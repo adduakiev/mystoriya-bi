@@ -32,7 +32,7 @@ const nav = [
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, null],
+  ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, null]
 ] as const;
 
