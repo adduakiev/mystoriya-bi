@@ -100,7 +100,7 @@ export default async function AggregatorsPage({
         <nav>
           {nav.map(([label, Icon, href]) =>
             href ? (
-              <Link key={label} href={href} className={label === "Агрегатори" ? "nav-item active" : "nav-item"}>
+              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={label === "Агрегатори" ? "nav-item active" : "nav-item"}>
                 <Icon size={18} />
                 {label}
               </Link>
