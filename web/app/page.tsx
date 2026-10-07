@@ -415,7 +415,7 @@ export default async function Home({
         <section className="panel channel-mix-panel">
           <div className="panel-head">
             <div>
-              <span className="eyebrow">CHANNEL MIX · ${selectedYear}</span>
+              <span className="eyebrow">CHANNEL MIX · {selectedYear}</span>
               <h2>Як змінюється структура продажів</h2>
             </div>
             <span className="text-button">100% · Заклад / Агрегатор / Доставка</span>
