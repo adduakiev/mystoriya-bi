@@ -20,6 +20,7 @@ import {
   buildMultiYearMetricSeries,
   buildMultiYearWeeklyMetricSeries,
   buildChannelMixSeries,
+  buildGrowthDrivers,
   formatUah
 } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
@@ -151,6 +152,12 @@ export default async function Home({
     ? buildMultiYearWeeklyMetricSeries(rows, years, metric)
     : buildMultiYearMetricSeries(rows, years, metric, selectedMonth);
   const channelMixData = buildChannelMixSeries(channelMixRows, selectedYear, snapshot.cutoffDate);
+  const growthDrivers = buildGrowthDrivers(rows, {
+    period,
+    comparison: compare,
+    focusYear: selectedYear,
+    focusMonth: selectedMonth
+  });
   const metricLabels: Record<MetricMode, string> = {
     revenue: "Оборот",
     checks: "Чеки",
@@ -466,6 +473,83 @@ export default async function Home({
             <span className="text-button">100% · Заклад / Агрегатор / Доставка</span>
           </div>
           <ChannelMixChart data={channelMixData} />
+        </section>
+
+        <section className="content-grid growth-grid">
+          <article className="panel">
+            <div className="panel-head">
+              <div>
+                <span className="eyebrow">GROWTH DECOMPOSITION</span>
+                <h2>Що зробило зміну обороту</h2>
+              </div>
+              <span className="text-button">
+                Δ {growthDrivers.totalDelta >= 0 ? "+" : ""}{formatUah(growthDrivers.totalDelta)}
+              </span>
+            </div>
+
+            <div className="growth-driver-cards">
+              <div className="growth-driver-card">
+                <span>Ефект чеків</span>
+                <strong className={growthDrivers.checksEffect >= 0 ? "positive" : "negative"}>
+                  {growthDrivers.checksEffect >= 0 ? "+" : ""}{formatUah(growthDrivers.checksEffect)}
+                </strong>
+                <small>зміна кількості чеків × базовий ср. чек</small>
+              </div>
+              <div className="growth-driver-card">
+                <span>Ефект середнього чека</span>
+                <strong className={growthDrivers.averageCheckEffect >= 0 ? "positive" : "negative"}>
+                  {growthDrivers.averageCheckEffect >= 0 ? "+" : ""}{formatUah(growthDrivers.averageCheckEffect)}
+                </strong>
+                <small>поточні чеки × зміна ср. чека</small>
+              </div>
+            </div>
+          </article>
+
+          <article className="panel">
+            <div className="panel-head">
+              <div>
+                <span className="eyebrow">CONTRIBUTION TO GROWTH</span>
+                <h2>Хто дав зміну</h2>
+              </div>
+            </div>
+
+            <div className="growth-contribution-list">
+              {growthDrivers.channelDrivers.map((driver) => (
+                <div className="growth-contribution-row" key={driver.name}>
+                  <b>{driver.name}</b>
+                  <span className={driver.delta >= 0 ? "positive" : "negative"}>
+                    {driver.delta >= 0 ? "+" : ""}{formatUah(driver.delta)}
+                  </span>
+                  <small>
+                    {driver.contribution === null ? "—" : `${driver.contribution >= 0 ? "+" : ""}${driver.contribution.toFixed(1)}%`}
+                  </small>
+                </div>
+              ))}
+            </div>
+          </article>
+        </section>
+
+        <section className="panel growth-locations-panel">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">LOCATION CONTRIBUTION</span>
+              <h2>Точки, що найбільше змінили оборот</h2>
+            </div>
+            <span className="text-button">TOP {growthDrivers.locationDrivers.length}</span>
+          </div>
+          <div className="growth-location-list">
+            {growthDrivers.locationDrivers.map((driver) => (
+              <div className="growth-location-row" key={driver.name}>
+                <b>{driver.name}</b>
+                <span className={driver.delta >= 0 ? "positive" : "negative"}>
+                  {driver.delta >= 0 ? "+" : ""}{formatUah(driver.delta)}
+                </span>
+                <small>
+                  {driver.contribution === null ? "—" : `${driver.contribution >= 0 ? "+" : ""}${driver.contribution.toFixed(1)}% внеску`}
+                </small>
+              </div>
+            ))}
+          </div>
         </section>
 
         {!selectedMonth && period === "ytd" && (
