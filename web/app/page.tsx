@@ -18,11 +18,12 @@ import {
   availableYears,
   buildDashboardSnapshot,
   buildMultiYearMetricSeries,
+  buildMultiYearWeeklyMetricSeries,
   buildChannelMixSeries,
   formatUah
 } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows, queryHref, type DashboardFilters, type MetricMode } from "@/lib/filters";
+import { filterSalesRows, queryHref, type DashboardFilters, type MetricMode, type GrainMode } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const MONTHS = [
@@ -65,6 +66,10 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
+function parseGrain(value: string | undefined): GrainMode {
+  return value === "week" ? "week" : "month";
+}
+
 function parsePositiveInt(value: string | undefined): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
@@ -91,6 +96,7 @@ export default async function Home({
   const period = selectedMonth ? "month" : parsePeriod(first(params.period));
   const compare = parseCompare(first(params.compare));
   const metric = parseMetric(first(params.metric));
+  const grain = selectedMonth ? "month" : parseGrain(first(params.grain));
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -102,7 +108,8 @@ export default async function Home({
     month: selectedMonth,
     period,
     compare,
-    metric
+    metric,
+    grain
   };
 
   const rows = filterSalesRows(sourceRows, filters);
@@ -135,7 +142,9 @@ export default async function Home({
     filters.ownership
   ].filter(Boolean).length;
 
-  const multiYearData = buildMultiYearMetricSeries(rows, years, metric, selectedMonth);
+  const multiYearData = grain === "week" && !selectedMonth
+    ? buildMultiYearWeeklyMetricSeries(rows, years, metric)
+    : buildMultiYearMetricSeries(rows, years, metric, selectedMonth);
   const channelMixData = buildChannelMixSeries(channelMixRows, selectedYear, snapshot.cutoffDate);
   const metricLabels: Record<MetricMode, string> = {
     revenue: "Оборот",
@@ -356,24 +365,42 @@ export default async function Home({
           <article className="panel revenue-panel">
             <div className="panel-head metric-panel-head">
               <div>
-                <span className="eyebrow">MULTI-YEAR DYNAMICS · 2024–2026</span>
+                <span className="eyebrow">MULTI-YEAR DYNAMICS · {grain === "week" && !selectedMonth ? "ТИЖНІ" : selectedMonth ? "ДНІ" : "МІСЯЦІ"} · 2024–2026</span>
                 <h2>{metricLabels[metric]}</h2>
               </div>
-              <div className="metric-switcher">
-                {([
-                  ["revenue", "Оборот"],
-                  ["checks", "Чеки"],
-                  ["averageCheck", "Ср. чек"],
-                  ["markupRate", "Націнка %"]
-                ] as const).map(([value, label]) => (
-                  <Link
-                    key={value}
-                    className={metric === value ? "metric-pill active" : "metric-pill"}
-                    href={queryHref(filters, { metric: value })}
-                  >
-                    {label}
-                  </Link>
-                ))}
+              <div className="chart-controls">
+                {!selectedMonth && (
+                  <div className="metric-switcher grain-switcher">
+                    {([
+                      ["month", "Місяці"],
+                      ["week", "Тижні"]
+                    ] as const).map(([value, label]) => (
+                      <Link
+                        key={value}
+                        className={grain === value ? "metric-pill active" : "metric-pill"}
+                        href={queryHref(filters, { grain: value })}
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                <div className="metric-switcher">
+                  {([
+                    ["revenue", "Оборот"],
+                    ["checks", "Чеки"],
+                    ["averageCheck", "Ср. чек"],
+                    ["markupRate", "Націнка %"]
+                  ] as const).map(([value, label]) => (
+                    <Link
+                      key={value}
+                      className={metric === value ? "metric-pill active" : "metric-pill"}
+                      href={queryHref(filters, { metric: value })}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
             <MultiYearMetricChart
