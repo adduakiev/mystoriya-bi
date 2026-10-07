@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   BarChart3,
   ChevronDown,
@@ -6,12 +7,18 @@ import {
   Network,
   PackageSearch,
   Sparkles,
-  Truck
+  Truck,
+  X
 } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { buildDashboardSnapshot, formatUah } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
+import {
+  filterSalesRows,
+  queryHref,
+  type DashboardFilters
+} from "@/lib/filters";
 
 const nav = [
   ["Огляд", LayoutDashboard],
@@ -32,9 +39,27 @@ function prettyDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
-export default async function Home() {
-  const rows = await loadSalesData();
+function first(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function Home({
+  searchParams
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = (await searchParams) ?? {};
+  const filters: DashboardFilters = {
+    channel: first(params.channel),
+    location: first(params.location),
+    brand: first(params.brand),
+    ownership: first(params.ownership)
+  };
+
+  const sourceRows = await loadSalesData();
+  const rows = filterSalesRows(sourceRows, filters);
   const snapshot = buildDashboardSnapshot(rows);
+  const hasFilters = Object.values(filters).some(Boolean);
 
   return (
     <main className="shell">
@@ -59,7 +84,7 @@ export default async function Home() {
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>Google Sheets · {snapshot.sourceRows.toLocaleString("uk-UA")} rows</small>
+          <small>{rows.toLocaleString ? rows.length.toLocaleString("uk-UA") : rows.length} / {sourceRows.length.toLocaleString("uk-UA")} rows</small>
         </div>
       </aside>
 
@@ -72,9 +97,20 @@ export default async function Home() {
           <div className="filters">
             <button>01 січ — {prettyDate(snapshot.cutoffDate)} <ChevronDown size={14} /></button>
             <button>Compare: LY YTD <ChevronDown size={14} /></button>
-            <button>Всі канали <ChevronDown size={14} /></button>
+            <button>{filters.channel ?? "Всі канали"} <ChevronDown size={14} /></button>
           </div>
         </header>
+
+        {hasFilters && (
+          <div className="active-filters">
+            <span className="eyebrow">ACTIVE VIEW</span>
+            {filters.channel && <span className="filter-chip">Канал: {filters.channel}</span>}
+            {filters.location && <span className="filter-chip">Локація: {filters.location}</span>}
+            {filters.brand && <span className="filter-chip">Бренд: {filters.brand}</span>}
+            {filters.ownership && <span className="filter-chip">Власність: {filters.ownership}</span>}
+            <Link className="reset-filter" href="/"><X size={13} /> Скинути</Link>
+          </div>
+        )}
 
         <section className="kpi-grid">
           {snapshot.kpis.map((item) => <KpiCard key={item.label} kpi={item} />)}
@@ -108,14 +144,20 @@ export default async function Home() {
             </div>
             <div className="channel-list">
               {snapshot.channels.map((channel) => (
-                <button className="channel-row" key={channel.name}>
+                <Link
+                  className="channel-row"
+                  key={channel.name}
+                  href={queryHref(filters, {
+                    channel: filters.channel === channel.name ? undefined : channel.name
+                  })}
+                >
                   <div>
                     <b>{channel.name}</b>
                     <span>{formatUah(channel.revenue)} · {Math.round(channel.checks).toLocaleString("uk-UA")} чеків</span>
                   </div>
                   <div className="share">{channel.share.toFixed(1)}%</div>
                   <div className="track"><span style={{ width: `${Math.min(channel.share, 100)}%` }} /></div>
-                </button>
+                </Link>
               ))}
             </div>
           </article>
@@ -128,21 +170,31 @@ export default async function Home() {
                 <span className="eyebrow">LOCATIONS · YTD</span>
                 <h2>Внесок точок</h2>
               </div>
-              <button className="text-button">Всі локації →</button>
+              {filters.location ? (
+                <Link className="text-button" href={queryHref(filters, { location: undefined })}>Всі локації →</Link>
+              ) : (
+                <span className="text-button">TOP {snapshot.locations.length}</span>
+              )}
             </div>
             <div className="location-table">
               <div className="table-row table-head">
                 <span>Локація</span><span>Оборот</span><span>YoY</span><span>Частка</span>
               </div>
               {snapshot.locations.map((location) => (
-                <button className="table-row" key={location.name}>
+                <Link
+                  className="table-row"
+                  key={location.name}
+                  href={queryHref(filters, {
+                    location: filters.location === location.name ? undefined : location.name
+                  })}
+                >
                   <b>{location.name}</b>
                   <span>{formatUah(location.revenue)}</span>
                   <span className={location.growth === null ? "" : location.growth >= 0 ? "positive" : "negative"}>
                     {location.growth === null ? "—" : `${location.growth >= 0 ? "+" : ""}${location.growth.toFixed(1)}%`}
                   </span>
                   <span>{location.share.toFixed(1)}%</span>
-                </button>
+                </Link>
               ))}
             </div>
           </article>
