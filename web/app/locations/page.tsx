@@ -111,8 +111,9 @@ export default async function LocationsPage({
   const selectedMonth = parsePositiveInt(first(params.month));
   const brand = first(params.brand);
   const ownership = first(params.ownership);
+  const lfl = first(params.lfl) === "1";
 
-  const dimensionRows = filterSalesRows(sourceRows, { brand, ownership });
+  const dimensionRows = filterSalesRows(sourceRows, { brand, ownership, lfl });
   const snapshot = buildDashboardSnapshot(dimensionRows, {
     period: selectedMonth ? "month" : "ytd",
     comparison: "ly",
@@ -219,7 +220,15 @@ export default async function LocationsPage({
             <span className="eyebrow">LOCATIONS PERFORMANCE · LIVE</span>
             <h1>Заклади</h1>
           </div>
-          <Link className="quick-mode" href="/">← Огляд</Link>
+<div className="quick-context">
+            <Link className="quick-mode" href="/">← Огляд</Link>
+            <Link
+              className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
+              href={`/locations?year=${selectedYear}${selectedMonth ? `&month=${selectedMonth}` : ""}${brand ? `&brand=${encodeURIComponent(brand)}` : ""}${ownership ? `&ownership=${encodeURIComponent(ownership)}` : ""}${lfl ? "" : "&lfl=1"}`}
+            >
+              LFL · активні
+            </Link>
+          </div>
         </header>
 
         <details className="filter-center">
@@ -228,10 +237,11 @@ export default async function LocationsPage({
             <span className="filter-summary">
               {selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : " · YTD"}
               {brand ? ` · ${brand}` : ""}
-              {ownership ? ` · ${ownership}` : ""}
+              {ownership ? ` · ${ownership}` : ""}{lfl ? " · LFL" : ""}
             </span>
           </summary>
           <form className="filter-form" method="get" action="/locations">
+            {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Рік</span>
               <select name="year" defaultValue={String(selectedYear)}>
@@ -270,11 +280,12 @@ export default async function LocationsPage({
           <b>{snapshot.periodLabel}</b>
           <span>cutoff {snapshot.cutoffDate}</span>
           <span>vs {selectedYear - 1}</span>
+          {lfl && <span className="lfl-context">LFL · без закритих точок</span>}
         </div>
 
         <section className="lfl-strip">
           <div className="lfl-card">
-            <span>Зіставні точки</span>
+            <span>{lfl ? "Зіставні активні точки" : "Зіставні точки"}</span>
             <strong>{lflRows.length}</strong>
             <small>є продажі в обох періодах</small>
           </div>
