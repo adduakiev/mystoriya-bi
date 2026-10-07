@@ -153,3 +153,28 @@ insert into map_location_source(source_name, canonical_name) values
 ('София new','Софія'),
 ('Софія (NEW)','Софія')
 on conflict (source_name) do update set canonical_name = excluded.canonical_name;
+
+
+create table if not exists location_lifecycle_registry (
+  canonical_name text primary key,
+  status text not null check (status in ('active','closed')),
+  lfl_exclude boolean not null default false,
+  close_date date,
+  notes text,
+  updated_at timestamptz not null default now()
+);
+
+alter table location_lifecycle_registry enable row level security;
+
+insert into location_lifecycle_registry(canonical_name, status, lfl_exclude, notes) values
+('Кудряшова', 'closed', true, 'Мокра / Кудряшова'),
+('Європарк', 'closed', true, 'Closed location'),
+('Поділ', 'closed', true, 'Closed location'),
+('Піраміда', 'closed', true, 'Closed location'),
+('Черкаси', 'closed', true, 'Closed location'),
+('Сверстюка', 'closed', true, 'Closed location')
+on conflict (canonical_name) do update
+set status = excluded.status,
+    lfl_exclude = excluded.lfl_exclude,
+    notes = excluded.notes,
+    updated_at = now();
