@@ -12,6 +12,7 @@ import {
   Truck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
 import { availableMonths, availableYears, formatUah } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
 import { filterSalesRows } from "@/lib/filters";
@@ -144,13 +145,7 @@ export default async function InsightsPage({
   return (
     <main className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <b>М'ЯСТОРІЯ</b>
-            <span>CONTROL CENTER</span>
-          </div>
-        </div>
+        <SidebarBrand />
 
         <nav>
           {nav.map(([label, Icon, href]) => (
