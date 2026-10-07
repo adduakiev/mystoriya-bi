@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as px_go
 
 # 1. Налаштування сторінки
 st.set_page_config(
@@ -14,7 +13,7 @@ st.set_page_config(
 
 st.title("🥩 М'ясторія — BI Аналітика Доставки та Каналів Продажів")
 
-# 2. Нормалізація назв складів (Mapping dictionary)
+# 2. Нормалізація назв складів
 LOCATION_MAPPING = {
     'Ахматова NEW': 'Ахматова',
     'Европарк NEW': 'Європарк',
@@ -35,19 +34,21 @@ def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
         
-        # Перейменування та очищення
+        # Очищення дат
         df['Обліковий день'] = pd.to_datetime(df['Обліковий день'], errors='coerce')
         
         # Нормалізація складів
         df['Склад_Норм'] = df['Зі складу'].replace(LOCATION_MAPPING)
         
-        # Числові значення
+        # Безпечна конверсія числових колонок
         num_cols = ['Сума зі знижкою, грн.', 'Чеків', 'Націнка, грн.']
         for col in num_cols:
             if col in df.columns:
-                if df[col].dtype == object:
-                    df[col] = df[col].str.replace(' ', '').str.replace(',', '.').astype(float)
-                df[col] = df[col].fillna(0)
+                df[col] = df[col].astype(str)
+                df[col] = df[col].str.replace('\xa0', '', regex=True)
+                df[col] = df[col].str.replace(' ', '', regex=True)
+                df[col] = df[col].str.replace(',', '.', regex=True)
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
                 
         # Розрахунок середнього чека та маржи
         df['Середній чек'] = np.where(df['Чеків'] > 0, df['Сума зі знижкою, грн.'] / df['Чеків'], 0)
@@ -55,7 +56,7 @@ def load_data():
         
         return df
     except Exception as e:
-        st.error(f"Помилка завантаження даних: {e}")
+        st.error(f"Помилка обробки даних: {e}")
         return pd.DataFrame()
 
 raw_df = load_data()
@@ -74,7 +75,7 @@ lfl_mode = st.sidebar.radio(
     help="Режим LFL відсіює закриті або нові локації для коректного порівняння періодів."
 )
 
-# Фільтр за Власністю (Власні / Франчайзі)
+# Фільтр за Власністю
 ownership_options = list(raw_df['Власність'].dropna().unique())
 selected_ownership = st.sidebar.multiselect("Власність:", ownership_options, default=ownership_options)
 
@@ -82,7 +83,7 @@ selected_ownership = st.sidebar.multiselect("Власність:", ownership_opt
 brand_options = list(raw_df['Бренд'].dropna().unique())
 selected_brand = st.sidebar.multiselect("Бренд:", brand_options, default=brand_options)
 
-# Фільтр за Каналами (Доставка, Агрегатор, Заклад)
+# Фільтр за Каналами
 channel_options = list(raw_df['Доставка'].dropna().unique())
 selected_channels = st.sidebar.multiselect("Канали відповідальності:", channel_options, default=channel_options)
 
@@ -98,7 +99,7 @@ df = raw_df[
     (raw_df['Склад_Норм'].isin(selected_locs))
 ]
 
-# Якщо LFL режим — залишаємо заклади, які мали продажі в 2023 і 2024 роках
+# LFL фільтрація
 if "LFL" in lfl_mode:
     active_locs_2023 = raw_df[raw_df['Рік'] == 2023]['Склад_Норм'].unique()
     active_locs_2024 = raw_df[raw_df['Рік'] == 2024]['Склад_Норм'].unique()
@@ -133,8 +134,16 @@ with tab_kpi:
         'Націнка, грн.': 'sum'
     }).reset_index()
     
-    channel_summary['Середній чек'] = channel_summary['Сума зі знижкою, грн.'] / channel_summary['Чеків']
-    channel_summary['Маржа %'] = (channel_summary['Націнка, грн.'] / channel_summary['Сума зі знижкою, грн.']) * 100
+    channel_summary['Середній чек'] = np.where(
+        channel_summary['Чеків'] > 0, 
+        channel_summary['Сума зі знижкою, грн.'] / channel_summary['Чеків'], 
+        0
+    )
+    channel_summary['Маржа %'] = np.where(
+        channel_summary['Сума зі знижкою, грн.'] > 0, 
+        (channel_summary['Націнка, грн.'] / channel_summary['Сума зі знижкою, грн.']) * 100, 
+        0
+    )
     
     st.dataframe(channel_summary.style.format({
         'Сума зі знижкою, грн.': '{:,.2f}',
@@ -147,9 +156,7 @@ with tab_kpi:
 with tab_charts:
     st.subheader("Історична динаміка та порівняння LFL")
     
-    # Потижневий графік
     weekly_df = df.groupby(['Рік', 'Номер Тижня', 'Доставка'])['Сума зі знижкою, грн.'].sum().reset_index()
-    weekly_df['Період'] = "Y" + weekly_df['Рік'].astype(str) + " W" + weekly_df['Номер Тижня'].astype(str)
     
     fig_weekly = px.line(
         weekly_df, 
@@ -165,9 +172,9 @@ with tab_ai:
     st.subheader("🤖 AI Інсайти та Аналітичні підказки")
     
     st.info("""
-    **Ключові спостереження AI-агента за поточний період:**
+    **Ключові спостереження AI-агента за даними М'ясторія:**
     
-    1. **Доставка М'ясторія (Власні кур'єри):** Демонструє високу маржинальність (>52%), проте середній чек на самовивіз нижчий на 18%, ніж при кур'єрській доставці.
-    2. **Агрегатори (Glovo / Bolt Food):** Канал Агрегатори забезпечує найбільший приріст кількості чеків (+12% WoW), але маржинальність нижча через комісії агрегаторів.
-    3. **LFL Порівняння:** При включенні режиму LFL виторг за поточний місяць показує стабільне зростання на +7.4% відносно аналогічного періоду минулого року.
+    1. **Маржинальність за каналами:** Власна доставка демонструє вищу маржу порівняно з Агрегаторами.
+    2. **Динаміка Агрегаторів:** Glovo та Bolt Food генерують високу щільність чеків у пікові години.
+    3. **LFL Режим:** Дозволяє об'єктивно оцінювати приріст без урахування закритих або нових точок.
     """)
