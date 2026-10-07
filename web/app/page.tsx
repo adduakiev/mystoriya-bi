@@ -176,7 +176,7 @@ export default async function Home({
         <nav>
           {nav.map(([label, Icon, href], i) =>
             href ? (
-              <Link key={label} href={href} className={i === 0 ? "nav-item active" : "nav-item"}>
+              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={i === 0 ? "nav-item active" : "nav-item"}>
                 <Icon size={18} />
                 {label}
               </Link>
