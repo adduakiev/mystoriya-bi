@@ -2,12 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime
 
-# -----------------------------------------------------------------------------
-# 1. КОНФІГУРАЦІЯ СТОРІНКИ ТА СТИЛІЗАЦІЯ
-# -----------------------------------------------------------------------------
+# 1. Налаштування сторінки
 st.set_page_config(
     page_title="М'ясторія BI — Analytics System",
     page_icon="🥩",
@@ -17,7 +13,6 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
     .stMetric {
         background-color: #1e222d;
         padding: 15px;
@@ -31,9 +26,7 @@ st.markdown("""
 
 st.title("🥩 М'ясторія — Аналітична BI Система Каналiв Продажiв & Доставки")
 
-# -----------------------------------------------------------------------------
-# 2. НОРМАЛІЗАЦІЯ ДАНИХ ТА КЕШУВАННЯ
-# -----------------------------------------------------------------------------
+# 2. Нормалізація назв складів
 LOCATION_MAPPING = {
     'Ахматова NEW': 'Ахматова',
     'Европарк NEW': 'Європарк',
@@ -64,11 +57,16 @@ def load_and_transform_data():
                                            .str.replace(',', '.', regex=True)
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
                 
-        # Допоміжні атрибути
+        # Очищення від текстових сміттєвих значень (#REF!, nan тощо)
+        str_cols = ['Власність', 'Бренд', 'Доставка', 'Тип замовлення', 'Склад_Норм']
+        for col in str_cols:
+            if col in df.columns:
+                df[col] = df[col].astype(str)
+                df = df[~df[col].str.contains('#REF!|#N/A|None|nan', case=False, na=False)]
+                
         df['Рік'] = df['Рік'].astype(int)
         df['Месяц'] = df['Месяц'].astype(int)
         df['Номер Тижня'] = df['Номер Тижня'].astype(int)
-        df['Рік-Місяць'] = df['Обліковий день'].dt.strftime('%Y-%m')
         
         return df
     except Exception as e:
@@ -81,37 +79,28 @@ if raw_df.empty:
     st.warning("Дані не завантажено.")
     st.stop()
 
-# -----------------------------------------------------------------------------
-# 3. ФІЛЬТРИ ТА УПРАВЛІННЯ ЗРІЗАМИ (SIDEBAR)
-# -----------------------------------------------------------------------------
-st.sidebar.image("https://myastoriya.ua/upload/CbrCms/1/logo_main.svg", width=180)
-st.sidebar.markdown("---")
+# 3. Бічна панель фільтрів
 st.sidebar.header("🎛️ Панель Управління BI")
 
-# 1. Режим LFL vs ALL
 lfl_mode = st.sidebar.selectbox(
     "Режим фільтрації точок:",
     ["Всі заклади (ALL)", "LFL (Тільки порівнянні заклади 2023-2024)"],
     help="LFL виключає нові або закриті заклади для збереження чистоти аналізу."
 )
 
-# 2. Фільтр за Власністю
-all_ownership = sorted(list(raw_df['Власність'].dropna().unique()))
+all_ownership = sorted([x for x in raw_df['Власність'].unique() if x and x != 'nan'])
 selected_ownership = st.sidebar.multiselect("Власність:", all_ownership, default=all_ownership)
 
-# 3. Фільтр за Брендом
-all_brands = sorted(list(raw_df['Бренд'].dropna().unique()))
+all_brands = sorted([x for x in raw_df['Бренд'].unique() if x and x != 'nan'])
 selected_brands = st.sidebar.multiselect("Бренд:", all_brands, default=all_brands)
 
-# 4. Фільтр за Каналами відповідальності
-all_channels = sorted(list(raw_df['Доставка'].dropna().unique()))
+all_channels = sorted([x for x in raw_df['Доставка'].unique() if x and x != 'nan'])
 selected_channels = st.sidebar.multiselect("Канали відповідальності:", all_channels, default=all_channels)
 
-# 5. Фільтр за Локаціями
-all_locs = sorted(list(raw_df['Склад_Норм'].dropna().unique()))
+all_locs = sorted([x for x in raw_df['Склад_Норм'].unique() if x and x != 'nan'])
 selected_locs = st.sidebar.multiselect("Локації / Склади:", all_locs, default=all_locs)
 
-# Фільтрація базового датасету
+# Фільтрація
 df = raw_df[
     (raw_df['Власність'].isin(selected_ownership)) &
     (raw_df['Бренд'].isin(selected_brands)) &
@@ -125,9 +114,7 @@ if "LFL" in lfl_mode:
     common_locs = locs_2023.intersection(locs_2024)
     df = df[df['Склад_Норм'].isin(common_locs)]
 
-# -----------------------------------------------------------------------------
-# 4. ГОЛОВНІ ВКТАДКИ ІНТЕРФЕЙСУ
-# -----------------------------------------------------------------------------
+# 4. Вкладки
 tab_exec, tab_channels, tab_lfl, tab_ai = st.tabs([
     "👑 Executive Summary (KPI)", 
     "🚚 Канали & Агрегатори", 
@@ -135,9 +122,6 @@ tab_exec, tab_channels, tab_lfl, tab_ai = st.tabs([
     "🧠 AI Інсайти & Аномалії"
 ])
 
-# -----------------------------------------------------------------------------
-# TAB 1: EXECUTIVE SUMMARY
-# -----------------------------------------------------------------------------
 with tab_exec:
     st.subheader("📌 Головні показники за обраними критеріями")
     
@@ -147,7 +131,6 @@ with tab_exec:
     avg_chk = rev / chk if chk > 0 else 0
     margin_rate = (margin / rev * 100) if rev > 0 else 0
     
-    # Розрахунок YoY для довідки
     rev_2024 = df[df['Рік'] == 2024]['Сума зі знижкою, грн.'].sum()
     rev_2023 = df[df['Рік'] == 2023]['Сума зі знижкою, грн.'].sum()
     yoy_growth = ((rev_2024 - rev_2023) / rev_2023 * 100) if rev_2023 > 0 else 0
@@ -180,7 +163,7 @@ with tab_exec:
             'Націнка, грн.': '{:,.0f} ₴',
             'Середній чек': '{:,.1f} ₴',
             'Маржа %': '{:.1f}%'
-        }).background_gradient(subset=['Сума зі знижкою, грн.'], cmap='YlOrRd'), use_container_width=True)
+        }), use_container_width=True)
         
     with col_right:
         st.subheader("🥧 Частка Каналiв у Виторзі")
@@ -190,9 +173,6 @@ with tab_exec:
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-# -----------------------------------------------------------------------------
-# TAB 2: КАНАЛИ ТА АГРЕГАТОРИ (Зона відповідальності)
-# -----------------------------------------------------------------------------
 with tab_channels:
     st.subheader("🚚 Поглиблений аналіз Доставки та Агрегаторів")
     
@@ -215,7 +195,7 @@ with tab_channels:
     
     st.markdown("---")
     
-    st.subheader("📊 Порівняння Середнього Чека та Маржинальності за типами замовлення")
+    st.subheader("📊 Порівняння Середнього Чека та Маржинальності")
     fig_bar = px.bar(
         chan_summary, x='Тип замовлення', y='Середній чек',
         color='Маржа %', text_auto='.0f',
@@ -224,9 +204,6 @@ with tab_channels:
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-# -----------------------------------------------------------------------------
-# TAB 3: ДИНАМІКА LFL & ТРЕНДИ
-# -----------------------------------------------------------------------------
 with tab_lfl:
     st.subheader("📈 Потижневе LFL Порівняння (2023 vs 2024)")
     
@@ -239,26 +216,18 @@ with tab_lfl:
         labels={'Сума зі знижкою, грн.': 'Виторг, ₴', 'Номер Тижня': 'Номер тижня року'}
     )
     st.plotly_chart(fig_lfl, use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("📅 Помісячна деталізація за роками")
-    monthly = df.groupby(['Рік', 'Месяц'])['Сума зі знижкою, грн.'].sum().unstack(level=0)
-    st.dataframe(monthly.style.format('{:,.0f} ₴'), use_container_width=True)
 
-# -----------------------------------------------------------------------------
-# TAB 4: AI INSIGHTS
-# -----------------------------------------------------------------------------
 with tab_ai:
     st.subheader("🧠 Автоматичні Аналітичні Висновки та Аномалії")
     
-    # Авто-генерація аналітики на основі поточного df
-    top_channel = chan_summary.sort_values(by='Сума зі знижкою, грн.', ascending=False).iloc[0]
-    high_margin_channel = chan_summary.sort_values(by='Маржа %', ascending=False).iloc[0]
-    
-    st.success(f"""
-    **💡 Ключові висновки системи на основі обраних даних:**
-    
-    1. **Головний драйвер виторгу:** Канал **{top_channel['Тип замовлення']}** забезпечує найбільший обсяг продажів — **{top_channel['Сума зі знижкою, грн.']:,.0f} ₴** ({top_channel['Чеків']:,.0f} чеків).
-    2. **Найбільш маржинальний напрямок:** **{high_margin_channel['Тип замовлення']}** зберігає рекордну маржинальність **{high_margin_channel['Маржа %']:.1f}%**.
-    3. **LFL Динаміка:** За рахунок виключення закритих точок чиста ефективність діючих локацій показує зважений ріст у сегменті Доставки.
-    """)
+    if not chan_summary.empty:
+        top_channel = chan_summary.sort_values(by='Сума зі знижкою, грн.', ascending=False).iloc[0]
+        high_margin_channel = chan_summary.sort_values(by='Маржа %', ascending=False).iloc[0]
+        
+        st.success(f"""
+        **💡 Ключові висновки системи на основі обраних даних:**
+        
+        1. **Головний драйвер виторгу:** Канал **{top_channel['Тип замовлення']}** забезпечує найбільший обсяг продажів — **{top_channel['Сума зі знижкою, грн.']:,.0f} ₴** ({top_channel['Чеків']:,.0f} чеків).
+        2. **Найбільш маржинальний напрямок:** **{high_margin_channel['Тип замовлення']}** зберігає маржинальність **{high_margin_channel['Маржа %']:.1f}%**.
+        3. **Чистота LFL:** Усі значення відфільтровані від службових сміттєвих рядків Google Таблиці (#REF!).
+        """)
