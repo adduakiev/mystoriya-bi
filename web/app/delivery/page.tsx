@@ -9,6 +9,7 @@ import {
   Sparkles,
   Truck
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { DeliveryVsAggregatorChart } from "@/components/DeliveryVsAggregatorChart";
@@ -29,7 +30,7 @@ const MONTHS = [
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
 ];
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
@@ -37,7 +38,7 @@ const nav = [
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, "/insights"]
-] as const;
+];
 
 const METRICS: Array<[MetricMode, string]> = [
   ["revenue", "Оборот"],
