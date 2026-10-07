@@ -76,6 +76,23 @@ function excelSerialToDate(serial: number): Date {
   return new Date(excelEpoch + serial * 86_400_000);
 }
 
+function utcDateStrict(year: number, month: number, day: number): Date | null {
+  if (year < 2000 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return null;
+  }
+
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
 function parseSourceDate(value: string): Date | null {
   const clean = value.trim();
   if (!clean) return null;
@@ -85,18 +102,26 @@ function parseSourceDate(value: string): Date | null {
     return excelSerialToDate(numeric);
   }
 
-  const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\D|$)/);
   if (iso) {
-    return new Date(Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])));
+    return utcDateStrict(Number(iso[1]), Number(iso[2]), Number(iso[3]));
   }
 
-  const dmy = clean.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+  // Google gviz returns older source dates in US M/D/YYYY format.
+  // Example observed in the source: 1/18/2025.
+  const mdy = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\D|$)/);
+  if (mdy) {
+    return utcDateStrict(Number(mdy[3]), Number(mdy[1]), Number(mdy[2]));
+  }
+
+  // Newer source rows are rendered in D.M.YYYY format.
+  // Example observed in the source: 04.11.2025.
+  const dmy = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\D|$)/);
   if (dmy) {
-    return new Date(Date.UTC(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1])));
+    return utcDateStrict(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]));
   }
 
-  const parsed = new Date(clean);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return null;
 }
 
 function normalizeText(value: string): string {
