@@ -97,3 +97,18 @@ a.table-row:hover { background: #121923; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
   .reset-filter { margin-left: 0; }
 }
+
+
+.nav-disabled { cursor: default; opacity: .5; }
+.aggregator-stack { display: grid; gap: 9px; }
+.aggregator-card { background: var(--panel-2); border: 1px solid #1d2530; border-radius: 10px; padding: 13px; }
+.aggregator-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.aggregator-card-head b { display: block; font-size: 13px; }
+.aggregator-card-head span { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+.aggregator-card-head strong { font-size: 14px; }
+.aggregator-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0 10px; }
+.aggregator-metrics span { color: var(--muted); font-size: 10px; }
+.aggregator-metrics b { display: block; margin-top: 3px; color: #dfe5ec; font-size: 11px; }
+@media (max-width: 720px) {
+  .aggregator-metrics { grid-template-columns: 1fr 1fr; }
+}
