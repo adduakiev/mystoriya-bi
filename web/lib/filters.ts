@@ -9,7 +9,8 @@ export const CLOSED_LOCATION_NAMES = [
   "Поділ",
   "Піраміда",
   "Черкаси",
-  "Сверстюка"
+  "Сверстюка",
+  "ЖК Галактика"
 ] as const;
 
 function normalizeLocationName(value: string): string {
@@ -33,7 +34,9 @@ const CLOSED_LOCATION_KEYS = new Set([
   "піраміда",
   "пирамида",
   "черкаси",
-  "сверстюка"
+  "сверстюка",
+  "жк галактика",
+  "галактика"
 ].map(normalizeLocationName));
 
 export function isClosedLocation(location: string): boolean {
