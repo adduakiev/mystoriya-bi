@@ -295,7 +295,8 @@ export default async function ExplorerPage({
     lfl
   });
 
-  const cutoffDate = resolveCutoff(filteredRows, selectedYear, selectedMonth);
+  const safeRows = filteredRows.length > 0 ? filteredRows : filterSalesRows(sourceRows, { lfl });
+  const cutoffDate = resolveCutoff(safeRows, selectedYear, selectedMonth);
   const previousCutoffDate = `${selectedYear - 1}${cutoffDate.slice(4)}`;
 
   const currentRows = currentPeriodRows(filteredRows, selectedYear, selectedMonth, cutoffDate);
