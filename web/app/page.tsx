@@ -10,6 +10,7 @@ import {
   Truck,
   X
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { ChannelMixChart } from "@/components/ChannelMixChart";
@@ -32,15 +33,15 @@ const MONTHS = [
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
 ];
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, null]
-] as const;
+  ["Insights", Sparkles, "/insights"]
+];
 
 function prettyDate(value: string): string {
   return new Intl.DateTimeFormat("uk-UA", {

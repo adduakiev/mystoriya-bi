@@ -9,6 +9,7 @@ import {
   Sparkles,
   Truck
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import {
   availableYears,
@@ -18,15 +19,15 @@ import {
 import { loadSalesData } from "@/lib/data/source";
 import { filterSalesRows, type GrainMode, type MetricMode } from "@/lib/filters";
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, null]
-] as const;
+  ["Insights", Sparkles, "/insights"]
+];
 
 const METRICS: Array<[MetricMode, string]> = [
   ["revenue", "Оборот"],

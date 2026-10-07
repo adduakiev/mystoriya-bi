@@ -9,6 +9,7 @@ import {
   Sparkles,
   Truck
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
 import { LocationsComparisonChart } from "@/components/LocationsComparisonChart";
 import {
@@ -26,15 +27,15 @@ const MONTHS = [
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
 ];
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, null]
-] as const;
+  ["Insights", Sparkles, "/insights"]
+];
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
