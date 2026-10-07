@@ -5,6 +5,7 @@ import type {
   Kpi,
   LocationSummary,
   MetricSet,
+  MonthlyManagementRow,
   PeriodMode,
   SalesRow,
   TrendPoint
@@ -86,23 +87,57 @@ function clampDay(year: number, month: number, day: number): Date {
   return utcDate(year, month, Math.min(day, endOfMonth(year, month).getUTCDate()));
 }
 
-function currentWindow(cutoff: Date, period: PeriodMode): DateWindow {
+function maxDate(rows: SalesRow[]): Date {
+  const value = rows.reduce((max, row) => row.date > max ? row.date : max, rows[0].date);
+  return new Date(`${value}T00:00:00Z`);
+}
+
+function resolveCutoff(rows: SalesRow[], focusYear?: number, focusMonth?: number): Date {
+  const sourceCutoff = maxDate(rows);
+  const year = focusYear ?? sourceCutoff.getUTCFullYear();
+
+  const candidates = rows.filter((row) => {
+    const rowYear = Number(row.date.slice(0, 4));
+    const rowMonth = Number(row.date.slice(5, 7));
+    return rowYear === year && (!focusMonth || rowMonth === focusMonth);
+  });
+
+  if (candidates.length === 0) return sourceCutoff;
+
+  const available = maxDate(candidates);
+  if (year < sourceCutoff.getUTCFullYear()) {
+    if (focusMonth) return available;
+    return available;
+  }
+
+  return available;
+}
+
+function currentWindow(cutoff: Date, period: PeriodMode, focusMonth?: number): DateWindow {
   if (period === "week") {
     return { start: startOfWeek(cutoff), end: cutoff, label: "Поточний тиждень" };
   }
 
-  if (period === "month") {
-    return { start: utcDate(cutoff.getUTCFullYear(), cutoff.getUTCMonth(), 1), end: cutoff, label: "Поточний місяць" };
+  if (period === "month" || focusMonth) {
+    return {
+      start: utcDate(cutoff.getUTCFullYear(), cutoff.getUTCMonth(), 1),
+      end: cutoff,
+      label: `${MONTHS_UA[cutoff.getUTCMonth()]} ${cutoff.getUTCFullYear()}`
+    };
   }
 
-  return { start: utcDate(cutoff.getUTCFullYear(), 0, 1), end: cutoff, label: "YTD" };
+  return {
+    start: utcDate(cutoff.getUTCFullYear(), 0, 1),
+    end: cutoff,
+    label: String(cutoff.getUTCFullYear())
+  };
 }
 
 function comparisonWindow(current: DateWindow, period: PeriodMode, comparison: ComparisonMode): DateWindow {
   if (comparison === "ly" || period === "ytd") {
     const start = clampDay(current.start.getUTCFullYear() - 1, current.start.getUTCMonth(), current.start.getUTCDate());
     const end = clampDay(current.end.getUTCFullYear() - 1, current.end.getUTCMonth(), current.end.getUTCDate());
-    return { start, end, label: period === "ytd" ? "LY YTD" : "LY" };
+    return { start, end, label: period === "ytd" ? String(current.end.getUTCFullYear() - 1) : "LY" };
   }
 
   if (period === "week") {
@@ -163,9 +198,7 @@ function buildTrend(
     const currentDate = addDays(current.start, offset);
     const previousDate = addDays(previous.start, offset);
     return {
-      label: period === "week"
-        ? WEEKDAYS_UA[currentDate.getUTCDay()]
-        : String(currentDate.getUTCDate()),
+      label: period === "week" ? WEEKDAYS_UA[currentDate.getUTCDay()] : String(currentDate.getUTCDate()),
       current: revenueForDate(rows, currentDate),
       previous: previousDate <= previous.end ? revenueForDate(rows, previousDate) : 0
     };
@@ -216,6 +249,54 @@ function locationSummary(currentRows: SalesRow[], previousRows: SalesRow[]): Loc
     .slice(0, 8);
 }
 
+function monthRows(rows: SalesRow[], year: number, month: number, maxDay?: number): SalesRow[] {
+  return rows.filter((row) => {
+    const rowYear = Number(row.date.slice(0, 4));
+    const rowMonth = Number(row.date.slice(5, 7));
+    const rowDay = Number(row.date.slice(8, 10));
+    return rowYear === year && rowMonth === month && (!maxDay || rowDay <= maxDay);
+  });
+}
+
+function channelShare(rows: SalesRow[], channel: string): number {
+  const total = rows.reduce((sum, row) => sum + row.revenue, 0);
+  if (total === 0) return 0;
+  const value = rows.filter((row) => row.channelGroup === channel).reduce((sum, row) => sum + row.revenue, 0);
+  return (value / total) * 100;
+}
+
+function buildMonthlyTable(rows: SalesRow[], year: number, cutoff: Date): MonthlyManagementRow[] {
+  const maxMonth = cutoff.getUTCFullYear() === year ? cutoff.getUTCMonth() + 1 : 12;
+
+  return Array.from({ length: maxMonth }, (_, index) => {
+    const month = index + 1;
+    const isPartial = cutoff.getUTCFullYear() === year &&
+      month === cutoff.getUTCMonth() + 1 &&
+      cutoff.getUTCDate() < endOfMonth(year, index).getUTCDate();
+
+    const maxDay = isPartial ? cutoff.getUTCDate() : undefined;
+    const currentRows = monthRows(rows, year, month, maxDay);
+    const previousRows = monthRows(rows, year - 1, month, maxDay);
+    const current = metricSet(currentRows);
+    const previous = metricSet(previousRows);
+
+    return {
+      month,
+      label: MONTHS_UA[index],
+      revenue: current.revenue,
+      revenueGrowth: pctDelta(current.revenue, previous.revenue),
+      checks: current.checks,
+      checksGrowth: pctDelta(current.checks, previous.checks),
+      averageCheck: current.averageCheck,
+      markupRate: current.markupRate,
+      venueShare: channelShare(currentRows, "Заклад"),
+      aggregatorShare: channelShare(currentRows, "Агрегатор"),
+      deliveryShare: channelShare(currentRows, "Доставка"),
+      isPartial
+    };
+  });
+}
+
 function signal(current: MetricSet, previous: MetricSet, comparisonLabel: string): DashboardSnapshot["signal"] {
   const revenueGrowth = pctDelta(current.revenue, previous.revenue) ?? 0;
   const markupPp = ppDelta(current.markupRate, previous.markupRate) ?? 0;
@@ -239,15 +320,20 @@ function signal(current: MetricSet, previous: MetricSet, comparisonLabel: string
 
 export function buildDashboardSnapshot(
   rows: SalesRow[],
-  options: { period?: PeriodMode; comparison?: ComparisonMode } = {}
+  options: {
+    period?: PeriodMode;
+    comparison?: ComparisonMode;
+    focusYear?: number;
+    focusMonth?: number;
+  } = {}
 ): DashboardSnapshot {
   if (rows.length === 0) throw new Error("No valid sales rows");
 
-  const period = options.period ?? "ytd";
+  const focusMonth = options.focusMonth;
+  const period = focusMonth ? "month" : (options.period ?? "ytd");
   const comparison = options.comparison ?? "ly";
-  const cutoffDate = rows.reduce((max, row) => row.date > max ? row.date : max, rows[0].date);
-  const cutoff = new Date(`${cutoffDate}T00:00:00Z`);
-  const current = currentWindow(cutoff, period);
+  const cutoff = resolveCutoff(rows, options.focusYear, focusMonth);
+  const current = currentWindow(cutoff, period, focusMonth);
   const previous = comparisonWindow(current, period, comparison);
 
   const currentRows = between(rows, current);
@@ -266,7 +352,7 @@ export function buildDashboardSnapshot(
 
   return {
     sourceRows: rows.length,
-    cutoffDate,
+    cutoffDate: iso(cutoff),
     currentYear: cutoff.getUTCFullYear(),
     previousYear: previous.end.getUTCFullYear(),
     period,
@@ -279,8 +365,25 @@ export function buildDashboardSnapshot(
     trend: buildTrend(rows, current, previous, period),
     channels: channelSummary(currentRows),
     locations: locationSummary(currentRows, previousRows),
+    monthlyTable: buildMonthlyTable(rows, cutoff.getUTCFullYear(), cutoff),
     signal: signal(currentMetrics, previousMetrics, previous.label)
   };
+}
+
+export function availableYears(rows: SalesRow[]): number[] {
+  return [...new Set(rows.map((row) => Number(row.date.slice(0, 4))))]
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+}
+
+export function availableMonths(rows: SalesRow[], year: number): number[] {
+  return [...new Set(
+    rows
+      .filter((row) => Number(row.date.slice(0, 4)) === year)
+      .map((row) => Number(row.date.slice(5, 7)))
+  )]
+    .filter((month) => month >= 1 && month <= 12)
+    .sort((a, b) => a - b);
 }
 
 export function formatUah(value: number): string {
