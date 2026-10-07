@@ -9,6 +9,7 @@ import {
   Sparkles,
   Truck
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ExplorerComparisonChart } from "@/components/ExplorerComparisonChart";
 import { availableMonths, availableYears, formatUah } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
@@ -40,7 +41,7 @@ const METRICS: Array<[ExplorerMetric, string]> = [
   ["markupRate", "Націнка %"]
 ];
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
@@ -48,7 +49,7 @@ const nav = [
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, "/insights"]
-] as const;
+];
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
