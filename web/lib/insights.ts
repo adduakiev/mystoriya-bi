@@ -315,32 +315,34 @@ function monthlyAnomalies(
 
   if (std < 3) return [];
 
-  return growthSeries
-    .map((item) => {
-      const z = (item.growth - mean) / std;
-      if (Math.abs(z) < 1.35) return null;
+  const anomalies: InsightItem[] = [];
 
-      const negative = z < 0;
-      const params = new URLSearchParams();
-      params.set("year", String(year));
-      params.set("month", String(item.month));
-      if (lfl) params.set("lfl", "1");
+  growthSeries.forEach((item) => {
+    const z = (item.growth - mean) / std;
+    if (Math.abs(z) < 1.35) return;
 
-      return {
-        id: `month-anomaly-${year}-${item.month}`,
-        severity: negative ? "warning" : "positive",
-        kind: "anomaly",
-        scope: "business",
-        entity: MONTHS_UA[item.month - 1],
-        title: `${MONTHS_UA[item.month - 1]}: нетипова динаміка`,
-        body: `YoY ${pctLabel(item.growth)} проти середнього ${pctLabel(mean)} за видимі місяці. Відхилення ${Math.abs(z).toFixed(1)}σ.`,
-        primaryValue: item.delta,
-        secondaryValue: item.growth,
-        score: Math.abs(z) * Math.abs(item.delta),
-        href: `/?${params.toString()}`
-      } satisfies InsightItem;
-    })
-    .filter((item): item is InsightItem => item !== null)
+    const negative = z < 0;
+    const params = new URLSearchParams();
+    params.set("year", String(year));
+    params.set("month", String(item.month));
+    if (lfl) params.set("lfl", "1");
+
+    anomalies.push({
+      id: `month-anomaly-${year}-${item.month}`,
+      severity: negative ? "warning" : "positive",
+      kind: "anomaly",
+      scope: "business",
+      entity: MONTHS_UA[item.month - 1],
+      title: `${MONTHS_UA[item.month - 1]}: нетипова динаміка`,
+      body: `YoY ${pctLabel(item.growth)} проти середнього ${pctLabel(mean)} за видимі місяці. Відхилення ${Math.abs(z).toFixed(1)}σ.`,
+      primaryValue: item.delta,
+      secondaryValue: item.growth,
+      score: Math.abs(z) * Math.abs(item.delta),
+      href: `/?${params.toString()}`
+    });
+  });
+
+  return anomalies
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 }
