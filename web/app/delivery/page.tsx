@@ -36,7 +36,7 @@ const nav = [
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, null]
+  ["Insights", Sparkles, "/insights"]
 ] as const;
 
 const METRICS: Array<[MetricMode, string]> = [
