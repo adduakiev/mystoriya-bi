@@ -24,9 +24,9 @@ function parseCsv(text: string): string[][] {
     const char = text[i];
     const next = text[i + 1];
 
-    if (char === """) {
-      if (quoted && next === """) {
-        field += """;
+    if (char === '"') {
+      if (quoted && next === '"') {
+        field += '"';
         i += 1;
       } else {
         quoted = !quoted;
@@ -126,8 +126,8 @@ export async function loadSalesData(): Promise<SalesRow[]> {
   const matrix = parseCsv(await response.text());
   if (matrix.length < 2) return [];
 
-  // We intentionally map by position, not duplicate header names.
-  // Source currently contains two columns named "Рік".
+  // Map by position, not duplicate source header names.
+  // The Sheet currently contains two columns named "Рік".
   return matrix
     .slice(1)
     .map((row): SalesRow | null => {
@@ -146,11 +146,9 @@ export async function loadSalesData(): Promise<SalesRow[]> {
         return null;
       }
 
-      const location = LOCATION_MAPPING[rawLocation] ?? rawLocation;
-
       return {
         date: date.toISOString().slice(0, 10),
-        location,
+        location: LOCATION_MAPPING[rawLocation] ?? rawLocation,
         brand,
         ownership,
         channelGroup,
