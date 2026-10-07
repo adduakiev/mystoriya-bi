@@ -8,6 +8,7 @@ import {
   Sparkles,
   Truck
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { buildDashboardSnapshot, formatUah } from "@/lib/analytics";
@@ -15,7 +16,7 @@ import { loadSalesData } from "@/lib/data/source";
 import { filterSalesRows } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode, SalesRow } from "@/lib/data/types";
 
-const nav = [
+const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
@@ -23,7 +24,7 @@ const nav = [
   ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, "/insights"]
-] as const;
+];
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
