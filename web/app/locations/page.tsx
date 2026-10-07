@@ -28,7 +28,7 @@ const MONTHS = [
 
 const nav = [
   ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, null],
+  ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
