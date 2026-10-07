@@ -21,7 +21,7 @@ export function filterSalesRows(rows: SalesRow[], filters: DashboardFilters): Sa
 
 export function queryHref(
   current: DashboardFilters,
-  patch: Partial<Record<keyof DashboardFilters, string | undefined>>
+  patch: Partial<DashboardFilters>
 ): string {
   const next: DashboardFilters = { ...current, ...patch };
   const params = new URLSearchParams();
