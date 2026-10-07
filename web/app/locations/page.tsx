@@ -10,6 +10,7 @@ import {
   Truck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { LocationsComparisonChart } from "@/components/LocationsComparisonChart";
 import {
@@ -184,13 +185,7 @@ export default async function LocationsPage({
   return (
     <main className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <b>М'ЯСТОРІЯ</b>
-            <span>CONTROL CENTER</span>
-          </div>
-        </div>
+        <SidebarBrand />
 
         <nav>
           {nav.map(([label, Icon, href]) =>
