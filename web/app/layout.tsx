@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const officialBrandIcon = "https://myastoriya.com.ua/frontend/myastoriya/dist/images/logo.png";
+
 const description =
   "BI Control Center М'ЯСТОРІЯ: оборот, чеки, середній чек, націнка, доставка, агрегатори, заклади, LFL, динаміка та автоматичні insights.";
 
@@ -11,6 +13,11 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: "М'ЯСТОРІЯ Control Center",
+  icons: {
+    icon: [{ url: officialBrandIcon, type: "image/png" }],
+    shortcut: officialBrandIcon,
+    apple: officialBrandIcon
+  },
   openGraph: {
     title: "М'ЯСТОРІЯ — Control Center",
     description,
