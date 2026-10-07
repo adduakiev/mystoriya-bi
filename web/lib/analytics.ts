@@ -474,3 +474,40 @@ export function buildChannelMixSeries(
     };
   });
 }
+
+
+function isoWeekNumber(date: Date): number {
+  const target = new Date(date.getTime());
+  const day = target.getUTCDay() || 7;
+  target.setUTCDate(target.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+  return Math.ceil((((target.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
+}
+
+export function buildMultiYearWeeklyMetricSeries(
+  rows: SalesRow[],
+  years: number[],
+  metric: DashboardMetricMode
+): Array<Record<string, string | number>> {
+  if (rows.length === 0) return [];
+
+  const sourceCutoff = maxDate(rows);
+  const cutoffWeek = isoWeekNumber(sourceCutoff);
+
+  return Array.from({ length: cutoffWeek }, (_, index) => {
+    const week = index + 1;
+    const point: Record<string, string | number> = {
+      label: `W${String(week).padStart(2, "0")}`
+    };
+
+    years.forEach((year) => {
+      const subset = rows.filter((row) => {
+        const date = new Date(`${row.date}T00:00:00Z`);
+        return date.getUTCFullYear() === year && isoWeekNumber(date) === week;
+      });
+      point[String(year)] = metricValue(subset, metric);
+    });
+
+    return point;
+  });
+}
