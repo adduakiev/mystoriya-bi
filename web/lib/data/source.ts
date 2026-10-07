@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import type { SalesRow } from "./types";
 
 const DEFAULT_SPREADSHEET_ID = "1g8NbVYEunt55lB-0E1OLQmNkeEQbF9y73n9kH3d3xbA";
@@ -132,7 +133,7 @@ function isGarbage(value: string): boolean {
   return /#REF!|#N\/A|^None$|^nan$/i.test(value.trim());
 }
 
-export async function loadSalesData(): Promise<SalesRow[]> {
+async function fetchAndNormalizeSalesData(): Promise<SalesRow[]> {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID ?? DEFAULT_SPREADSHEET_ID;
   const sheetName = process.env.GOOGLE_SHEET_NAME ?? DEFAULT_SHEET_NAME;
 
@@ -140,7 +141,7 @@ export async function loadSalesData(): Promise<SalesRow[]> {
     `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
 
   const response = await fetch(url, {
-    next: { revalidate: 600 },
+    cache: "no-store",
     headers: { "User-Agent": "myastoriya-bi-v2" }
   });
 
@@ -184,4 +185,18 @@ export async function loadSalesData(): Promise<SalesRow[]> {
       };
     })
     .filter((row): row is SalesRow => row !== null);
+}
+
+
+const getCachedSalesData = unstable_cache(
+  fetchAndNormalizeSalesData,
+  ["myastoriya-sales-data-normalized-v1"],
+  {
+    revalidate: 600,
+    tags: ["sales-data"]
+  }
+);
+
+export async function loadSalesData(): Promise<SalesRow[]> {
+  return getCachedSalesData();
 }
