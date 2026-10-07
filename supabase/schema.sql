@@ -172,7 +172,8 @@ insert into location_lifecycle_registry(canonical_name, status, lfl_exclude, not
 ('Поділ', 'closed', true, 'Closed location'),
 ('Піраміда', 'closed', true, 'Closed location'),
 ('Черкаси', 'closed', true, 'Closed location'),
-('Сверстюка', 'closed', true, 'Closed location')
+('Сверстюка', 'closed', true, 'Closed location'),
+('ЖК Галактика', 'closed', true, 'Closed location')
 on conflict (canonical_name) do update
 set status = excluded.status,
     lfl_exclude = excluded.lfl_exclude,
