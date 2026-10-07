@@ -135,10 +135,29 @@ export default async function DynamicsPage({
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
   const latestYear = years[years.length - 1];
   const previousYear = years.length > 1 ? years[years.length - 2] : undefined;
-  const latestYearTotal = data.reduce((sum, point) => sum + Number(point[String(latestYear)] ?? 0), 0);
-  const previousYearTotal = previousYear
-    ? data.reduce((sum, point) => sum + Number(point[String(previousYear)] ?? 0), 0)
-    : 0;
+  const latestSourceDate = rows.reduce((max, row) => row.date > max ? row.date : max, rows[0]?.date ?? "");
+  const cutoffMonthDay = latestSourceDate.slice(4);
+
+  const aggregateMetricForYear = (year: number): number => {
+    const yearRows = rows.filter((row) => {
+      const rowYear = Number(row.date.slice(0, 4));
+      if (rowYear !== year) return false;
+      if (year === latestYear) return row.date <= latestSourceDate;
+      return row.date.slice(4) <= cutoffMonthDay;
+    });
+
+    const revenue = yearRows.reduce((sum, row) => sum + row.revenue, 0);
+    const checks = yearRows.reduce((sum, row) => sum + row.checks, 0);
+    const markup = yearRows.reduce((sum, row) => sum + row.markup, 0);
+
+    if (metric === "checks") return checks;
+    if (metric === "averageCheck") return checks > 0 ? revenue / checks : 0;
+    if (metric === "markupRate") return revenue > 0 ? (markup / revenue) * 100 : 0;
+    return revenue;
+  };
+
+  const latestYearTotal = aggregateMetricForYear(latestYear);
+  const previousYearTotal = previousYear ? aggregateMetricForYear(previousYear) : 0;
   const totalGrowth = previousYear ? pct(latestYearTotal, previousYearTotal) : null;
 
   return (
