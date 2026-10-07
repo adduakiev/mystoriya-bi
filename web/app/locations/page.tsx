@@ -194,7 +194,7 @@ export default async function LocationsPage({
         <nav>
           {nav.map(([label, Icon, href]) =>
             href ? (
-              <Link key={label} href={href} className={label === "Заклади" ? "nav-item active" : "nav-item"}>
+              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={label === "Заклади" ? "nav-item active" : "nav-item"}>
                 <Icon size={18} />
                 {label}
               </Link>
@@ -221,7 +221,7 @@ export default async function LocationsPage({
             <h1>Заклади</h1>
           </div>
 <div className="quick-context">
-            <Link className="quick-mode" href="/">← Огляд</Link>
+            <Link className="quick-mode" href={lfl ? "/?lfl=1" : "/"}>← Огляд</Link>
             <Link
               className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
               href={`/locations?year=${selectedYear}${selectedMonth ? `&month=${selectedMonth}` : ""}${brand ? `&brand=${encodeURIComponent(brand)}` : ""}${ownership ? `&ownership=${encodeURIComponent(ownership)}` : ""}${lfl ? "" : "&lfl=1"}`}
