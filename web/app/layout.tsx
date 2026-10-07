@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { NavigationFeedback } from "@/components/NavigationFeedback";
 import "./globals.css";
 
 const officialBrandIcon = "https://myastoriya.com.ua/frontend/myastoriya/dist/images/logo.png";
@@ -44,7 +46,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="uk">
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <NavigationFeedback />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
