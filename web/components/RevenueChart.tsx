@@ -9,13 +9,21 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { trend } from "@/lib/metrics";
+import type { TrendPoint } from "@/lib/data/types";
 
-export function RevenueChart() {
+export function RevenueChart({
+  data,
+  currentYear,
+  previousYear
+}: {
+  data: TrendPoint[];
+  currentYear: number;
+  previousYear: number;
+}) {
   return (
     <div className="chart-wrap">
       <ResponsiveContainer width="100%" height={320}>
-        <AreaChart data={trend}>
+        <AreaChart data={data}>
           <defs>
             <linearGradient id="currentFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#f5a623" stopOpacity={0.36} />
@@ -24,12 +32,19 @@ export function RevenueChart() {
           </defs>
           <CartesianGrid stroke="#222833" vertical={false} />
           <XAxis dataKey="month" stroke="#77808f" tickLine={false} axisLine={false} />
-          <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={32} />
+          <YAxis
+            stroke="#77808f"
+            tickLine={false}
+            axisLine={false}
+            width={58}
+            tickFormatter={(value) => `${Math.round(value / 1_000_000)}M`}
+          />
           <Tooltip
+            formatter={(value) => [`₴${Number(value).toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`, "Оборот"]}
             contentStyle={{ background: "#111720", border: "1px solid #29313d", borderRadius: 12 }}
           />
-          <Area type="monotone" dataKey="previous" stroke="#68717e" fill="transparent" strokeWidth={2} />
-          <Area type="monotone" dataKey="current" stroke="#f5a623" fill="url(#currentFill)" strokeWidth={3} />
+          <Area name={String(previousYear)} type="monotone" dataKey="previous" stroke="#68717e" fill="transparent" strokeWidth={2} />
+          <Area name={String(currentYear)} type="monotone" dataKey="current" stroke="#f5a623" fill="url(#currentFill)" strokeWidth={3} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
