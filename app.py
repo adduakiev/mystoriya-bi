@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime   
 
 # -----------------------------------------------------------------------------
 # 1. СТИЛІЗАЦІЯ ТА КОНФІГУРАЦІЯ
