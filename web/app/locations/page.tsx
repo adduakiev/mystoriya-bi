@@ -31,7 +31,7 @@ const nav = [
   ["Доставка", Truck, null],
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, null],
+  ["Динаміка", BarChart3, "/dynamics"],
   ["Data Explorer", PackageSearch, null],
   ["Insights", Sparkles, null]
 ] as const;
