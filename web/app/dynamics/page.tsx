@@ -181,7 +181,7 @@ export default async function DynamicsPage({
             href ? (
               <Link
                 key={label}
-                href={href}
+                href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
                 className={label === "Динаміка" ? "nav-item active" : "nav-item"}
               >
                 <Icon size={18} />
@@ -210,7 +210,7 @@ export default async function DynamicsPage({
             <h1>Динаміка</h1>
           </div>
 <div className="quick-context">
-            <Link className="quick-mode" href="/">← Огляд</Link>
+            <Link className="quick-mode" href={lfl ? "/?lfl=1" : "/"}>← Огляд</Link>
             <Link
               className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
               href={buildHref(state, { lfl: !lfl, location: undefined })}
