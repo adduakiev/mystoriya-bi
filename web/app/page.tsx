@@ -97,6 +97,7 @@ export default async function Home({
   const compare = parseCompare(first(params.compare));
   const metric = parseMetric(first(params.metric));
   const grain = selectedMonth ? "month" : parseGrain(first(params.grain));
+  const lfl = first(params.lfl) === "1";
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -109,14 +110,16 @@ export default async function Home({
     period,
     compare,
     metric,
-    grain
+    grain,
+    lfl
   };
 
   const rows = filterSalesRows(sourceRows, filters);
   const channelMixRows = filterSalesRows(sourceRows, {
     location: filters.location,
     brand: filters.brand,
-    ownership: filters.ownership
+    ownership: filters.ownership,
+    lfl
   });
   const snapshot = buildDashboardSnapshot(rows, {
     period,
@@ -125,9 +128,10 @@ export default async function Home({
     focusMonth: selectedMonth
   });
 
-  const brands = [...new Set(sourceRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(sourceRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(sourceRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
+  const dimensionRows = filterSalesRows(sourceRows, { lfl });
+  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
+  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
+  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
   const orderTypes = [...new Set(
     sourceRows
       .filter((row) => !filters.channel || row.channelGroup === filters.channel)
@@ -139,7 +143,8 @@ export default async function Home({
     filters.orderType,
     filters.location,
     filters.brand,
-    filters.ownership
+    filters.ownership,
+    filters.lfl
   ].filter(Boolean).length;
 
   const multiYearData = grain === "week" && !selectedMonth
@@ -219,6 +224,16 @@ export default async function Home({
             >
               {MONTHS[latestMonth - 1]} MTD
             </Link>
+            <Link
+              className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
+              href={queryHref(filters, {
+                lfl: !lfl,
+                location: undefined
+              })}
+              title="Виключити закриті точки: Кудряшова/Мокра, Європарк, Поділ, Піраміда, Черкаси, Сверстюка"
+            >
+              LFL · активні
+            </Link>
           </div>
         </header>
 
@@ -227,11 +242,12 @@ export default async function Home({
             <span><Filter size={15} /> Фільтри</span>
             <span className="filter-summary">
               {selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : " · весь рік"}
-              {activeDimensionFilters > 0 ? ` · +${activeDimensionFilters} зрізи` : ""}
+              {activeDimensionFilters > 0 ? ` · +${activeDimensionFilters} зрізи` : ""}{lfl ? " · LFL" : ""}
             </span>
           </summary>
 
           <form className="filter-form" method="get" action="/">
+            {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Рік</span>
               <select name="year" defaultValue={String(selectedYear)}>
@@ -312,6 +328,7 @@ export default async function Home({
           <span>vs {snapshot.comparisonLabel}</span>
           {filters.channel && <span>{filters.channel}</span>}
           {filters.orderType && <span>{filters.orderType}</span>}
+          {lfl && <span className="lfl-context">LFL · активна мережа</span>}
         </div>
 
         {activeDimensionFilters > 0 && (
@@ -322,6 +339,7 @@ export default async function Home({
             {filters.location && <span className="filter-chip">Локація: {filters.location}</span>}
             {filters.brand && <span className="filter-chip">Бренд: {filters.brand}</span>}
             {filters.ownership && <span className="filter-chip">Власність: {filters.ownership}</span>}
+            {lfl && <span className="filter-chip lfl-chip">LFL: без закритих точок</span>}
             <Link
               className="reset-filter"
               href={queryHref(filters, {
