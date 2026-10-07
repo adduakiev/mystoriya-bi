@@ -232,3 +232,9 @@ a.management-row:hover { background: #121923; }
 @media (max-width: 720px) {
   .delivery-benchmark-strip { grid-template-columns: 1fr; }
 }
+
+.lfl-toggle { border-color: #2b4735; }
+.lfl-toggle:hover, .lfl-toggle.active { color: #dff7e8; border-color: #3e7653; background: #102016; }
+.lfl-context { color: var(--green); font-weight: 800; }
+.lfl-chip { color: #bfeacf; border-color: #2f5c40; background: #102016; }
+.lfl-banner { margin: 0 0 12px; padding: 9px 11px; border: 1px solid #2f5c40; background: #102016; color: #bfeacf; border-radius: 9px; font-size: 11px; font-weight: 700; }
