@@ -38,7 +38,7 @@ const nav = [
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, null],
+  ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, null]
 ] as const;
 
@@ -237,7 +237,7 @@ export default async function Home({
                 lfl: !lfl,
                 location: undefined
               })}
-              title="Виключити закриті точки: Кудряшова/Мокра, Європарк, Поділ, Піраміда, Черкаси, Сверстюка"
+              title="Виключити закриті точки: Кудряшова/Мокра, Європарк, Поділ, Піраміда, Черкаси, Сверстюка, ЖК Галактика"
             >
               LFL · активні
             </Link>

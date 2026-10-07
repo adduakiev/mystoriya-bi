@@ -261,3 +261,15 @@ a.management-row:hover { background: #121923; }
 @media (max-width: 720px) {
   .growth-driver-cards, .growth-location-list { grid-template-columns: 1fr; }
 }
+
+.explorer-chart-panel, .explorer-table-panel { margin-top: 12px; }
+.explorer-chart-wrap { margin: 0 -4px -8px; }
+.explorer-table-wrap { overflow-x: auto; border-top: 1px solid #1d2530; }
+.explorer-table { min-width: 1280px; }
+.explorer-row { display: grid; grid-template-columns: 220px 135px 135px 90px 95px 125px 90px 100px 95px; gap: 12px; align-items: center; padding: 11px 8px; border-bottom: 1px solid #1d2530; font-size: 11px; }
+.explorer-row:hover { background: #121923; }
+.explorer-row > :first-child { position: sticky; left: 0; z-index: 2; background: var(--panel); padding-right: 8px; }
+.explorer-row:hover > :first-child { background: #121923; }
+.explorer-head { color: #65707e; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; background: var(--panel); position: sticky; top: 0; z-index: 4; }
+.explorer-head > :first-child { z-index: 5; }
+.explorer-shortcuts { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
