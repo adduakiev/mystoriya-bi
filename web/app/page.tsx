@@ -17,13 +17,13 @@ import { filterSalesRows, queryHref, type DashboardFilters } from "@/lib/filters
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const nav = [
-  ["Огляд", LayoutDashboard],
-  ["Доставка", Truck],
-  ["Агрегатори", Network],
-  ["Локації", MapPin],
-  ["Динаміка", BarChart3],
-  ["Data Explorer", PackageSearch],
-  ["Insights", Sparkles]
+  ["Огляд", LayoutDashboard, "/"],
+  ["Доставка", Truck, null],
+  ["Агрегатори", Network, "/aggregators"],
+  ["Локації", MapPin, null],
+  ["Динаміка", BarChart3, null],
+  ["Data Explorer", PackageSearch, null],
+  ["Insights", Sparkles, null]
 ] as const;
 
 function prettyDate(value: string): string {
@@ -82,12 +82,19 @@ export default async function Home({
         </div>
 
         <nav>
-          {nav.map(([label, Icon], i) => (
-            <button key={label} className={i === 0 ? "nav-item active" : "nav-item"}>
-              <Icon size={18} />
-              {label}
-            </button>
-          ))}
+          {nav.map(([label, Icon, href], i) =>
+            href ? (
+              <Link key={label} href={href} className={i === 0 ? "nav-item active" : "nav-item"}>
+                <Icon size={18} />
+                {label}
+              </Link>
+            ) : (
+              <span key={label} className="nav-item nav-disabled">
+                <Icon size={18} />
+                {label}
+              </span>
+            )
+          )}
         </nav>
 
         <div className="sidebar-status">
