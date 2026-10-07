@@ -58,6 +58,7 @@ function buildHref(
     location?: string;
     brand?: string;
     ownership?: string;
+    lfl?: boolean;
   },
   patch: Partial<{
     metric: MetricMode;
@@ -67,6 +68,7 @@ function buildHref(
     location?: string;
     brand?: string;
     ownership?: string;
+    lfl?: boolean;
   }>
 ): string {
   const next = { ...current, ...patch };
@@ -78,6 +80,7 @@ function buildHref(
   if (next.location) params.set("location", next.location);
   if (next.brand) params.set("brand", next.brand);
   if (next.ownership) params.set("ownership", next.ownership);
+  if (next.lfl) params.set("lfl", "1");
   const query = params.toString();
   return query ? `/dynamics?${query}` : "/dynamics";
 }
@@ -114,9 +117,10 @@ export default async function DynamicsPage({
   const location = first(params.location);
   const brand = first(params.brand);
   const ownership = first(params.ownership);
+  const lfl = first(params.lfl) === "1";
 
-  const state = { metric, grain, channel, orderType, location, brand, ownership };
-  const rows = filterSalesRows(sourceRows, { channel, orderType, location, brand, ownership });
+  const state = { metric, grain, channel, orderType, location, brand, ownership, lfl };
+  const rows = filterSalesRows(sourceRows, { channel, orderType, location, brand, ownership, lfl });
   const years = availableYears(rows);
   const data = grain === "week"
     ? buildMultiYearWeeklyMetricSeries(rows, years, metric)
@@ -128,9 +132,10 @@ export default async function DynamicsPage({
       .filter((row) => !channel || row.channelGroup === channel)
       .map((row) => row.orderType)
   )].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(sourceRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(sourceRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(sourceRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
+  const dimensionRows = filterSalesRows(sourceRows, { lfl });
+  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
+  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
+  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
 
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
   const latestYear = years[years.length - 1];
@@ -176,7 +181,7 @@ export default async function DynamicsPage({
             href ? (
               <Link
                 key={label}
-                href={href}
+                href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
                 className={label === "Динаміка" ? "nav-item active" : "nav-item"}
               >
                 <Icon size={18} />
@@ -204,7 +209,15 @@ export default async function DynamicsPage({
             <span className="eyebrow">TREND ANALYSIS · MULTI-YEAR</span>
             <h1>Динаміка</h1>
           </div>
-          <Link className="quick-mode" href="/">← Огляд</Link>
+<div className="quick-context">
+            <Link className="quick-mode" href={lfl ? "/?lfl=1" : "/"}>← Огляд</Link>
+            <Link
+              className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
+              href={buildHref(state, { lfl: !lfl, location: undefined })}
+            >
+              LFL · активні
+            </Link>
+          </div>
         </header>
 
         <details className="filter-center" open>
@@ -213,11 +226,12 @@ export default async function DynamicsPage({
             <span className="filter-summary">
               {grain === "week" ? "Тижні" : "Місяці"} · {metricLabel}
               {channel ? ` · ${channel}` : ""}
-              {location ? ` · ${location}` : ""}
+              {location ? ` · ${location}` : ""}{lfl ? " · LFL" : ""}
             </span>
           </summary>
 
           <form className="filter-form" method="get" action="/dynamics">
+            {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
@@ -338,6 +352,7 @@ export default async function DynamicsPage({
             </div>
           </div>
 
+          {lfl && <div className="lfl-banner">LFL · закриті точки виключено з усієї динаміки</div>}
           <MultiYearMetricChart data={data} years={years} metric={metric} />
         </section>
 

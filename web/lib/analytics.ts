@@ -511,3 +511,78 @@ export function buildMultiYearWeeklyMetricSeries(
     return point;
   });
 }
+
+
+export function buildGrowthDrivers(
+  rows: SalesRow[],
+  options: {
+    period?: PeriodMode;
+    comparison?: ComparisonMode;
+    focusYear?: number;
+    focusMonth?: number;
+  } = {}
+) {
+  if (rows.length === 0) {
+    return {
+      totalDelta: 0,
+      checksEffect: 0,
+      averageCheckEffect: 0,
+      channelDrivers: [] as Array<{ name: string; delta: number; contribution: number | null }>,
+      locationDrivers: [] as Array<{ name: string; delta: number; contribution: number | null }>
+    };
+  }
+
+  const focusMonth = options.focusMonth;
+  const period = focusMonth ? "month" : (options.period ?? "ytd");
+  const comparison = options.comparison ?? "ly";
+  const cutoff = resolveCutoff(rows, options.focusYear, focusMonth);
+  const currentWindowValue = currentWindow(cutoff, period, focusMonth);
+  const previousWindowValue = comparisonWindow(currentWindowValue, period, comparison);
+  const currentRows = between(rows, currentWindowValue);
+  const previousRows = between(rows, previousWindowValue);
+  const currentMetrics = metricSet(currentRows);
+  const previousMetrics = metricSet(previousRows);
+
+  const totalDelta = currentMetrics.revenue - previousMetrics.revenue;
+  const checksEffect =
+    (currentMetrics.checks - previousMetrics.checks) * previousMetrics.averageCheck;
+  const averageCheckEffect =
+    currentMetrics.checks * (currentMetrics.averageCheck - previousMetrics.averageCheck);
+
+  const contribution = (delta: number): number | null =>
+    Math.abs(totalDelta) < 0.01 ? null : (delta / totalDelta) * 100;
+
+  const groupedDrivers = (
+    currentInput: SalesRow[],
+    previousInput: SalesRow[],
+    key: (row: SalesRow) => string
+  ) => {
+    const currentMap = new Map<string, number>();
+    const previousMap = new Map<string, number>();
+
+    currentInput.forEach((row) => {
+      const name = key(row);
+      currentMap.set(name, (currentMap.get(name) ?? 0) + row.revenue);
+    });
+    previousInput.forEach((row) => {
+      const name = key(row);
+      previousMap.set(name, (previousMap.get(name) ?? 0) + row.revenue);
+    });
+
+    const names = new Set([...currentMap.keys(), ...previousMap.keys()]);
+    return [...names]
+      .map((name) => {
+        const delta = (currentMap.get(name) ?? 0) - (previousMap.get(name) ?? 0);
+        return { name, delta, contribution: contribution(delta) };
+      })
+      .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  };
+
+  return {
+    totalDelta,
+    checksEffect,
+    averageCheckEffect,
+    channelDrivers: groupedDrivers(currentRows, previousRows, (row) => row.channelGroup),
+    locationDrivers: groupedDrivers(currentRows, previousRows, (row) => row.location).slice(0, 6)
+  };
+}

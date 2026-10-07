@@ -12,6 +12,7 @@ import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { buildDashboardSnapshot, formatUah } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
+import { filterSalesRows } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode, SalesRow } from "@/lib/data/types";
 
 const nav = [
@@ -77,9 +78,11 @@ export default async function AggregatorsPage({
   const params = (await searchParams) ?? {};
   const period = parsePeriod(first(params.period));
   const comparison = parseCompare(first(params.compare));
+  const lfl = first(params.lfl) === "1";
+  const lflQuery = lfl ? "&lfl=1" : "";
 
   const allRows = await loadSalesData();
-  const rows = allRows.filter((row) => row.channelGroup === "Агрегатор");
+  const rows = filterSalesRows(allRows, { channel: "Агрегатор", lfl });
   const snapshot = buildDashboardSnapshot(rows, { period, comparison });
   const aggregators = groupByOrderType(rows, period, comparison);
 
@@ -97,7 +100,7 @@ export default async function AggregatorsPage({
         <nav>
           {nav.map(([label, Icon, href]) =>
             href ? (
-              <Link key={label} href={href} className={label === "Агрегатори" ? "nav-item active" : "nav-item"}>
+              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={label === "Агрегатори" ? "nav-item active" : "nav-item"}>
                 <Icon size={18} />
                 {label}
               </Link>
@@ -125,6 +128,12 @@ export default async function AggregatorsPage({
           </div>
 
           <div className="control-stack">
+            <Link
+              className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
+              href={`/aggregators?period=${period}&compare=${comparison}${lfl ? "" : "&lfl=1"}`}
+            >
+              LFL · активні
+            </Link>
             <div className="segmented">
               {([
                 ["ytd", "YTD"],
@@ -134,7 +143,7 @@ export default async function AggregatorsPage({
                 <Link
                   key={value}
                   className={period === value ? "segment active" : "segment"}
-                  href={`/aggregators?period=${value}&compare=${comparison}`}
+                  href={`/aggregators?period=${value}&compare=${comparison}${lflQuery}`}
                 >
                   {label}
                 </Link>
@@ -144,13 +153,13 @@ export default async function AggregatorsPage({
             <div className="segmented">
               <Link
                 className={comparison === "ly" ? "segment active" : "segment"}
-                href={`/aggregators?period=${period}&compare=ly`}
+                href={`/aggregators?period=${period}&compare=ly${lflQuery}`}
               >
                 LY
               </Link>
               <Link
                 className={comparison === "previous" ? "segment active" : "segment"}
-                href={`/aggregators?period=${period}&compare=previous`}
+                href={`/aggregators?period=${period}&compare=previous${lflQuery}`}
               >
                 Previous
               </Link>
@@ -162,6 +171,7 @@ export default async function AggregatorsPage({
           <b>{snapshot.periodLabel}</b>
           <span>cutoff {snapshot.cutoffDate}</span>
           <span>vs {snapshot.comparisonLabel}</span>
+          {lfl && <span className="lfl-context">LFL · активна мережа</span>}
         </div>
 
         <section className="kpi-grid">

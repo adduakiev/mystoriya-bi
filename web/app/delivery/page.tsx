@@ -123,6 +123,7 @@ function buildHref(
     location?: string;
     brand?: string;
     ownership?: string;
+    lfl?: boolean;
   },
   patch: Partial<{
     year: number;
@@ -133,6 +134,7 @@ function buildHref(
     location?: string;
     brand?: string;
     ownership?: string;
+    lfl?: boolean;
   }>
 ): string {
   const next = { ...current, ...patch };
@@ -145,6 +147,7 @@ function buildHref(
   if (next.location) params.set("location", next.location);
   if (next.brand) params.set("brand", next.brand);
   if (next.ownership) params.set("ownership", next.ownership);
+  if (next.lfl) params.set("lfl", "1");
   return `/delivery?${params.toString()}`;
 }
 
@@ -165,13 +168,15 @@ export default async function DeliveryPage({
   const location = first(params.location);
   const brand = first(params.brand);
   const ownership = first(params.ownership);
+  const lfl = first(params.lfl) === "1";
 
   const deliveryBase = filterSalesRows(sourceRows, {
     channel: "Доставка",
     orderType,
     location,
     brand,
-    ownership
+    ownership,
+    lfl
   });
 
   const deliveryAllTypes = filterSalesRows(sourceRows, {
@@ -185,7 +190,8 @@ export default async function DeliveryPage({
     channel: "Агрегатор",
     location,
     brand,
-    ownership
+    ownership,
+    lfl
   });
 
   const snapshot = buildDashboardSnapshot(deliveryBase, {
@@ -195,12 +201,13 @@ export default async function DeliveryPage({
     focusMonth: selectedMonth
   });
 
-  const state = { year: selectedYear, month: selectedMonth, metric, grain, orderType, location, brand, ownership };
+  const state = { year: selectedYear, month: selectedMonth, metric, grain, orderType, location, brand, ownership, lfl };
   const months = availableMonths(deliveryBase, selectedYear);
   const deliveryTypes = [...new Set(deliveryAllTypes.map((row) => row.orderType))].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(sourceRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(sourceRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(sourceRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
+  const dimensionRows = filterSalesRows(sourceRows, { lfl });
+  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
+  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
+  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
 
   const multiYearData = grain === "week" && !selectedMonth
     ? buildMultiYearWeeklyMetricSeries(deliveryBase, years, metric)
@@ -246,7 +253,7 @@ export default async function DeliveryPage({
   });
 
   const allPeriodRows = periodRows(
-    filterSalesRows(sourceRows, { location, brand, ownership }),
+    filterSalesRows(sourceRows, { location, brand, ownership, lfl }),
     selectedYear,
     selectedMonth,
     snapshot.cutoffDate
@@ -296,7 +303,7 @@ export default async function DeliveryPage({
             href ? (
               <Link
                 key={label}
-                href={href}
+                href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
                 className={label === "Доставка" ? "nav-item active" : "nav-item"}
               >
                 <Icon size={18} />
@@ -324,7 +331,15 @@ export default async function DeliveryPage({
             <span className="eyebrow">OWN DELIVERY · LIVE</span>
             <h1>Доставка</h1>
           </div>
-          <Link className="quick-mode" href="/">← Огляд</Link>
+<div className="quick-context">
+            <Link className="quick-mode" href={lfl ? "/?lfl=1" : "/"}>← Огляд</Link>
+            <Link
+              className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
+              href={buildHref(state, { lfl: !lfl, location: undefined })}
+            >
+              LFL · активні
+            </Link>
+          </div>
         </header>
 
         <details className="filter-center">
@@ -333,11 +348,12 @@ export default async function DeliveryPage({
             <span className="filter-summary">
               {selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : " · YTD"}
               {orderType ? ` · ${orderType}` : ""}
-              {location ? ` · ${location}` : ""}
+              {location ? ` · ${location}` : ""}{lfl ? " · LFL" : ""}
             </span>
           </summary>
 
           <form className="filter-form" method="get" action="/delivery">
+            {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Рік</span>
               <select name="year" defaultValue={String(selectedYear)}>
@@ -412,6 +428,7 @@ export default async function DeliveryPage({
           <span>cutoff {snapshot.cutoffDate}</span>
           <span>vs {selectedYear - 1}</span>
           {orderType && <span>{orderType}</span>}
+          {lfl && <span className="lfl-context">LFL · активна мережа</span>}
         </div>
 
         <section className="kpi-grid">
