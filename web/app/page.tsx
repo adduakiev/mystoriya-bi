@@ -11,6 +11,7 @@ import {
   X
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { ChannelMixChart } from "@/components/ChannelMixChart";
@@ -173,13 +174,7 @@ export default async function Home({
   return (
     <main className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <b>М'ЯСТОРІЯ</b>
-            <span>CONTROL CENTER</span>
-          </div>
-        </div>
+        <SidebarBrand />
 
         <nav>
           {nav.map(([label, Icon, href], i) =>
