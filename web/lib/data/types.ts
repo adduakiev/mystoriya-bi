@@ -51,6 +51,21 @@ export type LocationSummary = {
   share: number;
 };
 
+export type MonthlyManagementRow = {
+  month: number;
+  label: string;
+  revenue: number;
+  revenueGrowth: number | null;
+  checks: number;
+  checksGrowth: number | null;
+  averageCheck: number;
+  markupRate: number;
+  venueShare: number;
+  aggregatorShare: number;
+  deliveryShare: number;
+  isPartial: boolean;
+};
+
 export type DashboardSnapshot = {
   sourceRows: number;
   cutoffDate: string;
@@ -66,6 +81,7 @@ export type DashboardSnapshot = {
   trend: TrendPoint[];
   channels: ChannelSummary[];
   locations: LocationSummary[];
+  monthlyTable: MonthlyManagementRow[];
   signal: {
     title: string;
     body: string;
