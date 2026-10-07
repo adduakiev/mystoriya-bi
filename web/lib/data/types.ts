@@ -10,6 +10,9 @@ export type SalesRow = {
   markup: number;
 };
 
+export type PeriodMode = "ytd" | "month" | "week";
+export type ComparisonMode = "ly" | "previous";
+
 export type MetricSet = {
   revenue: number;
   checks: number;
@@ -27,7 +30,7 @@ export type Kpi = {
 };
 
 export type TrendPoint = {
-  month: string;
+  label: string;
   current: number;
   previous: number;
 };
@@ -53,6 +56,10 @@ export type DashboardSnapshot = {
   cutoffDate: string;
   currentYear: number;
   previousYear: number;
+  period: PeriodMode;
+  comparison: ComparisonMode;
+  periodLabel: string;
+  comparisonLabel: string;
   current: MetricSet;
   previous: MetricSet;
   kpis: Kpi[];

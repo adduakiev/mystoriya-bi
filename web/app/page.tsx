@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   BarChart3,
-  ChevronDown,
   LayoutDashboard,
   MapPin,
   Network,
@@ -14,11 +13,8 @@ import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { buildDashboardSnapshot, formatUah } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
-import {
-  filterSalesRows,
-  queryHref,
-  type DashboardFilters
-} from "@/lib/filters";
+import { filterSalesRows, queryHref, type DashboardFilters } from "@/lib/filters";
+import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const nav = [
   ["Огляд", LayoutDashboard],
@@ -43,23 +39,36 @@ function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function parsePeriod(value: string | undefined): PeriodMode {
+  return value === "month" || value === "week" ? value : "ytd";
+}
+
+function parseCompare(value: string | undefined): ComparisonMode {
+  return value === "previous" ? "previous" : "ly";
+}
+
 export default async function Home({
   searchParams
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
+  const period = parsePeriod(first(params.period));
+  const compare = parseCompare(first(params.compare));
+
   const filters: DashboardFilters = {
     channel: first(params.channel),
     location: first(params.location),
     brand: first(params.brand),
-    ownership: first(params.ownership)
+    ownership: first(params.ownership),
+    period,
+    compare
   };
 
   const sourceRows = await loadSalesData();
   const rows = filterSalesRows(sourceRows, filters);
-  const snapshot = buildDashboardSnapshot(rows);
-  const hasFilters = Object.values(filters).some(Boolean);
+  const snapshot = buildDashboardSnapshot(rows, { period, comparison: compare });
+  const hasDimensionFilters = [filters.channel, filters.location, filters.brand, filters.ownership].some(Boolean);
 
   return (
     <main className="shell">
@@ -84,7 +93,7 @@ export default async function Home({
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>{rows.toLocaleString ? rows.length.toLocaleString("uk-UA") : rows.length} / {sourceRows.length.toLocaleString("uk-UA")} rows</small>
+          <small>{rows.length.toLocaleString("uk-UA")} / {sourceRows.length.toLocaleString("uk-UA")} rows</small>
         </div>
       </aside>
 
@@ -94,21 +103,65 @@ export default async function Home({
             <span className="eyebrow">BUSINESS PERFORMANCE · LIVE</span>
             <h1>Огляд</h1>
           </div>
-          <div className="filters">
-            <button>01 січ — {prettyDate(snapshot.cutoffDate)} <ChevronDown size={14} /></button>
-            <button>Compare: LY YTD <ChevronDown size={14} /></button>
-            <button>{filters.channel ?? "Всі канали"} <ChevronDown size={14} /></button>
+
+          <div className="control-stack">
+            <div className="segmented">
+              {([
+                ["ytd", "YTD"],
+                ["month", "Місяць"],
+                ["week", "Тиждень"]
+              ] as const).map(([value, label]) => (
+                <Link
+                  key={value}
+                  className={period === value ? "segment active" : "segment"}
+                  href={queryHref(filters, { period: value })}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="segmented">
+              <Link
+                className={compare === "ly" ? "segment active" : "segment"}
+                href={queryHref(filters, { compare: "ly" })}
+              >
+                LY
+              </Link>
+              <Link
+                className={compare === "previous" ? "segment active" : "segment"}
+                href={queryHref(filters, { compare: "previous" })}
+              >
+                Previous
+              </Link>
+            </div>
           </div>
         </header>
 
-        {hasFilters && (
+        <div className="context-line">
+          <b>{snapshot.periodLabel}</b>
+          <span>cutoff {prettyDate(snapshot.cutoffDate)}</span>
+          <span>vs {snapshot.comparisonLabel}</span>
+        </div>
+
+        {hasDimensionFilters && (
           <div className="active-filters">
             <span className="eyebrow">ACTIVE VIEW</span>
             {filters.channel && <span className="filter-chip">Канал: {filters.channel}</span>}
             {filters.location && <span className="filter-chip">Локація: {filters.location}</span>}
             {filters.brand && <span className="filter-chip">Бренд: {filters.brand}</span>}
             {filters.ownership && <span className="filter-chip">Власність: {filters.ownership}</span>}
-            <Link className="reset-filter" href="/"><X size={13} /> Скинути</Link>
+            <Link
+              className="reset-filter"
+              href={queryHref(filters, {
+                channel: undefined,
+                location: undefined,
+                brand: undefined,
+                ownership: undefined
+              })}
+            >
+              <X size={13} /> Скинути зріз
+            </Link>
           </div>
         )}
 
@@ -120,25 +173,25 @@ export default async function Home({
           <article className="panel revenue-panel">
             <div className="panel-head">
               <div>
-                <span className="eyebrow">DYNAMICS · YTD</span>
+                <span className="eyebrow">DYNAMICS · {snapshot.periodLabel.toUpperCase()}</span>
                 <h2>Оборот</h2>
               </div>
               <div className="legend">
-                <span><i className="legend-current" />{snapshot.currentYear}</span>
-                <span><i />{snapshot.previousYear}</span>
+                <span><i className="legend-current" />{snapshot.periodLabel}</span>
+                <span><i />{snapshot.comparisonLabel}</span>
               </div>
             </div>
             <RevenueChart
               data={snapshot.trend}
-              currentYear={snapshot.currentYear}
-              previousYear={snapshot.previousYear}
+              currentLabel={snapshot.periodLabel}
+              previousLabel={snapshot.comparisonLabel}
             />
           </article>
 
           <article className="panel">
             <div className="panel-head">
               <div>
-                <span className="eyebrow">STRUCTURE · YTD</span>
+                <span className="eyebrow">STRUCTURE · {snapshot.periodLabel.toUpperCase()}</span>
                 <h2>Канали продажів</h2>
               </div>
             </div>
@@ -167,7 +220,7 @@ export default async function Home({
           <article className="panel">
             <div className="panel-head">
               <div>
-                <span className="eyebrow">LOCATIONS · YTD</span>
+                <span className="eyebrow">LOCATIONS · {snapshot.periodLabel.toUpperCase()}</span>
                 <h2>Внесок точок</h2>
               </div>
               {filters.location ? (
@@ -176,9 +229,10 @@ export default async function Home({
                 <span className="text-button">TOP {snapshot.locations.length}</span>
               )}
             </div>
+
             <div className="location-table">
               <div className="table-row table-head">
-                <span>Локація</span><span>Оборот</span><span>YoY</span><span>Частка</span>
+                <span>Локація</span><span>Оборот</span><span>Δ</span><span>Частка</span>
               </div>
               {snapshot.locations.map((location) => (
                 <Link

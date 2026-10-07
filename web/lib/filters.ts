@@ -1,10 +1,12 @@
-import type { SalesRow } from "@/lib/data/types";
+import type { ComparisonMode, PeriodMode, SalesRow } from "@/lib/data/types";
 
 export type DashboardFilters = {
   channel?: string;
   location?: string;
   brand?: string;
   ownership?: string;
+  period?: PeriodMode;
+  compare?: ComparisonMode;
 };
 
 export function filterSalesRows(rows: SalesRow[], filters: DashboardFilters): SalesRow[] {
@@ -15,18 +17,6 @@ export function filterSalesRows(rows: SalesRow[], filters: DashboardFilters): Sa
     if (filters.ownership && row.ownership !== filters.ownership) return false;
     return true;
   });
-}
-
-export function uniqueFilterValues(rows: SalesRow[]) {
-  const values = <K extends keyof Pick<SalesRow, "channelGroup" | "location" | "brand" | "ownership">>(key: K) =>
-    [...new Set(rows.map((row) => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, "uk"));
-
-  return {
-    channels: values("channelGroup"),
-    locations: values("location"),
-    brands: values("brand"),
-    ownerships: values("ownership")
-  };
 }
 
 export function queryHref(
@@ -40,6 +30,8 @@ export function queryHref(
   if (next.location) params.set("location", next.location);
   if (next.brand) params.set("brand", next.brand);
   if (next.ownership) params.set("ownership", next.ownership);
+  if (next.period && next.period !== "ytd") params.set("period", next.period);
+  if (next.compare && next.compare !== "ly") params.set("compare", next.compare);
 
   const query = params.toString();
   return query ? `/?${query}` : "/";

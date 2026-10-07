@@ -1,17 +1,19 @@
 import type {
   ChannelSummary,
+  ComparisonMode,
   DashboardSnapshot,
   Kpi,
   LocationSummary,
   MetricSet,
+  PeriodMode,
   SalesRow,
   TrendPoint
 } from "@/lib/data/types";
 
-const MONTHS_UA = [
-  "Січ", "Лют", "Бер", "Кві", "Тра", "Чер",
-  "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"
-];
+const MONTHS_UA = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
+const WEEKDAYS_UA = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
+type DateWindow = { start: Date; end: Date; label: string };
 
 function metricSet(rows: SalesRow[]): MetricSet {
   const revenue = rows.reduce((sum, row) => sum + row.revenue, 0);
@@ -44,12 +46,7 @@ function formatCompactUah(value: number): string {
   return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;
 }
 
-function kpi(
-  label: string,
-  value: string,
-  delta: number | null,
-  deltaLabel: string
-): Kpi {
+function kpi(label: string, value: string, delta: number | null, deltaLabel: string): Kpi {
   return {
     label,
     value,
@@ -59,25 +56,120 @@ function kpi(
   };
 }
 
-function dateAtUtc(year: number, month: number, day: number): Date {
-  return new Date(Date.UTC(year, month, day));
-}
-
 function iso(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function between(rows: SalesRow[], start: Date, end: Date): SalesRow[] {
-  const from = iso(start);
-  const to = iso(end);
+function utcDate(year: number, month: number, day: number): Date {
+  return new Date(Date.UTC(year, month, day));
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 86_400_000);
+}
+
+function daysBetween(a: Date, b: Date): number {
+  return Math.floor((b.getTime() - a.getTime()) / 86_400_000);
+}
+
+function startOfWeek(date: Date): Date {
+  const day = date.getUTCDay();
+  const distance = day === 0 ? 6 : day - 1;
+  return addDays(date, -distance);
+}
+
+function endOfMonth(year: number, month: number): Date {
+  return new Date(Date.UTC(year, month + 1, 0));
+}
+
+function clampDay(year: number, month: number, day: number): Date {
+  return utcDate(year, month, Math.min(day, endOfMonth(year, month).getUTCDate()));
+}
+
+function currentWindow(cutoff: Date, period: PeriodMode): DateWindow {
+  if (period === "week") {
+    return { start: startOfWeek(cutoff), end: cutoff, label: "Поточний тиждень" };
+  }
+
+  if (period === "month") {
+    return { start: utcDate(cutoff.getUTCFullYear(), cutoff.getUTCMonth(), 1), end: cutoff, label: "Поточний місяць" };
+  }
+
+  return { start: utcDate(cutoff.getUTCFullYear(), 0, 1), end: cutoff, label: "YTD" };
+}
+
+function comparisonWindow(current: DateWindow, period: PeriodMode, comparison: ComparisonMode): DateWindow {
+  if (comparison === "ly" || period === "ytd") {
+    const start = clampDay(current.start.getUTCFullYear() - 1, current.start.getUTCMonth(), current.start.getUTCDate());
+    const end = clampDay(current.end.getUTCFullYear() - 1, current.end.getUTCMonth(), current.end.getUTCDate());
+    return { start, end, label: period === "ytd" ? "LY YTD" : "LY" };
+  }
+
+  if (period === "week") {
+    return {
+      start: addDays(current.start, -7),
+      end: addDays(current.end, -7),
+      label: "Попередній тиждень"
+    };
+  }
+
+  const previousMonth = current.start.getUTCMonth() - 1;
+  const previousMonthStart = utcDate(current.start.getUTCFullYear(), previousMonth, 1);
+  const elapsed = daysBetween(current.start, current.end);
+  const maxEnd = endOfMonth(previousMonthStart.getUTCFullYear(), previousMonthStart.getUTCMonth());
+  const alignedEnd = addDays(previousMonthStart, elapsed);
+
+  return {
+    start: previousMonthStart,
+    end: alignedEnd > maxEnd ? maxEnd : alignedEnd,
+    label: "Попередній місяць"
+  };
+}
+
+function between(rows: SalesRow[], window: DateWindow): SalesRow[] {
+  const from = iso(window.start);
+  const to = iso(window.end);
   return rows.filter((row) => row.date >= from && row.date <= to);
 }
 
-function monthTotal(rows: SalesRow[], year: number, month: number): number {
+function revenueForDate(rows: SalesRow[], date: Date): number {
+  const value = iso(date);
+  return rows.filter((row) => row.date === value).reduce((sum, row) => sum + row.revenue, 0);
+}
+
+function monthlyRevenue(rows: SalesRow[], year: number, month: number): number {
   const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
-  return rows
-    .filter((row) => row.date.startsWith(prefix))
-    .reduce((sum, row) => sum + row.revenue, 0);
+  return rows.filter((row) => row.date.startsWith(prefix)).reduce((sum, row) => sum + row.revenue, 0);
+}
+
+function buildTrend(
+  rows: SalesRow[],
+  current: DateWindow,
+  previous: DateWindow,
+  period: PeriodMode
+): TrendPoint[] {
+  if (period === "ytd") {
+    const currentYear = current.end.getUTCFullYear();
+    const previousYear = previous.end.getUTCFullYear();
+    return Array.from({ length: current.end.getUTCMonth() + 1 }, (_, month) => ({
+      label: MONTHS_UA[month],
+      current: monthlyRevenue(rows, currentYear, month),
+      previous: monthlyRevenue(rows, previousYear, month)
+    }));
+  }
+
+  const length = daysBetween(current.start, current.end) + 1;
+  return Array.from({ length }, (_, offset) => {
+    const currentDate = addDays(current.start, offset);
+    const previousDate = addDays(previous.start, offset);
+    return {
+      label: period === "week"
+        ? WEEKDAYS_UA[currentDate.getUTCDay()]
+        : String(currentDate.getUTCDate()),
+      current: revenueForDate(rows, currentDate),
+      previous: previousDate <= previous.end ? revenueForDate(rows, previousDate) : 0
+    };
+  });
 }
 
 function channelSummary(rows: SalesRow[]): ChannelSummary[] {
@@ -105,10 +197,7 @@ function channelSummary(rows: SalesRow[]): ChannelSummary[] {
     .sort((a, b) => b.revenue - a.revenue);
 }
 
-function locationSummary(
-  currentRows: SalesRow[],
-  previousRows: SalesRow[]
-): LocationSummary[] {
+function locationSummary(currentRows: SalesRow[], previousRows: SalesRow[]): LocationSummary[] {
   const totalCurrent = currentRows.reduce((sum, row) => sum + row.revenue, 0);
   const current = new Map<string, number>();
   const previous = new Map<string, number>();
@@ -127,20 +216,7 @@ function locationSummary(
     .slice(0, 8);
 }
 
-function buildTrend(
-  rows: SalesRow[],
-  currentYear: number,
-  previousYear: number,
-  cutoffMonth: number
-): TrendPoint[] {
-  return Array.from({ length: cutoffMonth + 1 }, (_, month) => ({
-    month: MONTHS_UA[month],
-    current: monthTotal(rows, currentYear, month),
-    previous: monthTotal(rows, previousYear, month)
-  }));
-}
-
-function signal(current: MetricSet, previous: MetricSet): DashboardSnapshot["signal"] {
+function signal(current: MetricSet, previous: MetricSet, comparisonLabel: string): DashboardSnapshot["signal"] {
   const revenueGrowth = pctDelta(current.revenue, previous.revenue) ?? 0;
   const markupPp = ppDelta(current.markupRate, previous.markupRate) ?? 0;
   const checksGrowth = pctDelta(current.checks, previous.checks) ?? 0;
@@ -150,55 +226,60 @@ function signal(current: MetricSet, previous: MetricSet): DashboardSnapshot["sig
     return {
       severity: "warning",
       title: "Оборот росте швидше за націнку %",
-      body: `Оборот ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}% YoY, але націнка % змінилась на ${markupPp.toFixed(1)} п.п. Варто декомпозувати ефект по каналах і локаціях.`
+      body: `Оборот ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}% vs ${comparisonLabel}, але націнка % змінилась на ${markupPp.toFixed(1)} п.п. Потрібна декомпозиція по каналах і локаціях.`
     };
   }
 
   return {
     severity: "info",
-    title: revenueGrowth >= 0 ? "Позитивна динаміка YTD" : "YTD нижче минулого року",
-    body: `Оборот: ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}% YoY. Чеки: ${checksGrowth >= 0 ? "+" : ""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth >= 0 ? "+" : ""}${aovGrowth.toFixed(1)}%.`
+    title: revenueGrowth >= 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
+    body: `Оборот: ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth >= 0 ? "+" : ""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth >= 0 ? "+" : ""}${aovGrowth.toFixed(1)}% vs ${comparisonLabel}.`
   };
 }
 
-export function buildDashboardSnapshot(rows: SalesRow[]): DashboardSnapshot {
+export function buildDashboardSnapshot(
+  rows: SalesRow[],
+  options: { period?: PeriodMode; comparison?: ComparisonMode } = {}
+): DashboardSnapshot {
   if (rows.length === 0) throw new Error("No valid sales rows");
 
+  const period = options.period ?? "ytd";
+  const comparison = options.comparison ?? "ly";
   const cutoffDate = rows.reduce((max, row) => row.date > max ? row.date : max, rows[0].date);
   const cutoff = new Date(`${cutoffDate}T00:00:00Z`);
-  const currentYear = cutoff.getUTCFullYear();
-  const previousYear = currentYear - 1;
+  const current = currentWindow(cutoff, period);
+  const previous = comparisonWindow(current, period, comparison);
 
-  const currentStart = dateAtUtc(currentYear, 0, 1);
-  const previousStart = dateAtUtc(previousYear, 0, 1);
-  const previousCutoff = dateAtUtc(previousYear, cutoff.getUTCMonth(), cutoff.getUTCDate());
-
-  const currentRows = between(rows, currentStart, cutoff);
-  const previousRows = between(rows, previousStart, previousCutoff);
-
-  const current = metricSet(currentRows);
-  const previous = metricSet(previousRows);
+  const currentRows = between(rows, current);
+  const previousRows = between(rows, previous);
+  const currentMetrics = metricSet(currentRows);
+  const previousMetrics = metricSet(previousRows);
+  const deltaLabel = previous.label;
 
   const kpis: Kpi[] = [
-    kpi("Оборот", formatCompactUah(current.revenue), pctDelta(current.revenue, previous.revenue), "YoY"),
-    kpi("Чеки", Math.round(current.checks).toLocaleString("uk-UA"), pctDelta(current.checks, previous.checks), "YoY"),
-    kpi("Середній чек", `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`, pctDelta(current.averageCheck, previous.averageCheck), "YoY"),
-    kpi("Націнка", formatCompactUah(current.markup), pctDelta(current.markup, previous.markup), "YoY"),
-    kpi("Націнка %", `${current.markupRate.toFixed(1)}%`, ppDelta(current.markupRate, previous.markupRate), "п.п. YoY")
+    kpi("Оборот", formatCompactUah(currentMetrics.revenue), pctDelta(currentMetrics.revenue, previousMetrics.revenue), deltaLabel),
+    kpi("Чеки", Math.round(currentMetrics.checks).toLocaleString("uk-UA"), pctDelta(currentMetrics.checks, previousMetrics.checks), deltaLabel),
+    kpi("Середній чек", `₴ ${Math.round(currentMetrics.averageCheck).toLocaleString("uk-UA")}`, pctDelta(currentMetrics.averageCheck, previousMetrics.averageCheck), deltaLabel),
+    kpi("Націнка", formatCompactUah(currentMetrics.markup), pctDelta(currentMetrics.markup, previousMetrics.markup), deltaLabel),
+    kpi("Націнка %", `${currentMetrics.markupRate.toFixed(1)}%`, ppDelta(currentMetrics.markupRate, previousMetrics.markupRate), `п.п. vs ${deltaLabel}`)
   ];
 
   return {
     sourceRows: rows.length,
     cutoffDate,
-    currentYear,
-    previousYear,
-    current,
-    previous,
+    currentYear: cutoff.getUTCFullYear(),
+    previousYear: previous.end.getUTCFullYear(),
+    period,
+    comparison,
+    periodLabel: current.label,
+    comparisonLabel: previous.label,
+    current: currentMetrics,
+    previous: previousMetrics,
     kpis,
-    trend: buildTrend(rows, currentYear, previousYear, cutoff.getUTCMonth()),
+    trend: buildTrend(rows, current, previous, period),
     channels: channelSummary(currentRows),
     locations: locationSummary(currentRows, previousRows),
-    signal: signal(current, previous)
+    signal: signal(currentMetrics, previousMetrics, previous.label)
   };
 }
 

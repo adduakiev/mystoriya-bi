@@ -13,12 +13,12 @@ import type { TrendPoint } from "@/lib/data/types";
 
 export function RevenueChart({
   data,
-  currentYear,
-  previousYear
+  currentLabel,
+  previousLabel
 }: {
   data: TrendPoint[];
-  currentYear: number;
-  previousYear: number;
+  currentLabel: string;
+  previousLabel: string;
 }) {
   return (
     <div className="chart-wrap">
@@ -31,20 +31,23 @@ export function RevenueChart({
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#222833" vertical={false} />
-          <XAxis dataKey="month" stroke="#77808f" tickLine={false} axisLine={false} />
+          <XAxis dataKey="label" stroke="#77808f" tickLine={false} axisLine={false} />
           <YAxis
             stroke="#77808f"
             tickLine={false}
             axisLine={false}
             width={58}
-            tickFormatter={(value) => `${Math.round(value / 1_000_000)}M`}
+            tickFormatter={(value) => value >= 1_000_000 ? `${Math.round(value / 1_000_000)}M` : `${Math.round(value / 1_000)}K`}
           />
           <Tooltip
-            formatter={(value) => [`₴${Number(value).toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`, "Оборот"]}
+            formatter={(value, name) => [
+              `₴${Number(value).toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`,
+              name === "current" ? currentLabel : previousLabel
+            ]}
             contentStyle={{ background: "#111720", border: "1px solid #29313d", borderRadius: 12 }}
           />
-          <Area name={String(previousYear)} type="monotone" dataKey="previous" stroke="#68717e" fill="transparent" strokeWidth={2} />
-          <Area name={String(currentYear)} type="monotone" dataKey="current" stroke="#f5a623" fill="url(#currentFill)" strokeWidth={3} />
+          <Area name="previous" type="monotone" dataKey="previous" stroke="#68717e" fill="transparent" strokeWidth={2} />
+          <Area name="current" type="monotone" dataKey="current" stroke="#f5a623" fill="url(#currentFill)" strokeWidth={3} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
