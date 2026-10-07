@@ -155,11 +155,18 @@ export default async function LocationsPage({
         deliveryRevenue,
         deliveryShare: total.revenue > 0 ? (deliveryRevenue / total.revenue) * 100 : 0,
         aggregatorRevenue,
-        aggregatorShare: total.revenue > 0 ? (aggregatorRevenue / total.revenue) * 100 : 0
+        aggregatorShare: total.revenue > 0 ? (aggregatorRevenue / total.revenue) * 100 : 0,
+        previousRevenue: prior.revenue,
+        lflEligible: total.revenue > 0 && prior.revenue > 0
       };
     })
     .filter((row) => row.revenue > 0)
     .sort((a, b) => b.revenue - a.revenue);
+
+  const lflRows = locationRows.filter((row) => row.lflEligible);
+  const lflCurrentRevenue = lflRows.reduce((sum, row) => sum + row.revenue, 0);
+  const lflPreviousRevenue = lflRows.reduce((sum, row) => sum + row.previousRevenue, 0);
+  const lflGrowth = pct(lflCurrentRevenue, lflPreviousRevenue);
 
   const chartData = locationRows.map((row) => ({
     location: row.location,
@@ -265,6 +272,26 @@ export default async function LocationsPage({
           <span>vs {selectedYear - 1}</span>
         </div>
 
+        <section className="lfl-strip">
+          <div className="lfl-card">
+            <span>Зіставні точки</span>
+            <strong>{lflRows.length}</strong>
+            <small>є продажі в обох періодах</small>
+          </div>
+          <div className="lfl-card">
+            <span>LFL оборот</span>
+            <strong>{formatUah(lflCurrentRevenue)}</strong>
+            <small>тільки зіставні точки</small>
+          </div>
+          <div className="lfl-card">
+            <span>LFL YoY</span>
+            <strong className={lflGrowth === null ? "" : lflGrowth >= 0 ? "positive" : "negative"}>
+              {pctLabel(lflGrowth)}
+            </strong>
+            <small>vs {selectedYear - 1}</small>
+          </div>
+        </section>
+
         <section className="kpi-grid">
           {snapshot.kpis.map((item) => <KpiCard key={item.label} kpi={item} />)}
         </section>
@@ -308,6 +335,7 @@ export default async function LocationsPage({
                 <span>Доставка %</span>
                 <span>Агрегатор Т/О</span>
                 <span>Агрегатор %</span>
+                <span>LFL</span>
               </div>
 
               {locationRows.map((row) => (
@@ -336,6 +364,7 @@ export default async function LocationsPage({
                   <span>{row.deliveryShare.toFixed(1)}%</span>
                   <span>{formatUah(row.aggregatorRevenue)}</span>
                   <span>{row.aggregatorShare.toFixed(1)}%</span>
+                  <span className={row.lflEligible ? "lfl-yes" : "lfl-no"}>{row.lflEligible ? "Так" : "Ні"}</span>
                 </Link>
               ))}
             </div>
