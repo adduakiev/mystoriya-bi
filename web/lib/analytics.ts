@@ -389,3 +389,88 @@ export function availableMonths(rows: SalesRow[], year: number): number[] {
 export function formatUah(value: number): string {
   return `₴${Math.round(value).toLocaleString("uk-UA")}`;
 }
+
+
+export type DashboardMetricMode = "revenue" | "checks" | "averageCheck" | "markupRate";
+
+function metricValue(rows: SalesRow[], metric: DashboardMetricMode): number {
+  const metrics = metricSet(rows);
+  if (metric === "checks") return metrics.checks;
+  if (metric === "averageCheck") return metrics.averageCheck;
+  if (metric === "markupRate") return metrics.markupRate;
+  return metrics.revenue;
+}
+
+export function buildMultiYearMetricSeries(
+  rows: SalesRow[],
+  years: number[],
+  metric: DashboardMetricMode,
+  focusMonth?: number
+): Array<Record<string, string | number>> {
+  if (rows.length === 0) return [];
+
+  const sourceCutoff = maxDate(rows);
+  const cutoffYear = sourceCutoff.getUTCFullYear();
+  const cutoffMonth = sourceCutoff.getUTCMonth() + 1;
+  const cutoffDay = sourceCutoff.getUTCDate();
+
+  if (focusMonth) {
+    const days = endOfMonth(cutoffYear, focusMonth - 1).getUTCDate();
+    const maxDay = focusMonth === cutoffMonth ? cutoffDay : days;
+
+    return Array.from({ length: maxDay }, (_, index) => {
+      const day = index + 1;
+      const point: Record<string, string | number> = { label: String(day) };
+
+      years.forEach((year) => {
+        const subset = rows.filter((row) => {
+          const rowYear = Number(row.date.slice(0, 4));
+          const rowMonth = Number(row.date.slice(5, 7));
+          const rowDay = Number(row.date.slice(8, 10));
+          return rowYear === year && rowMonth === focusMonth && rowDay === day;
+        });
+        point[String(year)] = metricValue(subset, metric);
+      });
+
+      return point;
+    });
+  }
+
+  return Array.from({ length: 12 }, (_, index) => {
+    const month = index + 1;
+    const point: Record<string, string | number> = { label: MONTHS_UA[index] };
+    const alignedDay = month === cutoffMonth ? cutoffDay : undefined;
+
+    years.forEach((year) => {
+      const subset = monthRows(rows, year, month, alignedDay);
+      point[String(year)] = metricValue(subset, metric);
+    });
+
+    return point;
+  });
+}
+
+export function buildChannelMixSeries(
+  rows: SalesRow[],
+  year: number,
+  cutoffDate: string
+): Array<{ label: string; venue: number; aggregator: number; delivery: number }> {
+  const cutoff = new Date(`${cutoffDate}T00:00:00Z`);
+  const maxMonth = cutoff.getUTCFullYear() === year ? cutoff.getUTCMonth() + 1 : 12;
+
+  return Array.from({ length: maxMonth }, (_, index) => {
+    const month = index + 1;
+    const partialDay =
+      cutoff.getUTCFullYear() === year && month === cutoff.getUTCMonth() + 1
+        ? cutoff.getUTCDate()
+        : undefined;
+    const subset = monthRows(rows, year, month, partialDay);
+
+    return {
+      label: MONTHS_UA[index],
+      venue: channelShare(subset, "Заклад"),
+      aggregator: channelShare(subset, "Агрегатор"),
+      delivery: channelShare(subset, "Доставка")
+    };
+  });
+}
