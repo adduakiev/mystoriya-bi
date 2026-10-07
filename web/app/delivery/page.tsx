@@ -10,6 +10,7 @@ import {
   Truck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { DeliveryVsAggregatorChart } from "@/components/DeliveryVsAggregatorChart";
@@ -291,13 +292,7 @@ export default async function DeliveryPage({
   return (
     <main className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <b>М'ЯСТОРІЯ</b>
-            <span>CONTROL CENTER</span>
-          </div>
-        </div>
+        <SidebarBrand />
 
         <nav>
           {nav.map(([label, Icon, href]) =>

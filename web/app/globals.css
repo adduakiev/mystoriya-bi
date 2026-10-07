@@ -18,6 +18,7 @@ button { font: inherit; color: inherit; }
 .sidebar { position: sticky; top: 0; height: 100vh; padding: 24px 18px; border-right: 1px solid var(--border); background: #0b1016; display: flex; flex-direction: column; }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 28px; }
 .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #604619; background: #221a0d; color: var(--accent); border-radius: 9px; font-weight: 900; }
+.brand-logo { width: 38px; height: 38px; display: block; object-fit: contain; flex: 0 0 38px; }
 .brand b { display: block; letter-spacing: .06em; font-size: 14px; }
 .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; letter-spacing: .18em; }
 nav { display: grid; gap: 4px; }

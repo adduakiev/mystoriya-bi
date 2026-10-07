@@ -10,6 +10,7 @@ import {
   Truck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import {
   availableYears,
@@ -169,13 +170,7 @@ export default async function DynamicsPage({
   return (
     <main className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <b>М'ЯСТОРІЯ</b>
-            <span>CONTROL CENTER</span>
-          </div>
-        </div>
+        <SidebarBrand />
 
         <nav>
           {nav.map(([label, Icon, href]) =>
