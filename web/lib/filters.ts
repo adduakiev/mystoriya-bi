@@ -1,5 +1,7 @@
 import type { ComparisonMode, PeriodMode, SalesRow } from "@/lib/data/types";
 
+export type MetricMode = "revenue" | "checks" | "averageCheck" | "markupRate";
+
 export type DashboardFilters = {
   channel?: string;
   orderType?: string;
@@ -10,6 +12,7 @@ export type DashboardFilters = {
   month?: number;
   period?: PeriodMode;
   compare?: ComparisonMode;
+  metric?: MetricMode;
 };
 
 export function filterSalesRows(rows: SalesRow[], filters: DashboardFilters): SalesRow[] {
@@ -39,6 +42,7 @@ export function queryHref(
   if (next.month) params.set("month", String(next.month));
   if (next.period && next.period !== "ytd") params.set("period", next.period);
   if (next.compare && next.compare !== "ly") params.set("compare", next.compare);
+  if (next.metric && next.metric !== "revenue") params.set("metric", next.metric);
 
   const query = params.toString();
   return query ? `/?${query}` : "/";
