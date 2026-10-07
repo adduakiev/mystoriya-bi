@@ -11,15 +11,18 @@ import {
   X
 } from "lucide-react";
 import { KpiCard } from "@/components/KpiCard";
-import { RevenueChart } from "@/components/RevenueChart";
+import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
+import { ChannelMixChart } from "@/components/ChannelMixChart";
 import {
   availableMonths,
   availableYears,
   buildDashboardSnapshot,
+  buildMultiYearMetricSeries,
+  buildChannelMixSeries,
   formatUah
 } from "@/lib/analytics";
 import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows, queryHref, type DashboardFilters } from "@/lib/filters";
+import { filterSalesRows, queryHref, type DashboardFilters, type MetricMode } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const MONTHS = [
@@ -31,7 +34,7 @@ const nav = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, null],
   ["Агрегатори", Network, "/aggregators"],
-  ["Локації", MapPin, null],
+  ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, null],
   ["Data Explorer", PackageSearch, null],
   ["Insights", Sparkles, null]
@@ -56,6 +59,10 @@ function parsePeriod(value: string | undefined): PeriodMode {
 
 function parseCompare(value: string | undefined): ComparisonMode {
   return value === "previous" ? "previous" : "ly";
+}
+
+function parseMetric(value: string | undefined): MetricMode {
+  return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -83,6 +90,7 @@ export default async function Home({
   const availableMonthNumbers = availableMonths(sourceRows, selectedYear);
   const period = selectedMonth ? "month" : parsePeriod(first(params.period));
   const compare = parseCompare(first(params.compare));
+  const metric = parseMetric(first(params.metric));
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -93,10 +101,16 @@ export default async function Home({
     year: selectedYear,
     month: selectedMonth,
     period,
-    compare
+    compare,
+    metric
   };
 
   const rows = filterSalesRows(sourceRows, filters);
+  const channelMixRows = filterSalesRows(sourceRows, {
+    location: filters.location,
+    brand: filters.brand,
+    ownership: filters.ownership
+  });
   const snapshot = buildDashboardSnapshot(rows, {
     period,
     comparison: compare,
@@ -120,6 +134,15 @@ export default async function Home({
     filters.brand,
     filters.ownership
   ].filter(Boolean).length;
+
+  const multiYearData = buildMultiYearMetricSeries(rows, years, metric, selectedMonth);
+  const channelMixData = buildChannelMixSeries(channelMixRows, selectedYear, snapshot.cutoffDate);
+  const metricLabels: Record<MetricMode, string> = {
+    revenue: "Оборот",
+    checks: "Чеки",
+    averageCheck: "Середній чек",
+    markupRate: "Націнка %"
+  };
 
   const latestSourceDate = sourceRows.reduce((max, row) => row.date > max ? row.date : max, sourceRows[0].date);
   const latestMonth = Number(latestSourceDate.slice(5, 7));
@@ -331,20 +354,32 @@ export default async function Home({
 
         <section className="content-grid">
           <article className="panel revenue-panel">
-            <div className="panel-head">
+            <div className="panel-head metric-panel-head">
               <div>
-                <span className="eyebrow">DYNAMICS · {snapshot.periodLabel.toUpperCase()}</span>
-                <h2>Оборот</h2>
+                <span className="eyebrow">MULTI-YEAR DYNAMICS · 2024–2026</span>
+                <h2>{metricLabels[metric]}</h2>
               </div>
-              <div className="legend">
-                <span><i className="legend-current" />{snapshot.periodLabel}</span>
-                <span><i />{snapshot.comparisonLabel}</span>
+              <div className="metric-switcher">
+                {([
+                  ["revenue", "Оборот"],
+                  ["checks", "Чеки"],
+                  ["averageCheck", "Ср. чек"],
+                  ["markupRate", "Націнка %"]
+                ] as const).map(([value, label]) => (
+                  <Link
+                    key={value}
+                    className={metric === value ? "metric-pill active" : "metric-pill"}
+                    href={queryHref(filters, { metric: value })}
+                  >
+                    {label}
+                  </Link>
+                ))}
               </div>
             </div>
-            <RevenueChart
-              data={snapshot.trend}
-              currentLabel={snapshot.periodLabel}
-              previousLabel={snapshot.comparisonLabel}
+            <MultiYearMetricChart
+              data={multiYearData}
+              years={years}
+              metric={metric}
             />
           </article>
 
@@ -375,6 +410,17 @@ export default async function Home({
               ))}
             </div>
           </article>
+        </section>
+
+        <section className="panel channel-mix-panel">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">CHANNEL MIX · ${selectedYear}</span>
+              <h2>Як змінюється структура продажів</h2>
+            </div>
+            <span className="text-button">100% · Заклад / Агрегатор / Доставка</span>
+          </div>
+          <ChannelMixChart data={channelMixData} />
         </section>
 
         {!selectedMonth && period === "ytd" && (
