@@ -18,7 +18,7 @@ const nav = [
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, null],
   ["Агрегатори", Network, "/aggregators"],
-  ["Локації", MapPin, null],
+  ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, null],
   ["Data Explorer", PackageSearch, null],
   ["Insights", Sparkles, null]
