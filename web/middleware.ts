@@ -14,7 +14,6 @@ export async function middleware(request: NextRequest) {
 
   if (!configuredPassword) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("error", "config");
     return NextResponse.redirect(loginUrl);
   }
 
