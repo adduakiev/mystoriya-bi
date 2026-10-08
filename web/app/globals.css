@@ -348,3 +348,14 @@ html.is-navigating, html.is-navigating body, html.is-navigating a, html.is-navig
 @media (max-width: 720px) {
   .navigation-pill { right: 10px; top: 10px; }
 }
+
+.brand-stack { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.brand-stack .brand-official { width: 100%; }
+.data-health { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 9px; border: 1px solid #25303b; border-radius: 10px; background: rgba(255,255,255,.018); }
+.data-health-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; background: #69737f; box-shadow: 0 0 0 3px rgba(105,115,127,.10); }
+.data-health.ok .data-health-dot { background: #4fd18b; box-shadow: 0 0 0 3px rgba(79,209,139,.10); }
+.data-health.fallback .data-health-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(245,166,35,.10); }
+.data-health b { display: block; color: #dce3eb; font-size: 10px; line-height: 1.25; font-weight: 760; }
+.data-health span:not(.data-health-dot) { display: block; margin-top: 2px; color: #687483; font-size: 8px; line-height: 1.3; letter-spacing: .04em; }
+.logout-button { display: inline-flex; align-items: center; gap: 6px; border: 0; padding: 3px 0; background: transparent; color: #667281; font: inherit; font-size: 9px; cursor: pointer; transition: color .14s ease; }
+.logout-button:hover { color: #d9e0e8; }
