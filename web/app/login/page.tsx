@@ -4,6 +4,8 @@ export const metadata: Metadata = {
   title: "Вхід"
 };
 
+export const dynamic = "force-dynamic";
+
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -16,6 +18,7 @@ export default async function LoginPage({
   const params = (await searchParams) ?? {};
   const error = first(params.error);
   const nextPath = first(params.next) ?? "/";
+  const passwordConfigured = Boolean(process.env.BI_ACCESS_PASSWORD);
 
   return (
     <main
@@ -115,7 +118,7 @@ export default async function LoginPage({
             </div>
           )}
 
-          {error === "config" && (
+          {!passwordConfigured && (
             <div
               style={{
                 marginTop: "10px",
