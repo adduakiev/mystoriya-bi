@@ -4,6 +4,10 @@ import type { SalesRow } from "./types";
 const DEFAULT_SPREADSHEET_ID = "1g8NbVYEunt55lB-0E1OLQmNkeEQbF9y73n9kH3d3xbA";
 const DEFAULT_SHEET_NAME = "Данние короткі";
 
+const BI_SUPABASE_URL = "https://rxewpevxqtfmksybykvo.supabase.co";
+const BI_SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXdwZXZ4cXRmbWtzeWJ5a3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNzMwODksImV4cCI6MjEwNjk0OTA4OX0.T9tfpmwYxsy_3KdaVw23NLGy01NlQG7cMOUBkHMJc3k";
+
 const LOCATION_MAPPING: Record<string, string> = {
   "Ахматова NEW": "Ахматова",
   "Европарк NEW": "Європарк",
@@ -13,6 +17,43 @@ const LOCATION_MAPPING: Record<string, string> = {
   "Парк Авеню NEW": "Парк Авеню",
   "София new": "Софія",
   "Софія (NEW)": "Софія"
+};
+
+export type SalesDataStatus = {
+  source: "supabase" | "google-sheets";
+  cutoffDate: string | null;
+  lastSuccessfulSync: string | null;
+  warehouseRows: number | null;
+  monthlyAggregateRows: number | null;
+  weeklyAggregateRows: number | null;
+  status: "success" | "fallback";
+};
+
+type SalesDataset = {
+  rows: SalesRow[];
+  status: SalesDataStatus;
+};
+
+type SupabaseSnapshotPayload = {
+  source?: string;
+  meta?: {
+    cutoffDate?: string | null;
+    lastSuccessfulSync?: string | null;
+    warehouseRows?: number | string | null;
+    monthlyAggregateRows?: number | string | null;
+    weeklyAggregateRows?: number | string | null;
+  };
+  rows?: unknown[];
+};
+
+type SupabaseStatusPayload = {
+  source?: string;
+  cutoffDate?: string | null;
+  lastSuccessfulSync?: string | null;
+  warehouseRows?: number | string | null;
+  monthlyAggregateRows?: number | string | null;
+  weeklyAggregateRows?: number | string | null;
+  status?: string;
 };
 
 function parseCsv(text: string): string[][] {
@@ -72,6 +113,17 @@ function parseNumber(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function toNumber(value: unknown): number {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function toNullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function excelSerialToDate(serial: number): Date {
   const excelEpoch = Date.UTC(1899, 11, 30);
   return new Date(excelEpoch + serial * 86_400_000);
@@ -108,15 +160,11 @@ function parseSourceDate(value: string): Date | null {
     return utcDateStrict(Number(iso[1]), Number(iso[2]), Number(iso[3]));
   }
 
-  // Google gviz returns older source dates in US M/D/YYYY format.
-  // Example observed in the source: 1/18/2025.
   const mdy = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\D|$)/);
   if (mdy) {
     return utcDateStrict(Number(mdy[3]), Number(mdy[1]), Number(mdy[2]));
   }
 
-  // Newer source rows are rendered in D.M.YYYY format.
-  // Example observed in the source: 04.11.2025.
   const dmy = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\D|$)/);
   if (dmy) {
     return utcDateStrict(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]));
@@ -133,7 +181,100 @@ function isGarbage(value: string): boolean {
   return /#REF!|#N\/A|^None$|^nan$/i.test(value.trim());
 }
 
-async function fetchAndNormalizeSalesData(): Promise<SalesRow[]> {
+function supabaseHeaders(): HeadersInit {
+  return {
+    apikey: BI_SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${BI_SUPABASE_ANON_KEY}`,
+    "Content-Type": "application/json",
+    Accept: "application/json"
+  };
+}
+
+function unwrapRpcPayload<T>(raw: unknown, functionName: string): T {
+  if (
+    Array.isArray(raw) &&
+    raw.length === 1 &&
+    raw[0] &&
+    typeof raw[0] === "object" &&
+    functionName in (raw[0] as Record<string, unknown>)
+  ) {
+    return (raw[0] as Record<string, unknown>)[functionName] as T;
+  }
+
+  return raw as T;
+}
+
+function mapSupabaseRows(rawRows: unknown[]): SalesRow[] {
+  const rows: SalesRow[] = [];
+
+  for (const raw of rawRows) {
+    if (!Array.isArray(raw) || raw.length < 9) continue;
+
+    const [date, location, brand, ownership, channelGroup, orderType, revenue, checks, markup] = raw;
+
+    if (
+      typeof date !== "string" ||
+      typeof location !== "string" ||
+      typeof brand !== "string" ||
+      typeof ownership !== "string" ||
+      typeof channelGroup !== "string" ||
+      typeof orderType !== "string"
+    ) {
+      continue;
+    }
+
+    rows.push({
+      date,
+      location,
+      brand,
+      ownership,
+      channelGroup,
+      orderType,
+      revenue: toNumber(revenue),
+      checks: toNumber(checks),
+      markup: toNumber(markup)
+    });
+  }
+
+  return rows;
+}
+
+async function fetchSupabaseDataset(password: string): Promise<SalesDataset> {
+  const response = await fetch(`${BI_SUPABASE_URL}/rest/v1/rpc/bi_sales_snapshot`, {
+    method: "POST",
+    headers: supabaseHeaders(),
+    body: JSON.stringify({ p_password: password }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(20_000)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase snapshot returned ${response.status}`);
+  }
+
+  const raw = await response.json();
+  const payload = unwrapRpcPayload<SupabaseSnapshotPayload>(raw, "bi_sales_snapshot");
+  const rows = mapSupabaseRows(Array.isArray(payload.rows) ? payload.rows : []);
+
+  if (rows.length === 0) {
+    throw new Error("Supabase snapshot returned no sales rows");
+  }
+
+  return {
+    rows,
+    status: {
+      source: "supabase",
+      cutoffDate: payload.meta?.cutoffDate ?? null,
+      lastSuccessfulSync: payload.meta?.lastSuccessfulSync ?? null,
+      warehouseRows: toNullableNumber(payload.meta?.warehouseRows),
+      monthlyAggregateRows: toNullableNumber(payload.meta?.monthlyAggregateRows),
+      weeklyAggregateRows: toNullableNumber(payload.meta?.weeklyAggregateRows),
+      status: "success"
+    }
+  };
+}
+
+async function fetchGoogleSheetRows(): Promise<SalesRow[]> {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID ?? DEFAULT_SPREADSHEET_ID;
   const sheetName = process.env.GOOGLE_SHEET_NAME ?? DEFAULT_SHEET_NAME;
 
@@ -142,7 +283,8 @@ async function fetchAndNormalizeSalesData(): Promise<SalesRow[]> {
 
   const response = await fetch(url, {
     cache: "no-store",
-    headers: { "User-Agent": "myastoriya-bi-v2" }
+    headers: { "User-Agent": "myastoriya-bi-v2" },
+    signal: AbortSignal.timeout(20_000)
   });
 
   if (!response.ok) {
@@ -152,8 +294,6 @@ async function fetchAndNormalizeSalesData(): Promise<SalesRow[]> {
   const matrix = parseCsv(await response.text());
   if (matrix.length < 2) return [];
 
-  // Map by position, not duplicate source header names.
-  // The Sheet currently contains two columns named "Рік".
   return matrix
     .slice(1)
     .map((row): SalesRow | null => {
@@ -187,16 +327,102 @@ async function fetchAndNormalizeSalesData(): Promise<SalesRow[]> {
     .filter((row): row is SalesRow => row !== null);
 }
 
+function cutoffFromRows(rows: SalesRow[]): string | null {
+  return rows.reduce<string | null>(
+    (max, row) => (max === null || row.date > max ? row.date : max),
+    null
+  );
+}
 
-const getCachedSalesData = unstable_cache(
-  fetchAndNormalizeSalesData,
-  ["myastoriya-sales-data-normalized-v1"],
+async function fetchSalesDataset(): Promise<SalesDataset> {
+  const password = process.env.BI_ACCESS_PASSWORD;
+
+  if (password) {
+    try {
+      return await fetchSupabaseDataset(password);
+    } catch (error) {
+      console.error("Supabase BI snapshot failed; falling back to Google Sheets.", error);
+    }
+  }
+
+  const rows = await fetchGoogleSheetRows();
+
+  return {
+    rows,
+    status: {
+      source: "google-sheets",
+      cutoffDate: cutoffFromRows(rows),
+      lastSuccessfulSync: null,
+      warehouseRows: null,
+      monthlyAggregateRows: null,
+      weeklyAggregateRows: null,
+      status: "fallback"
+    }
+  };
+}
+
+async function fetchSupabaseStatus(password: string): Promise<SalesDataStatus> {
+  const response = await fetch(`${BI_SUPABASE_URL}/rest/v1/rpc/bi_sync_status`, {
+    method: "POST",
+    headers: supabaseHeaders(),
+    body: JSON.stringify({ p_password: password }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(8_000)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase status returned ${response.status}`);
+  }
+
+  const raw = await response.json();
+  const payload = unwrapRpcPayload<SupabaseStatusPayload>(raw, "bi_sync_status");
+
+  return {
+    source: "supabase",
+    cutoffDate: payload.cutoffDate ?? null,
+    lastSuccessfulSync: payload.lastSuccessfulSync ?? null,
+    warehouseRows: toNullableNumber(payload.warehouseRows),
+    monthlyAggregateRows: toNullableNumber(payload.monthlyAggregateRows),
+    weeklyAggregateRows: toNullableNumber(payload.weeklyAggregateRows),
+    status: "success"
+  };
+}
+
+const getCachedSalesDataset = unstable_cache(
+  fetchSalesDataset,
+  ["myastoriya-sales-dataset-v2"],
   {
     revalidate: 600,
     tags: ["sales-data"]
   }
 );
 
+const getCachedSalesStatus = unstable_cache(
+  async (): Promise<SalesDataStatus> => {
+    const password = process.env.BI_ACCESS_PASSWORD;
+
+    if (password) {
+      try {
+        return await fetchSupabaseStatus(password);
+      } catch (error) {
+        console.error("Supabase BI status failed.", error);
+      }
+    }
+
+    const dataset = await getCachedSalesDataset();
+    return dataset.status;
+  },
+  ["myastoriya-sales-status-v1"],
+  {
+    revalidate: 60,
+    tags: ["sales-data-status"]
+  }
+);
+
 export async function loadSalesData(): Promise<SalesRow[]> {
-  return getCachedSalesData();
+  return (await getCachedSalesDataset()).rows;
+}
+
+export async function loadSalesDataStatus(): Promise<SalesDataStatus> {
+  return getCachedSalesStatus();
 }
