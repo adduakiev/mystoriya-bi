@@ -12,13 +12,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
-import {
-  availableYears,
-  buildMultiYearMetricSeries,
-  buildMultiYearWeeklyMetricSeries
-} from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows, type GrainMode, type MetricMode } from "@/lib/filters";
+import { loadDynamicsData } from "@/lib/data/dynamics";
+import { type GrainMode, type MetricMode } from "@/lib/filters";
 
 const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
@@ -110,7 +105,6 @@ export default async function DynamicsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
 
   const metric = parseMetric(first(params.metric));
   const grain = parseGrain(first(params.grain));
@@ -122,51 +116,34 @@ export default async function DynamicsPage({
   const lfl = first(params.lfl) === "1";
 
   const state = { metric, grain, channel, orderType, location, brand, ownership, lfl };
-  const rows = filterSalesRows(sourceRows, { channel, orderType, location, brand, ownership, lfl });
-  const years = availableYears(rows);
-  const data = grain === "week"
-    ? buildMultiYearWeeklyMetricSeries(rows, years, metric)
-    : buildMultiYearMetricSeries(rows, years, metric);
+  const result = await loadDynamicsData({
+    metric,
+    grain,
+    channel,
+    orderType,
+    location,
+    brand,
+    ownership,
+    lfl
+  });
 
-  const channels = [...new Set(sourceRows.map((row) => row.channelGroup))].sort((a, b) => a.localeCompare(b, "uk"));
-  const orderTypes = [...new Set(
-    sourceRows
-      .filter((row) => !channel || row.channelGroup === channel)
-      .map((row) => row.orderType)
-  )].sort((a, b) => a.localeCompare(b, "uk"));
-  const dimensionRows = filterSalesRows(sourceRows, { lfl });
-  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
+  const {
+    rowCount,
+    years,
+    series: data,
+    channels,
+    orderTypes,
+    locations,
+    brands,
+    ownerships,
+    latestYear,
+    previousYear,
+    latestYearTotal,
+    previousYearTotal,
+    totalGrowth
+  } = result;
 
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
-  const latestYear = years[years.length - 1];
-  const previousYear = years.length > 1 ? years[years.length - 2] : undefined;
-  const latestSourceDate = rows.reduce((max, row) => row.date > max ? row.date : max, rows[0]?.date ?? "");
-  const cutoffMonthDay = latestSourceDate.slice(4);
-
-  const aggregateMetricForYear = (year: number): number => {
-    const yearRows = rows.filter((row) => {
-      const rowYear = Number(row.date.slice(0, 4));
-      if (rowYear !== year) return false;
-      if (year === latestYear) return row.date <= latestSourceDate;
-      return row.date.slice(4) <= cutoffMonthDay;
-    });
-
-    const revenue = yearRows.reduce((sum, row) => sum + row.revenue, 0);
-    const checks = yearRows.reduce((sum, row) => sum + row.checks, 0);
-    const markup = yearRows.reduce((sum, row) => sum + row.markup, 0);
-
-    if (metric === "checks") return checks;
-    if (metric === "averageCheck") return checks > 0 ? revenue / checks : 0;
-    if (metric === "markupRate") return revenue > 0 ? (markup / revenue) * 100 : 0;
-    return revenue;
-  };
-
-  const latestYearTotal = aggregateMetricForYear(latestYear);
-  const previousYearTotal = previousYear ? aggregateMetricForYear(previousYear) : 0;
-  const totalGrowth = previousYear ? pct(latestYearTotal, previousYearTotal) : null;
-
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -195,7 +172,7 @@ export default async function DynamicsPage({
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>{rows.length.toLocaleString("uk-UA")} рядків у зрізі</small>
+          <small>{rowCount.toLocaleString("uk-UA")} рядків у зрізі</small>
         </div>
       </aside>
 
