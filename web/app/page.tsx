@@ -15,18 +15,9 @@ import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { ChannelMixChart } from "@/components/ChannelMixChart";
-import {
-  availableMonths,
-  availableYears,
-  buildDashboardSnapshot,
-  buildMultiYearMetricSeries,
-  buildMultiYearWeeklyMetricSeries,
-  buildChannelMixSeries,
-  buildGrowthDrivers,
-  formatUah
-} from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows, queryHref, type DashboardFilters, type MetricMode, type GrainMode } from "@/lib/filters";
+import { formatUah } from "@/lib/analytics";
+import { loadOverviewData } from "@/lib/data/overview";
+import { queryHref, type DashboardFilters, type MetricMode, type GrainMode } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const MONTHS = [
@@ -90,17 +81,45 @@ export default async function Home({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
-  const years = availableYears(sourceRows);
-  const latestYear = years[years.length - 1];
-  const selectedYear = parsePositiveInt(first(params.year)) ?? latestYear;
+  const requestedYear = parsePositiveInt(first(params.year));
   const selectedMonth = parsePositiveInt(first(params.month));
-  const availableMonthNumbers = availableMonths(sourceRows, selectedYear);
   const period = selectedMonth ? "month" : parsePeriod(first(params.period));
   const compare = parseCompare(first(params.compare));
   const metric = parseMetric(first(params.metric));
   const grain = selectedMonth ? "month" : parseGrain(first(params.grain));
   const lfl = first(params.lfl) === "1";
+
+  const overview = await loadOverviewData({
+    channel: first(params.channel),
+    orderType: first(params.orderType),
+    location: first(params.location),
+    brand: first(params.brand),
+    ownership: first(params.ownership),
+    year: requestedYear,
+    month: selectedMonth,
+    period,
+    compare,
+    metric,
+    grain,
+    lfl
+  });
+
+  const {
+    sourceRowCount,
+    filteredRowCount,
+    years,
+    selectedYear,
+    availableMonthNumbers,
+    brands,
+    ownerships,
+    locations,
+    orderTypes,
+    latestSourceDate,
+    snapshot,
+    multiYearData,
+    channelMixData,
+    growthDrivers
+  } = overview;
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -117,30 +136,6 @@ export default async function Home({
     lfl
   };
 
-  const rows = filterSalesRows(sourceRows, filters);
-  const channelMixRows = filterSalesRows(sourceRows, {
-    location: filters.location,
-    brand: filters.brand,
-    ownership: filters.ownership,
-    lfl
-  });
-  const snapshot = buildDashboardSnapshot(rows, {
-    period,
-    comparison: compare,
-    focusYear: selectedYear,
-    focusMonth: selectedMonth
-  });
-
-  const dimensionRows = filterSalesRows(sourceRows, { lfl });
-  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
-  const orderTypes = [...new Set(
-    sourceRows
-      .filter((row) => !filters.channel || row.channelGroup === filters.channel)
-      .map((row) => row.orderType)
-  )].sort((a, b) => a.localeCompare(b, "uk"));
-
   const activeDimensionFilters = [
     filters.channel,
     filters.orderType,
@@ -150,16 +145,6 @@ export default async function Home({
     filters.lfl
   ].filter(Boolean).length;
 
-  const multiYearData = grain === "week" && !selectedMonth
-    ? buildMultiYearWeeklyMetricSeries(rows, years, metric)
-    : buildMultiYearMetricSeries(rows, years, metric, selectedMonth);
-  const channelMixData = buildChannelMixSeries(channelMixRows, selectedYear, snapshot.cutoffDate);
-  const growthDrivers = buildGrowthDrivers(rows, {
-    period,
-    comparison: compare,
-    focusYear: selectedYear,
-    focusMonth: selectedMonth
-  });
   const metricLabels: Record<MetricMode, string> = {
     revenue: "Оборот",
     checks: "Чеки",
@@ -167,7 +152,6 @@ export default async function Home({
     markupRate: "Націнка %"
   };
 
-  const latestSourceDate = sourceRows.reduce((max, row) => row.date > max ? row.date : max, sourceRows[0].date);
   const latestMonth = Number(latestSourceDate.slice(5, 7));
   const latestSourceYear = Number(latestSourceDate.slice(0, 4));
 
@@ -195,7 +179,7 @@ export default async function Home({
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>{rows.length.toLocaleString("uk-UA")} / {sourceRows.length.toLocaleString("uk-UA")} rows</small>
+          <small>{filteredRowCount.toLocaleString("uk-UA")} / {sourceRowCount.toLocaleString("uk-UA")} rows</small>
         </div>
       </aside>
 
