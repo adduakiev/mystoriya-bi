@@ -12,10 +12,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { ExplorerComparisonChart } from "@/components/ExplorerComparisonChart";
 import { SidebarBrand } from "@/components/SidebarBrand";
-import { availableMonths, availableYears, formatUah } from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows } from "@/lib/filters";
-import type { SalesRow } from "@/lib/data/types";
+import { formatUah } from "@/lib/analytics";
+import { loadExplorerData } from "@/lib/data/explorer";
 
 type DimensionMode = "location" | "channel" | "orderType" | "brand" | "ownership";
 type ExplorerMetric = "revenue" | "checks" | "averageCheck" | "markup" | "markupRate";
@@ -84,106 +82,11 @@ function parseSort(value: string | undefined): SortMode {
   return value === "growth" || value === "share" || value === "name" ? value : "current";
 }
 
-function metricSet(rows: SalesRow[]) {
-  const revenue = rows.reduce((sum, row) => sum + row.revenue, 0);
-  const checks = rows.reduce((sum, row) => sum + row.checks, 0);
-  const markup = rows.reduce((sum, row) => sum + row.markup, 0);
-
-  return {
-    revenue,
-    checks,
-    markup,
-    averageCheck: checks > 0 ? revenue / checks : 0,
-    markupRate: revenue > 0 ? (markup / revenue) * 100 : 0
-  };
-}
-
-function metricValue(
-  metrics: ReturnType<typeof metricSet>,
-  metric: ExplorerMetric
-): number {
-  if (metric === "checks") return metrics.checks;
-  if (metric === "averageCheck") return metrics.averageCheck;
-  if (metric === "markup") return metrics.markup;
-  if (metric === "markupRate") return metrics.markupRate;
-  return metrics.revenue;
-}
-
-function pct(current: number, previous: number): number | null {
-  if (previous === 0) return null;
-  return ((current / previous) - 1) * 100;
-}
-
-function dimensionValue(row: SalesRow, dimension: DimensionMode): string {
-  if (dimension === "channel") return row.channelGroup;
-  if (dimension === "orderType") return row.orderType;
-  if (dimension === "brand") return row.brand;
-  if (dimension === "ownership") return row.ownership;
-  return row.location;
-}
-
-function currentPeriodRows(
-  rows: SalesRow[],
-  year: number,
-  month: number | undefined,
-  cutoffDate: string
-): SalesRow[] {
-  const cutoffMonth = Number(cutoffDate.slice(5, 7));
-  const cutoffDay = Number(cutoffDate.slice(8, 10));
-
-  return rows.filter((row) => {
-    const rowYear = Number(row.date.slice(0, 4));
-    const rowMonth = Number(row.date.slice(5, 7));
-    const rowDay = Number(row.date.slice(8, 10));
-
-    if (rowYear !== year) return false;
-    if (month) return rowMonth === month && rowDay <= cutoffDay;
-    if (rowMonth < cutoffMonth) return true;
-    return rowMonth === cutoffMonth && rowDay <= cutoffDay;
-  });
-}
-
-function resolveCutoff(rows: SalesRow[], year: number, month?: number): string {
-  const candidates = rows
-    .filter((row) => {
-      const rowYear = Number(row.date.slice(0, 4));
-      const rowMonth = Number(row.date.slice(5, 7));
-      return rowYear === year && (!month || rowMonth === month);
-    })
-    .map((row) => row.date)
-    .sort();
-
-  if (candidates.length > 0) return candidates[candidates.length - 1];
-
-  const fallback = rows.map((row) => row.date).sort();
-  return fallback[fallback.length - 1];
-}
-
 function formatMetric(value: number, metric: ExplorerMetric): string {
   if (metric === "markupRate") return `${value.toFixed(1)}%`;
   if (metric === "checks") return Math.round(value).toLocaleString("uk-UA");
   if (metric === "averageCheck") return formatUah(value);
   return formatUah(value);
-}
-
-function formatGrowth(
-  current: number,
-  previous: number,
-  metric: ExplorerMetric
-): { value: number | null; label: string } {
-  if (metric === "markupRate") {
-    const value = current - previous;
-    return {
-      value,
-      label: `${value >= 0 ? "+" : ""}${value.toFixed(1)} п.п.`
-    };
-  }
-
-  const value = pct(current, previous);
-  return {
-    value,
-    label: value === null ? "—" : `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`
-  };
 }
 
 function drilldownHref(
@@ -257,22 +160,49 @@ export default async function ExplorerPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
 
   const dimension = parseDimension(first(params.dimension));
   const metric = parseMetric(first(params.metric));
   const sort = parseSort(first(params.sort));
   const lfl = first(params.lfl) === "1";
-
-  const years = availableYears(sourceRows);
-  const selectedYear = parsePositiveInt(first(params.year)) ?? years[years.length - 1];
-  const selectedMonth = parsePositiveInt(first(params.month));
-
+  const requestedYear = parsePositiveInt(first(params.year));
+  const requestedMonth = parsePositiveInt(first(params.month));
   const channel = first(params.channel);
   const orderType = first(params.orderType);
   const location = first(params.location);
   const brand = first(params.brand);
   const ownership = first(params.ownership);
+
+  const data = await loadExplorerData({
+    dimension,
+    metric,
+    sort,
+    year: requestedYear,
+    month: requestedMonth,
+    channel,
+    orderType,
+    location,
+    brand,
+    ownership,
+    lfl
+  });
+
+  const {
+    years,
+    selectedYear,
+    selectedMonth,
+    months,
+    channels,
+    orderTypes,
+    locations,
+    brands,
+    ownerships,
+    cutoffDate,
+    totalMetricCurrent,
+    totalMetricPrevious,
+    totalGrowth,
+    rows: explorerRows
+  } = data;
 
   const state = {
     dimension,
@@ -288,81 +218,6 @@ export default async function ExplorerPage({
     lfl
   };
 
-  const filteredRows = filterSalesRows(sourceRows, {
-    channel,
-    orderType,
-    location,
-    brand,
-    ownership,
-    lfl
-  });
-
-  const safeRows = filteredRows.length > 0 ? filteredRows : filterSalesRows(sourceRows, { lfl });
-  const cutoffDate = resolveCutoff(safeRows, selectedYear, selectedMonth);
-  const previousCutoffDate = `${selectedYear - 1}${cutoffDate.slice(4)}`;
-
-  const currentRows = currentPeriodRows(filteredRows, selectedYear, selectedMonth, cutoffDate);
-  const previousRows = currentPeriodRows(
-    filteredRows,
-    selectedYear - 1,
-    selectedMonth,
-    previousCutoffDate
-  );
-
-  const currentTotal = metricSet(currentRows);
-  const previousTotal = metricSet(previousRows);
-  const totalMetricCurrent = metricValue(currentTotal, metric);
-  const totalMetricPrevious = metricValue(previousTotal, metric);
-  const totalGrowth = formatGrowth(totalMetricCurrent, totalMetricPrevious, metric);
-
-  const currentMap = new Map<string, SalesRow[]>();
-  const previousMap = new Map<string, SalesRow[]>();
-
-  currentRows.forEach((row) => {
-    const key = dimensionValue(row, dimension);
-    const group = currentMap.get(key) ?? [];
-    group.push(row);
-    currentMap.set(key, group);
-  });
-
-  previousRows.forEach((row) => {
-    const key = dimensionValue(row, dimension);
-    const group = previousMap.get(key) ?? [];
-    group.push(row);
-    previousMap.set(key, group);
-  });
-
-  const keys = [...new Set([...currentMap.keys(), ...previousMap.keys()])];
-  const explorerRows = keys.map((name) => {
-    const currentMetrics = metricSet(currentMap.get(name) ?? []);
-    const previousMetrics = metricSet(previousMap.get(name) ?? []);
-    const current = metricValue(currentMetrics, metric);
-    const previous = metricValue(previousMetrics, metric);
-    const growth = formatGrowth(current, previous, metric);
-
-    return {
-      name,
-      current,
-      previous,
-      growthValue: growth.value,
-      growthLabel: growth.label,
-      revenue: currentMetrics.revenue,
-      share: currentTotal.revenue > 0
-        ? (currentMetrics.revenue / currentTotal.revenue) * 100
-        : 0,
-      checks: currentMetrics.checks,
-      averageCheck: currentMetrics.averageCheck,
-      markupRate: currentMetrics.markupRate
-    };
-  });
-
-  explorerRows.sort((a, b) => {
-    if (sort === "name") return a.name.localeCompare(b.name, "uk");
-    if (sort === "growth") return (b.growthValue ?? -Infinity) - (a.growthValue ?? -Infinity);
-    if (sort === "share") return b.share - a.share;
-    return b.current - a.current;
-  });
-
   const chartData = explorerRows
     .slice()
     .sort((a, b) => b.current - a.current)
@@ -373,25 +228,8 @@ export default async function ExplorerPage({
       previous: row.previous
     }));
 
-  const dimensionRows = filterSalesRows(sourceRows, { lfl });
-  const months = availableMonths(dimensionRows, selectedYear);
-  const channels = [...new Set(dimensionRows.map((row) => row.channelGroup))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const orderTypes = [...new Set(
-    dimensionRows
-      .filter((row) => !channel || row.channelGroup === channel)
-      .map((row) => row.orderType)
-  )].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(dimensionRows.map((row) => row.location))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(dimensionRows.map((row) => row.brand))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-
   const dimensionLabel = DIMENSIONS.find(([value]) => value === dimension)?.[1] ?? "Заклад";
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
-
   return (
     <main className="shell">
       <aside className="sidebar">
