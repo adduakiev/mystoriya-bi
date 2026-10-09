@@ -13,10 +13,9 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
-import { availableMonths, availableYears, formatUah } from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows } from "@/lib/filters";
-import { buildInsights, type InsightItem } from "@/lib/insights";
+import { formatUah } from "@/lib/analytics";
+import { loadInsightsData } from "@/lib/data/insights";
+import type { InsightItem } from "@/lib/insights";
 
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
@@ -81,11 +80,8 @@ export default async function InsightsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
-
-  const years = availableYears(sourceRows);
-  const selectedYear = parsePositiveInt(first(params.year)) ?? years[years.length - 1];
-  const selectedMonth = parsePositiveInt(first(params.month));
+  const requestedYear = parsePositiveInt(first(params.year));
+  const requestedMonth = parsePositiveInt(first(params.month));
   const lfl = first(params.lfl) === "1";
 
   const channel = first(params.channel);
@@ -94,7 +90,9 @@ export default async function InsightsPage({
   const brand = first(params.brand);
   const ownership = first(params.ownership);
 
-  const rows = filterSalesRows(sourceRows, {
+  const data = await loadInsightsData({
+    year: requestedYear,
+    month: requestedMonth,
     channel,
     orderType,
     location,
@@ -103,28 +101,19 @@ export default async function InsightsPage({
     lfl
   });
 
-  const result = buildInsights(rows, {
-    year: selectedYear,
-    month: selectedMonth,
-    lfl
-  });
-
-  const dimensionRows = filterSalesRows(sourceRows, { lfl });
-  const months = availableMonths(dimensionRows, selectedYear);
-  const channels = [...new Set(dimensionRows.map((row) => row.channelGroup))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const orderTypes = [...new Set(
-    dimensionRows
-      .filter((row) => !channel || row.channelGroup === channel)
-      .map((row) => row.orderType)
-  )].sort((a, b) => a.localeCompare(b, "uk"));
-  const locations = [...new Set(dimensionRows.map((row) => row.location))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(dimensionRows.map((row) => row.brand))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-
+  const {
+    rowCount,
+    years,
+    selectedYear,
+    selectedMonth,
+    months,
+    channels,
+    orderTypes,
+    locations,
+    brands,
+    ownerships,
+    result
+  } = data;
   const currentQuery = new URLSearchParams();
   currentQuery.set("year", String(selectedYear));
   if (selectedMonth) currentQuery.set("month", String(selectedMonth));
@@ -163,7 +152,7 @@ export default async function InsightsPage({
         <div className="sidebar-status">
           <span className="status-dot" />
           Rules engine active
-          <small>{rows.length.toLocaleString("uk-UA")} рядків у зрізі</small>
+          <small>{rowCount.toLocaleString("uk-UA")} рядків у зрізі</small>
         </div>
       </aside>
 
