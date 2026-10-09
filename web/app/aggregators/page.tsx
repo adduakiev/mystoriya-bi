@@ -12,10 +12,9 @@ import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
-import { buildDashboardSnapshot, formatUah } from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows } from "@/lib/filters";
-import type { ComparisonMode, PeriodMode, SalesRow } from "@/lib/data/types";
+import { formatUah } from "@/lib/analytics";
+import { loadAggregatorsData } from "@/lib/data/aggregators";
+import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
 const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
@@ -39,39 +38,6 @@ function parseCompare(value: string | undefined): ComparisonMode {
   return value === "previous" ? "previous" : "ly";
 }
 
-function pct(current: number, previous: number): number | null {
-  if (previous === 0) return null;
-  return ((current / previous) - 1) * 100;
-}
-
-function groupByOrderType(
-  rows: SalesRow[],
-  period: PeriodMode,
-  comparison: ComparisonMode
-) {
-  const names = [...new Set(rows.map((row) => row.orderType))].sort((a, b) => a.localeCompare(b, "uk"));
-  const total = buildDashboardSnapshot(rows, { period, comparison }).current.revenue;
-
-  return names
-    .map((name) => {
-      const snapshot = buildDashboardSnapshot(
-        rows.filter((row) => row.orderType === name),
-        { period, comparison }
-      );
-
-      return {
-        name,
-        revenue: snapshot.current.revenue,
-        checks: snapshot.current.checks,
-        averageCheck: snapshot.current.averageCheck,
-        markupRate: snapshot.current.markupRate,
-        growth: pct(snapshot.current.revenue, snapshot.previous.revenue),
-        share: total > 0 ? (snapshot.current.revenue / total) * 100 : 0
-      };
-    })
-    .sort((a, b) => b.revenue - a.revenue);
-}
-
 export default async function AggregatorsPage({
   searchParams
 }: {
@@ -83,10 +49,8 @@ export default async function AggregatorsPage({
   const lfl = first(params.lfl) === "1";
   const lflQuery = lfl ? "&lfl=1" : "";
 
-  const allRows = await loadSalesData();
-  const rows = filterSalesRows(allRows, { channel: "Агрегатор", lfl });
-  const snapshot = buildDashboardSnapshot(rows, { period, comparison });
-  const aggregators = groupByOrderType(rows, period, comparison);
+  const data = await loadAggregatorsData(period, comparison, lfl);
+  const { snapshot, aggregators, rowCount } = data;
 
   return (
     <main className="shell">
@@ -112,7 +76,7 @@ export default async function AggregatorsPage({
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>{rows.length.toLocaleString("uk-UA")} aggregator rows</small>
+          <small>{rowCount.toLocaleString("uk-UA")} aggregator rows</small>
         </div>
       </aside>
 
