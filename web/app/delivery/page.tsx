@@ -14,17 +14,9 @@ import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { DeliveryVsAggregatorChart } from "@/components/DeliveryVsAggregatorChart";
-import {
-  availableMonths,
-  availableYears,
-  buildDashboardSnapshot,
-  buildMultiYearMetricSeries,
-  buildMultiYearWeeklyMetricSeries,
-  formatUah
-} from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows, type GrainMode, type MetricMode } from "@/lib/filters";
-import type { SalesRow } from "@/lib/data/types";
+import { formatUah } from "@/lib/analytics";
+import { loadDeliveryData } from "@/lib/data/delivery";
+import type { GrainMode, MetricMode } from "@/lib/filters";
 
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
@@ -66,53 +58,9 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function metrics(rows: SalesRow[]) {
-  const revenue = rows.reduce((sum, row) => sum + row.revenue, 0);
-  const checks = rows.reduce((sum, row) => sum + row.checks, 0);
-  const markup = rows.reduce((sum, row) => sum + row.markup, 0);
-  return {
-    revenue,
-    checks,
-    markup,
-    averageCheck: checks > 0 ? revenue / checks : 0,
-    markupRate: revenue > 0 ? (markup / revenue) * 100 : 0
-  };
-}
-
-function pct(current: number, previous: number): number | null {
-  if (previous === 0) return null;
-  return ((current / previous) - 1) * 100;
-}
-
 function pctLabel(value: number | null): string {
   if (value === null) return "—";
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
-}
-
-function periodRows(rows: SalesRow[], year: number, month: number | undefined, cutoffDate: string): SalesRow[] {
-  const cutoffMonth = Number(cutoffDate.slice(5, 7));
-  const cutoffDay = Number(cutoffDate.slice(8, 10));
-
-  return rows.filter((row) => {
-    const rowYear = Number(row.date.slice(0, 4));
-    const rowMonth = Number(row.date.slice(5, 7));
-    const rowDay = Number(row.date.slice(8, 10));
-    if (rowYear !== year) return false;
-    if (month) return rowMonth === month && rowDay <= cutoffDay;
-    if (rowMonth < cutoffMonth) return true;
-    return rowMonth === cutoffMonth && rowDay <= cutoffDay;
-  });
-}
-
-function monthRevenue(rows: SalesRow[], year: number, month: number, maxDay?: number): number {
-  return rows
-    .filter((row) => {
-      const rowYear = Number(row.date.slice(0, 4));
-      const rowMonth = Number(row.date.slice(5, 7));
-      const rowDay = Number(row.date.slice(8, 10));
-      return rowYear === year && rowMonth === month && (!maxDay || rowDay <= maxDay);
-    })
-    .reduce((sum, row) => sum + row.revenue, 0);
 }
 
 function buildHref(
@@ -159,10 +107,7 @@ export default async function DeliveryPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
-  const years = availableYears(sourceRows);
-  const latestYear = years[years.length - 1];
-  const selectedYear = parsePositiveInt(first(params.year)) ?? latestYear;
+  const requestedYear = parsePositiveInt(first(params.year));
   const selectedMonth = parsePositiveInt(first(params.month));
   const metric = parseMetric(first(params.metric));
   const grain = selectedMonth ? "month" : parseGrain(first(params.grain));
@@ -172,123 +117,48 @@ export default async function DeliveryPage({
   const ownership = first(params.ownership);
   const lfl = first(params.lfl) === "1";
 
-  const deliveryBase = filterSalesRows(sourceRows, {
-    channel: "Доставка",
+  const data = await loadDeliveryData({
+    orderType,
+    location,
+    brand,
+    ownership,
+    year: requestedYear,
+    month: selectedMonth,
+    metric,
+    grain,
+    lfl
+  });
+
+  const {
+    rowCount,
+    years,
+    selectedYear,
+    months,
+    deliveryTypes,
+    locations,
+    brands,
+    ownerships,
+    snapshot,
+    multiYearData,
+    typeSummary,
+    deliveryMetrics,
+    aggregatorMetrics,
+    ownVsAggregatorRatio,
+    compareSeries,
+    locationRows
+  } = data;
+
+  const state = {
+    year: selectedYear,
+    month: selectedMonth,
+    metric,
+    grain,
     orderType,
     location,
     brand,
     ownership,
     lfl
-  });
-
-  const deliveryAllTypes = filterSalesRows(sourceRows, {
-    channel: "Доставка",
-    location,
-    brand,
-    ownership
-  });
-
-  const aggregatorBase = filterSalesRows(sourceRows, {
-    channel: "Агрегатор",
-    location,
-    brand,
-    ownership,
-    lfl
-  });
-
-  const snapshot = buildDashboardSnapshot(deliveryBase, {
-    period: selectedMonth ? "month" : "ytd",
-    comparison: "ly",
-    focusYear: selectedYear,
-    focusMonth: selectedMonth
-  });
-
-  const state = { year: selectedYear, month: selectedMonth, metric, grain, orderType, location, brand, ownership, lfl };
-  const months = availableMonths(deliveryBase, selectedYear);
-  const deliveryTypes = [...new Set(deliveryAllTypes.map((row) => row.orderType))].sort((a, b) => a.localeCompare(b, "uk"));
-  const dimensionRows = filterSalesRows(sourceRows, { lfl });
-  const locations = [...new Set(dimensionRows.map((row) => row.location))].sort((a, b) => a.localeCompare(b, "uk"));
-  const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(dimensionRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
-
-  const multiYearData = grain === "week" && !selectedMonth
-    ? buildMultiYearWeeklyMetricSeries(deliveryBase, years, metric)
-    : buildMultiYearMetricSeries(deliveryBase, years, metric, selectedMonth);
-
-  const currentRows = periodRows(deliveryBase, selectedYear, selectedMonth, snapshot.cutoffDate);
-  const previousCutoff = `${selectedYear - 1}${snapshot.cutoffDate.slice(4)}`;
-  const previousRows = periodRows(deliveryBase, selectedYear - 1, selectedMonth, previousCutoff);
-
-  const currentAllDeliveryRows = periodRows(deliveryAllTypes, selectedYear, selectedMonth, snapshot.cutoffDate);
-  const totalDeliveryRevenue = currentAllDeliveryRows.reduce((sum, row) => sum + row.revenue, 0);
-
-  const typeSummary = deliveryTypes
-    .map((name) => {
-      const rows = currentAllDeliveryRows.filter((row) => row.orderType === name);
-      const m = metrics(rows);
-      return {
-        name,
-        ...m,
-        share: totalDeliveryRevenue > 0 ? (m.revenue / totalDeliveryRevenue) * 100 : 0
-      };
-    })
-    .filter((item) => item.revenue > 0)
-    .sort((a, b) => b.revenue - a.revenue);
-
-  const currentAggregatorRows = periodRows(aggregatorBase, selectedYear, selectedMonth, snapshot.cutoffDate);
-  const deliveryMetrics = metrics(currentAllDeliveryRows);
-  const aggregatorMetrics = metrics(currentAggregatorRows);
-  const ownVsAggregatorRatio = aggregatorMetrics.revenue > 0
-    ? (deliveryMetrics.revenue / aggregatorMetrics.revenue) * 100
-    : 0;
-
-  const maxMonth = selectedMonth ?? Number(snapshot.cutoffDate.slice(5, 7));
-  const cutoffDay = Number(snapshot.cutoffDate.slice(8, 10));
-  const compareSeries = Array.from({ length: selectedMonth ? 1 : maxMonth }, (_, index) => {
-    const month = selectedMonth ?? index + 1;
-    const alignedDay = month === Number(snapshot.cutoffDate.slice(5, 7)) ? cutoffDay : undefined;
-    return {
-      label: MONTHS[month - 1].slice(0, 3),
-      delivery: monthRevenue(deliveryAllTypes, selectedYear, month, alignedDay),
-      aggregator: monthRevenue(aggregatorBase, selectedYear, month, alignedDay)
-    };
-  });
-
-  const allPeriodRows = periodRows(
-    filterSalesRows(sourceRows, { location, brand, ownership, lfl }),
-    selectedYear,
-    selectedMonth,
-    snapshot.cutoffDate
-  );
-
-  const locationNames = [...new Set(currentAllDeliveryRows.map((row) => row.location))];
-  const locationRows = locationNames
-    .map((name) => {
-      const current = currentAllDeliveryRows.filter((row) => row.location === name);
-      const previous = previousRows.filter((row) => row.location === name);
-      const all = allPeriodRows.filter((row) => row.location === name);
-      const dm = metrics(current);
-      const pm = metrics(previous);
-      const totalLocationRevenue = all.reduce((sum, row) => sum + row.revenue, 0);
-      const aggregatorRevenue = all
-        .filter((row) => row.channelGroup === "Агрегатор")
-        .reduce((sum, row) => sum + row.revenue, 0);
-
-      return {
-        name,
-        revenue: dm.revenue,
-        growth: pct(dm.revenue, pm.revenue),
-        checks: dm.checks,
-        averageCheck: dm.averageCheck,
-        markupRate: dm.markupRate,
-        deliveryShare: totalLocationRevenue > 0 ? (dm.revenue / totalLocationRevenue) * 100 : 0,
-        aggregatorRevenue,
-        versusAggregator: aggregatorRevenue > 0 ? (dm.revenue / aggregatorRevenue) * 100 : 0
-      };
-    })
-    .filter((row) => row.revenue > 0)
-    .sort((a, b) => b.revenue - a.revenue);
-
+  };
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -317,7 +187,7 @@ export default async function DeliveryPage({
         <div className="sidebar-status">
           <span className="status-dot" />
           Live data connected
-          <small>{currentAllDeliveryRows.length.toLocaleString("uk-UA")} delivery rows</small>
+          <small>{rowCount.toLocaleString("uk-UA")} delivery rows</small>
         </div>
       </aside>
 
