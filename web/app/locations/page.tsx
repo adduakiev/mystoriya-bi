@@ -13,15 +13,8 @@ import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
 import { KpiCard } from "@/components/KpiCard";
 import { LocationsComparisonChart } from "@/components/LocationsComparisonChart";
-import {
-  availableMonths,
-  availableYears,
-  buildDashboardSnapshot,
-  formatUah
-} from "@/lib/analytics";
-import { loadSalesData } from "@/lib/data/source";
-import { filterSalesRows } from "@/lib/filters";
-import type { SalesRow } from "@/lib/data/types";
+import { formatUah } from "@/lib/analytics";
+import { loadLocationsData } from "@/lib/data/locations";
 
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
@@ -48,57 +41,9 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function metrics(rows: SalesRow[]) {
-  const revenue = rows.reduce((sum, row) => sum + row.revenue, 0);
-  const checks = rows.reduce((sum, row) => sum + row.checks, 0);
-  const markup = rows.reduce((sum, row) => sum + row.markup, 0);
-  return {
-    revenue,
-    checks,
-    markup,
-    averageCheck: checks > 0 ? revenue / checks : 0,
-    markupRate: revenue > 0 ? (markup / revenue) * 100 : 0
-  };
-}
-
-function pct(current: number, previous: number): number | null {
-  if (previous === 0) return null;
-  return ((current / previous) - 1) * 100;
-}
-
 function pctLabel(value: number | null): string {
   if (value === null) return "—";
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
-}
-
-function channelRevenue(rows: SalesRow[], channel: string): number {
-  return rows
-    .filter((row) => row.channelGroup === channel)
-    .reduce((sum, row) => sum + row.revenue, 0);
-}
-
-function periodRows(
-  rows: SalesRow[],
-  year: number,
-  month: number | undefined,
-  cutoffDate: string
-): SalesRow[] {
-  const cutoffMonth = Number(cutoffDate.slice(5, 7));
-  const cutoffDay = Number(cutoffDate.slice(8, 10));
-
-  return rows.filter((row) => {
-    const rowYear = Number(row.date.slice(0, 4));
-    const rowMonth = Number(row.date.slice(5, 7));
-    const rowDay = Number(row.date.slice(8, 10));
-    if (rowYear !== year) return false;
-
-    if (month) {
-      return rowMonth === month && rowDay <= cutoffDay;
-    }
-
-    if (rowMonth < cutoffMonth) return true;
-    return rowMonth === cutoffMonth && rowDay <= cutoffDay;
-  });
 }
 
 export default async function LocationsPage({
@@ -107,69 +52,33 @@ export default async function LocationsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const sourceRows = await loadSalesData();
-  const years = availableYears(sourceRows);
-  const selectedYear = parsePositiveInt(first(params.year)) ?? years[years.length - 1];
+  const requestedYear = parsePositiveInt(first(params.year));
   const selectedMonth = parsePositiveInt(first(params.month));
   const brand = first(params.brand);
   const ownership = first(params.ownership);
   const lfl = first(params.lfl) === "1";
 
-  const dimensionRows = filterSalesRows(sourceRows, { brand, ownership, lfl });
-  const snapshot = buildDashboardSnapshot(dimensionRows, {
-    period: selectedMonth ? "month" : "ytd",
-    comparison: "ly",
-    focusYear: selectedYear,
-    focusMonth: selectedMonth
+  const data = await loadLocationsData({
+    brand,
+    ownership,
+    year: requestedYear,
+    month: selectedMonth,
+    lfl
   });
 
-  const currentRows = periodRows(dimensionRows, selectedYear, selectedMonth, snapshot.cutoffDate);
-  const previousCutoff = `${selectedYear - 1}${snapshot.cutoffDate.slice(4)}`;
-  const previousRows = periodRows(dimensionRows, selectedYear - 1, selectedMonth, previousCutoff);
-
-  const locations = [...new Set(dimensionRows.map((row) => row.location))]
-    .sort((a, b) => a.localeCompare(b, "uk"));
-
-  const locationRows = locations
-    .map((location) => {
-      const current = currentRows.filter((row) => row.location === location);
-      const previous = previousRows.filter((row) => row.location === location);
-      const total = metrics(current);
-      const prior = metrics(previous);
-
-      const venue = current.filter((row) => row.channelGroup === "Заклад");
-      const venueMetrics = metrics(venue);
-      const deliveryRevenue = channelRevenue(current, "Доставка");
-      const aggregatorRevenue = channelRevenue(current, "Агрегатор");
-
-      return {
-        location,
-        revenue: total.revenue,
-        revenueGrowth: pct(total.revenue, prior.revenue),
-        checks: total.checks,
-        checksGrowth: pct(total.checks, prior.checks),
-        averageCheck: total.averageCheck,
-        markup: total.markup,
-        markupRate: total.markupRate,
-        venueRevenue: venueMetrics.revenue,
-        venueChecks: venueMetrics.checks,
-        venueAverageCheck: venueMetrics.averageCheck,
-        venueMarkupRate: venueMetrics.markupRate,
-        deliveryRevenue,
-        deliveryShare: total.revenue > 0 ? (deliveryRevenue / total.revenue) * 100 : 0,
-        aggregatorRevenue,
-        aggregatorShare: total.revenue > 0 ? (aggregatorRevenue / total.revenue) * 100 : 0,
-        previousRevenue: prior.revenue,
-        lflEligible: total.revenue > 0 && prior.revenue > 0
-      };
-    })
-    .filter((row) => row.revenue > 0)
-    .sort((a, b) => b.revenue - a.revenue);
-
-  const lflRows = locationRows.filter((row) => row.lflEligible);
-  const lflCurrentRevenue = lflRows.reduce((sum, row) => sum + row.revenue, 0);
-  const lflPreviousRevenue = lflRows.reduce((sum, row) => sum + row.previousRevenue, 0);
-  const lflGrowth = pct(lflCurrentRevenue, lflPreviousRevenue);
+  const {
+    years,
+    selectedYear,
+    months,
+    brands,
+    ownerships,
+    snapshot,
+    locationRows,
+    lflCount,
+    lflCurrentRevenue,
+    lflPreviousRevenue,
+    lflGrowth
+  } = data;
 
   const chartData = locationRows.map((row) => ({
     location: row.location,
@@ -177,11 +86,6 @@ export default async function LocationsPage({
     delivery: row.deliveryRevenue,
     aggregator: row.aggregatorRevenue
   }));
-
-  const brands = [...new Set(sourceRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
-  const ownerships = [...new Set(sourceRows.map((row) => row.ownership))].sort((a, b) => a.localeCompare(b, "uk"));
-  const months = availableMonths(sourceRows, selectedYear);
-
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -282,7 +186,7 @@ export default async function LocationsPage({
         <section className="lfl-strip">
           <div className="lfl-card">
             <span>{lfl ? "Зіставні активні точки" : "Зіставні точки"}</span>
-            <strong>{lflRows.length}</strong>
+            <strong>{lflCount}</strong>
             <small>є продажі в обох періодах</small>
           </div>
           <div className="lfl-card">
