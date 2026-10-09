@@ -426,3 +426,37 @@ export async function loadSalesData(): Promise<SalesRow[]> {
 export async function loadSalesDataStatus(): Promise<SalesDataStatus> {
   return getCachedSalesStatus();
 }
+
+
+export async function callBiRpc<T>(
+  functionName: string,
+  args: Record<string, unknown> = {},
+  timeoutMs = 12_000
+): Promise<T> {
+  const password = process.env.BI_ACCESS_PASSWORD;
+
+  if (!password) {
+    throw new Error("BI_ACCESS_PASSWORD is not configured");
+  }
+
+  const response = await fetch(`${BI_SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: supabaseHeaders(),
+    body: JSON.stringify({
+      p_password: password,
+      ...args
+    }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(timeoutMs)
+  });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => "");
+    throw new Error(
+      `Supabase RPC ${functionName} returned ${response.status}${message ? `: ${message.slice(0, 240)}` : ""}`
+    );
+  }
+
+  const raw = await response.json();
+  return unwrapRpcPayload<T>(raw, functionName);
+}
