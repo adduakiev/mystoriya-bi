@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { DataSyncControl } from "@/components/DataSyncControl";
 import { loadSalesDataStatus } from "@/lib/data/source";
 
 const OFFICIAL_MYASTORIYA_LOGO =
@@ -32,10 +33,11 @@ export async function SidebarBrand() {
 
       <div className={isWarehouse ? "data-health ok" : "data-health fallback"}>
         <span className="data-health-dot" aria-hidden="true" />
-        <div>
+        <div className="data-health-content">
           <b>Дані по {formatCutoff(status.cutoffDate)}</b>
           <span>{isWarehouse ? "Warehouse · Sync OK" : "Google Sheets · fallback"}</span>
         </div>
+        <DataSyncControl initialCutoff={status.cutoffDate} />
       </div>
 
       <form action="/api/auth/logout" method="post">
