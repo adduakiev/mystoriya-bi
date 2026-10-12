@@ -238,25 +238,25 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const recentCutoff = new Date(Date.now() - 5 * 60_000).toISOString();
-  const { data: recentRun } = await supabase
+  const runningCutoff = new Date(Date.now() - 15 * 60_000).toISOString();
+  const { data: runningRun } = await supabase
     .from("import_runs")
     .select("id,status,started_at")
     .eq("source_name", "google_sheets:Данние короткі")
-    .gte("started_at", recentCutoff)
-    .in("status", ["running", "success"])
+    .eq("status", "running")
+    .gte("started_at", runningCutoff)
     .order("started_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (recentRun) {
+  if (runningRun) {
     return new Response(
       JSON.stringify({
         ok: true,
         skipped: true,
-        reason: "recent_sync_exists",
-        import_run_id: recentRun.id,
-        status: recentRun.status
+        reason: "sync_already_running",
+        import_run_id: runningRun.id,
+        status: runningRun.status
       }),
       {
         status: 202,
