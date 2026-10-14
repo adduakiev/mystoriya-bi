@@ -42,9 +42,9 @@ const METRICS: Record<Metric, {
 }> = {
   revenue:{label:"Виручка",fact:"revenueFact",plan:"revenuePlan",ly:"revenueLy"},
   markup:{label:"Валовий прибуток",fact:"markupFact",plan:"markupPlan",ly:"markupLy"},
-  profit:{label:"EBITDA",fact:"profitFact",plan:"profitPlan",ly:"profitLy"},
+  profit:{label:"Операційний результат",fact:"profitFact",plan:"profitPlan",ly:"profitLy"},
   markupRate:{label:"Валова маржа %",fact:"markupRateFact",plan:"markupRatePlan",ly:"markupRateLy",rate:true},
-  profitRate:{label:"EBITDA %",fact:"profitRateFact",plan:"profitRatePlan",ly:"profitRateLy",rate:true}
+  profitRate:{label:"EBITDA % від виручки",fact:"profitRateFact",plan:"profitRatePlan",ly:"profitRateLy",rate:true}
 };
 
 function formatMoney(value:number){

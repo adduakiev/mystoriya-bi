@@ -248,26 +248,26 @@ export function loadPnlData({
 
     detailRow("ФОТ","ФОТ команди","expense",fact.expenseGroups.fot,plan.expenseGroups.fot,ly.expenseGroups.fot),
 
-    detailRow("Маркетинг","Paid Media · Facebook + Google","expense",fact.delivery.media,plan.delivery.media,ly.delivery.media),
-    detailRow("Маркетинг","Агенція та affiliate","expense",fact.delivery.agency+fact.delivery.affiliate,plan.delivery.agency+plan.delivery.affiliate,ly.delivery.agency+ly.delivery.affiliate),
+    detailRow("Маркетинг","Реклама · Facebook + Google","expense",fact.delivery.media,plan.delivery.media,ly.delivery.media),
+    detailRow("Маркетинг","Агенція та партнерські канали","expense",fact.delivery.agency+fact.delivery.affiliate,plan.delivery.agency+plan.delivery.affiliate,ly.delivery.agency+ly.delivery.affiliate),
     detailRow("Маркетинг","Маркетинг без ФОТ","total",fact.expenseGroups.marketing,plan.expenseGroups.marketing,ly.expenseGroups.marketing),
 
-    detailRow("IT / Services","CRM / комунікації","expense",fact.delivery.serviceOps,plan.delivery.serviceOps,ly.delivery.serviceOps),
-    detailRow("IT / Services","IT / Digital","expense",fact.delivery.itDigital,plan.delivery.itDigital,ly.delivery.itDigital),
-    detailRow("IT / Services","IT + Services","total",fact.expenseGroups.digitalServices,plan.expenseGroups.digitalServices,ly.expenseGroups.digitalServices),
+    detailRow("IT та сервіси","CRM / комунікації","expense",fact.delivery.serviceOps,plan.delivery.serviceOps,ly.delivery.serviceOps),
+    detailRow("IT та сервіси","Сайт / Digital / IT","expense",fact.delivery.itDigital,plan.delivery.itDigital,ly.delivery.itDigital),
+    detailRow("IT та сервіси","IT та сервіси","total",fact.expenseGroups.digitalServices,plan.expenseGroups.digitalServices,ly.expenseGroups.digitalServices),
 
     detailRow("Логістика та доставка","Логістика","expense",fact.delivery.logistics,plan.delivery.logistics,ly.delivery.logistics),
     detailRow("Логістика та доставка","EasyPay","expense",fact.delivery.acquiring,plan.delivery.acquiring,ly.delivery.acquiring),
     detailRow("Логістика та доставка","Кур'єри + фріланс","expense",fact.delivery.couriers,plan.delivery.couriers,ly.delivery.couriers),
-    detailRow("Логістика та доставка","Delivery Operations","total",fact.expenseGroups.deliveryOperations,plan.expenseGroups.deliveryOperations,ly.expenseGroups.deliveryOperations),
+    detailRow("Логістика та доставка","Витрати доставки","total",fact.expenseGroups.deliveryOperations,plan.expenseGroups.deliveryOperations,ly.expenseGroups.deliveryOperations),
 
     detailRow("Агрегатори","Комісія агрегаторів","expense",fact.aggregators.commission,plan.aggregators.commission,ly.aggregators.commission),
     detailRow("Агрегатори","Просування","expense",fact.aggregators.promo,plan.aggregators.promo,ly.aggregators.promo),
     detailRow("Агрегатори","GetOrder","expense",fact.aggregators.getOrder,plan.aggregators.getOrder,ly.aggregators.getOrder),
-    detailRow("Агрегатори","Витрати Aggregators","total",fact.expenseGroups.aggregatorCosts,plan.expenseGroups.aggregatorCosts,ly.expenseGroups.aggregatorCosts),
+    detailRow("Агрегатори","Витрати агрегаторів","total",fact.expenseGroups.aggregatorCosts,plan.expenseGroups.aggregatorCosts,ly.expenseGroups.aggregatorCosts),
 
-    detailRow("Результат","OPEX","expense",fact.operatingExpenses,plan.operatingExpenses,ly.operatingExpenses),
-    detailRow("Результат","EBITDA · управлінська","total",fact.profit,plan.profit,ly.profit)
+    detailRow("Результат","Операційні витрати (OPEX)","expense",fact.operatingExpenses,plan.operatingExpenses,ly.operatingExpenses),
+    detailRow("Результат","Операційний результат (EBITDA)","total",fact.profit,plan.profit,ly.profit)
   ];
 
   return {
