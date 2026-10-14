@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   BarChart3,
   CircleDollarSign,
+  Filter,
   LayoutDashboard,
   MapPin,
   Network,
@@ -12,7 +13,12 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
 import { PnlTrendChart } from "@/components/PnlTrendChart";
-import { loadPnlData, type PnlDetailRow } from "@/lib/data/pnl";
+import {
+  loadPnlData,
+  PNL_MONTHS_LONG,
+  type PnlDetailRow
+} from "@/lib/data/pnl";
+import { PNL_SOURCE_META } from "@/lib/data/pnl-source";
 
 const nav: Array<[string, LucideIcon, string]> = [
   ["Огляд", LayoutDashboard, "/"],
@@ -25,44 +31,53 @@ const nav: Array<[string, LucideIcon, string]> = [
   ["Insights", Sparkles, "/insights"]
 ];
 
-function money(value: number): string {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `₴ ${(value / 1_000_000).toFixed(2)}M`;
-  if (abs >= 1_000) return `₴ ${(value / 1_000).toFixed(0)}K`;
+function first(value:string|string[]|undefined){
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function clampMonth(value:string|undefined,fallback:number){
+  const parsed=Number(value);
+  if(!Number.isFinite(parsed)) return fallback;
+  return Math.max(1,Math.min(PNL_SOURCE_META.latestFactMonth,Math.round(parsed)));
+}
+
+function money(value:number):string{
+  const abs=Math.abs(value);
+  if(abs>=1_000_000) return `₴ ${(value/1_000_000).toFixed(2)}M`;
+  if(abs>=1_000) return `₴ ${(value/1_000).toFixed(0)}K`;
   return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;
 }
 
-function fullMoney(value: number): string {
+function fullMoney(value:number):string{
   return `${Math.round(value).toLocaleString("uk-UA")} ₴`;
 }
 
-function pct(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
+function pct(value:number):string{
+  return `${(value*100).toFixed(1)}%`;
 }
 
-function growth(current: number, base: number): number | null {
-  if (!base) return null;
-  return (current / base - 1) * 100;
+function growth(current:number,base:number):number|null{
+  if(!base) return null;
+  return (current/base-1)*100;
 }
 
-function pp(current: number, base: number): number {
-  return (current - base) * 100;
+function pp(current:number,base:number):number{
+  return (current-base)*100;
 }
 
-function signed(value: number | null, suffix = "%"): string {
-  if (value === null) return "—";
-  return `${value > 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+function signed(value:number|null,suffix="%"):string{
+  if(value===null) return "—";
+  return `${value>0?"+":""}${value.toFixed(1)}${suffix}`;
 }
 
-function deltaClass(value: number | null, goodWhenHigher = true): string {
-  if (value === null || Math.abs(value) < 0.05) return "";
-  const good = goodWhenHigher ? value > 0 : value < 0;
-  return good ? "positive" : "negative";
+function deltaClass(value:number|null,goodWhenHigher=true):string{
+  if(value===null||Math.abs(value)<0.05) return "";
+  const good=goodWhenHigher?value>0:value<0;
+  return good?"positive":"negative";
 }
 
-function rowVarianceClass(row: PnlDetailRow, value: number | null): string {
-  if (row.kind === "control") return "";
-  return deltaClass(value, row.kind !== "expense");
+function rowVarianceClass(row:PnlDetailRow,value:number|null):string{
+  return deltaClass(value,row.kind!=="expense");
 }
 
 function Kpi({
@@ -70,34 +85,37 @@ function Kpi({
   fact,
   plan,
   ly,
-  rate = false,
-  goodWhenHigher = true
-}: {
-  label: string;
-  fact: number;
-  plan: number;
-  ly: number;
-  rate?: boolean;
-  goodWhenHigher?: boolean;
-}) {
-  const planDelta = rate ? pp(fact, plan) : growth(fact, plan);
-  const yoy = rate ? pp(fact, ly) : growth(fact, ly);
+  rate=false,
+  goodWhenHigher=true,
+  hint
+}:{
+  label:string;
+  fact:number;
+  plan:number;
+  ly:number;
+  rate?:boolean;
+  goodWhenHigher?:boolean;
+  hint?:string;
+}){
+  const planDelta=rate?pp(fact,plan):growth(fact,plan);
+  const yoy=rate?pp(fact,ly):growth(fact,ly);
 
   return (
     <article className="pnl-kpi-card">
       <span>{label}</span>
-      <strong>{rate ? pct(fact) : money(fact)}</strong>
+      <strong>{rate?pct(fact):money(fact)}</strong>
+      {hint&&<em>{hint}</em>}
       <div className="pnl-kpi-deltas">
         <small>
           vs План
-          <b className={deltaClass(planDelta, goodWhenHigher)}>
-            {rate ? signed(planDelta, " п.п.") : signed(planDelta)}
+          <b className={deltaClass(planDelta,goodWhenHigher)}>
+            {rate?signed(planDelta," п.п."):signed(planDelta)}
           </b>
         </small>
         <small>
           YoY
-          <b className={deltaClass(yoy, goodWhenHigher)}>
-            {rate ? signed(yoy, " п.п.") : signed(yoy)}
+          <b className={deltaClass(yoy,goodWhenHigher)}>
+            {rate?signed(yoy," п.п."):signed(yoy)}
           </b>
         </small>
       </div>
@@ -105,8 +123,52 @@ function Kpi({
   );
 }
 
-type DeliveryChannel = ReturnType<typeof loadPnlData>["fact"]["delivery"];
-type AggregatorChannel = ReturnType<typeof loadPnlData>["fact"]["aggregators"];
+function ReferenceMetric({label,value,detail}:{label:string;value:string;detail?:string}){
+  return (
+    <div className="pnl-reference-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {detail&&<small>{detail}</small>}
+    </div>
+  );
+}
+
+function CostCard({
+  label,
+  fact,
+  plan,
+  ly,
+  revenue
+}:{
+  label:string;
+  fact:number;
+  plan:number;
+  ly:number;
+  revenue:number;
+}){
+  const share=revenue?fact/revenue:0;
+  const planDelta=growth(fact,plan);
+  const yoy=growth(fact,ly);
+
+  return (
+    <article className="pnl-cost-card">
+      <div>
+        <span>{label}</span>
+        <strong>{money(fact)}</strong>
+      </div>
+      <b>{pct(share)} від виручки</b>
+      <div className="pnl-cost-track"><i style={{width:`${Math.min(100,share*100)}%`}} /></div>
+      <small>
+        План <em className={deltaClass(planDelta,false)}>{signed(planDelta)}</em>
+        <i>·</i>
+        YoY <em className={deltaClass(yoy,false)}>{signed(yoy)}</em>
+      </small>
+    </article>
+  );
+}
+
+type DeliveryChannel=ReturnType<typeof loadPnlData>["fact"]["delivery"];
+type AggregatorChannel=ReturnType<typeof loadPnlData>["fact"]["aggregators"];
 
 function ChannelCard({
   title,
@@ -114,17 +176,17 @@ function ChannelCard({
   fact,
   plan,
   ly,
-  aggregator = false
-}: {
-  title: string;
-  subtitle: string;
-  fact: DeliveryChannel | AggregatorChannel;
-  plan: DeliveryChannel | AggregatorChannel;
-  ly: DeliveryChannel | AggregatorChannel;
-  aggregator?: boolean;
-}) {
-  const profitPlan = growth(fact.profit, plan.profit);
-  const profitYoy = growth(fact.profit, ly.profit);
+  aggregator=false
+}:{
+  title:string;
+  subtitle:string;
+  fact:DeliveryChannel|AggregatorChannel;
+  plan:DeliveryChannel|AggregatorChannel;
+  ly:DeliveryChannel|AggregatorChannel;
+  aggregator?:boolean;
+}){
+  const profitPlan=growth(fact.profit,plan.profit);
+  const profitYoy=growth(fact.profit,ly.profit);
 
   return (
     <article className="panel pnl-channel-card">
@@ -134,7 +196,7 @@ function ChannelCard({
           <h2>{title}</h2>
         </div>
         <div className="pnl-channel-result">
-          <span>Результат каналу</span>
+          <span>EBITDA каналу</span>
           <strong>{money(fact.profit)}</strong>
           <small>
             <b className={deltaClass(profitPlan)}>{signed(profitPlan)}</b> до плану
@@ -146,69 +208,76 @@ function ChannelCard({
 
       <div className="pnl-channel-stats">
         <div><span>Виручка</span><b>{money(fact.revenue)}</b></div>
-        <div><span>Націнка</span><b>{money(fact.markup)}</b><small>{pct(fact.markupRate)}</small></div>
-        <div><span>Витрати каналу</span><b>{money(fact.opex)}</b></div>
-        <div><span>Profit %</span><b>{pct(fact.profitRate)}</b></div>
+        <div><span>Валова маржа</span><b>{pct(fact.markupRate)}</b></div>
+        <div><span>OPEX</span><b>{money(fact.opex)}</b></div>
+        <div><span>EBITDA %</span><b>{pct(fact.profitRate)}</b></div>
       </div>
 
-      {aggregator && "commissionRate" in fact ? (
+      {aggregator&&"commissionRate" in fact?(
         <div className="pnl-cost-strip">
           <div><span>Комісія</span><b>{pct(fact.commissionRate)}</b></div>
           <div><span>Promo</span><b>{pct(fact.promoRate)}</b></div>
           <div><span>Комісія + Promo</span><b>{pct(fact.commissionPromoRate)}</b></div>
-          <div><span>GetOrder</span><b>{money(fact.getOrder)}</b></div>
+          <div><span>ФОТ каналу</span><b>{money(fact.fot)}</b></div>
         </div>
-      ) : !aggregator && "marketingTotal" in fact ? (
+      ):!aggregator&&"marketingNonFot" in fact?(
         <div className="pnl-cost-strip">
-          <div><span>Marketing</span><b>{money(fact.marketingTotal)}</b></div>
-          <div><span>IT / Digital</span><b>{money(fact.itDigital)}</b></div>
-          <div><span>Логістика</span><b>{money(fact.logistics)}</b></div>
-          <div><span>Кур'єри</span><b>{money(fact.couriers)}</b></div>
+          <div><span>ФОТ каналу</span><b>{money(fact.fot)}</b></div>
+          <div><span>Маркетинг</span><b>{money(fact.marketingNonFot)}</b></div>
+          <div><span>IT + Services</span><b>{money(fact.digitalServices)}</b></div>
+          <div><span>Логістика</span><b>{money(fact.logistics+fact.couriers)}</b></div>
         </div>
-      ) : null}
+      ):null}
     </article>
   );
 }
 
-export default function PnlPage() {
-  const data = loadPnlData();
-  const { fact, plan, ly } = data;
-  const revenuePlan = growth(fact.revenue, plan.revenue);
-  const revenueYoy = growth(fact.revenue, ly.revenue);
+export default async function PnlPage({
+  searchParams
+}:{
+  searchParams?:Promise<Record<string,string|string[]|undefined>>;
+}){
+  const params=(await searchParams)??{};
+  let from=clampMonth(first(params.from),1);
+  let to=clampMonth(first(params.to),PNL_SOURCE_META.latestFactMonth);
+  if(from>to) [from,to]=[to,from];
+
+  const data=loadPnlData({startMonth:from-1,endMonth:to-1});
+  const {fact,plan,ly}=data;
+  const revenuePlan=growth(fact.revenue,plan.revenue);
+  const revenueYoy=growth(fact.revenue,ly.revenue);
 
   return (
     <main className="shell">
       <aside className="sidebar">
         <SidebarBrand />
-
         <nav>
-          {nav.map(([label, Icon, href]) => (
+          {nav.map(([label,Icon,href])=>(
             <Link
               key={label}
               href={href}
-              className={label === "P&L" ? "nav-item active" : "nav-item"}
+              className={label==="P&L"?"nav-item active":"nav-item"}
             >
-              <Icon size={18} />
+              <Icon size={18}/>
               {label}
             </Link>
           ))}
         </nav>
-
         <div className="sidebar-status">
-          <span className="status-dot" />
-          P&L source connected
-          <small>Січень–серпень 2026 · Plan / Fact / YoY</small>
+          <span className="status-dot"/>
+          P&L snapshot
+          <small>Fact / Plan / 2025 · Jan–Aug 2026</small>
         </div>
       </aside>
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">FINANCE · MANAGEMENT P&L</span>
+            <span className="eyebrow">FINANCE · OWNER VIEW</span>
             <h1>P&L · План / Факт</h1>
           </div>
           <div className="pnl-headline-result">
-            <span>YTD виручка</span>
+            <span>{data.meta.periodLabel} · виручка</span>
             <strong>{money(fact.revenue)}</strong>
             <small>
               <b className={deltaClass(revenuePlan)}>{signed(revenuePlan)}</b> до плану
@@ -218,36 +287,48 @@ export default function PnlPage() {
           </div>
         </header>
 
-        <div className="context-line">
-          <b>Січень–серпень 2026</b>
-          <span>Факт vs План 2026</span>
-          <span>динаміка vs січень–серпень 2025</span>
-          <span>атомарна управлінська модель</span>
-        </div>
+        <form className="pnl-filter-bar" action="/pnl" method="get">
+          <div className="pnl-filter-title">
+            <Filter size={15}/>
+            <span>Період</span>
+          </div>
+          <label>
+            <span>Від</span>
+            <select name="from" defaultValue={String(from)}>
+              {PNL_MONTHS_LONG.map((month,index)=>(
+                <option key={month} value={index+1}>{month}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>До</span>
+            <select name="to" defaultValue={String(to)}>
+              {PNL_MONTHS_LONG.map((month,index)=>(
+                <option key={month} value={index+1}>{month}</option>
+              ))}
+            </select>
+          </label>
+          <button type="submit" className="apply-filter">Застосувати</button>
+          <Link href="/pnl" className="clear-filter">YTD</Link>
+          <div className="pnl-filter-meta">Snapshot · дані по серпень 2026</div>
+        </form>
 
         <section className="pnl-kpi-grid">
-          <Kpi label="Виручка" fact={fact.revenue} plan={plan.revenue} ly={ly.revenue} />
-          <Kpi label="Націнка" fact={fact.markup} plan={plan.markup} ly={ly.markup} />
-          <Kpi label="Націнка %" fact={fact.markupRate} plan={plan.markupRate} ly={ly.markupRate} rate />
-          <Kpi label="Прибуток BI" fact={fact.profit} plan={plan.profit} ly={ly.profit} />
-          <Kpi label="Profit %" fact={fact.profitRate} plan={plan.profitRate} ly={ly.profitRate} rate />
+          <Kpi label="Виручка" fact={fact.revenue} plan={plan.revenue} ly={ly.revenue}/>
+          <Kpi label="Валовий прибуток" fact={fact.markup} plan={plan.markup} ly={ly.markup}/>
+          <Kpi label="Валова маржа %" fact={fact.markupRate} plan={plan.markupRate} ly={ly.markupRate} rate/>
+          <Kpi label="OPEX" fact={fact.operatingExpenses} plan={plan.operatingExpenses} ly={ly.operatingExpenses} goodWhenHigher={false}/>
+          <Kpi label="EBITDA · управл." fact={fact.profit} plan={plan.profit} ly={ly.profit}/>
+          <Kpi label="EBITDA %" fact={fact.profitRate} plan={plan.profitRate} ly={ly.profitRate} rate hint="від виручки"/>
         </section>
 
-        <section className="pnl-audit-banner">
-          <div>
-            <span className="eyebrow">CONTROL · SOURCE FORMULA</span>
-            <b>Комісія агрегаторів у BI враховується рівно один раз</b>
-            <p>
-              Вихідний Excel показує YTD прибуток {money(fact.reportedProfit)}, а атомарна
-              модель BI — {money(fact.profit)}. Різниця {money(fact.reportedGap)} відповідає
-              повторно врахованій у вихідному файлі комісії агрегаторів. Товарний COGS у BI
-              збирається з COGS Delivery + Aggregators без комісії.
-            </p>
-          </div>
-          <div className="pnl-audit-number">
-            <span>Δ до Excel</span>
-            <strong>{money(fact.reportedGap)}</strong>
-          </div>
+        <section className="pnl-reference-strip">
+          <ReferenceMetric label="OPEX / Revenue" value={pct(fact.opexRate)}/>
+          <ReferenceMetric label="ФОТ / Revenue" value={pct(fact.expenseGroups.fot/fact.revenue)}/>
+          <ReferenceMetric label="Marketing / Revenue" value={pct(fact.expenseGroups.marketing/fact.revenue)}/>
+          <ReferenceMetric label="Delivery share" value={pct(fact.delivery.revenue/fact.revenue)}/>
+          <ReferenceMetric label="Aggregators share" value={pct(fact.aggregators.revenue/fact.revenue)}/>
+          <ReferenceMetric label="Commission + Promo" value={pct(fact.aggregators.commissionPromoRate)} detail="від Aggregators revenue"/>
         </section>
 
         <section className="pnl-channel-grid">
@@ -268,35 +349,40 @@ export default function PnlPage() {
           />
         </section>
 
-        <section className="content-grid pnl-chart-grid">
-          <article className="panel">
-            <div className="panel-head">
-              <div>
-                <span className="eyebrow">REVENUE DYNAMICS</span>
-                <h2>Виручка · Plan / Fact / YoY</h2>
-              </div>
+        <section className="panel pnl-dynamics-panel">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">FINANCIAL DYNAMICS</span>
+              <h2>Динаміка · Fact / Plan / YoY</h2>
             </div>
-            <PnlTrendChart data={data.trend} metric="revenue" />
-          </article>
+            <span className="pnl-source-chip">{data.meta.periodLabel}</span>
+          </div>
+          <PnlTrendChart data={data.trend}/>
+        </section>
 
-          <article className="panel">
-            <div className="panel-head">
-              <div>
-                <span className="eyebrow">PROFIT DYNAMICS</span>
-                <h2>Прибуток BI · Plan / Fact / YoY</h2>
-              </div>
-            </div>
-            <PnlTrendChart data={data.trend} metric="profit" />
-          </article>
+        <section className="pnl-section-heading">
+          <div>
+            <span className="eyebrow">COST STRUCTURE</span>
+            <h2>Структура операційних витрат</h2>
+          </div>
+          <small>Кожен блок показує суму та частку від виручки</small>
+        </section>
+
+        <section className="pnl-cost-grid">
+          <CostCard label="ФОТ" fact={fact.expenseGroups.fot} plan={plan.expenseGroups.fot} ly={ly.expenseGroups.fot} revenue={fact.revenue}/>
+          <CostCard label="Маркетинг" fact={fact.expenseGroups.marketing} plan={plan.expenseGroups.marketing} ly={ly.expenseGroups.marketing} revenue={fact.revenue}/>
+          <CostCard label="IT + Services" fact={fact.expenseGroups.digitalServices} plan={plan.expenseGroups.digitalServices} ly={ly.expenseGroups.digitalServices} revenue={fact.revenue}/>
+          <CostCard label="Delivery Operations" fact={fact.expenseGroups.deliveryOperations} plan={plan.expenseGroups.deliveryOperations} ly={ly.expenseGroups.deliveryOperations} revenue={fact.revenue}/>
+          <CostCard label="Aggregators Costs" fact={fact.expenseGroups.aggregatorCosts} plan={plan.expenseGroups.aggregatorCosts} ly={ly.expenseGroups.aggregatorCosts} revenue={fact.revenue}/>
         </section>
 
         <section className="panel pnl-detail-panel">
           <div className="panel-head">
             <div>
               <span className="eyebrow">MANAGEMENT P&L</span>
-              <h2>Структура · Січень–серпень</h2>
+              <h2>Детальний P&L · {data.meta.periodLabel}</h2>
             </div>
-            <span className="pnl-source-chip">Source: Доставка 2026</span>
+            <span className="pnl-source-chip">Snapshot · Plan / Fact / 2025</span>
           </div>
 
           <div className="pnl-detail-wrap">
@@ -311,31 +397,28 @@ export default function PnlPage() {
                 <span>YoY</span>
               </div>
 
-              {data.details.map((row, index) => {
-                const planDelta = row.fact - row.plan;
-                const planDeltaPct = growth(row.fact, row.plan);
-                const yoy = growth(row.fact, row.ly);
-                const previousSection = index > 0 ? data.details[index - 1].section : null;
-                const startsSection = row.section !== previousSection;
+              {data.details.map((row,index)=>{
+                const planDelta=row.fact-row.plan;
+                const planDeltaPct=growth(row.fact,row.plan);
+                const yoy=growth(row.fact,row.ly);
+                const previousSection=index>0?data.details[index-1].section:null;
+                const startsSection=row.section!==previousSection;
 
                 return (
-                  <div key={row.section + row.label}>
-                    {startsSection && <div className="pnl-detail-section">{row.section}</div>}
+                  <div key={row.section+row.label}>
+                    {startsSection&&<div className="pnl-detail-section">{row.section}</div>}
                     <div className={`pnl-detail-row pnl-row-${row.kind}`}>
-                      <span>
-                        <b>{row.label}</b>
-                        {row.note && <small>{row.note}</small>}
-                      </span>
+                      <span><b>{row.label}</b></span>
                       <span>{fullMoney(row.fact)}</span>
                       <span>{fullMoney(row.plan)}</span>
-                      <span className={rowVarianceClass(row, planDelta)}>
-                        {planDelta > 0 ? "+" : ""}{fullMoney(planDelta)}
+                      <span className={rowVarianceClass(row,planDelta)}>
+                        {planDelta>0?"+":""}{fullMoney(planDelta)}
                       </span>
-                      <span className={rowVarianceClass(row, planDeltaPct)}>
+                      <span className={rowVarianceClass(row,planDeltaPct)}>
                         {signed(planDeltaPct)}
                       </span>
                       <span>{fullMoney(row.ly)}</span>
-                      <span className={rowVarianceClass(row, yoy)}>
+                      <span className={rowVarianceClass(row,yoy)}>
                         {signed(yoy)}
                       </span>
                     </div>
@@ -344,18 +427,6 @@ export default function PnlPage() {
               })}
             </div>
           </div>
-        </section>
-
-        <section className="pnl-footnotes">
-          <span>
-            <b>IT / Digital:</b> з квітня 2026 source-стаття включає також частину інвестицій
-            у новий сайт. У 2026 залишаємо їх у фактичному OPEX; з 2027 винесемо
-            Investment / Development окремо.
-          </span>
-          <span>
-            <b>Розподіл ФОТ:</b> Костюшко + контакт-центр 70% Delivery / 30% Aggregators.
-            Недогибченко — 100% Delivery. Marketing FOT — 100% Delivery.
-          </span>
         </section>
       </section>
     </main>

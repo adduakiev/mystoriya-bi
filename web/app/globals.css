@@ -443,3 +443,78 @@ html.is-navigating, html.is-navigating body, html.is-navigating a, html.is-navig
   .pnl-channel-result { text-align: left; }
   .pnl-channel-result small { justify-content: flex-start; }
 }
+
+
+/* P&L v2 · owner / investor view */
+.pnl-filter-bar {
+  display: flex;
+  align-items: end;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  background: #0d131a;
+  border-radius: 11px;
+}
+.pnl-filter-title { display: flex; align-items: center; gap: 7px; color: #b7c0cc; font-size: 11px; font-weight: 800; align-self: center; margin-right: 4px; }
+.pnl-filter-bar label { display: grid; gap: 5px; }
+.pnl-filter-bar label > span { color: #687382; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+.pnl-filter-bar select { min-width: 128px; padding: 8px 9px; color: #dbe1e8; background: #121923; border: 1px solid #27313d; border-radius: 8px; outline: none; }
+.pnl-filter-meta { margin-left: auto; align-self: center; color: #626d7a; font-size: 9px; }
+
+.pnl-kpi-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.pnl-kpi-card { min-height: 138px; position: relative; overflow: hidden; }
+.pnl-kpi-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(245,166,35,.55), transparent); opacity: .35; }
+.pnl-kpi-card > em { display: block; margin-top: 4px; color: #606b78; font-size: 9px; font-style: normal; }
+
+.pnl-reference-strip { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+.pnl-reference-card { border: 1px solid #202935; background: #0e141c; border-radius: 10px; padding: 10px 11px; }
+.pnl-reference-card span { display: block; color: #697482; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
+.pnl-reference-card strong { display: block; margin-top: 6px; font-size: 16px; }
+.pnl-reference-card small { display: block; margin-top: 3px; color: #5f6a77; font-size: 8px; }
+
+.pnl-dynamics-panel { margin-top: 12px; }
+.pnl-dynamics-toolbar { display: flex; align-items: start; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
+.pnl-chart-latest { min-width: 150px; text-align: right; }
+.pnl-chart-latest span { display: block; color: #667180; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+.pnl-chart-latest b { display: block; margin-top: 5px; font-size: 18px; }
+.pnl-chart-latest small { display: block; margin-top: 3px; color: #667180; font-size: 9px; }
+.pnl-main-chart { margin-top: 4px; }
+
+.pnl-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin: 18px 2px 9px; }
+.pnl-section-heading small { color: #667180; font-size: 9px; }
+.pnl-cost-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
+.pnl-cost-card { border: 1px solid var(--border); background: linear-gradient(180deg,#111821 0%,#0e141b 100%); border-radius: 12px; padding: 14px; min-height: 150px; }
+.pnl-cost-card > div:first-child span { display: block; color: #7c8795; font-size: 10px; }
+.pnl-cost-card > div:first-child strong { display: block; margin-top: 7px; font-size: 19px; }
+.pnl-cost-card > b { display: block; margin-top: 10px; color: #c5cdd7; font-size: 10px; }
+.pnl-cost-track { height: 4px; margin-top: 8px; border-radius: 999px; background: #222b36; overflow: hidden; }
+.pnl-cost-track i { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.pnl-cost-card > small { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; color: #65707e; font-size: 9px; }
+.pnl-cost-card > small em { font-style: normal; font-weight: 800; }
+.pnl-cost-card > small > i { font-style: normal; color: #3d4652; }
+
+.pnl-row-total { background: rgba(255,255,255,.02); }
+.pnl-detail-section { color: #a2abb7; }
+
+@media (max-width: 1450px) {
+  .pnl-kpi-grid { grid-template-columns: repeat(3,1fr); }
+  .pnl-reference-strip { grid-template-columns: repeat(3,1fr); }
+  .pnl-cost-grid { grid-template-columns: repeat(3,1fr); }
+}
+@media (max-width: 980px) {
+  .pnl-cost-grid { grid-template-columns: repeat(2,1fr); }
+  .pnl-reference-strip { grid-template-columns: repeat(2,1fr); }
+  .pnl-filter-meta { width: 100%; margin-left: 0; }
+}
+@media (max-width: 720px) {
+  .pnl-kpi-grid, .pnl-reference-strip, .pnl-cost-grid { grid-template-columns: 1fr; }
+  .pnl-dynamics-toolbar { display: grid; }
+  .pnl-chart-latest { text-align: left; }
+  .pnl-filter-bar { align-items: stretch; }
+  .pnl-filter-bar label { width: calc(50% - 5px); }
+  .pnl-filter-bar select { width: 100%; min-width: 0; }
+  .pnl-filter-title { width: 100%; }
+  .pnl-section-heading { align-items: start; display: grid; }
+}
