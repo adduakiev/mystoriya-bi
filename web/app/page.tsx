@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BarChart3,
+  CircleDollarSign,
   Filter,
   LayoutDashboard,
   MapPin,
@@ -31,6 +32,7 @@ const nav: Array<[string, LucideIcon, string]> = [
   ["Агрегатори", Network, "/aggregators"],
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
+  ["P&L", CircleDollarSign, "/pnl"],
   ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, "/insights"]
 ];
