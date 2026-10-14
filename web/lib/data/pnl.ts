@@ -24,9 +24,12 @@ function sourceTotal(code:string,key:PnlSeriesKey,monthCount:number){
 }
 
 function calculate(get:Getter):PnlCalculated{
-  const revenue=get("revenue_total"),cogs=get("cogs_total");
+  const revenue=get("revenue_total");
   const deliveryRevenue=get("revenue_delivery"),deliveryCogs=get("cogs_delivery");
   const aggregatorRevenue=get("revenue_aggregators"),aggregatorCogs=get("cogs_aggregators");
+  // Source row "Собівартість" already contains aggregator commission. For BI merchandise COGS,
+  // use only channel COGS and keep commission once in Aggregators OPEX.
+  const cogs=deliveryCogs+aggregatorCogs;
   const marketingFot=get("marketing_fot"),media=get("facebook")+get("google"),agency=get("agency"),affiliate=get("admitad");
   const marketingTotal=marketingFot+media+agency+affiliate;
   const serviceOps=get("email_esputnik")+get("turbo_sms_ai")+get("binotel");
