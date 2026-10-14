@@ -1,17 +1,7 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  Filter,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Filter } from "lucide-react";
 import { ExplorerComparisonChart } from "@/components/ExplorerComparisonChart";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { formatUah } from "@/lib/analytics";
 import { loadExplorerData } from "@/lib/data/explorer";
 
@@ -38,16 +28,6 @@ const METRICS: Array<[ExplorerMetric, string]> = [
   ["averageCheck", "Середній чек"],
   ["markup", "Націнка грн"],
   ["markupRate", "Націнка %"]
-];
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
 ];
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -232,35 +212,12 @@ export default async function ExplorerPage({
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href]) =>
-            href ? (
-              <Link
-                key={label}
-                href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
-                className={label === "Data Explorer" ? "nav-item active" : "nav-item"}
-              >
-                <Icon size={18} />
-                {label}
-              </Link>
-            ) : (
-              <span key={label} className="nav-item nav-disabled">
-                <Icon size={18} />
-                {label}
-              </span>
-            )
-          )}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Live data connected
-          <small>{explorerRows.length} груп у поточному зрізі</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/explorer"
+        lfl={lfl}
+        statusTitle="Live data connected"
+        statusDetail={`${explorerRows.length} груп у поточному зрізі`}
+      />
 
       <section className="workspace">
         <header className="topbar">

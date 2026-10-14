@@ -1,18 +1,6 @@
 import Link from "next/link";
-import {
-  AlertTriangle,
-  BarChart3,
-  CircleCheck,
-  Filter,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { AlertTriangle, CircleCheck, Filter } from "lucide-react";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { formatUah } from "@/lib/analytics";
 import { loadInsightsData } from "@/lib/data/insights";
 import type { InsightItem } from "@/lib/insights";
@@ -20,16 +8,6 @@ import type { InsightItem } from "@/lib/insights";
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-];
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
 ];
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -133,28 +111,12 @@ export default async function InsightsPage({
 
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href]) => (
-            <Link
-              key={label}
-              href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
-              className={label === "Insights" ? "nav-item active" : "nav-item"}
-            >
-              <Icon size={18} />
-              {label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Rules engine active
-          <small>{rowCount.toLocaleString("uk-UA")} рядків у зрізі</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/insights"
+        lfl={lfl}
+        statusTitle="Rules engine active"
+        statusDetail={`${rowCount.toLocaleString("uk-UA")} рядків у зрізі`}
+      />
 
       <section className="workspace">
         <header className="topbar">

@@ -1,16 +1,6 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  Filter,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { Filter } from "lucide-react";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { KpiCard } from "@/components/KpiCard";
 import { LocationsComparisonChart } from "@/components/LocationsComparisonChart";
 import { formatUah } from "@/lib/analytics";
@@ -19,16 +9,6 @@ import { loadLocationsData } from "@/lib/data/locations";
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-];
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
 ];
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -88,31 +68,12 @@ export default async function LocationsPage({
   }));
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href]) =>
-            href ? (
-              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={label === "Заклади" ? "nav-item active" : "nav-item"}>
-                <Icon size={18} />
-                {label}
-              </Link>
-            ) : (
-              <span key={label} className="nav-item nav-disabled">
-                <Icon size={18} />
-                {label}
-              </span>
-            )
-          )}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Live data connected
-          <small>{locationRows.length} активних точок у зрізі</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/locations"
+        lfl={lfl}
+        statusTitle="Live data connected"
+        statusDetail={`${locationRows.length} активних точок у зрізі`}
+      />
 
       <section className="workspace">
         <header className="topbar">

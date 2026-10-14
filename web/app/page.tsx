@@ -1,17 +1,6 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  Filter,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck,
-  X
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { Filter, X } from "lucide-react";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { ChannelMixChart } from "@/components/ChannelMixChart";
@@ -23,16 +12,6 @@ import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-];
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
 ];
 
 function prettyDate(value: string): string {
@@ -157,31 +136,12 @@ export default async function Home({
 
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href], i) =>
-            href ? (
-              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={i === 0 ? "nav-item active" : "nav-item"}>
-                <Icon size={18} />
-                {label}
-              </Link>
-            ) : (
-              <span key={label} className="nav-item nav-disabled">
-                <Icon size={18} />
-                {label}
-              </span>
-            )
-          )}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Live data connected
-          <small>{filteredRowCount.toLocaleString("uk-UA")} / {sourceRowCount.toLocaleString("uk-UA")} rows</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/"
+        lfl={lfl}
+        statusTitle="Live data connected"
+        statusDetail={`${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows`}
+      />
 
       <section className="workspace">
         <header className="topbar">

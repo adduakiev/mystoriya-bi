@@ -1,16 +1,6 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  Filter,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { Filter } from "lucide-react";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { DeliveryVsAggregatorChart } from "@/components/DeliveryVsAggregatorChart";
@@ -21,16 +11,6 @@ import type { GrainMode, MetricMode } from "@/lib/filters";
 const MONTHS = [
   "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
   "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-];
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
 ];
 
 const METRICS: Array<[MetricMode, string]> = [
@@ -161,35 +141,12 @@ export default async function DeliveryPage({
   };
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href]) =>
-            href ? (
-              <Link
-                key={label}
-                href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href}
-                className={label === "Доставка" ? "nav-item active" : "nav-item"}
-              >
-                <Icon size={18} />
-                {label}
-              </Link>
-            ) : (
-              <span key={label} className="nav-item nav-disabled">
-                <Icon size={18} />
-                {label}
-              </span>
-            )
-          )}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Live data connected
-          <small>{rowCount.toLocaleString("uk-UA")} delivery rows</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/delivery"
+        lfl={lfl}
+        statusTitle="Live data connected"
+        statusDetail={`${rowCount.toLocaleString("uk-UA")} delivery rows`}
+      />
 
       <section className="workspace">
         <header className="topbar">

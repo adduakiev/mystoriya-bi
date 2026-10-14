@@ -1,0 +1,69 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  BarChart3,
+  LayoutDashboard,
+  MapPin,
+  Network,
+  PackageSearch,
+  Sparkles,
+  Truck
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { SidebarBrand } from "@/components/SidebarBrand";
+
+const NAV: Array<[string, LucideIcon, string]> = [
+  ["Огляд", LayoutDashboard, "/"],
+  ["Доставка", Truck, "/delivery"],
+  ["Агрегатори", Network, "/aggregators"],
+  ["Заклади", MapPin, "/locations"],
+  ["Динаміка", BarChart3, "/dynamics"],
+  ["Data Explorer", PackageSearch, "/explorer"],
+  ["Insights", Sparkles, "/insights"]
+];
+
+type DashboardSidebarProps = {
+  activeHref: string;
+  lfl: boolean;
+  statusTitle: string;
+  statusDetail: ReactNode;
+};
+
+export function DashboardSidebar({
+  activeHref,
+  lfl,
+  statusTitle,
+  statusDetail
+}: DashboardSidebarProps) {
+  return (
+    <aside className="sidebar">
+      <SidebarBrand />
+
+      <nav>
+        {NAV.map(([label, Icon, href]) => {
+          const target = lfl
+            ? `${href}${href.includes("?") ? "&" : "?"}lfl=1`
+            : href;
+
+          return (
+            <Link
+              key={label}
+              href={target}
+              prefetch={true}
+              className={href === activeHref ? "nav-item active" : "nav-item"}
+            >
+              <Icon size={18} />
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="sidebar-status">
+        <span className="status-dot" />
+        {statusTitle}
+        <small>{statusDetail}</small>
+      </div>
+    </aside>
+  );
+}

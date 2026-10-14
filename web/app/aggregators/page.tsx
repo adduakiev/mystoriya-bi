@@ -1,30 +1,10 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  LayoutDashboard,
-  MapPin,
-  Network,
-  PackageSearch,
-  Sparkles,
-  Truck
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SidebarBrand } from "@/components/SidebarBrand";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { formatUah } from "@/lib/analytics";
 import { loadAggregatorsData } from "@/lib/data/aggregators";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
-
-const nav: Array<[string, LucideIcon, string]> = [
-  ["Огляд", LayoutDashboard, "/"],
-  ["Доставка", Truck, "/delivery"],
-  ["Агрегатори", Network, "/aggregators"],
-  ["Заклади", MapPin, "/locations"],
-  ["Динаміка", BarChart3, "/dynamics"],
-  ["Data Explorer", PackageSearch, "/explorer"],
-  ["Insights", Sparkles, "/insights"]
-];
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -54,31 +34,12 @@ export default async function AggregatorsPage({
 
   return (
     <main className="shell">
-      <aside className="sidebar">
-        <SidebarBrand />
-
-        <nav>
-          {nav.map(([label, Icon, href]) =>
-            href ? (
-              <Link key={label} href={lfl ? `${href}${href.includes("?") ? "&" : "?"}lfl=1` : href} className={label === "Агрегатори" ? "nav-item active" : "nav-item"}>
-                <Icon size={18} />
-                {label}
-              </Link>
-            ) : (
-              <span key={label} className="nav-item nav-disabled">
-                <Icon size={18} />
-                {label}
-              </span>
-            )
-          )}
-        </nav>
-
-        <div className="sidebar-status">
-          <span className="status-dot" />
-          Live data connected
-          <small>{rowCount.toLocaleString("uk-UA")} aggregator rows</small>
-        </div>
-      </aside>
+      <DashboardSidebar
+        activeHref="/aggregators"
+        lfl={lfl}
+        statusTitle="Live data connected"
+        statusDetail={`${rowCount.toLocaleString("uk-UA")} aggregator rows`}
+      />
 
       <section className="workspace">
         <header className="topbar">
