@@ -8,44 +8,42 @@ function pct(v:number){return `${(v*100).toFixed(2)}%`;}
 export default async function Page(){
   const data=await loadDigitalData();
   const c=data.current;
-  const steps=[
-    {name:"Сесії",value:c.sessions,rate:1,detail:"усі візити на сайт"},
-    {name:"Додавання в кошик",value:c.addToCarts,rate:c.sessions?c.addToCarts/c.sessions:0,detail:"подія add_to_cart"},
-    {name:"Початок оформлення",value:c.checkouts,rate:c.sessions?c.checkouts/c.sessions:0,detail:"подія begin_checkout"},
-    {name:"Покупка GA4",value:c.purchases,rate:c.sessions?c.purchases/c.sessions:0,detail:"подія purchase"}
-  ];
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Воронка" statusDetail="GA4 · live"/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Funnel diagnostics" statusDetail="GA4 aggregate events"/>
     <section className="workspace">
-      <header className="topbar"><div><span className="eyebrow">DIGITAL · ВОРОНКА</span><h1>Воронка сайту</h1></div><div className="digital-source-badge">GA4 · 30 днів</div></header>
+      <header className="topbar"><div><span className="eyebrow">DIGITAL · FUNNEL</span><h1>Діагностика воронки</h1></div><div className="digital-source-badge">GA4 · агреговані події</div></header>
       <DigitalTabs active="funnel"/>
-      <section className="panel">
-        <div className="panel-head"><div><span className="eyebrow">CUSTOMER JOURNEY</span><h2>Де ми втрачаємо користувача</h2></div></div>
-        <div className="digital-source-flow">
-          {steps.map(step=><div key={step.name}><b>{n(step.value)}</b><span>{step.name} · {pct(step.rate)}</span><span>{step.detail}</span></div>)}
-        </div>
+
+      <div className="lfl-banner">
+        Поточний набір не є точною послідовною user-funnel: «сесії» та ecommerce events мають різну одиницю вимірювання. Тому нижче — діагностичні сигнали, а не «відсоток людей, які відпали».
+      </div>
+
+      <section className="digital-source-flow" style={{marginBottom:12}}>
+        <div><b>{n(c.sessions)}</b><span>Сесії</span><span>session_start</span></div>
+        <div><b>{n(c.addToCarts)}</b><span>Add to cart</span><span>кількість подій</span></div>
+        <div><b>{n(c.checkouts)}</b><span>Begin checkout</span><span>кількість подій</span></div>
+        <div><b>{n(c.purchases)}</b><span>Purchase</span><span>кількість подій</span></div>
       </section>
+
       <section className="digital-plan-grid">
         <article className="panel">
-          <span className="eyebrow">ПЕРЕХОДИ МІЖ КРОКАМИ</span>
+          <span className="eyebrow">ДІАГНОСТИЧНІ СПІВВІДНОШЕННЯ</span>
           <div className="digital-metric-list">
-            <div><b>Сесія → кошик</b><span>{pct(c.sessions?c.addToCarts/c.sessions:0)}</span></div>
-            <div><b>Кошик → checkout</b><span>{pct(c.addToCarts?c.checkouts/c.addToCarts:0)}</span></div>
-            <div><b>Checkout → purchase</b><span>{pct(c.checkouts?c.purchases/c.checkouts:0)}</span></div>
-            <div><b>Загальна конверсія</b><span>{pct(c.conversionRate)}</span></div>
+            <div><b>Purchase / Sessions</b><span>{pct(c.conversionRate)}</span></div>
+            <div><b>Checkout events / Add-to-cart events</b><span>{pct(c.addToCarts?c.checkouts/c.addToCarts:0)}</span></div>
+            <div><b>Purchase events / Checkout events</b><span>{pct(c.checkouts?c.purchases/c.checkouts:0)}</span></div>
           </div>
         </article>
         <article className="panel">
-          <span className="eyebrow">ЩО ДИВИМОСЯ ДАЛІ</span>
+          <span className="eyebrow">ТОЧНА ВОРОНКА · НАСТУПНИЙ КРОК</span>
           <div className="digital-decision-list">
-            <div><span>1</span><b>Сегментувати воронку mobile / desktop.</b></div>
-            <div><span>2</span><b>Розкласти checkout по помилках і способах оплати.</b></div>
-            <div><span>3</span><b>Зв’язати purchase GA4 з реальними замовленнями warehouse.</b></div>
+            <div><span>1</span><b>Одна одиниця вимірювання: користувач або сесія на всіх кроках.</b></div>
+            <div><span>2</span><b>Послідовність: menu → item → cart → checkout → delivery/payment → confirmed order.</b></div>
+            <div><span>3</span><b>Сегментація: mobile / desktop, channel, new / returning.</b></div>
           </div>
         </article>
       </section>
-      <small className="table-note">Важливо: add_to_cart / begin_checkout / purchase — кількість подій GA4, не унікальних людей.</small>
     </section>
   </main>;
 }

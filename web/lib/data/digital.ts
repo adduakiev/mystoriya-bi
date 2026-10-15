@@ -84,11 +84,60 @@ export type DigitalData = {
   seoPages: DigitalSeoItem[];
 };
 
+export type DigitalMonthlyRow = {
+  year: number;
+  month: number;
+  sessions: number | null;
+  purchases: number | null;
+  revenue: number | null;
+  conversionRate: number | null;
+  averageOrderValue: number | null;
+  seoClicks: number | null;
+  seoImpressions: number | null;
+  seoCtr: number | null;
+  seoPosition: number | null;
+  partial: boolean;
+};
+
+export type DigitalSourceQuality = {
+  from?: string;
+  to?: string;
+  rows: number;
+  last7Sessions?: number;
+  last7Purchases?: number;
+};
+
+export type DigitalHistory = {
+  meta: {
+    currentYear: number;
+    commonLatest: string;
+    cutoffMonth: number;
+    cutoffDay: number;
+  };
+  monthly: DigitalMonthlyRow[];
+  quality: {
+    commonLatest: string;
+    ga4: DigitalSourceQuality;
+    searchConsole: DigitalSourceQuality;
+    channels: DigitalSourceQuality;
+    devices: DigitalSourceQuality;
+    landingSnapshot: DigitalSourceQuality;
+    querySnapshot: DigitalSourceQuality;
+    pageSnapshot: DigitalSourceQuality;
+  };
+};
+
 type Raw = Record<string, any>;
 
 function num(value: unknown): number {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function nullableNum(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function metrics(raw: Raw | undefined): DigitalMetrics {
@@ -176,12 +225,73 @@ function normalize(raw: Raw): DigitalData {
   };
 }
 
-const cached = unstable_cache(
-  async () => normalize(await callBiRpc<Raw>("bi_digital_payload")),
-  ["digital-dashboard-v1"],
+function sourceQuality(raw: Raw | undefined): DigitalSourceQuality {
+  return {
+    from: raw?.from ? String(raw.from) : undefined,
+    to: raw?.to ? String(raw.to) : undefined,
+    rows: num(raw?.rows),
+    last7Sessions: raw?.last7Sessions === undefined ? undefined : num(raw.last7Sessions),
+    last7Purchases: raw?.last7Purchases === undefined ? undefined : num(raw.last7Purchases)
+  };
+}
+
+function normalizeHistory(raw: Raw): DigitalHistory {
+  return {
+    meta: {
+      currentYear: num(raw?.meta?.currentYear),
+      commonLatest: String(raw?.meta?.commonLatest ?? ""),
+      cutoffMonth: num(raw?.meta?.cutoffMonth),
+      cutoffDay: num(raw?.meta?.cutoffDay)
+    },
+    monthly: (raw?.monthly ?? []).map((row: Raw) => ({
+      year: num(row.year),
+      month: num(row.month),
+      sessions: nullableNum(row.sessions),
+      purchases: nullableNum(row.purchases),
+      revenue: nullableNum(row.revenue),
+      conversionRate: nullableNum(row.conversionRate),
+      averageOrderValue: nullableNum(row.averageOrderValue),
+      seoClicks: nullableNum(row.seoClicks),
+      seoImpressions: nullableNum(row.seoImpressions),
+      seoCtr: nullableNum(row.seoCtr),
+      seoPosition: nullableNum(row.seoPosition),
+      partial: Boolean(row.partial)
+    })),
+    quality: {
+      commonLatest: String(raw?.quality?.commonLatest ?? ""),
+      ga4: sourceQuality(raw?.quality?.ga4),
+      searchConsole: sourceQuality(raw?.quality?.searchConsole),
+      channels: sourceQuality(raw?.quality?.channels),
+      devices: sourceQuality(raw?.quality?.devices),
+      landingSnapshot: sourceQuality(raw?.quality?.landingSnapshot),
+      querySnapshot: sourceQuality(raw?.quality?.querySnapshot),
+      pageSnapshot: sourceQuality(raw?.quality?.pageSnapshot)
+    }
+  };
+}
+
+const cachedPeriod = unstable_cache(
+  async (from: string, to: string): Promise<DigitalData> => {
+    const args: Record<string, unknown> = {};
+    if (from) args.p_from = from;
+    if (to) args.p_to = to;
+    return normalize(await callBiRpc<Raw>("bi_digital_payload", args));
+  },
+  ["digital-dashboard-v2"],
   { revalidate: 300, tags: ["digital-data"] }
 );
 
-export async function loadDigitalData(): Promise<DigitalData> {
-  return cached();
+const cachedHistory = unstable_cache(
+  async (): Promise<DigitalHistory> =>
+    normalizeHistory(await callBiRpc<Raw>("bi_digital_history_payload")),
+  ["digital-history-v1"],
+  { revalidate: 300, tags: ["digital-data"] }
+);
+
+export async function loadDigitalData(range?: {from?: string; to?: string}): Promise<DigitalData> {
+  return cachedPeriod(range?.from ?? "", range?.to ?? "");
+}
+
+export async function loadDigitalHistory(): Promise<DigitalHistory> {
+  return cachedHistory();
 }
