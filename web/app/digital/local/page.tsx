@@ -3,7 +3,7 @@ import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
 function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function rate(clicks:number,impressions:number){return impressions?\`${(clicks/impressions*100).toFixed(2)}%\`:"—";}
+function rate(clicks:number,impressions:number){return impressions?`${(clicks/impressions*100).toFixed(2)}%`:"—";}
 
 export default async function Page(){
   const data=await loadDigitalLocalData();
