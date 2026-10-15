@@ -46,7 +46,7 @@ function dateLabel(value:string){
   return new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(value+"T00:00:00Z"));
 }
 function parseIso(value:string|undefined){
-  if(!value||!/^d{4}-d{2}-d{2}$/.test(value)) return null;
+  if(!value||!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return null;
   const date=new Date(value+"T00:00:00Z");
   return Number.isNaN(date.getTime())?null:date;
 }
@@ -231,8 +231,8 @@ export default async function DigitalPage({
           <Kpi label="Revenue GA4" value={money(c.purchaseRevenue)} hint="аналітична purchase revenue" change={delta(c.purchaseRevenue,p?.purchaseRevenue??null)} compareLabel={compare.label}/>
           <Kpi label="Середній чек GA4" value={money(c.averageOrderValue)} hint="purchase revenue / purchase" change={delta(c.averageOrderValue,p?.averageOrderValue??null)} compareLabel={compare.label}/>
           <Kpi label="Engagement rate" value={pct(c.engagementRate)} hint="залучені сесії / сесії" change={delta(c.engagementRate,p?.engagementRate??null)} compareLabel={compare.label}/>
-          <Kpi label="SEO кліки" value={compact(seo.clicks)} hint={range.from<searchMin?`історія GSC доступна з ${dateLabel(searchMin)}`:"Google Search Console"} change={delta(seo.clicks,prevSeo?.clicks??null)} compareLabel={compare.label}/>
-          <Kpi label="SEO CTR" value={pct(seo.ctr)} hint={`середня позиція ${seo.position.toFixed(1)} · зважено показами`} change={delta(seo.ctr,prevSeo?.ctr??null)} compareLabel={compare.label}/>
+          <Kpi label="SEO кліки" value={seoAvailable?compact(seo.clicks):"—"} hint={seoPartial?`часткове покриття з ${dateLabel(searchMin)}`:seoAvailable?"Google Search Console":`немає даних до ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.clicks,prevSeo?.clicks??null):null} compareLabel={compare.label}/>
+          <Kpi label="SEO CTR" value={seoAvailable?pct(seo.ctr):"—"} hint={seoAvailable?`середня позиція ${seo.position.toFixed(1)} · зважено показами`:`історія GSC з ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.ctr,prevSeo?.ctr??null):null} compareLabel={compare.label}/>
         </section>
 
         <section className="panel">
