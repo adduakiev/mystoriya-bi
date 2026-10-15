@@ -17,6 +17,7 @@ import { DigitalTrendChart } from "@/components/DigitalTrendChart";
 import { DigitalHistoryChart } from "@/components/DigitalHistoryChart";
 import { DIGITAL_REPORTS } from "@/lib/digital-reports";
 import { loadDigitalData, loadDigitalHistory, type DigitalMetrics, type SeoMetrics } from "@/lib/data/digital";
+import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
 const ICONS = {
   funnel: MousePointerClick,
@@ -152,9 +153,10 @@ export default async function DigitalPage({
   const compareMode=first(params.compare)==="previous"?"previous":"yoy";
   const compare=comparisonRange(range.from,range.to,compareMode);
 
-  const [data,comparison]=await Promise.all([
+  const [data,comparison,local]=await Promise.all([
     loadDigitalData({from:range.from,to:range.to}),
-    compare.from>=ga4Min?loadDigitalData({from:compare.from,to:compare.to}):Promise.resolve(null)
+    compare.from>=ga4Min?loadDigitalData({from:compare.from,to:compare.to}):Promise.resolve(null),
+    loadDigitalLocalData()
   ]);
 
   const c=data.current;
@@ -167,6 +169,23 @@ export default async function DigitalPage({
   const currentYear=Number(latest.slice(0,4));
   const selectedYear=Number(first(params.year)??currentYear);
   const selectedMonth=Number(first(params.month)??0);
+  const seoOpportunities=data.seoQueries.filter(row=>row.impressions>=1000&&row.position<=10&&row.ctr<seo.ctr);
+  const topTrafficChannel=data.channels[0]??null;
+  const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
+  const attentionSignals=[
+    local.pageSpeed&&local.pageSpeed.mobileScore<70?{
+      level:"HIGH",title:"Mobile швидкість",text:`PageSpeed mobile ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
+    }:null,
+    seoOpportunities.length?{
+      level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
+    }:null,
+    topTrafficChannel&&topTrafficChannel.conversionRate<c.conversionRate?{
+      level:"MEDIUM",title:`Канал: ${topTrafficChannel.channel}`,text:`${pct(c.sessions?topTrafficChannel.sessions/c.sessions:0)} трафіку, але purchase/session ${pct(topTrafficChannel.conversionRate)} проти ${pct(c.conversionRate)} по сайту.`,href:"/digital/channels"
+    }:null,
+    unknownLanding&&unknownLanding.sessions>0?{
+      level:"DATA",title:"Tracking landing page",text:`${compact(unknownLanding.sessions)} сесій мають landing page “(not set)”. Перевіряємо session_start / tracking.`,href:"/digital/tracking"
+    }:null
+  ].filter(Boolean) as Array<{level:string;title:string;text:string;href:string}>;
 
   return (
     <main className="shell">
@@ -285,6 +304,24 @@ export default async function DigitalPage({
             </div>
           </article>
         </section>
+
+        {attentionSignals.length>0&&<section className="panel" style={{marginTop:12}}>
+          <div className="panel-head">
+            <div><span className="eyebrow">ПОТРЕБУЄ УВАГИ</span><h2>Управлінські сигнали</h2></div>
+            <span className="pnl-source-chip">правила з фактичних даних</span>
+          </div>
+          <div className="digital-report-grid">
+            {attentionSignals.map(signal=><Link href={signal.href} className="digital-report-card" key={signal.title}>
+              <div className="digital-report-icon"><Activity size={18}/></div>
+              <div>
+                <span>{signal.level}</span>
+                <b>{signal.title}</b>
+                <p>{signal.text}</p>
+              </div>
+              <ArrowRight size={15}/>
+            </Link>)}
+          </div>
+        </section>}
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
