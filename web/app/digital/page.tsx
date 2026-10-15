@@ -46,7 +46,7 @@ function dateLabel(value:string){
   return new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(value+"T00:00:00Z"));
 }
 function parseIso(value:string|undefined){
-  if(!value||!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return null;
+  if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const date=new Date(value+"T00:00:00Z");
   return Number.isNaN(date.getTime())?null:date;
 }
@@ -158,6 +158,8 @@ export default async function DigitalPage({
   const c=data.current;
   const p:DigitalMetrics|null=comparison?.current??null;
   const seo=data.seo;
+  const seoAvailable=range.to>=searchMin;
+  const seoPartial=seoAvailable&&range.from<searchMin;
   const prevSeo:SeoMetrics|null=(comparison&&range.from>=searchMin&&compare.from>=searchMin)?comparison.seo:null;
   const topChannels=data.channels.slice(0,6);
   const currentYear=Number(latest.slice(0,4));
@@ -195,7 +197,6 @@ export default async function DigitalPage({
 
         <section className="digital-filter-grid">
           <form method="get" className="digital-filter-form">
-            <input type="hidden" name="compare" value={compareMode}/>
             <label><span>Від</span><input type="date" name="from" defaultValue={range.from} min={ga4Min} max={latest}/></label>
             <label><span>До</span><input type="date" name="to" defaultValue={range.to} min={ga4Min} max={latest}/></label>
             <label><span>Порівнювати</span>
