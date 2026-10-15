@@ -46,6 +46,7 @@ export default async function Page(){
             <div><b>Purchase GA4 · останні 7 днів</b><span>{n(q.ga4.last7Purchases??0)}</span></div>
             <div><b>Google Ads</b><span>{ads.meta.available?"дані синхронізовані":"акаунт підключений · sync очікує"}</span></div>
             <div><b>Google PageSpeed</b><span>{local.pageSpeed?`live · mobile ${n(local.pageSpeed.mobileScore)} / desktop ${n(local.pageSpeed.desktopScore)}`:"очікує sync"}</span></div>
+            <div><b>Google Business Profile</b><span>{local.locations.length?`дані синхронізовані · ${n(local.locations.length)} профілів`:"10 профілів підключено · щоденний sync ще не налаштований"}</span></div>
             <div><b>Myastoria App · GA4 property 321739013</b><span>0 рядків за 01.01.2025–14.10.2026</span></div>
           </div>
         </article>

@@ -5,6 +5,7 @@ import {
   BarChart3,
   Filter,
   Megaphone,
+  MapPinned,
   MousePointerClick,
   Search,
   ShieldCheck,
@@ -23,6 +24,7 @@ const ICONS = {
   seo: Search,
   ads: Megaphone,
   site: Activity,
+  local: MapPinned,
   audience: Users,
   tracking: ShieldCheck
 };
@@ -286,17 +288,19 @@ export default async function DigitalPage({
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
-          <small>GA4 + Search Console live · Ads підготовлений до інтеграції</small>
+          <small>GA4 + Search Console + PageSpeed live · Google Ads і Business Profile підключені</small>
         </div>
 
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
             const live=["funnel","channels","seo","site","tracking"].includes(report.slug);
+            const connected=["ads","local"].includes(report.slug);
+            const state=live?"LIVE":connected?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>
-                <span>{live?"LIVE":"ПІДГОТОВЛЕНО"}</span>
+                <span>{state}</span>
                 <b>{report.title}</b>
                 <p>{report.description}</p>
               </div>

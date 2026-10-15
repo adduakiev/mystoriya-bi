@@ -55,6 +55,15 @@ export const DIGITAL_REPORTS: DigitalReport[] = [
     decisions: ["Які landing pages продають", "Де слабка мобільна конверсія", "Які сторінки мають трафік без результату"]
   },
   {
+    slug: "local",
+    label: "Google / Maps",
+    title: "Локальний попит",
+    description: "Як люди знаходять наші заклади у Google Search і Maps: покази, дзвінки, маршрути, сайт і меню.",
+    source: "Google Business Profile",
+    metrics: ["Покази", "Дзвінки", "Маршрути", "Переходи на сайт", "Menu clicks", "Точки"],
+    decisions: ["Які точки мають найбільший локальний попит", "Де профіль Google працює слабко", "Де є потенціал для local SEO та реклами"]
+  },
+  {
     slug: "audience",
     label: "Аудиторія",
     title: "Клієнти та аудиторія",
