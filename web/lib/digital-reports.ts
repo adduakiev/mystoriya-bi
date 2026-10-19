@@ -64,6 +64,15 @@ export const DIGITAL_REPORTS: DigitalReport[] = [
     decisions: ["Які точки мають найбільший локальний попит", "Де профіль Google працює слабко", "Де є потенціал для local SEO та реклами"]
   },
   {
+    slug: "social",
+    label: "Social",
+    title: "Facebook / Instagram Organic",
+    description: "Органічна аудиторія, охоплення, контент і взаємодії Facebook та Instagram.",
+    source: "Facebook Organic + Instagram Insights",
+    metrics: ["Followers", "Organic impressions", "Reach", "Clicks", "Engagement", "Top content"],
+    decisions: ["Який контент працює", "Чи росте аудиторія", "Що дає органічний трафік", "Де потрібне підсилення рекламою"]
+  },
+  {
     slug: "commerce",
     label: "Merchant",
     title: "Google Commerce / Merchant",
