@@ -64,6 +64,15 @@ export const DIGITAL_REPORTS: DigitalReport[] = [
     decisions: ["Які точки мають найбільший локальний попит", "Де профіль Google працює слабко", "Де є потенціал для local SEO та реклами"]
   },
   {
+    slug: "commerce",
+    label: "Merchant",
+    title: "Google Commerce / Merchant",
+    description: "Продуктовий feed, видимість товарів, кліки, conversions і технічний стан Merchant Center.",
+    source: "Google Merchant Center",
+    metrics: ["Products", "Impressions", "Clicks", "CTR", "Conversions", "Approved / Disapproved", "Availability", "Price"],
+    decisions: ["Які товари отримують видимість", "Які товари мають потенціал", "Що відхилено або потребує виправлення", "Чи feed допомагає Shopping / PMax"]
+  },
+  {
     slug: "app",
     label: "App",
     title: "Мобільний застосунок",
