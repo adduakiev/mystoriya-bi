@@ -218,7 +218,7 @@ export default async function DigitalPage({
         <DigitalTabs active="overview"/>
 
         <section className="digital-control-bar">
-          <div className="digital-control-title"><Filter size={15}/><b>Глобальний період</b></div>
+          <div className="digital-control-title"><Filter size={15}/><b>Період огляду</b></div>
           <div className="digital-quick-periods">
             {[
               ["7d","7 днів"],["30d","30 днів"],["90d","90 днів"],["mtd","MTD"],["qtd","QTD"],["ytd","YTD"]
@@ -357,9 +357,9 @@ export default async function DigitalPage({
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app","social"].includes(report.slug);
+            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app"].includes(report.slug);\n            const snapshot=report.slug==="social";
             const prepared=report.slug==="commerce";
-            const state=live?"LIVE":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
+            const state=live?"LIVE":snapshot?"SNAPSHOT":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>
