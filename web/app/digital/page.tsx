@@ -357,7 +357,8 @@ export default async function DigitalPage({
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app"].includes(report.slug);\n            const snapshot=report.slug==="social";
+            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app"].includes(report.slug);
+            const snapshot=report.slug==="social";
             const prepared=report.slug==="commerce";
             const state=live?"LIVE":snapshot?"SNAPSHOT":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
