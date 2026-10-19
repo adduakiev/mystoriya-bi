@@ -64,6 +64,15 @@ export const DIGITAL_REPORTS: DigitalReport[] = [
     decisions: ["Які точки мають найбільший локальний попит", "Де профіль Google працює слабко", "Де є потенціал для local SEO та реклами"]
   },
   {
+    slug: "app",
+    label: "App",
+    title: "Мобільний застосунок",
+    description: "Повний шлях мобільного клієнта: store → install → registration → order → repeat → LTV.",
+    source: "App Store + Google Play + Firebase + Orders + Attribution",
+    metrics: ["Downloads", "First opens", "Registrations", "First buyers", "Orders", "Revenue", "CAC", "LTV", "Crash-free users"],
+    decisions: ["Скільки коштує app-клієнт", "Де втрачаємо користувача", "Які кампанії дають покупців", "Чи окупається залучення"]
+  },
+  {
     slug: "audience",
     label: "Аудиторія",
     title: "Клієнти та аудиторія",
