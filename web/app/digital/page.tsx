@@ -17,7 +17,7 @@ import { DigitalTrendChart } from "@/components/DigitalTrendChart";
 import { DigitalHistoryChart } from "@/components/DigitalHistoryChart";
 import { DIGITAL_REPORTS } from "@/lib/digital-reports";
 import { loadDigitalData, loadDigitalHistory, type DigitalMetrics, type SeoMetrics } from "@/lib/data/digital";
-import { loadDigitalLocalData } from "@/lib/data/digital-sources";
+import { loadDigitalAdsData, loadDigitalLocalData } from "@/lib/data/digital-sources";
 
 const ICONS = {
   funnel: MousePointerClick,
@@ -153,10 +153,11 @@ export default async function DigitalPage({
   const compareMode=first(params.compare)==="previous"?"previous":"yoy";
   const compare=comparisonRange(range.from,range.to,compareMode);
 
-  const [data,comparison,local]=await Promise.all([
+  const [data,comparison,local,ads]=await Promise.all([
     loadDigitalData({from:range.from,to:range.to}),
     compare.from>=ga4Min?loadDigitalData({from:compare.from,to:compare.to}):Promise.resolve(null),
-    loadDigitalLocalData()
+    loadDigitalLocalData(),
+    loadDigitalAdsData()
   ]);
 
   const c=data.current;
@@ -172,9 +173,14 @@ export default async function DigitalPage({
   const seoOpportunities=data.seoQueries.filter(row=>row.impressions>=1000&&row.position<=10&&row.ctr<seo.ctr);
   const topTrafficChannel=data.channels[0]??null;
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
+  const noConversionCampaigns=ads.campaigns.filter(row=>row.cost>=500&&row.conversions===0);
+  const noConversionSpend=noConversionCampaigns.reduce((sum,row)=>sum+row.cost,0);
   const attentionSignals=[
-    local.pageSpeed&&local.pageSpeed.mobileScore<70?{
-      level:"HIGH",title:"Mobile швидкість",text:`PageSpeed mobile ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
+    local.pageSpeed&&local.pageSpeed.mobileCategory!=="GOOD"?{
+      level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
+    }:null,
+    noConversionCampaigns.length?{
+      level:"HIGH",title:"Google Ads без conversions",text:`${noConversionCampaigns.length} кампаній витратили ${money(noConversionSpend)} і мають 0 Google Ads conversions у доступному вікні.`,href:"/digital/ads"
     }:null,
     seoOpportunities.length?{
       level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
@@ -325,15 +331,14 @@ export default async function DigitalPage({
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
-          <small>GA4 + Search Console + PageSpeed live · Google Ads і Business Profile підключені</small>
+          <small>Google layer LIVE · GA4 + Search Console + Ads + Maps + PageSpeed</small>
         </div>
 
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking"].includes(report.slug);
-            const connected=["ads","local"].includes(report.slug);
-            const state=live?"LIVE":connected?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
+            const live=["funnel","channels","seo","site","tracking","ads","local"].includes(report.slug);
+            const state=live?"LIVE":"ПІДГОТОВЛЕНО";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>

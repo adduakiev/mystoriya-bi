@@ -36,6 +36,9 @@ export default async function Page(){
         <SourceCard title="Landing pages" source={q.landingSnapshot} warning="поки 30-денний snapshot"/>
         <SourceCard title="SEO запити" source={q.querySnapshot} warning="поки 30-денний snapshot"/>
         <SourceCard title="SEO сторінки" source={q.pageSnapshot} warning="поки 30-денний snapshot"/>
+        <SourceCard title="Google Ads · Windsor" source={{from:ads.meta.from,to:ads.meta.to,rows:ads.trend.length}} warning={ads.meta.days<30?"історія накопичується":undefined}/>
+        <SourceCard title="Google / Maps · власні точки" source={{from:local.meta.from,to:local.meta.to,rows:local.meta.days*local.meta.locationCount}} warning={local.meta.days<30?"історія накопичується":undefined}/>
+        <SourceCard title="PageSpeed" source={{to:local.pageSpeed?.capturedOn,rows:local.pageSpeed?1:0}}/>
       </section>
 
       <section className="digital-plan-grid">
@@ -44,9 +47,9 @@ export default async function Page(){
           <div className="digital-metric-list">
             <div><b>Сесії сайту GA4 · останні 7 днів</b><span>{n(q.ga4.last7Sessions??0)}</span></div>
             <div><b>Purchase GA4 · останні 7 днів</b><span>{n(q.ga4.last7Purchases??0)}</span></div>
-            <div><b>Google Ads</b><span>{ads.meta.available?"дані синхронізовані":"акаунт підключений · sync очікує"}</span></div>
-            <div><b>Google PageSpeed</b><span>{local.pageSpeed?`live · mobile ${n(local.pageSpeed.mobileScore)} / desktop ${n(local.pageSpeed.desktopScore)}`:"очікує sync"}</span></div>
-            <div><b>Google Business Profile</b><span>{local.locations.length?`дані синхронізовані · ${n(local.locations.length)} профілів`:"10 профілів підключено · щоденний sync ще не налаштований"}</span></div>
+            <div><b>Google Ads</b><span>{ads.meta.available?`LIVE · ${ads.meta.days} днів · до ${dateLabel(ads.meta.to)}`:"акаунт підключений · sync очікує"}</span></div>
+            <div><b>Google PageSpeed</b><span>{local.pageSpeed?`LIVE · mobile ${n(local.pageSpeed.mobileScore)} / desktop ${n(local.pageSpeed.desktopScore)} · ${dateLabel(local.pageSpeed.capturedOn)}`:"очікує sync"}</span></div>
+            <div><b>Google Business Profile</b><span>{local.locations.length?`LIVE · ${n(local.locations.length)} власні точки · ${local.meta.days} днів`:"4 власні профілі підключено · sync очікує"}</span></div>
             <div><b>Myastoria App · GA4 property 321739013</b><span>0 рядків за 01.01.2025–14.10.2026</span></div>
           </div>
         </article>
@@ -55,7 +58,7 @@ export default async function Page(){
           <div className="digital-decision-list">
             <div><span>1</span><b>Паша: перевірити Firebase/GA4 SDK та streams мобільного застосунку — app telemetry зараз не надходить.</b></div>
             <div><span>2</span><b>Підключити точну послідовну GA4 funnel-модель.</b></div>
-            <div><span>3</span><b>Щоденно архівувати Ads, PageSpeed, GBP, landing pages і SEO snapshots.</b></div>
+            <div><span>3</span><b>Google daily sync уже автоматизований. Наступний шар — Meta / Instagram та точна funnel-модель.</b></div>
           </div>
         </article>
       </section>

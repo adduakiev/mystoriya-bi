@@ -7,6 +7,12 @@ function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
 function money(v:number){return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
 function pct(v:number){return `${(v*100).toFixed(2)}%`;}
 function ms(v:number){return `${Math.round(v)} ms`;}
+function categoryLabel(v:string){
+  if(v==="GOOD") return "Добре";
+  if(v==="NEEDS_IMPROVEMENT") return "Потребує покращення";
+  if(v==="POOR") return "Погано";
+  return "—";
+}
 
 export default async function Page(){
   const [data,local]=await Promise.all([loadDigitalData(),loadDigitalLocalData()]);
@@ -21,13 +27,13 @@ export default async function Page(){
       <DigitalTabs active="site"/>
 
       {speed&&<section className="digital-kpi-grid">
-        <article className="digital-kpi-card"><span>PageSpeed · Mobile</span><strong>{n(speed.mobileScore)}</strong><small>Google PSI score</small><em>{speed.mobileCategory}</em></article>
-        <article className="digital-kpi-card"><span>PageSpeed · Desktop</span><strong>{n(speed.desktopScore)}</strong><small>Google PSI score</small><em>{speed.desktopCategory}</em></article>
+        <article className="digital-kpi-card"><span>PageSpeed · Mobile</span><strong>{n(speed.mobileScore)}</strong><small>Google PSI score</small><em>{categoryLabel(speed.mobileCategory)}</em></article>
+        <article className="digital-kpi-card"><span>PageSpeed · Desktop</span><strong>{n(speed.desktopScore)}</strong><small>Google PSI score</small><em>{categoryLabel(speed.desktopCategory)}</em></article>
         <article className="digital-kpi-card"><span>Mobile LCP</span><strong>{ms(speed.mobileLcp)}</strong><small>Largest Contentful Paint · CrUX p75</small><em>INP {ms(speed.mobileInp)}</em></article>
         <article className="digital-kpi-card"><span>Mobile CLS</span><strong>{speed.mobileCls.toFixed(2)}</strong><small>стабільність layout · CrUX p75</small><em>Desktop CLS {speed.desktopCls.toFixed(2)}</em></article>
       </section>}
 
-      {speed&&speed.mobileCategory==="SLOW"&&<div className="lfl-banner">Mobile PageSpeed зараз слабке місце: score {n(speed.mobileScore)}, LCP {ms(speed.mobileLcp)}, CLS {speed.mobileCls.toFixed(2)}. Це вже можна використовувати як окремий UX-пріоритет.</div>}
+      {speed&&speed.mobileCategory!=="GOOD"&&<div className="lfl-banner">Mobile Core Web Vitals потребують уваги: PageSpeed {n(speed.mobileScore)}, LCP {ms(speed.mobileLcp)}, INP {ms(speed.mobileInp)}, CLS {speed.mobileCls.toFixed(2)}. Поточний статус: {categoryLabel(speed.mobileCategory)}.</div>}
 
       <section className="digital-source-flow" style={{marginBottom:12}}>
         {data.devices.map(row=><div key={row.device}><b>{row.device}</b><span>{n(row.sessions)} сесій · {pct(row.conversionRate)} конверсія</span><span>{n(row.purchases)} purchase · {money(row.purchaseRevenue)}</span></div>)}
