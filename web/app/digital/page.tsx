@@ -175,6 +175,7 @@ export default async function DigitalPage({
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
   const noConversionCampaigns=ads.campaigns.filter(row=>row.cost>=500&&row.conversions===0);
   const noConversionSpend=noConversionCampaigns.reduce((sum,row)=>sum+row.cost,0);
+  const localActions=local.summary.calls+local.summary.directions+local.summary.websiteClicks+local.summary.menuClicks;
   const attentionSignals=[
     local.pageSpeed&&local.pageSpeed.mobileCategory!=="GOOD"?{
       level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
@@ -261,6 +262,19 @@ export default async function DigitalPage({
           <Kpi label="Engagement rate" value={pct(c.engagementRate)} hint="залучені сесії / сесії" change={delta(c.engagementRate,p?.engagementRate??null)} compareLabel={compare.label}/>
           <Kpi label="SEO кліки" value={seoAvailable?compact(seo.clicks):"—"} hint={seoPartial?`часткове покриття з ${dateLabel(searchMin)}`:seoAvailable?"Google Search Console":`немає даних до ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.clicks,prevSeo?.clicks??null):null} compareLabel={compare.label}/>
           <Kpi label="SEO CTR" value={seoAvailable?pct(seo.ctr):"—"} hint={seoAvailable?`середня позиція ${seo.position.toFixed(1)} · зважено показами`:`історія GSC з ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.ctr,prevSeo?.ctr??null):null} compareLabel={compare.label}/>
+        </section>
+
+        <div className="pnl-section-heading">
+          <div><span className="eyebrow">GOOGLE LAYER · LIVE</span><h2>Реклама, локальний попит та швидкість</h2></div>
+          <small>Ads: {ads.meta.days} днів · Maps: {local.meta.days} днів · PageSpeed: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}</small>
+        </div>
+        <section className="digital-kpi-grid">
+          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{ads.meta.days} днів автоматичного імпорту</small><em>Google Ads</em></article>
+          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{ads.summary.conversions.toFixed(1)} conversions</em></article>
+          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas.toFixed(2)}x</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
+          <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{local.meta.locationCount} власні точки</em></article>
+          <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{local.meta.days} днів</em></article>
+          <article className="digital-kpi-card"><span>PageSpeed Mobile</span><strong>{local.pageSpeed?compact(local.pageSpeed.mobileScore):"—"}</strong><small>PSI score · CrUX</small><em>{local.pageSpeed?.mobileCategory==="GOOD"?"Добре":local.pageSpeed?.mobileCategory==="POOR"?"Погано":"Потребує покращення"}</em></article>
         </section>
 
         <section className="panel">
