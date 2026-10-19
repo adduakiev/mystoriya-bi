@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import {
   BarChart3,
   CircleDollarSign,
+  Globe2,
   LayoutDashboard,
   MapPin,
   Network,
@@ -20,6 +21,7 @@ const NAV: Array<[string, LucideIcon, string]> = [
   ["Заклади", MapPin, "/locations"],
   ["Динаміка", BarChart3, "/dynamics"],
   ["P&L", CircleDollarSign, "/pnl"],
+  ["Digital", Globe2, "/digital"],
   ["Data Explorer", PackageSearch, "/explorer"],
   ["Insights", Sparkles, "/insights"]
 ];
