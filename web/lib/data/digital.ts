@@ -3,6 +3,7 @@ import { callBiRpc } from "@/lib/data/source";
 
 export type DigitalMetrics = {
   sessions: number;
+  activeUsers: number;
   engagedSessions: number;
   engagementRate: number;
   addToCarts: number;
@@ -143,6 +144,7 @@ function nullableNum(value: unknown): number | null {
 function metrics(raw: Raw | undefined): DigitalMetrics {
   return {
     sessions: num(raw?.sessions),
+    activeUsers: num(raw?.activeUsers),
     engagedSessions: num(raw?.engagedSessions),
     engagementRate: num(raw?.engagementRate),
     addToCarts: num(raw?.addToCarts),
