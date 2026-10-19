@@ -4,12 +4,19 @@ import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
 function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
 function rate(clicks:number,impressions:number){return impressions?`${(clicks/impressions*100).toFixed(2)}%`:"—";}
+function pct(v:number){return `${(v*100).toFixed(2)}%`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
 
 export default async function Page(){
   const data=await loadDigitalLocalData();
   const s=data.summary;
   const available=data.locations.length>0;
+  const ranked=data.locations.map(row=>({
+    ...row,
+    intentActions:row.calls+row.directions+row.websiteClicks+row.menuClicks,
+    intentRate:row.impressions?(row.calls+row.directions+row.websiteClicks+row.menuClicks)/row.impressions:0
+  })).sort((a,b)=>b.intentActions-a.intentActions);
+  const topIntent=ranked[0]??null;
 
   return <main className="shell">
     <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`LIVE · ${data.meta.locationCount} власні точки · ${data.meta.days} днів`:"джерело підключено · sync очікує"}/>
@@ -33,17 +40,37 @@ export default async function Page(){
         </section>
 
         <div className="lfl-banner">У цьому звіті свідомо тільки 4 власні точки М’ЯСТОРІЇ. Франшизи, MARMOO та Meat Bar сюди не змішуємо. Період: {dateLabel(data.meta.from)} — {dateLabel(data.meta.to)}.</div>
+
+        {topIntent&&<section className="content-grid">
+          <article className="panel">
+            <span className="eyebrow">LOCAL INTENT</span>
+            <div className="digital-metric-list">
+              <div><b>Усі локальні дії</b><span>{n(s.calls+s.directions+s.websiteClicks+s.menuClicks)}</span></div>
+              <div><b>Дії / покази</b><span>{rate(s.calls+s.directions+s.websiteClicks+s.menuClicks,s.impressions)}</span></div>
+              <div><b>Найбільше локальних дій</b><span>{n(topIntent.intentActions)} · ID …{topIntent.locationId.split("/").pop()?.slice(-6)}</span></div>
+            </div>
+          </article>
+          <article className="panel">
+            <span className="eyebrow">ЩО ВВАЖАЄМО НАМІРОМ</span>
+            <div className="digital-decision-list">
+              <div><span>1</span><b>Маршрут до закладу.</b></div>
+              <div><span>2</span><b>Дзвінок або перехід на сайт.</b></div>
+              <div><span>3</span><b>Перегляд / взаємодія з меню.</b></div>
+            </div>
+          </article>
+        </section>}
+
         <section className="panel">
           <div className="panel-head">
             <div><span className="eyebrow">LOCATIONS</span><h2>Локальний попит по профілях</h2></div>
           </div>
           <div className="management-table-wrap">
             <div className="management-table" style={{minWidth:980}}>
-              <div className="table-row table-head" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .7fr .7fr"}}>
-                <span>Профіль</span><span>Покази</span><span>Дзвінки</span><span>Маршрути</span><span>Сайт</span><span>Меню</span>
+              <div className="table-row table-head" style={{gridTemplateColumns:"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr"}}>
+                <span>Профіль</span><span>Покази</span><span>Дзвінки</span><span>Маршрути</span><span>Сайт</span><span>Меню</span><span>Дії</span><span>Action rate</span>
               </div>
-              {data.locations.map(row=><div className="table-row" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .7fr .7fr"}} key={row.locationId}>
-                <div><b>{row.locationTitle}</b><small className="table-note">{row.locationId.split("/").pop()?.slice(-6)}</small></div><span>{n(row.impressions)}</span><span>{n(row.calls)}</span><span>{n(row.directions)}</span><span>{n(row.websiteClicks)}</span><span>{n(row.menuClicks)}</span>
+              {ranked.map(row=><div className="table-row" style={{gridTemplateColumns:"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr"}} key={row.locationId}>
+                <div><b>{row.locationTitle}</b><small className="table-note">{row.locationId.split("/").pop()?.slice(-6)}</small></div><span>{n(row.impressions)}</span><span>{n(row.calls)}</span><span>{n(row.directions)}</span><span>{n(row.websiteClicks)}</span><span>{n(row.menuClicks)}</span><span>{n(row.intentActions)}</span><span>{pct(row.intentRate)}</span>
               </div>)}
             </div>
           </div>
