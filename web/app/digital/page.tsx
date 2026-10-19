@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   Users,
   Smartphone,
-  ShoppingBag
+  ShoppingBag,
+  Share2
 } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
@@ -28,6 +29,7 @@ const ICONS = {
   ads: Megaphone,
   site: Activity,
   local: MapPinned,
+  social: Share2,
   commerce: ShoppingBag,
   app: Smartphone,
   audience: Users,
@@ -355,7 +357,7 @@ export default async function DigitalPage({
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app"].includes(report.slug);
+            const live=["funnel","channels","seo","site","tracking","ads","local","audience","app","social"].includes(report.slug);
             const prepared=report.slug==="commerce";
             const state=live?"LIVE":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
