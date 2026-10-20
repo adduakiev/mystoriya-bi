@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "timezone": "Europe/Kyiv",
+  "maxConcurrentAgents": 1,
+  "timeoutMsPerAgent": 180000,
+  "maxInputBytes": 65536,
+  "order": ["agent-sales-retail", "agent-digital-ads", "agent-seo-content", "agent-bi-uxui", "agent-executive-lead"],
+  "routes": {
+    "agent-sales-retail": ["agent-digital-ads", "agent-executive-lead"],
+    "agent-digital-ads": ["agent-seo-content", "agent-executive-lead"],
+    "agent-seo-content": ["agent-bi-uxui", "agent-executive-lead"],
+    "agent-bi-uxui": ["agent-executive-lead"],
+    "agent-executive-lead": []
+  }
+}

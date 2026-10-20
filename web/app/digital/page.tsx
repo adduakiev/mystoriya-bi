@@ -40,7 +40,7 @@ const MONTHS=["Увесь період / YTD","Січень","Лютий","Бе�
 
 function first(value:string|string[]|undefined){return Array.isArray(value)?value[0]:value;}
 function compact(value:number){return Math.round(value).toLocaleString("uk-UA");}
-function money(value:number){return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;}
+function money(value:number|null){if(value===null)return "—";return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;}
 function pct(value:number){return `${(value*100).toFixed(2)}%`;}
 function delta(current:number,previous:number|null){
   if(previous===null||previous===0) return null;
@@ -216,6 +216,7 @@ export default async function DigitalPage({
         </header>
 
         <DigitalTabs active="overview"/>
+        <div className="lfl-banner">Дати даних: GA4 — {history.quality.ga4.to ?? "невідомо"}; канали — {history.quality.channels.to ?? "невідомо"}; пристрої — {history.quality.devices.to ?? "невідомо"}; GSC — {history.quality.searchConsole.to ?? "невідомо"}. Зрізи з різними датами не є повністю зіставними. Дата обробки не підтверджує свіжість джерела.</div>
 
         <section className="digital-control-bar">
           <div className="digital-control-title"><Filter size={15}/><b>Період огляду</b></div>
@@ -277,7 +278,7 @@ export default async function DigitalPage({
         <section className="digital-kpi-grid">
           <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{ads.meta.days} днів автоматичного імпорту</small><em>Google Ads</em></article>
           <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{ads.summary.conversions.toFixed(1)} conversions</em></article>
-          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas.toFixed(2)}x</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
+          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${ads.summary.roas.toFixed(2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
           <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{local.meta.locationCount} власні точки</em></article>
           <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{local.meta.days} днів</em></article>
           <article className="digital-kpi-card"><span>PageSpeed Mobile</span><strong>{local.pageSpeed?compact(local.pageSpeed.mobileScore):"—"}</strong><small>PSI score · CrUX</small><em>{local.pageSpeed?.mobileCategory==="GOOD"?"Добре":local.pageSpeed?.mobileCategory==="POOR"?"Погано":"Потребує покращення"}</em></article>

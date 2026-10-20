@@ -1,16 +1,18 @@
 import { unstable_cache } from "next/cache";
 import { callBiRpc } from "@/lib/data/source";
 
+import { metricRatio } from "@/lib/digital-quality";
+
 type Raw=Record<string,any>;
 const num=(v:unknown)=>{const n=Number(v??0);return Number.isFinite(n)?n:0;};
 
 export type AdsCampaign={
   campaignName:string; cost:number; clicks:number; impressions:number;
-  conversions:number; conversionValue:number; ctr:number; cpc:number; cpa:number; roas:number;
+  conversions:number; conversionValue:number; ctr:number|null; cpc:number|null; cpa:number|null; roas:number|null;
 };
 export type DigitalAdsData={
   meta:{available:boolean;from:string;to:string;days:number;maxWindowDays:number};
-  summary:{cost:number;clicks:number;impressions:number;conversions:number;conversionValue:number;ctr:number;cpc:number;cpa:number;roas:number};
+  summary:{cost:number;clicks:number;impressions:number;conversions:number;conversionValue:number;ctr:number|null;cpc:number|null;cpa:number|null;roas:number|null};
   campaigns:AdsCampaign[];
   trend:Array<{date:string;cost:number;clicks:number;impressions:number;conversions:number;conversionValue:number}>;
 };
@@ -39,8 +41,8 @@ function normalizeAds(raw:Raw):DigitalAdsData{
   const s=raw?.summary??{};
   return {
     meta:{available:Boolean(raw?.meta?.available),from:String(raw?.meta?.from??""),to:String(raw?.meta?.to??""),days:num(raw?.meta?.days),maxWindowDays:num(raw?.meta?.maxWindowDays)},
-    summary:{cost:num(s.cost),clicks:num(s.clicks),impressions:num(s.impressions),conversions:num(s.conversions),conversionValue:num(s.conversionValue),ctr:num(s.ctr),cpc:num(s.cpc),cpa:num(s.cpa),roas:num(s.roas)},
-    campaigns:(raw?.campaigns??[]).map((x:Raw)=>({campaignName:String(x.campaign_name??"—"),cost:num(x.cost),clicks:num(x.clicks),impressions:num(x.impressions),conversions:num(x.conversions),conversionValue:num(x.conversion_value),ctr:num(x.ctr),cpc:num(x.cpc),cpa:num(x.cpa),roas:num(x.roas)})),
+    summary:{cost:num(s.cost),clicks:num(s.clicks),impressions:num(s.impressions),conversions:num(s.conversions),conversionValue:num(s.conversionValue),ctr:metricRatio(s.clicks,s.impressions),cpc:metricRatio(s.cost,s.clicks),cpa:metricRatio(s.cost,s.conversions),roas:metricRatio(s.conversionValue,s.cost)},
+    campaigns:(raw?.campaigns??[]).map((x:Raw)=>({campaignName:String(x.campaign_name??"—"),cost:num(x.cost),clicks:num(x.clicks),impressions:num(x.impressions),conversions:num(x.conversions),conversionValue:num(x.conversion_value),ctr:metricRatio(x.clicks,x.impressions),cpc:metricRatio(x.cost,x.clicks),cpa:metricRatio(x.cost,x.conversions),roas:metricRatio(x.conversion_value,x.cost)})),
     trend:(raw?.trend??[]).map((x:Raw)=>({date:String(x.date??""),cost:num(x.cost),clicks:num(x.clicks),impressions:num(x.impressions),conversions:num(x.conversions),conversionValue:num(x.conversionValue)}))
   };
 }
@@ -61,7 +63,7 @@ function normalizeLocal(raw:Raw):DigitalLocalData{
   };
 }
 
-const adsCache=unstable_cache(async()=>normalizeAds(await callBiRpc<Raw>("bi_digital_ads_payload")),["digital-ads-v1"],{revalidate:300,tags:["digital-data"]});
+const adsCache=unstable_cache(async()=>normalizeAds(await callBiRpc<Raw>("bi_digital_ads_payload")),["digital-ads-v2"],{revalidate:300,tags:["digital-data"]});
 const localCache=unstable_cache(async()=>normalizeLocal(await callBiRpc<Raw>("bi_digital_local_payload")),["digital-local-v1"],{revalidate:300,tags:["digital-data"]});
 const appCache=unstable_cache(async()=>normalizeApp(await callBiRpc<Raw>("bi_digital_app_payload")),["digital-app-v1"],{revalidate:300,tags:["digital-data"]});
 const merchantCache=unstable_cache(async()=>normalizeMerchant(await callBiRpc<Raw>("bi_digital_merchant_payload")),["digital-merchant-v1"],{revalidate:300,tags:["digital-data"]});
