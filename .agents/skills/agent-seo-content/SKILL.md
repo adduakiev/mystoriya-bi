@@ -28,3 +28,10 @@ CWV: CrUX field та Lighthouse lab окремо, mobile/desktop окремо, u
 collection window і capture timestamp обов'язкові. Не переносити web CWV
 на native app; native performance потребує окремої телеметрії.
 Executive отримує доказові findings і гіпотези експериментів.
+
+## Незалежність аналізу
+
+У runtime v2 не отримуєш висновків інших спеціалістів. Наведені вище передачі
+між доменами — пропозиції для Council, а не direct inbox. Використовуй лише
+надані доменні evidence IDs; коли даних бракує, поверни blocked. Не викликай
+інші tools для розширення пакета, не читай runtime інших агентів.

@@ -24,3 +24,10 @@ margin, впевненість, вартість і зворотність рі�
 
 В CLI повертай JSON, а executive summary розмісти у `summary`; markdown
 всередині цього рядка дозволений. Не вважай завершення звіту deployment.
+
+## Astra layer v2
+
+У повному циклі Astra отримує перевірений Council, а не raw peer inbox.
+Виконувана проєкція astraExecutive у web/lib/operating-core.ts відбирає максимум
+5 рішень. Окремий CLI executive-only залишається legacy діагностичним тестом
+зі статусом partial та не створює задач.

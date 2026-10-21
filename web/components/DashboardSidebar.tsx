@@ -15,6 +15,7 @@ import type { LucideIcon } from "lucide-react";
 import { SidebarBrand } from "@/components/SidebarBrand";
 
 const NAV: Array<[string, LucideIcon, string]> = [
+  ["Оперативне керування", Sparkles, "/operating"],
   ["Огляд", LayoutDashboard, "/"],
   ["Доставка", Truck, "/delivery"],
   ["Агрегатори", Network, "/aggregators"],

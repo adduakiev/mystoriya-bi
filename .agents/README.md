@@ -1,42 +1,50 @@
-# М'ясторія: п'ять агентів
+# Agent Foundation + локальний Operating Layer
 
-Потрібні Node.js і авторизований Codex CLI (`codex exec`). Залежностей npm немає.
-Запуски строго послідовні: sales → ads → seo → ux → executive.
-П'ять LLM-викликів максимум, без автоматичних повторів, timeout 180 s/agent.
-Модель успадковується з CLI. Byte limits обмежують пакет, але не є лімітом
-оплачуваних токенів. Доступні tools і облікові дані визначає середовище CLI.
+Foundation v1 зафіксовано окремим комітом `ba46e2a`. Наступний шар додає незалежність аналізу, quality gate, Council, Astra й задачі. Це ще не розгорнутий Digital Intelligence 3.0.
+
+## Перевірка
+
+Node >=22.13, npm, авторизований Codex CLI для live-аналізу.
 
 ```powershell
-node .agents/run.mjs --input C:\private\evidence.json
-node --test .agents/run.test.mjs
+npm ci --prefix web
+npm test
+npm run check
 ```
 
-Вхід: `{ "as_of": "2026-10-20T00:00:00Z", "evidence": [
-{ "id": "source-check", "observed_at": "2026-10-19T12:00:00Z",
-"summary": "Approved, pseudonymized evidence with source, period and limitations" }
-] }`. Зберігайте вхід поза Git. Пакет готується з дозволених джерел; цей
-launcher самостійно не імпортує Windsor/SYRVE і не підтверджує свіжість даних.
-Валідація перевіряє посилання на докази, але не доводить істинність LLM-висновку.
+`npm run check`: тести → TypeScript → production build. Без npm у PATH після встановлення залежностей можна виконати `node scripts/check.mjs`.
 
-`.agents/data_bus.json` створюється при запуску. Оркестратор володіє записом;
-агенти повертають структуровані findings. Маршрути в orchestrator.json.
-Контракт у CONTRACT.md, схема відповіді у output.schema.json.
-`runtime/executive-summary.md` — останній успішний звіт; перевіряйте його
-дату і поточний data_bus.status, оскільки невдалий запуск не стирає минулий звіт.
-При аварійному завершенні процесу може залишитися run.lock: перед ручним
-видаленням переконайтеся, що попередній runner завершився.
+## Потік
 
-Для перевірки без витрати токенів:
-`node .agents/run.mjs --input PRIVATE_PACKET --replay PRIVATE_RESULTS`.
-Replay читає map agent-name→response і перевіряє весь маршрут. Він явно
-позначений replay і не є новим незалежним LLM-аналізом.
-`--executive-only` виконує один виклик, status=partial: спеціалісти не запускалися.
+Collector → Data Quality → незалежні specialists → Council → Astra → cockpit → task drafts.
+Чотири specialists запускаються послідовно, кожен отримує лише свій домен після quality gate та порожній inbox. Peer conclusions не є вхідними фактами.
+Data Quality (`qualityGate`), Council (`buildCouncil`) і Astra (`astraExecutive`) зараз детерміновані шари правил, не додаткові LLM-виклики. Council відокремлює FACT/INFERENCE/RECOMMENDATION/BLOCKED. Astra обирає до п'яти питань.
+До чотирьох Codex-викликів, без retries, timeout 180s кожен. Заблокований домен не витрачає LLM-виклик.
 
-Runtime, bus і приватні результати ігноруються Git. Не вставляйте business
-exports до skills, конфігурації або tracked fixtures.
+## Collector
 
-Це локальний виконуваний runtime. Він не встановлює фоновий процес чи cloud
-scheduler. Для щоденної експлуатації потрібні runner host, актуальний пакет,
-дійсна CLI-авторизація та доступна квота. Автоматичний розклад задавайте
-через підтримуваний scheduler після визначення джерела й часу оновлення.
-Публікація на Vercel сама по собі не запускає цей локальний CLI.
+Лише `bi_digital_payload`, `bi_digital_history_payload`, `bi_digital_ads_payload`. Проєкція фіксованих агрегатів відкидає raw payload/PII. Source/date/status/coverage/confidence обов'язкові. SYRVE unknown; валюта legacy Ads RPC не підтверджена. Targets/forecasts не підставляються.
+
+Локальний сервер читає секрет із Git-ignored `web/.env.local`. Після його запуску:
+
+```powershell
+$env:BI_LOCAL_URL = "http://localhost:3100"
+node --experimental-strip-types .agents/collect.mjs
+node --experimental-strip-types .agents/run.mjs --input .agents/runtime/collected-input.json
+```
+
+Прямий HTTPS RPC також підтримується через securely configured `BI_SUPABASE_URL`, `BI_SUPABASE_ANON_KEY`, `BI_ACCESS_PASSWORD`. Секрети не потрапляють у пакет. Scheduler не встановлено.
+Повний run вимагає InputPacket v2 з `web/lib/operating-core.ts`. Legacy summary packet дозволений лише через `--executive-only` (partial). `--replay PRIVATE_RESULTS.json` перевіряє протокол без LLM і не дозволяє створення задач.
+
+## Runtime
+
+`.agents/data_bus.json` — поточний run; єдиний автор — оркестратор. `runtime/run.lock` блокує конкуренцію. Збій зберігає failed status; старі results не домішуються. `runtime/latest.json` і executive-summary.md оновлюються після успіху, тому завжди перевіряти поточний bus. Після аварії lock видаляється лише після перевірки завершення процесу. Кожен завершений/невдалий run архівується в `runtime/runs/<run_id>.json`. Runtime не комітити.
+
+Cockpit `/operating` читає поточні aggregates та повторно перевіряє Council. Replay/partial/старший за 24h/невідповідний поточним даним run не може створювати задачі.
+Task API `/api/operating/tasks`: GET/POST/PATCH, cookie auth, same-origin mutations, body limit, revision conflicts, atomic local writes. NEW → IN PROGRESS → DONE → CHECK RESULT. Створення задачі — явна дія користувача, без виконання бізнес-операцій.
+Store: `.agents/runtime/tasks.json`; production-процес вимагає абсолютний `OPERATING_TASKS_PATH`. На Vercel запис вимкнено до durable adapter. `OPERATING_BUS_PATH` задає локальну шину.
+
+## Межі
+
+Rules confidence — консервативна оцінка якості, не статистична ймовірність. Exact-key конфлікти не є повним NLP-аналізом. Спільний evidence не доводить причину. Будь-який impact_uah блокується до появи виміряного impact-контракту.
+Read-only sandbox CLI не обмежує сам по собі MCP; інструкції забороняють tool calls і читання інших agent outputs. Повний live-цикл потребує квоти та acceptance-перевірки.

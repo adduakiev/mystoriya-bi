@@ -14,7 +14,25 @@
 - Використовується npm; pnpm lock прибрано, package-lock звірено, чистий npm ci пройшов.
 - Live-перевірка оновлених локальних Overview/Ads/SEO пройшла: HTTP 200, без runtime errors; 390 px без горизонтального overflow. Секрет лише в Git-ignored .env.local.
 - Foundation-коміт фіксує перевірений локальний фундамент і frontend. Push/deploy не виконано.
-- Council, quality gate і cockpit — наступний локальний етап, не реліз Digital 3.0.
+- Foundation v1: `ba46e2a`. Локально реалізовано наступний Operating Layer; це не production-реліз Digital 3.0.
+
+## Поточне доповнення: Operating Layer
+
+- [x] Незалежні specialists: domain-only evidence, порожній peer inbox, послідовний запуск.
+- [x] Data Quality Agent (детерміновані правила), strict InputPacket v2.
+- [x] Окремі Council та Astra: classifications, conflicts, quality recheck, максимум 5 рішень.
+- [x] Aggregate-only collector із трьох існуючих RPC; живий збір дав 6 метрик, 1 недоступну.
+- [x] Локальна сторінка `/operating`, KPI/напрям/зміни/причини/рішення/задачі.
+- [x] Task Engine з local persistence, auth, same-origin, revisions і контрольованими статусами.
+- [x] Replay повного потоку на живому aggregate packet. Це НЕ live LLM-цикл.
+- [x] 14 автоматичних тестів; TypeScript і build пройшли під час інтеграції.
+- [x] Локальний browser smoke: Overview/Ads/SEO/Operating — HTTP 200; runtime errors 0;
+  task GET 200, cross-origin POST 403; 390px без document overflow.
+- [ ] Повний незалежний live LLM-цикл — не підтверджено; делегований агент натрапив на квоту.
+- [ ] Production durable storage, scheduler, deployment — не виконано.
+
+Деталі: [архітектура](OPERATING-ARCHITECTURE.md), [release report](RELEASE-REPORT-2026-10-20.md).
+Поточний bus позначений **replay**: задачі з нього не створюються.
 
 ## 1. Що зроблено
 
@@ -39,7 +57,8 @@
 - [ ] Опублікувати локальні зміни: Foundation commit локально є; push / deployment не виконано.
 - [x] Перевірити оновлені Ads, SEO й overview локально з реальними даними. Після майбутнього deployment потрібен окремий smoke test.
 - [ ] Запустити повний live-цикл усіх п'яти агентів з актуальними доказами.
-- [ ] Налаштувати щоденний scheduler і автоматичне формування вхідного пакета.
+- [x] Реалізувати автоматичне формування aggregate input packet.
+- [ ] Налаштувати щоденний scheduler.
 - [ ] Завершити збір GA4/GSC daily slices: попередній агент зупинився через квоту; завершення не підтверджено.
 - [ ] Підключити правильний Meta Ads account та Instagram.
 - [ ] Узгодити й підключити SYRVE/backend orders, order_events, refunds та line items.
@@ -176,3 +195,6 @@ source timestamps, row limits і completeness. Наявність файлу н�
 - Тести: [`digital-quality.test.mjs`](../web/tests/digital-quality.test.mjs).
 - Runtime-звіти — локально в `.agents/runtime/`, виключені з Git.
 - Детальний аудит і сирі результати збору зберігаються поза публічним репозиторієм.
+# Stabilization verification — 2026-10-21
+
+Актуальний фінальний стан і межі: [STABILIZATION-2026-10-21.md](STABILIZATION-2026-10-21.md). Повторно перевірено Overview / Ads / SEO / Operations, desktop/mobile, контраст і HTTP Task API. Нових commit/push/PR немає; production persistence/deployment/DB не змінювалися. Єдиний lockfile: `web/package-lock.json` (npm). Повний перелік змін входить до окремого audit package.

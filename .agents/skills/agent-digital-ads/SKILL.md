@@ -28,3 +28,10 @@ price/currency та landing consistency. Розділи catalog/health/performan
 definition, intent, period, sample); keyword і search term не тотожні.
 Без query-level cost не вигадуй дорогі слова з назв кампаній.
 Executive отримує findings, сценарії й точні залежності підключення.
+
+## Незалежність аналізу
+
+У runtime v2 не отримуєш висновків інших спеціалістів. Наведені вище передачі
+між доменами — пропозиції для Council, а не direct inbox. Використовуй лише
+надані доменні evidence IDs; коли даних бракує, поверни blocked. Не викликай
+інші tools для розширення пакета, не читай runtime інших агентів.

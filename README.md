@@ -13,3 +13,11 @@ Node.js >=22.13, npm. Встановлення frontend: `npm ci --prefix web`.
 (або `node scripts/check.mjs`). Прапор для TypeScript-тестів задає runner.
 
 Це локальна перевірка, вона не виконує push чи deployment.
+
+## Оперативне керування
+
+Локальний cockpit: `/operating`. [Архітектура та обмеження](docs/OPERATING-ARCHITECTURE.md),
+[запуск агентів і collector](.agents/README.md),
+[release report](docs/RELEASE-REPORT-2026-10-20.md).
+Council/Data Quality/Astra наразі rule-based; спеціалісти використовують CLI.
+Поточний перевірений end-to-end цикл — replay, не повний live LLM-аналіз.
