@@ -4,16 +4,15 @@ import { DigitalAdsTrendChart } from "@/components/DigitalAdsTrendChart";
 import { loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
 
 function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function money(v:number){return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
-function pct(v:number){return `${(v*100).toFixed(2)}%`;}
-function x(v:number){return `${v.toFixed(2)}x`;}
+function money(v:number|null){if(v===null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
+function pct(v:number|null){if(v===null)return "—";return `${(v*100).toFixed(2)}%`;}
+function x(v:number|null){if(v===null)return "—";return `${v.toFixed(2)}x`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
 function signal(r:AdsCampaign){
   if(r.cost>=500&&r.conversions===0) return {label:"0 conversions",cls:"negative"};
-  if(r.conversions>0&&r.conversionValue===0) return {label:"Value не задано",cls:""};
-  if(r.roas>=5) return {label:"Сильна",cls:"positive"};
-  if(r.roas>=2) return {label:"Стабільна",cls:"positive"};
-  if(r.roas>0&&r.roas<1) return {label:"Низький ROAS",cls:"negative"};
+  if(r.conversions>0&&r.conversionValue===0) return {label:"Value = 0",cls:""};
+  if(r.roas===null) return {label:"ROAS не визначено",cls:""};
+  if(r.roas>0&&r.roas<1) return {label:"Value нижче spend",cls:"negative"};
   return {label:"Перевірити",cls:""};
 }
 
@@ -52,7 +51,7 @@ export default async function Page(){
             <span className="eyebrow">ЯК ЧИТАТИ</span>
             <div className="digital-decision-list">
               <div><span>1</span><b>ROAS тут — атрибуція Google Ads, не фінальний бізнес-ROAS.</b></div>
-              <div><span>2</span><b>Value = 0 при conversions означає, що частина conversion actions не має грошової цінності.</b></div>
+              <div><span>2</span><b>Value = 0 при conversions потребує перевірки цілей і передавання цінності; це не доводить відсутність продажів.</b></div>
               <div><span>3</span><b>Кампанії з витратами та 0 conversions — перші кандидати на перевірку.</b></div>
             </div>
           </article>
@@ -69,7 +68,7 @@ export default async function Page(){
             <div className="table-row table-head" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .8fr .8fr .7fr .9fr"}}><span>Кампанія</span><span>Spend</span><span>Кліки</span><span>Conv.</span><span>CPA</span><span>Conv. value</span><span>ROAS</span><span>Сигнал</span></div>
             {data.campaigns.map(r=>{const s=signal(r);return <div className="table-row" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .8fr .8fr .7fr .9fr"}} key={r.campaignName}><b>{r.campaignName}</b><span>{money(r.cost)}</span><span>{n(r.clicks)}</span><span>{r.conversions.toFixed(1)}</span><span>{money(r.cpa)}</span><span>{money(r.conversionValue)}</span><span>{x(r.roas)}</span><span className={s.cls}>{s.label}</span></div>})}
           </div></div>
-          <small className="table-note">Це рекламна атрибуція Google Ads. Реальний бізнес-ROAS згодом рахуємо через фактичні замовлення та виручку warehouse.</small>
+          <small className="table-note">«—» означає, що показник неможливо обчислити: відсутні дані або знаменник дорівнює нулю. ROAS не визначає прибутковість без маржі та перевірки цілей конверсій. Це рекламна атрибуція Google Ads. Реальний бізнес-ROAS згодом рахуємо через фактичні замовлення та виручку warehouse.</small>
         </section>
       </>}
     </section>

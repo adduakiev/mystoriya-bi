@@ -218,3 +218,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Private agent state and evidence; skills and runner remain versioned.
+.agents/data_bus.json
+.agents/data_bus.json.tmp
+.agents/runtime/
+
+# Frontend dependencies and build output
+web/node_modules/
+web/.next/
+web/tsconfig.tsbuildinfo
+web/next-env.d.ts
+web/.env*
+!web/.env.example
+!web/lib/
+!web/lib/digital-quality.ts

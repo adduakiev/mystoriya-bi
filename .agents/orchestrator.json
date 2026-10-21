@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "timezone": "Europe/Kyiv",
+  "maxConcurrentAgents": 1,
+  "timeoutMsPerAgent": 180000,
+  "maxInputBytes": 65536,
+  "order": ["agent-sales-retail", "agent-digital-ads", "agent-seo-content", "agent-bi-uxui", "agent-executive-lead"],
+  "routes": {
+    "agent-sales-retail": ["ai-council"],
+    "agent-digital-ads": ["ai-council"],
+    "agent-seo-content": ["ai-council"],
+    "agent-bi-uxui": ["ai-council"],
+    "agent-executive-lead": []
+  }
+}

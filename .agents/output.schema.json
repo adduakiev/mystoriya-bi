@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["agent", "summary", "findings"],
+  "properties": {
+    "agent": {"type": "string"},
+    "summary": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "kind", "insight", "action", "evidence_ids", "impact_uah", "impact_basis"],
+        "properties": {
+          "key": {"type": "string"},
+          "kind": {"type": "string", "enum": ["fact", "hypothesis", "blocked"]},
+          "insight": {"type": "string"},
+          "action": {"type": "string"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "impact_uah": {"type": ["number", "null"]},
+          "impact_basis": {"type": "string"}
+        }
+      }
+    }
+  }
+}

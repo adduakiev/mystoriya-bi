@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { callBiRpc } from "@/lib/data/source";
+import { snapshotDate } from "@/lib/digital-quality";
 
 export type DigitalMetrics = {
   sessions: number;
@@ -296,4 +297,26 @@ export async function loadDigitalData(range?: {from?: string; to?: string}): Pro
 
 export async function loadDigitalHistory(): Promise<DigitalHistory> {
   return cachedHistory();
+}
+
+/** The legacy RPC selects snapshots by exact period_end. Query each known
+ * eligible snapshot date explicitly, without relabeling it as current daily data. */
+export async function loadSeoSnapshots(data: DigitalData, history: DigitalHistory) {
+  const queryDate = snapshotDate(history.quality.querySnapshot.to, data.meta.to);
+  const pageDate = snapshotDate(history.quality.pageSnapshot.to, data.meta.to);
+  const dates = [...new Set([queryDate, pageDate].filter((d): d is string => d !== null))];
+  const periods = await Promise.all(dates.map(async to => {
+    if (to === data.meta.to) return [to, data] as const;
+    const from = new Date(`${to}T00:00:00Z`);
+    from.setUTCDate(from.getUTCDate() - 29);
+    return [to, await loadDigitalData({ from: from.toISOString().slice(0, 10), to })] as const;
+  }));
+  const byDate = new Map(periods);
+  return {
+    queryDate,
+    pageDate,
+    queries: queryDate ? byDate.get(queryDate)?.seoQueries ?? [] : [],
+    pages: pageDate ? byDate.get(pageDate)?.seoPages ?? [] : [],
+    queryPeriodCtr: queryDate ? byDate.get(queryDate)?.seo.ctr ?? null : null
+  };
 }
