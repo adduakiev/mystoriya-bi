@@ -1,10 +1,12 @@
+import { DigitalQualityNotice } from "@/components/DigitalQualityNotice";
+import { metricRatio } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalData } from "@/lib/data/digital";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function money(v:number){return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
-function pct(v:number){return `${(v*100).toFixed(2)}%`;}
+function n(v:number|null|undefined){if(v==null)return "—";return Math.round(v).toLocaleString("uk-UA");}
+function money(v:number|null|undefined){if(v==null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
+function pct(v:number|null|undefined){if(v==null)return "—";return `${(v*100).toFixed(2)}%`;}
 
 export default async function Page(){
   const data=await loadDigitalData();
@@ -14,10 +16,11 @@ export default async function Page(){
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · КАНАЛИ</span><h1>Канали залучення</h1></div><div className="digital-source-badge">GA4 · Session default channel group</div></header>
       <DigitalTabs active="channels"/>
+      <DigitalQualityNotice quality={data.quality} sources={data.sources} dates={`GA4 до ${data.meta.ga4Latest || "UNKNOWN"}; GSC до ${data.meta.searchLatest || "UNKNOWN"}. Період: ${data.meta.from || "UNKNOWN"} — ${data.meta.to || "UNKNOWN"}`}/>
       <section className="digital-kpi-grid">
         {data.channels.slice(0,4).map(row=><article className="digital-kpi-card" key={row.channel}>
           <span>{row.channel}</span><strong>{n(row.sessions)}</strong>
-          <small>{pct(total?row.sessions/total:0)} трафіку · {n(row.purchases)} покупок</small>
+          <small>{pct(metricRatio(row.sessions,total))} трафіку · {n(row.purchases)} покупок</small>
           <em>{pct(row.conversionRate)} конверсія</em>
         </article>)}
       </section>
@@ -29,7 +32,7 @@ export default async function Page(){
               <span>Канал</span><span>Сесії</span><span>Частка</span><span>Purchase</span><span>Конверсія</span><span>Revenue GA4</span>
             </div>
             {data.channels.map(row=><div className="table-row" style={{gridTemplateColumns:"1.4fr .8fr .7fr .8fr .8fr 1fr"}} key={row.channel}>
-              <b>{row.channel}</b><span>{n(row.sessions)}</span><span>{pct(total?row.sessions/total:0)}</span><span>{n(row.purchases)}</span><span>{pct(row.conversionRate)}</span><span>{money(row.purchaseRevenue)}</span>
+              <b>{row.channel}</b><span>{n(row.sessions)}</span><span>{pct(metricRatio(row.sessions,total))}</span><span>{n(row.purchases)}</span><span>{pct(row.conversionRate)}</span><span>{money(row.purchaseRevenue)}</span>
             </div>)}
           </div>
         </div>

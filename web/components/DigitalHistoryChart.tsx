@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { cumulativeMetric } from "@/lib/digital-quality";
 import {
   CartesianGrid,
   Line,
@@ -47,23 +48,7 @@ export function DigitalHistoryChart({rows,currentYear,cutoffMonth,cutoffDay}:{ro
 
     const cumulative=new Map<number,Record<number,number|null>>();
     years.forEach(year=>{
-      let sessions=0,purchases=0,revenue=0,seoClicks=0,seoImpressions=0;
-      let ga4Started=false,seoStarted=false;
-      const values:Record<number,number|null>={};
-      for(const row of byYear.get(year)??[]){
-        if(row.sessions!==null){sessions+=row.sessions;ga4Started=true;}
-        if(row.purchases!==null) purchases+=row.purchases;
-        if(row.revenue!==null) revenue+=row.revenue;
-        if(row.seoClicks!==null){seoClicks+=row.seoClicks;seoStarted=true;}
-        if(row.seoImpressions!==null) seoImpressions+=row.seoImpressions;
-
-        if(metric==="sessions") values[row.month]=ga4Started?sessions:null;
-        else if(metric==="purchases") values[row.month]=ga4Started?purchases:null;
-        else if(metric==="revenue") values[row.month]=ga4Started?revenue:null;
-        else if(metric==="conversionRate") values[row.month]=ga4Started&&sessions?purchases/sessions:null;
-        else if(metric==="seoClicks") values[row.month]=seoStarted?seoClicks:null;
-        else values[row.month]=seoStarted&&seoImpressions?seoClicks/seoImpressions:null;
-      }
+      const values=cumulativeMetric(byYear.get(year)??[],metric);
       cumulative.set(year,values);
     });
 

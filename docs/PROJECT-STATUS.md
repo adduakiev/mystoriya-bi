@@ -8,6 +8,16 @@
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
 
+## Issue #12 — Digital correctness phase 1 · 22.10.2026
+
+**EXECUTABLE (локально):** nullable-метрики підключених GA4/GSC/Ads/GBP/PageSpeed,
+невідомі period-unique users, точні періоди SEO snapshots, окремі source/collector dates,
+UNKNOWN completeness, видимі RPC caps та YTD без підміни пропусків нулями.
+**PREPARED / NOT APPLIED:** SQL design для read RPCs, period row counts і nullable gaps.
+**NOT IMPLEMENTED:** відновлення старих default-zero значень, provider completeness,
+collection snapshot identity, точні period users та measurement time PageSpeed.
+Production не змінено. Контракт, обмеження та верифікація: [Digital data contract](digital-data-contract.md).
+
 ## Актуальний production status — 21.10.2026
 
 - **Digital Operating Layer v1 — LIVE**.
