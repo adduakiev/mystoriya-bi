@@ -1,9 +1,10 @@
+import { formatMetric, metricRatio } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalData } from "@/lib/data/digital";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function pct(v:number){return `${(v*100).toFixed(2)}%`;}
+function n(v:number|null|undefined){return formatMetric(v);}
+function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
 
 export default async function Page(){
   const data=await loadDigitalData();
@@ -14,6 +15,7 @@ export default async function Page(){
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · FUNNEL</span><h1>Діагностика воронки</h1></div><div className="digital-source-badge">GA4 · агреговані події</div></header>
       <DigitalTabs active="funnel"/>
+      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Повнота UNKNOWN; невідомі значення та ділення на нуль показано як «—».</div>
 
       <div className="lfl-banner">
         Поточний набір не є точною послідовною user-funnel: «сесії» та ecommerce events мають різну одиницю вимірювання. Тому нижче — діагностичні сигнали, а не «відсоток людей, які відпали».
@@ -31,8 +33,8 @@ export default async function Page(){
           <span className="eyebrow">ДІАГНОСТИЧНІ СПІВВІДНОШЕННЯ</span>
           <div className="digital-metric-list">
             <div><b>Purchase / Sessions</b><span>{pct(c.conversionRate)}</span></div>
-            <div><b>Checkout events / Add-to-cart events</b><span>{pct(c.addToCarts?c.checkouts/c.addToCarts:0)}</span></div>
-            <div><b>Purchase events / Checkout events</b><span>{pct(c.checkouts?c.purchases/c.checkouts:0)}</span></div>
+            <div><b>Checkout events / Add-to-cart events</b><span>{pct(metricRatio(c.checkouts,c.addToCarts))}</span></div>
+            <div><b>Purchase events / Checkout events</b><span>{pct(metricRatio(c.purchases,c.checkouts))}</span></div>
           </div>
         </article>
         <article className="panel">

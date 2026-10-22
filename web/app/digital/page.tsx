@@ -1,3 +1,4 @@
+import { formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
 import Link from "next/link";
 import {
   Activity,
@@ -39,11 +40,11 @@ const ICONS = {
 const MONTHS=["Увесь період / YTD","Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
 function first(value:string|string[]|undefined){return Array.isArray(value)?value[0]:value;}
-function compact(value:number){return Math.round(value).toLocaleString("uk-UA");}
+function compact(value:number|null|undefined){return formatMetric(value);}
 function money(value:number|null){if(value===null)return "—";return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;}
-function pct(value:number){return `${(value*100).toFixed(2)}%`;}
-function delta(current:number,previous:number|null){
-  if(previous===null||previous===0) return null;
+function pct(value:number|null){return value===null?"—":`${(value*100).toFixed(2)}%`;}
+function delta(current:number|null,previous:number|null){
+  if(current===null||previous===null||previous===0) return null;
   return (current/previous-1)*100;
 }
 function deltaText(value:number|null){
@@ -176,26 +177,26 @@ export default async function DigitalPage({
   const currentYear=Number(latest.slice(0,4));
   const selectedYear=Number(first(params.year)??currentYear);
   const selectedMonth=Number(first(params.month)??0);
-  const seoOpportunities=data.seoQueries.filter(row=>row.impressions>=1000&&row.position<=10&&row.ctr<seo.ctr);
+  const seoOpportunities=data.seoQueries.filter(row=>row.impressions!==null&&row.impressions>=1000&&row.position!==null&&row.position<=10&&row.ctr!==null&&seo.ctr!==null&&row.ctr<seo.ctr);
   const topTrafficChannel=data.channels[0]??null;
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
-  const noConversionCampaigns=ads.campaigns.filter(row=>row.cost>=500&&row.conversions===0);
-  const noConversionSpend=noConversionCampaigns.reduce((sum,row)=>sum+row.cost,0);
-  const localActions=local.summary.calls+local.summary.directions+local.summary.websiteClicks+local.summary.menuClicks;
+  const noConversionCampaigns=ads.campaigns.filter(row=>row.cost!==null&&row.cost>=500&&row.conversions===0);
+  const noConversionSpend=metricSum(...noConversionCampaigns.map(row=>row.cost));
+  const localActions=metricSum(local.summary.calls,local.summary.directions,local.summary.websiteClicks,local.summary.menuClicks);
   const attentionSignals=[
-    local.pageSpeed&&local.pageSpeed.mobileCategory!=="GOOD"?{
-      level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
+    local.pageSpeed&&["POOR","NEEDS_IMPROVEMENT"].includes(local.pageSpeed.mobileCategory)?{
+      level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${formatMetric(local.pageSpeed.mobileScore)} · LCP ${formatMetric(local.pageSpeed.mobileLcp)} ms · CLS ${formatMetric(local.pageSpeed.mobileCls, 2)}.`,href:"/digital/site"
     }:null,
     noConversionCampaigns.length?{
-      level:"HIGH",title:"Google Ads без conversions",text:`${noConversionCampaigns.length} кампаній витратили ${money(noConversionSpend)} і мають 0 Google Ads conversions у доступному вікні.`,href:"/digital/ads"
+      level:"HIGH",title:"Google Ads · 0 conversions у вибірці",text:`${noConversionCampaigns.length} кампаній витратили ${money(noConversionSpend)} і мають 0 Google Ads conversions у доступному вікні.`,href:"/digital/ads"
     }:null,
     seoOpportunities.length?{
       level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
     }:null,
-    topTrafficChannel&&topTrafficChannel.conversionRate<c.conversionRate?{
-      level:"MEDIUM",title:`Канал: ${topTrafficChannel.channel}`,text:`${pct(c.sessions?topTrafficChannel.sessions/c.sessions:0)} трафіку, але purchase/session ${pct(topTrafficChannel.conversionRate)} проти ${pct(c.conversionRate)} по сайту.`,href:"/digital/channels"
+    topTrafficChannel&&topTrafficChannel.conversionRate!==null&&c.conversionRate!==null&&topTrafficChannel.conversionRate<c.conversionRate?{
+      level:"MEDIUM",title:`Канал: ${topTrafficChannel.channel}`,text:`${pct(metricRatio(topTrafficChannel.sessions,c.sessions))} трафіку, але purchase/session ${pct(topTrafficChannel.conversionRate)} проти ${pct(c.conversionRate)} по сайту.`,href:"/digital/channels"
     }:null,
-    unknownLanding&&unknownLanding.sessions>0?{
+    unknownLanding&&unknownLanding.sessions!==null&&unknownLanding.sessions>0?{
       level:"DATA",title:"Tracking landing page",text:`${compact(unknownLanding.sessions)} сесій мають landing page “(not set)”. Перевіряємо session_start / tracking.`,href:"/digital/tracking"
     }:null
   ].filter(Boolean) as Array<{level:string;title:string;text:string;href:string}>;
@@ -216,7 +217,7 @@ export default async function DigitalPage({
         </header>
 
         <DigitalTabs active="overview"/>
-        <div className="lfl-banner">Дати даних: GA4 — {history.quality.ga4.to ?? "невідомо"}; канали — {history.quality.channels.to ?? "невідомо"}; пристрої — {history.quality.devices.to ?? "невідомо"}; GSC — {history.quality.searchConsole.to ?? "невідомо"}. Зрізи з різними датами не є повністю зіставними. Дата обробки не підтверджує свіжість джерела.</div>
+        <div className="lfl-banner">Дати даних: GA4 — {history.quality.ga4.to ?? "невідомо"}; канали — {history.quality.channels.to ?? "невідомо"}; пристрої — {history.quality.devices.to ?? "невідомо"}; GSC — {history.quality.searchConsole.to ?? "невідомо"}. Зрізи з різними датами не є повністю зіставними. Дата обробки не підтверджує свіжість джерела. Повнота UNKNOWN; пропуски та атомарність між запитами не підтверджені. Landing / SEO таблиці — окремі 30-денні знімки лише за точного збігу періоду (RPC ліміти: 30 / 40 / 30); upstream ліміти невідомі. Сумарні active_users не є унікальними користувачами за період.</div>
 
         <section className="digital-control-bar">
           <div className="digital-control-title"><Filter size={15}/><b>Період огляду</b></div>
@@ -268,19 +269,19 @@ export default async function DigitalPage({
           <Kpi label="Середній чек GA4" value={money(c.averageOrderValue)} hint="purchase revenue / purchase" change={delta(c.averageOrderValue,p?.averageOrderValue??null)} compareLabel={compare.label}/>
           <Kpi label="Engagement rate" value={pct(c.engagementRate)} hint="залучені сесії / сесії" change={delta(c.engagementRate,p?.engagementRate??null)} compareLabel={compare.label}/>
           <Kpi label="SEO кліки" value={seoAvailable?compact(seo.clicks):"—"} hint={seoPartial?`часткове покриття з ${dateLabel(searchMin)}`:seoAvailable?"Google Search Console":`немає даних до ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.clicks,prevSeo?.clicks??null):null} compareLabel={compare.label}/>
-          <Kpi label="SEO CTR" value={seoAvailable?pct(seo.ctr):"—"} hint={seoAvailable?`середня позиція ${seo.position.toFixed(1)} · зважено показами`:`історія GSC з ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.ctr,prevSeo?.ctr??null):null} compareLabel={compare.label}/>
+          <Kpi label="SEO CTR" value={seoAvailable?pct(seo.ctr):"—"} hint={seoAvailable?`середня позиція ${formatMetric(seo.position, 1)} · зважено показами`:`історія GSC з ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.ctr,prevSeo?.ctr??null):null} compareLabel={compare.label}/>
         </section>
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">GOOGLE LAYER · LIVE</span><h2>Реклама, локальний попит та швидкість</h2></div>
-          <small>Ads: {ads.meta.days} днів · Maps: {local.meta.days} днів · PageSpeed: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}</small>
+          <small>Ads: {formatMetric(ads.meta.days)} днів · Maps: {formatMetric(local.meta.days)} днів · PageSpeed оброблено: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}; дата вимірювання невідома</small>
         </div>
         <section className="digital-kpi-grid">
-          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{ads.meta.days} днів автоматичного імпорту</small><em>Google Ads</em></article>
-          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{ads.summary.conversions.toFixed(1)} conversions</em></article>
-          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${ads.summary.roas.toFixed(2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
-          <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{local.meta.locationCount} власні точки</em></article>
-          <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{local.meta.days} днів</em></article>
+          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{formatMetric(ads.meta.days)} календарних днів у вікні</small><em>Google Ads</em></article>
+          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{formatMetric(ads.summary.conversions, 1)} conversions</em></article>
+          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${formatMetric(ads.summary.roas, 2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
+          <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{formatMetric(local.meta.locationCount)} власні точки</em></article>
+          <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{formatMetric(local.meta.days)} днів</em></article>
           <article className="digital-kpi-card"><span>PageSpeed Mobile</span><strong>{local.pageSpeed?compact(local.pageSpeed.mobileScore):"—"}</strong><small>PSI score · CrUX</small><em>{local.pageSpeed?.mobileCategory==="GOOD"?"Добре":local.pageSpeed?.mobileCategory==="POOR"?"Погано":"Потребує покращення"}</em></article>
         </section>
 
@@ -324,8 +325,8 @@ export default async function DigitalPage({
               {topChannels.map(row=>(
                 <div className="channel-row" key={row.channel}>
                   <div><b>{row.channel}</b><span>{compact(row.purchases)} purchase · {pct(row.conversionRate)} purchase/session</span></div>
-                  <span className="share">{pct(c.sessions?row.sessions/c.sessions:0)}</span>
-                  <div className="track"><span style={{width:`${Math.min(100,c.sessions?row.sessions/c.sessions*100:0)}%`}}/></div>
+                  <span className="share">{pct(metricRatio(row.sessions,c.sessions))}</span>
+                  {metricRatio(row.sessions,c.sessions)!==null&&<div className="track"><span style={{width:`${Math.min(100,metricRatio(row.sessions,c.sessions)!*100)}%`}}/></div>}
                 </div>
               ))}
             </div>

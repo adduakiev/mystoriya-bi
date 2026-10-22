@@ -1,17 +1,18 @@
+import { formatMetric, metricRatio } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
-import { loadDigitalData } from "@/lib/data/digital";
+import { loadDigitalData, loadDigitalHistory } from "@/lib/data/digital";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function money(v:number){return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
-function pct(v:number){return `${(v*100).toFixed(2)}%`;}
-function dec(v:number){return v.toLocaleString("uk-UA",{maximumFractionDigits:2});}
+function n(v:number|null|undefined){return formatMetric(v);}
+function money(v:number|null){return v===null?"—":`₴ ${formatMetric(v)}`;}
+function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
+function dec(v:number|null){return formatMetric(v,2);}
 
 export default async function Page(){
-  const data=await loadDigitalData();
+  const [data,history]=await Promise.all([loadDigitalData(),loadDigitalHistory()]);
   const c=data.current;
-  const sessionsPerUser=c.activeUsers?c.sessions/c.activeUsers:0;
-  const purchasesPerUser=c.activeUsers?c.purchases/c.activeUsers:0;
+  const sessionsPerUser=metricRatio(c.sessions,c.activeUsers);
+  const purchasesPerUser=metricRatio(c.purchases,c.activeUsers);
 
   return <main className="shell">
     <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Аудиторія" statusDetail="GA4 · web audience"/>
@@ -21,9 +22,10 @@ export default async function Page(){
         <div className="digital-source-badge">GA4 · Web</div>
       </header>
       <DigitalTabs active="audience"/>
+      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата зрізу пристроїв: {history.quality.devices.to ?? "невідомо"}. Повнота UNKNOWN. Унікальні користувачі за період недоступні: сума денних active_users не є унікальною аудиторією.</div>
 
       <section className="digital-kpi-grid">
-        <article className="digital-kpi-card"><span>Active users</span><strong>{n(c.activeUsers)}</strong><small>активні користувачі GA4</small><em>web</em></article>
+        <article className="digital-kpi-card"><span>Active users</span><strong>{n(c.activeUsers)}</strong><small>унікальні за період · недоступно</small><em>web</em></article>
         <article className="digital-kpi-card"><span>Сесії</span><strong>{n(c.sessions)}</strong><small>усі візити</small><em>{dec(sessionsPerUser)} сесії / active user</em></article>
         <article className="digital-kpi-card"><span>Engagement rate</span><strong>{pct(c.engagementRate)}</strong><small>{n(c.engagedSessions)} engaged sessions</small><em>GA4</em></article>
         <article className="digital-kpi-card"><span>Purchase / active user</span><strong>{pct(purchasesPerUser)}</strong><small>{n(c.purchases)} purchase events</small><em>діагностична метрика</em></article>
