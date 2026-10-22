@@ -1,10 +1,11 @@
+import { formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function rate(clicks:number,impressions:number){return impressions?`${(clicks/impressions*100).toFixed(2)}%`:"—";}
-function pct(v:number){return `${(v*100).toFixed(2)}%`;}
+function n(v:number|null|undefined){return formatMetric(v);}
+function rate(clicks:number|null,impressions:number|null){return pct(metricRatio(clicks,impressions));}
+function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
 
 export default async function Page(){
@@ -13,25 +14,26 @@ export default async function Page(){
   const available=data.locations.length>0;
   const ranked=data.locations.map(row=>({
     ...row,
-    intentActions:row.calls+row.directions+row.websiteClicks+row.menuClicks,
-    intentRate:row.impressions?(row.calls+row.directions+row.websiteClicks+row.menuClicks)/row.impressions:0
-  })).sort((a,b)=>b.intentActions-a.intentActions);
+    intentActions:metricSum(row.calls,row.directions,row.websiteClicks,row.menuClicks),
+    intentRate:metricRatio(metricSum(row.calls,row.directions,row.websiteClicks,row.menuClicks),row.impressions)
+  })).sort((a,b)=>(b.intentActions??-Infinity)-(a.intentActions??-Infinity));
   const topIntent=ranked[0]??null;
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`LIVE · ${data.meta.locationCount} власні точки · ${data.meta.days} днів`:"джерело підключено · sync очікує"}/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`LIVE · ${formatMetric(data.meta.locationCount)} власні точки · ${formatMetric(data.meta.days)} днів`:"джерело підключено · sync очікує"}/>
     <section className="workspace">
       <header className="topbar">
         <div><span className="eyebrow">DIGITAL · LOCAL INTELLIGENCE</span><h1>Google / Maps</h1></div>
         <div className="digital-source-badge">Google Business Profile · 4 власні точки</div>
       </header>
       <DigitalTabs active="local"/>
+      <div className="lfl-banner">Дати GBP: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Фактична кількість рядків та пропуски по точках невідомі.</div>
 
       {!available ? <div className="lfl-banner">
         Google Business Profile підключений для 4 власних точок М’ЯСТОРІЇ, але в бойовій таблиці ще немає імпортованих рядків.
       </div> : <>
         <section className="digital-kpi-grid">
-          <article className="digital-kpi-card"><span>Покази</span><strong>{n(s.impressions)}</strong><small>Search + Maps</small><em>{data.meta.days} днів імпорту</em></article>
+          <article className="digital-kpi-card"><span>Покази</span><strong>{n(s.impressions)}</strong><small>Search + Maps</small><em>{formatMetric(data.meta.days)} календарних днів у вікні</em></article>
           <article className="digital-kpi-card"><span>Переходи</span><strong>{n(s.clicks)}</strong><small>дзвінки + website clicks</small><em>CTR {rate(s.clicks,s.impressions)}</em></article>
           <article className="digital-kpi-card"><span>Дзвінки</span><strong>{n(s.calls)}</strong><small>натискання кнопки дзвінка</small><em>Google Business Profile</em></article>
           <article className="digital-kpi-card"><span>Маршрути</span><strong>{n(s.directions)}</strong><small>запити маршруту до точки</small><em>локальний намір</em></article>
@@ -45,8 +47,8 @@ export default async function Page(){
           <article className="panel">
             <span className="eyebrow">LOCAL INTENT</span>
             <div className="digital-metric-list">
-              <div><b>Усі локальні дії</b><span>{n(s.calls+s.directions+s.websiteClicks+s.menuClicks)}</span></div>
-              <div><b>Дії / покази</b><span>{rate(s.calls+s.directions+s.websiteClicks+s.menuClicks,s.impressions)}</span></div>
+              <div><b>Усі локальні дії</b><span>{n(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks))}</span></div>
+              <div><b>Дії / покази</b><span>{rate(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks),s.impressions)}</span></div>
               <div><b>Найбільше локальних дій</b><span>{n(topIntent.intentActions)} · ID …{topIntent.locationId.split("/").pop()?.slice(-6)}</span></div>
             </div>
           </article>

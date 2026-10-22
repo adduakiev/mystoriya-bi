@@ -86,7 +86,7 @@ test("technical row coverage stays out of business KPI, direction and changes", 
 });
 test("collector fetches only three allowed aggregate RPCs, strips raw fields and preserves failure", async () => {
   const calls=[];
-  const p=await collectInput(async name=>{calls.push(name);return {email:"should never leave",meta:{},current:{sessions:0}};},
+  const p=await collectInput(async name=>{calls.push(name);return {email:"should never leave",meta:{currentGa4Rows:1},current:{sessions:0}};},
     "2026-10-20T00:00:00Z");
   assert.equal(calls.length,3); assert.equal(JSON.stringify(p).includes("email"),false);
   assert.equal(p.evidence.find(e=>e.id==="ga4.sessions").value,0);

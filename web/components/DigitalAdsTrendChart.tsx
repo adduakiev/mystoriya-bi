@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMetric, metricNumber } from "@/lib/digital-quality";
 import { useState } from "react";
 import {
   CartesianGrid,
@@ -22,7 +23,9 @@ const CONFIG:Record<Metric,{label:string;money?:boolean}>={
   conversions:{label:"Conversions"}
 };
 
-function format(v:number,m:Metric){
+function format(raw:unknown,m:Metric){
+  const v=metricNumber(raw);
+  if(v===null)return "—";
   if(CONFIG[m].money){
     if(Math.abs(v)>=1000) return `₴${(v/1000).toFixed(1)}K`;
     return `₴${Math.round(v)}`;
@@ -48,11 +51,11 @@ export function DigitalAdsTrendChart({data}:{data:Row[]}){
           <XAxis dataKey="date" stroke="#77808f" tickLine={false} axisLine={false} tickFormatter={v=>String(v).slice(5)}/>
           <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={64} tickFormatter={v=>format(Number(v),metric)}/>
           <Tooltip
-            formatter={raw=>format(Number(raw),metric)}
+            formatter={raw=>format(raw,metric)}
             labelFormatter={label=>String(label)}
             contentStyle={{background:"#111720",border:"1px solid #29313d",borderRadius:12}}
           />
-          <Line type="monotone" dataKey={metric} name={CONFIG[metric].label} stroke="#f5a623" strokeWidth={3} dot={false} activeDot={{r:4}}/>
+          <Line connectNulls={false} type="monotone" dataKey={metric} name={CONFIG[metric].label} stroke="#f5a623" strokeWidth={3} dot={false} activeDot={{r:4}}/>
         </LineChart>
       </ResponsiveContainer>
     </div>

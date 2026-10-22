@@ -8,6 +8,14 @@
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
 
+## Issue #12 — локальна correctness phase 1 (22.10.2026)
+
+- **EXECUTABLE:** nullable GA4/GSC/Ads/GBP/PageSpeed adapters, відсутні period-unique active users, null-safe ratios/sums/YTD, окремі дати джерел/обробки, точні 30-денні періоди snapshot і видимі RPC row limits. Повнота без доказів залишається UNKNOWN.
+- **PREPARED / NOT APPLIED:** SQL design поза migrations, з фінальним ROLLBACK; жодного SQL execution чи production deploy.
+- **NOT IMPLEMENTED:** відновлення historical missingness, точні period uniques, справжній PageSpeed measurement timestamp, upstream completeness, історичний пошук snapshot та атомарність між RPC. App/Merchant/Social поза цією фазою.
+- Контракт, структурні обмеження й review blocker: [Digital data contract](digital-data-contract.md). Текст останнього Barbara CHANGES REQUESTED недоступний у runner event; GitHub API недоступний. Review-specific closure не заявляється.
+- Поточний production status нижче — історичний; ці локальні зміни його не змінюють.
+
 ## Актуальний production status — 21.10.2026
 
 - **Digital Operating Layer v1 — LIVE**.
@@ -54,7 +62,7 @@
 - [ ] Звірити повну виручку, маркетингові витрати й складові contribution margin.
 - [ ] Перенести нові факти у warehouse з контролем grain, currency, duplicates і completeness.
 - [ ] Виправити source measurement timestamps та окремо зберігати processing timestamps.
-- [ ] Усунути залишкове null→0 в інших метриках та некоректне сумування daily active users як унікальних користувачів періоду.
+- [x] Локально виправлено connected Google null→0 / daily active users UI й adapters у phase 1; SQL design NOT APPLIED, інші legacy джерела поза фазою.
 - [ ] Повністю реалізувати snapshot metadata і вибір знімків у warehouse/RPC.
 - [ ] Закрити питання доступу до фінансових даних, виявлені аудитом; деталі зберігати у приватному аудиті.
 - [ ] Впровадити й виміряти бізнес-експерименти. Приріст продажів і грошовий ефект поки не доведені.

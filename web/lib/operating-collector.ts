@@ -1,5 +1,6 @@
 import { validateInput, type Evidence, type InputPacket } from "./operating-core.ts";
-import { metricNumber } from "./digital-quality.ts";
+import { normalizeDigital } from "./data/digital-contract.ts";
+import { metricNumber, periodSourceDate } from "./digital-quality.ts";
 
 type Raw = Record<string, any>;
 export type RpcReader = (name: string) => Promise<unknown>;
@@ -12,7 +13,10 @@ export async function collectInput(read: RpcReader, now = new Date().toISOString
       return value && typeof value === "object" && !Array.isArray(value) ? value as Raw : null;
     } catch { return null; } // Failure becomes explicit missing evidence, never fabricated zero.
   }));
-  const [digital, history, ads] = values;
+  const [rawDigital, history, ads] = values;
+  const digital = rawDigital ? normalizeDigital(rawDigital) : null;
+  const ga4Date = periodSourceDate(digital?.meta?.ga4Latest, digital?.meta?.from, digital?.meta?.to);
+  const searchDate = periodSourceDate(digital?.meta?.searchLatest, digital?.meta?.from, digital?.meta?.to);
   const date = (v: unknown) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
   const make = (partial: Partial<Evidence> & Pick<Evidence,"id"|"source"|"domain"|"label"|"unit">): Evidence => ({
     source_date: null, observed_at: null, fetched_at: now, period_from: null, period_to: null,
@@ -22,15 +26,15 @@ export async function collectInput(read: RpcReader, now = new Date().toISOString
   });
   const packet: InputPacket = { version: 2, as_of: now, evidence: [
     make({ id: "ga4.sessions", source: "GA4", domain: "seo", label: "Сесії GA4", unit: "sessions",
-      source_date: date(digital?.meta?.ga4Latest), period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
+      source_date: ga4Date, period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
       value: metricNumber(digital?.current?.sessions), previous: metricNumber(digital?.previous?.sessions),
       source_status: digital ? "AVAILABLE" : "BROKEN", coverage: "UNKNOWN", confidence: 0.6, attribution: "analytics" }),
     make({ id: "ga4.purchases", source: "GA4", domain: "sales", label: "Події purchase GA4", unit: "events",
-      source_date: date(digital?.meta?.ga4Latest), period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
+      source_date: ga4Date, period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
       value: metricNumber(digital?.current?.purchases), previous: metricNumber(digital?.previous?.purchases),
       source_status: digital ? "AVAILABLE" : "BROKEN", confidence: 0.6, attribution: "analytics" }),
     make({ id: "gsc.clicks", source: "GSC", domain: "seo", label: "Кліки органічного пошуку", unit: "clicks",
-      source_date: date(digital?.meta?.searchLatest), period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
+      source_date: searchDate, period_from: date(digital?.meta?.from), period_to: date(digital?.meta?.to),
       value: metricNumber(digital?.seo?.clicks), previous: metricNumber(digital?.previousSeo?.clicks),
       source_status: digital ? "AVAILABLE" : "BROKEN", confidence: 0.6, freshness_sla_days: 3 }),
     make({ id: "ads.spend", source: "Google Ads", domain: "ads", label: "Витрати Google Ads", unit: "currency-unconfirmed",
