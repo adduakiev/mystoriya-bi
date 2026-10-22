@@ -1,6 +1,6 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-Оновлено: **20.10.2026**. Статус за результатами поточної роботи.
+Оновлено: **21.10.2026**. Статус за результатами поточної роботи.
 
 Цей документ розрізняє локальну реалізацію, перевірки та роботу в production.
 Позначка «зроблено» не означає, що зміна вже опублікована.
@@ -8,31 +8,19 @@
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
 
-### Stabilization pass — 20.10.2026
+## Актуальний production status — 21.10.2026
 
-- Додано єдині команди `npm test` і `npm run check` у корені.
-- Використовується npm; pnpm lock прибрано, package-lock звірено, чистий npm ci пройшов.
-- Live-перевірка оновлених локальних Overview/Ads/SEO пройшла: HTTP 200, без runtime errors; 390 px без горизонтального overflow. Секрет лише в Git-ignored .env.local.
-- Foundation-коміт фіксує перевірений локальний фундамент і frontend. Push/deploy не виконано.
-- Foundation v1: `ba46e2a`. Локально реалізовано наступний Operating Layer; це не production-реліз Digital 3.0.
+- **Digital Operating Layer v1 — LIVE**.
+- Production commit: `800b3ce9d9e062daf907825fd67fdadc11154a7c`.
+- Task persistence — **unavailable on Vercel**; local JSON лише для development.
+- Council у UI — deterministic/replay; це не production live LLM cycle.
+- Live 4-agent production cycle — **NOT IMPLEMENTED**.
+- Scheduler — **NOT IMPLEMENTED**.
+- v1: 18 regression tests, TypeScript/build та перевірки UI; historical release reports описують стан до публікації.
+- v2 готується окремо в `feature/digital-operating-v2`, без migration execution, production deploy чи зовнішнього LLM.
+- v2 architecture: [runtime/provider/repository і manual flow](DIGITAL-OPERATING-V2.md). ProductionRuntime/SupabaseTaskRepository — disabled stubs; migration лише файл. Після review Барбари в issue #7: SQL tasks лише з останнього eligible completed LIVE run; creator-wide default privileges прибрано, явні REVOKE для private objects. 45 тестів PASS; локальні HTTP guard checks пройдено на попередньому етапі. Результат поточного TypeScript/build — у work report. Commit/push/PR очікують review Барбари.
 
-## Поточне доповнення: Operating Layer
-
-- [x] Незалежні specialists: domain-only evidence, порожній peer inbox, послідовний запуск.
-- [x] Data Quality Agent (детерміновані правила), strict InputPacket v2.
-- [x] Окремі Council та Astra: classifications, conflicts, quality recheck, максимум 5 рішень.
-- [x] Aggregate-only collector із трьох існуючих RPC; живий збір дав 6 метрик, 1 недоступну.
-- [x] Локальна сторінка `/operating`, KPI/напрям/зміни/причини/рішення/задачі.
-- [x] Task Engine з local persistence, auth, same-origin, revisions і контрольованими статусами.
-- [x] Replay повного потоку на живому aggregate packet. Це НЕ live LLM-цикл.
-- [x] 14 автоматичних тестів; TypeScript і build пройшли під час інтеграції.
-- [x] Локальний browser smoke: Overview/Ads/SEO/Operating — HTTP 200; runtime errors 0;
-  task GET 200, cross-origin POST 403; 390px без document overflow.
-- [ ] Повний незалежний live LLM-цикл — не підтверджено; делегований агент натрапив на квоту.
-- [ ] Production durable storage, scheduler, deployment — не виконано.
-
-Деталі: [архітектура](OPERATING-ARCHITECTURE.md), [release report](RELEASE-REPORT-2026-10-20.md).
-Поточний bus позначений **replay**: задачі з нього не створюються.
+Подальші таблиці описують доступність джерел і задачі команди, а не заперечують LIVE-статус v1.
 
 ## 1. Що зроблено
 
@@ -54,8 +42,8 @@
 
 ## 2. Що ще НЕ зроблено
 
-- [ ] Опублікувати локальні зміни: Foundation commit локально є; push / deployment не виконано.
-- [x] Перевірити оновлені Ads, SEO й overview локально з реальними даними. Після майбутнього deployment потрібен окремий smoke test.
+- [x] Digital Operating Layer v1 опубліковано: production `800b3ce…`; v2 ще не опублікований.
+- [x] Перевірено Ads, SEO й Overview з реальними даними; v2 потребує нового release audit.
 - [ ] Запустити повний live-цикл усіх п'яти агентів з актуальними доказами.
 - [x] Реалізувати автоматичне формування aggregate input packet.
 - [ ] Налаштувати щоденний scheduler.
@@ -197,4 +185,4 @@ source timestamps, row limits і completeness. Наявність файлу н�
 - Детальний аудит і сирі результати збору зберігаються поза публічним репозиторієм.
 # Stabilization verification — 2026-10-21
 
-Актуальний фінальний стан і межі: [STABILIZATION-2026-10-21.md](STABILIZATION-2026-10-21.md). Повторно перевірено Overview / Ads / SEO / Operations, desktop/mobile, контраст і HTTP Task API. Нових commit/push/PR немає; production persistence/deployment/DB не змінювалися. Єдиний lockfile: `web/package-lock.json` (npm). Повний перелік змін входить до окремого audit package.
+Історичний стан до релізу: [STABILIZATION-2026-10-21.md](STABILIZATION-2026-10-21.md). Актуальний LIVE-статус v1 і production commit наведено на початку цього документа. Єдиний lockfile: `web/package-lock.json` (npm).

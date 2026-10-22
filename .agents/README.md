@@ -1,10 +1,10 @@
-# Agent Foundation + локальний Operating Layer
+# Agent Foundation + Operating Layer v2 development
 
-Foundation v1 зафіксовано окремим комітом `ba46e2a`. Наступний шар додає незалежність аналізу, quality gate, Council, Astra й задачі. Це ще не розгорнутий Digital Intelligence 3.0.
+Digital Operating Layer v1 LIVE у production commit `800b3ce9d9e062daf907825fd67fdadc11154a7c`. v2 готується окремо: runtime/provider і repository abstractions, без production activation. Це не повний Digital Intelligence 3.0.
 
 ## Перевірка
 
-Node >=22.13, npm, авторизований Codex CLI для live-аналізу.
+Node >=22.13, npm. Codex CLI adapter доступний лише локально; LIVE додатково вимагає fresh aggregate fingerprint callback.
 
 ```powershell
 npm ci --prefix web
@@ -34,11 +34,17 @@ node --experimental-strip-types .agents/run.mjs --input .agents/runtime/collecte
 ```
 
 Прямий HTTPS RPC також підтримується через securely configured `BI_SUPABASE_URL`, `BI_SUPABASE_ANON_KEY`, `BI_ACCESS_PASSWORD`. Секрети не потрапляють у пакет. Scheduler не встановлено.
-Повний run вимагає InputPacket v2 з `web/lib/operating-core.ts`. Legacy summary packet дозволений лише через `--executive-only` (partial). `--replay PRIVATE_RESULTS.json` перевіряє протокол без LLM і не дозволяє створення задач.
+Повний run вимагає свіжий InputPacket v2 з `web/lib/operating-core.ts`. `--executive-only` retired: він не є повним Council. `--replay PRIVATE_RESULTS.json` перевіряє протокол без LLM і не дозволяє створення задач. API `run()` тепер async — викликати через `await`.
+
+Після audit hardening issue #7 команда `run.mjs --input ...` без replay блокується до collection/LLM з `FINGERPRINT_REQUIRED`: CLI ще не має fresh-read wiring. Програмний `run({..., currentFingerprint})` передає callback у core; він має повторно прочитати поточні aggregates після specialists. Помилка/timeout/невалідний hash → `FINGERPRINT_READ_FAILED`, зміна → `EVIDENCE_CHANGED`; Council не запускається. Підставляти hash початкового пакета замість повторного читання заборонено. Replay callback не вимагає.
 
 ## Runtime
 
-`.agents/data_bus.json` — поточний run; єдиний автор — оркестратор. `runtime/run.lock` блокує конкуренцію. Збій зберігає failed status; старі results не домішуються. `runtime/latest.json` і executive-summary.md оновлюються після успіху, тому завжди перевіряти поточний bus. Після аварії lock видаляється лише після перевірки завершення процесу. Кожен завершений/невдалий run архівується в `runtime/runs/<run_id>.json`. Runtime не комітити.
+`.agents/data_bus.json` — поточний run; єдиний автор — локальний runner. `runtime/run.lock` блокує конкуренцію. `active-run.json` містить lifecycle checkpoint, `latest.json` — останню спробу, `last-successful.json` — останній completed run. Bus/latest/summary можуть описувати failed/blocked спробу; status перевіряти завжди. Після аварії lock видаляється лише після перевірки завершення процесу. Кожен завершений run архівується в `runtime/runs/<run_id>.json`. Runtime не комітити.
+
+Server-safe orchestration: `web/lib/operating-orchestrator.ts`. `AgentRuntime` має `invoke(agent, packet)` і metadata. `CodexCliRuntime` містить весь subprocess код у `.agents/adapters/`, заборонений на Vercel/production. `ReplayRuntime` виконується локально; `ProductionRuntime` — завжди disabled stub, без SDK/provider/credentials. Timeout припиняє очікування; майбутній network provider має реалізувати cancellation, бо Promise timeout не скасовує зовнішній запит.
+
+Manual API `/api/operating/runs`: authenticated GET availability; same-origin POST повертає BLOCKED/503. `OPERATING_MANUAL_RUN_ENABLED=1` сам по собі нічого не активує. TaskRepository local adapter виконується; Supabase adapter лише контракт зі stub-методами, що повертають 503.
 
 Cockpit `/operating` читає поточні aggregates та повторно перевіряє Council. Replay/partial/старший за 24h/невідповідний поточним даним run не може створювати задачі.
 Task API `/api/operating/tasks`: GET/POST/PATCH, cookie auth, same-origin mutations, body limit, revision conflicts, atomic local writes. NEW → IN PROGRESS → DONE → CHECK RESULT. Створення задачі — явна дія користувача, без виконання бізнес-операцій.

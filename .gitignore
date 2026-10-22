@@ -223,6 +223,7 @@ __marimo__/
 .agents/data_bus.json
 .agents/data_bus.json.tmp
 .agents/runtime/
+supabase/.temp/
 
 # Frontend dependencies and build output
 web/node_modules/

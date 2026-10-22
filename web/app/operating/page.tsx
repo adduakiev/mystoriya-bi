@@ -10,7 +10,8 @@ const number = (value: number | null, unit = "") => value === null ? "Невід
 export default async function OperatingPage() {
   const data = await loadOperatingData();
   const {packet,quality,council,astra,runId,runMode,runStatus,runAsOf,runIssues} = data;
-  const canCreate = runMode === "live" && runStatus === "completed" && runIssues.length === 0;
+  const {analysis}=data;
+  const canCreate = analysis.canCreate;
   const businessEvidence = packet.evidence.filter(isBusinessEvidence);
   const sourceEvidence = packet.evidence.filter(e => !isBusinessEvidence(e));
   return <div className={styles.shell}>
@@ -18,8 +19,14 @@ export default async function OperatingPage() {
     <main className={styles.main}>
       <header><p className={styles.eyebrow}>М’ЯСТОРІЯ · Executive cockpit</p><h1>Оперативне керування</h1>
         <p>Дані → пояснення → рішення → контроль результату.</p>
-        <p className={styles.meta}>Поточний пакет: {packet.as_of}. Час пакета не є датою спостереження джерел.</p>
-        <p className={styles.meta}>Запуск: {runId ?? "немає"} · Режим: {runMode ?? "не запускався"} · Стан: {runStatus ?? "невідомо"} · Пакет запуску: {runAsOf ?? "невідомо"}</p>
+        <section aria-label="Стан аналізу">
+          <h2>Стан аналізу</h2>
+          <p>Останній успішний run: {analysis.lastSuccessful?.finished_at ?? "не підтверджений"} · {analysis.lastSuccessful?.mode.toUpperCase() ?? "НЕ ЗАПУСКАВСЯ"}</p>
+          <p>Якість джерел: PASS {analysis.counts.PASS} / WARN {analysis.counts.WARN} / BLOCK {analysis.counts.BLOCK}</p>
+          <p>{canCreate ? "Створення задач доступне." : "Створення задач недоступне."}</p>
+          <button type="button" disabled aria-describedby="manual-reasons">Запустити новий аналіз</button>
+          <p id="manual-reasons" className={styles.meta}>{analysis.manual.reasons.join(' ')}</p>
+        </section>
         {runIssues.length > 0 && <ul className={styles.warning} role="status">{runIssues.map(reason => <li key={reason}>{reason}</li>)}</ul>}
         <nav className={styles.anchorNav} aria-label="Розділи оперативного керування">{[["kpi","KPI"],["sources","Data Quality / Sources"],["direction","Куди йдемо"],["changes","Що змінилось"],["why","Чому"],["decisions","Рішення"],["tasks","Задачі"]].map(([id,label]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav>
       </header>
@@ -34,6 +41,13 @@ export default async function OperatingPage() {
         })}</div>
       </section>
       <section id="sources"><h2>Data Quality / Sources</h2><p>Технічні лічильники покриття не є бізнес-KPI.</p>
+        <details><summary>Деталі запуску та свіжості</summary>
+          <p>Поточний collector time: {packet.as_of}; це не source freshness.</p>
+          <p>Run: {runId ?? "немає"} · Mode: {runMode?.toUpperCase() ?? "невідомо"} · Lifecycle: {runStatus?.toUpperCase() ?? "невідомо"}</p>
+          <p>Source as-of пакета запуску: {runAsOf ?? "невідомо"}; collector завершено: {analysis.collectorAt ?? "невідомо"}; Council time: {analysis.councilAt ?? "невідомо"}.</p>
+          <ul>{packet.evidence.map(e=><li key={e.id}>{e.source}: source date {e.source_date ?? "невідома"}; SLA {e.freshness_sla_days} днів</li>)}</ul>
+          <p>Причини недоступності задач:</p><ul>{analysis.taskReasons.map((reason,i)=><li key={i}>{reason}</li>)}</ul>
+        </details>
         <div className={styles.grid}>{sourceEvidence.map(e => {
           const q = quality.find(item => item.evidence_id === e.id);
           return <article key={e.id} className={styles.card}><h3>{e.label}</h3><p>{number(e.value,e.unit)}</p>

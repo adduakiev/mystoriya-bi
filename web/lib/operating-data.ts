@@ -1,4 +1,5 @@
 import "server-only";
+import { manualRunAvailability } from "./operating-manual";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { callBiRpc } from "@/lib/data/source";
@@ -13,6 +14,8 @@ export async function loadOperatingData() {
   let runId: string | null = null, runMode: string | null = null, runStatus: string | null = null;
   let runAsOf: string | null = null;
   const runIssues: string[] = [];
+  let lastSuccessful: {run_id:string;mode:string;finished_at:string|null} | null = null;
+  let collectorAt: string | null = null, councilAt: string | null = null;
   const file = process.env.OPERATING_BUS_PATH || path.resolve(process.cwd(), "../.agents/data_bus.json");
   try {
     const stat = await fs.stat(file);
@@ -26,6 +29,11 @@ export async function loadOperatingData() {
       runIssues.push("Немає завершеного Council-циклу. Окремий executive-тест не замінює результати спеціалістів.");
     } else {
       validateInput(bus.input);
+      if(!Array.isArray(bus.messages) || bus.messages.length!==4)throw Error('Partial specialist set');
+      buildCouncil(bus.input,bus.messages.map((m:{payload:unknown})=>m.payload));
+      lastSuccessful={run_id:runId??"unknown",mode:runMode??"unknown",finished_at:typeof bus.finished_at==="string"?bus.finished_at:null};
+      collectorAt=typeof bus.run?.collector_at==="string"?bus.run.collector_at:null;
+      councilAt=typeof bus.run?.council_at==="string"?bus.run.council_at:null;
       runIssues.push(...runWarnings(runMode, bus.input, packet));
       const age = (Date.parse(packet.as_of) - Date.parse(bus.input.as_of)) / 3600000;
       if (age >= 0 && age <= 24) {
@@ -40,5 +48,25 @@ export async function loadOperatingData() {
       ? "Council ще не запускався в цьому середовищі."
       : "Результат Council недоступний або не пройшов перевірку контракту.");
   }
-  return { packet, quality, council, astra, runId, runMode, runStatus, runAsOf, runIssues };
+  if(!lastSuccessful) {
+    try {
+      const previousFile=path.join(path.dirname(file),'runtime','last-successful.json');
+      if((await fs.stat(previousFile)).size>1024*1024)throw Error('Oversize');
+      const previous=JSON.parse(await fs.readFile(previousFile,'utf8'));
+      validateInput(previous.input);
+      if(previous.status==='completed' && ['live','replay'].includes(previous.mode) && typeof previous.run_id==='string' && previous.messages?.length===4) {
+        buildCouncil(previous.input,previous.messages.map((m:{payload:unknown})=>m.payload));
+        lastSuccessful={run_id:previous.run_id,mode:previous.mode,finished_at:typeof previous.finished_at==='string'?previous.finished_at:null};
+      }
+    } catch { /* unavailable historical state must remain unknown */ }
+  }
+  const taskReasons=[...runIssues];
+  if(runMode!=='live')taskReasons.push('A verified LIVE run is required; REPLAY cannot create tasks.');
+  if(runStatus!=='completed' || !council)taskReasons.push('A completed verified Council is required.');
+  if(process.env.VERCEL)taskReasons.push('Task persistence unavailable on Vercel.');
+  return { packet, quality, council, astra, runId, runMode, runStatus, runAsOf, runIssues,
+    analysis:{lastSuccessful,collectorAt,councilAt,taskReasons,canCreate:taskReasons.length===0,
+      manual:manualRunAvailability(process.env.OPERATING_MANUAL_RUN_ENABLED==='1'),
+      counts:{PASS:quality.filter(q=>q.status==='PASS').length,WARN:quality.filter(q=>q.status==='WARN').length,BLOCK:quality.filter(q=>q.status==='BLOCK').length}} };
+
 }
