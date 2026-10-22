@@ -25,8 +25,22 @@ export type DigitalLocalData={
   pageSpeed:PageSpeedSnapshot|null;
 };
 
+/** Selected-period evidence wins over availability flags, dates and profile lists.
+ * Explicit rows/observedDates=0 means no measurement. A legacy zero without
+ * positive selected-period evidence remains unknown; measured zero is preserved.
+ */
+export function selectedPeriodMetric(meta: Raw | undefined, value: unknown): number | null {
+  const rows = metricNumber(meta?.rows);
+  const observedDates = metricNumber(meta?.observedDates);
+  if (rows === 0 || observedDates === 0) return null;
+  const metric = metricNumber(value);
+  if (metric === 0 && !((rows !== null && rows > 0) || (observedDates !== null && observedDates > 0))) return null;
+  return metric;
+}
+
 export function normalizeAds(raw:Raw):DigitalAdsData{
-  const s=raw?.meta?.available === true ? raw?.summary??{} : {};
+  const summary=raw?.meta?.available === true ? raw?.summary??{} : {};
+  const s=Object.fromEntries(Object.entries(summary).map(([key,value])=>[key,selectedPeriodMetric(raw?.meta,value)]));
   return {
     meta:{coverage:sourceCoverage(raw?.meta?.coverage),limitations:["Calendar span is not observed days; daily summary and staging campaigns may differ in freshness/currency. Completeness unknown."],available:raw?.meta?.available === true,from:String(raw?.meta?.from??""),to:String(raw?.meta?.to??""),days:metricNumber(raw?.meta?.days),maxWindowDays:metricNumber(raw?.meta?.maxWindowDays)},
     summary:{cost:metricNumber(s.cost),clicks:metricNumber(s.clicks),impressions:metricNumber(s.impressions),conversions:metricNumber(s.conversions),conversionValue:metricNumber(s.conversionValue),ctr:metricRatio(s.clicks,s.impressions),cpc:metricRatio(s.cost,s.clicks),cpa:metricRatio(s.cost,s.conversions),roas:metricRatio(s.conversionValue,s.cost)},
@@ -35,7 +49,8 @@ export function normalizeAds(raw:Raw):DigitalAdsData{
   };
 }
 export function normalizeLocal(raw:Raw):DigitalLocalData{
-  const s=raw?.meta?.from && raw?.meta?.to && raw?.locations?.length ? raw?.summary??{} : {},p=raw?.pageSpeed??{};
+  const summary=raw?.summary??{},p=raw?.pageSpeed??{};
+  const s=Object.fromEntries(Object.entries(summary).map(([key,value])=>[key,selectedPeriodMetric(raw?.meta,value)]));
   const hasSpeed=Boolean(p.captured_on);
   return {
     meta:{coverage:sourceCoverage(raw?.meta?.coverage),limitations:["Calendar span × locations is not observed rows. Completeness unknown.","PageSpeed captured_on is processing/storage date; source measurement date unknown."],from:String(raw?.meta?.from??""),to:String(raw?.meta?.to??""),days:metricNumber(raw?.meta?.days),locationCount:metricNumber(raw?.meta?.locationCount),maxWindowDays:metricNumber(raw?.meta?.maxWindowDays)},
