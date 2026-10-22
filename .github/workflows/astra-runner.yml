@@ -1,0 +1,195 @@
+name: Astra issue runner
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: astra-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  astra:
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.actor == 'adduakiev' &&
+      startsWith(github.event.comment.body, '/astra run')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ASTRA_BRANCH: astra/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+
+    steps:
+      - name: Check out main without persistent GitHub credentials
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Require Codex API secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY GitHub Actions secret is not configured."
+            exit 78
+          fi
+
+      - name: Mark task WORKING
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}"             --body "WORKING — automated Astra runner started. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Create isolated work branch
+        run: |
+          git switch -c "$ASTRA_BRANCH"
+
+      - name: Install deterministic project dependencies
+        run: npm ci --prefix web
+
+      - name: Run Astra with Codex
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          allow-users: adduakiev
+          prompt: |
+            You are Astra, the implementation engineer for М'ЯСТОРІЯ BI.
+
+            Read AGENTS.md first and follow it strictly.
+
+            Execute GitHub issue #${{ github.event.issue.number }}:
+            Title: ${{ github.event.issue.title }}
+
+            Issue body:
+            ----
+            ${{ github.event.issue.body }}
+            ----
+
+            Latest trigger comment:
+            ----
+            ${{ github.event.comment.body }}
+            ----
+
+            Read the relevant source, docs, tests, and prior implementation patterns. Implement the issue end-to-end within its stated scope. Keep all owner-gated or unfinished production paths fail-closed.
+
+            Do not commit, push, create/merge PRs, deploy, execute migrations, alter credentials, or activate providers/schedulers/business writes. The GitHub runner handles the safe handoff after checks.
+
+            Run appropriate focused tests while working. The workflow will independently run the full repository verification after you finish.
+
+      - name: Full repository verification
+        run: |
+          npm run check
+          git diff --check
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push reviewed workspace changes
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "astra-control-room"
+          git config user.email "astra-control-room@users.noreply.github.com"
+          git add -A
+          git commit -m "astra: implement issue #$ISSUE_NUMBER"
+          git push "https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}.git"             "HEAD:refs/heads/$ASTRA_BRANCH"
+
+      - name: Open pull request
+        if: steps.changes.outputs.changed == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEX_FINAL: ${{ steps.codex.outputs.final-message }}
+        run: |
+          cat > /tmp/pr-body.md <<'BODY'
+          Automated Astra implementation from the AI Control Room.
+
+          Source issue: #ISSUE_PLACEHOLDER
+
+          Safety boundaries:
+          - no auto-merge
+          - no production deploy
+          - no DB migration execution
+          - no credential/provider activation
+          - no durable business writes or scheduler activation
+
+          Deterministic repository checks passed before PR creation.
+          BODY
+          sed -i "s/#ISSUE_PLACEHOLDER/#$ISSUE_NUMBER/" /tmp/pr-body.md
+          printf '\n### Astra handoff\n\n%s\n' "$CODEX_FINAL" >> /tmp/pr-body.md
+
+          PR_URL=$(gh pr create             --repo "${{ github.repository }}"             --base main             --head "$ASTRA_BRANCH"             --title "[ASTRA #$ISSUE_NUMBER] $ISSUE_TITLE"             --body-file /tmp/pr-body.md)
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report READY FOR REVIEW
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          CODEX_FINAL: ${{ steps.codex.outputs.final-message }}
+        run: |
+          {
+            echo "READY FOR REVIEW"
+            echo
+            echo "Automated Astra runner completed successfully."
+            echo
+            echo "PR: $PR_URL"
+            echo "Branch: `$ASTRA_BRANCH`"
+            echo "Checks: `npm run check` PASS; `git diff --check` PASS."
+            echo
+            echo "### Astra handoff"
+            echo
+            printf '%s\n' "$CODEX_FINAL"
+          } > /tmp/report.md
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body-file /tmp/report.md
+
+      - name: Report no-change result
+        if: steps.changes.outputs.changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEX_FINAL: ${{ steps.codex.outputs.final-message }}
+        run: |
+          {
+            echo "READY FOR REVIEW"
+            echo
+            echo "Automated Astra runner completed with no repository changes."
+            echo
+            echo "Checks: `npm run check` PASS; `git diff --check` PASS."
+            echo
+            echo "### Astra handoff"
+            echo
+            printf '%s\n' "$CODEX_FINAL"
+          } > /tmp/report.md
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body-file /tmp/report.md
+
+      - name: Report BLOCKED on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}"             --body "BLOCKED — automated Astra runner failed. No merge/deploy/migration was performed. Check Actions run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
