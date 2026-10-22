@@ -1,3 +1,0 @@
-{
-  "buildCommand": "cd .. && npm run check"
-}
