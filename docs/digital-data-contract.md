@@ -1,5 +1,10 @@
 # Current Digital correctness — issue #12
 
+## Barbara review closure — empty Ads / GBP periods
+
+Final review semantics are now executable in the existing source contract: explicit selected-period `rows=0` or `observedDates=0` forces Ads/GBP summary metrics to `null`, even when legacy SQL returned zeroes or nonzero aggregates. A measured zero is preserved only when positive selected-period row/date evidence exists. GBP profile presence is not treated as measurement evidence, and PageSpeed remains independent from GBP period emptiness. The aggregate collector applies the same rule to Google Ads spend. No SQL was executed and no production deployment was performed.
+
+
 Status: local implementation, **not deployed**. Applies to the already connected
 GA4 website, Search Console, Google Ads, GBP and PageSpeed paths. No new source,
 credential, provider, account setting, scheduler or business write is activated.
