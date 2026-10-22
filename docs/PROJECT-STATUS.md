@@ -10,6 +10,8 @@
 
 ## Issue #12 — локальна correctness phase 1 (22.10.2026)
 
+**Review closure:** Ads/GBP empty selected periods now stay unknown instead of fabricated zero; true zero requires positive period evidence. PageSpeed remains independent. Integration is still preview-only / not production.
+
 - **EXECUTABLE:** nullable GA4/GSC/Ads/GBP/PageSpeed adapters, відсутні period-unique active users, null-safe ratios/sums/YTD, окремі дати джерел/обробки, точні 30-денні періоди snapshot і видимі RPC row limits. Повнота без доказів залишається UNKNOWN.
 - **PREPARED / NOT APPLIED:** SQL design поза migrations, з фінальним ROLLBACK; жодного SQL execution чи production deploy.
 - **NOT IMPLEMENTED:** відновлення historical missingness, точні period uniques, справжній PageSpeed measurement timestamp, upstream completeness, історичний пошук snapshot та атомарність між RPC. App/Merchant/Social поза цією фазою.
