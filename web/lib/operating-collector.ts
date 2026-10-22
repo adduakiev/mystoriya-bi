@@ -1,5 +1,6 @@
 import { validateInput, type Evidence, type InputPacket } from "./operating-core.ts";
 import { normalizeDigital } from "./data/digital-contract.ts";
+import { selectedPeriodMetric } from "./data/digital-source-contract.ts";
 import { metricNumber, periodSourceDate } from "./digital-quality.ts";
 
 type Raw = Record<string, any>;
@@ -39,7 +40,7 @@ export async function collectInput(read: RpcReader, now = new Date().toISOString
       source_status: digital ? "AVAILABLE" : "BROKEN", confidence: 0.6, freshness_sla_days: 3 }),
     make({ id: "ads.spend", source: "Google Ads", domain: "ads", label: "Витрати Google Ads", unit: "currency-unconfirmed",
       source_date: date(ads?.meta?.to), period_from: date(ads?.meta?.from), period_to: date(ads?.meta?.to),
-      value: ads?.meta?.available === true ? metricNumber(ads?.summary?.cost) : null,
+      value: ads?.meta?.available === true ? selectedPeriodMetric(ads?.meta, ads?.summary?.cost) : null,
       direction: "neutral", source_status: ads?.meta?.available === true ? "AVAILABLE" : "UNKNOWN",
       confidence: 0.5, attribution: "platform" }),
     make({ id: "ux.device_rows", source: "GA4 devices", domain: "ux", label: "Рядки історії пристроїв", unit: "rows",
