@@ -11,7 +11,7 @@ function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-di
 export default async function Page(){
   const data=await loadDigitalLocalData();
   const s=data.summary;
-  const available=data.locations.length>0;
+  const available=Object.values(s).some(value=>value!==null);
   const ranked=data.locations.map(row=>({
     ...row,
     intentActions:metricSum(row.calls,row.directions,row.websiteClicks,row.menuClicks),
@@ -30,7 +30,7 @@ export default async function Page(){
       <div className="lfl-banner">Дати GBP: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Фактична кількість рядків та пропуски по точках невідомі.</div>
 
       {!available ? <div className="lfl-banner">
-        Google Business Profile підключений для 4 власних точок М’ЯСТОРІЇ, але в бойовій таблиці ще немає імпортованих рядків.
+        Google Business Profile підключений для 4 власних точок М’ЯСТОРІЇ, але за період звіту немає підтверджених вимірювань.
       </div> : <>
         <section className="digital-kpi-grid">
           <article className="digital-kpi-card"><span>Покази</span><strong>{n(s.impressions)}</strong><small>Search + Maps</small><em>{formatMetric(data.meta.days)} календарних днів у вікні</em></article>
