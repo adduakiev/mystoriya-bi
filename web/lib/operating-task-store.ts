@@ -1,7 +1,8 @@
+import { type TaskRepository } from './operating-task-repository.ts';
 import { readFile, mkdir, open, rename, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { TaskError, object, text, createTask, patchTask, type OperatingTask } from "./operating-tasks.ts";
+import { TaskError, object, text, exactKeys, createTask, patchTask, type OperatingTask } from "./operating-tasks.ts";
 import { buildCouncil, validateInput, evidenceFingerprint, SPECIALISTS, type InputPacket, type Specialist } from "./operating-core.ts";
 
 export function operatingRoot() { return path.basename(process.cwd()) === "web" ? path.dirname(process.cwd()) : process.cwd(); }
@@ -13,7 +14,7 @@ export function taskStorePath() {
   return configured || path.join(operatingRoot(), ".agents", "runtime", "tasks.json");
 }
 export function operatingBusPath() { return process.env.OPERATING_BUS_PATH || path.join(operatingRoot(), ".agents", "data_bus.json"); }
-export async function readTasks(file = taskStorePath()): Promise<OperatingTask[]> {
+async function readLocalTasks(file = taskStorePath()): Promise<OperatingTask[]> {
   try {
     const parsed = object(JSON.parse(await readFile(file, "utf8")));
     if (parsed.version !== 1 || !Array.isArray(parsed.tasks)) throw new Error("Invalid store");
@@ -42,7 +43,7 @@ export async function mutateTasks(update: (tasks: OperatingTask[]) => OperatingT
   }
   const temporary = `${file}.${randomUUID()}.tmp`;
   try {
-    const tasks = update(await readTasks(file));
+    const tasks = update(await readLocalTasks(file));
     const handle = await open(temporary, "wx", 0o600);
     try { await handle.writeFile(JSON.stringify({version: 1, tasks}, null, 2)); await handle.sync(); }
     finally { await handle.close(); }
@@ -75,13 +76,10 @@ export async function addCouncilTask(runId: unknown, recommendationId: unknown, 
   const recommendations = council.recommendations.filter(r => r.id === id);
   if (recommendations.length !== 1) throw new TaskError("Recommendation unavailable or ambiguous", 409);
   const task = createTask(recommendations[0], source, randomUUID(), new Date().toISOString());
-  await mutateTasks(tasks => {
-    if (tasks.some(t => t.source_run_id === source && t.recommendation_id === id)) throw new TaskError("Recommendation already has a task", 409);
-    return [...tasks, task];
-  });
-  return task;
+  return taskRepository().create(task);
 }
-export async function updateTask(input: unknown): Promise<OperatingTask> {
+
+async function updateLocalTask(input: unknown, file: string): Promise<OperatingTask> {
   const p = object(input);
   let updated: OperatingTask | undefined;
   await mutateTasks(tasks => {
@@ -89,6 +87,31 @@ export async function updateTask(input: unknown): Promise<OperatingTask> {
     if (index < 0) throw new TaskError("Task not found", 404);
     updated = patchTask(tasks[index], p);
     return tasks.map((t, i) => i === index ? updated! : t);
-  });
+  },file);
   return updated!;
 }
+
+export class LocalFileTaskRepository implements TaskRepository {
+  readonly kind='local-file';
+  private readonly file: string;
+  constructor(file=taskStorePath()) { this.file=file; }
+  private guard() { if(process.env.VERCEL)throw new TaskError('Task storage is unavailable on Vercel; configure a durable database adapter',503); }
+  async list(){this.guard();return readLocalTasks(this.file);}
+  async create(task: OperatingTask){
+    this.guard();
+    exactKeys(object(task),['id','source_run_id','recommendation_id','problem','evidence','recommendation','priority','expected_impact','owner','deadline','status','created_at','check_date','result','revision']);
+    if(task.status!=='NEW'||task.revision!==1||!Number.isFinite(Date.parse(task.created_at)))throw new TaskError('Invalid initial task');
+    const safe=createTask({id:task.recommendation_id,problem:task.problem,evidence:task.evidence,recommendation:task.recommendation,
+      priority:task.priority,expected_impact:task.expected_impact},task.source_run_id,task.id,task.created_at);
+    await mutateTasks(tasks=>{
+      if(tasks.some(t=>t.id===task.id || (t.source_run_id===task.source_run_id&&t.recommendation_id===task.recommendation_id)))
+        throw new TaskError('Recommendation already has a task',409);
+      return [...tasks,safe];
+    },this.file);
+    return safe;
+  }
+  async update(input: unknown){this.guard();return updateLocalTask(input,this.file);}
+}
+export function taskRepository(): TaskRepository { return new LocalFileTaskRepository(); }
+export async function readTasks(file?: string) { return new LocalFileTaskRepository(file).list(); }
+export async function updateTask(input: unknown) { return taskRepository().update(input); }

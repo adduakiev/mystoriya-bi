@@ -1,4 +1,6 @@
-# Локальний Operating Layer — контракт і межі
+# Operating Layer v1 — контракт і межі
+
+v1 LIVE у production `800b3ce9d9e062daf907825fd67fdadc11154a7c`; task persistence на Vercel unavailable. v2 architecture/adapter work описано в [DIGITAL-OPERATING-V2.md](DIGITAL-OPERATING-V2.md), без activation чи migration execution.
 
 ## Виконувані шари
 

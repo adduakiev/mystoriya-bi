@@ -22,17 +22,17 @@ test('hypotheses cannot claim measured financial impact', () => {
   const r = result('a'); r.findings[0].kind = 'hypothesis'; r.findings[0].impact_uah = 500;
   assert.throws(() => validateResult(r, 'a', new Set(['e1'])));
 });
-test('independent sequential domains, Council and Astra, lock and failure handling', () => {
+test('independent sequential domains, Council and Astra, lock and failure handling', async () => {
   const root = path.join(path.dirname(fileURLToPath(import.meta.url)), 'runtime');
   fs.mkdirSync(root, { recursive: true });
   const dir = fs.mkdtempSync(path.join(root, 'test-'));
   try {
     const visited = [];
-    const bus = run({ packet, stateDir: dir, mode: 'test', invoke(agent, _, inbox) {
+    const bus = await run({ packet, now:()=>packet.as_of, stateDir: dir, mode: 'test', async invoke(agent, _, inbox) {
       visited.push(agent);
       assert.deepEqual(inbox, []);
       assert.equal(_.evidence.length,1);
-      assert.throws(() => run({ packet, stateDir: dir, invoke: result }), /EEXIST/);
+      await assert.rejects(run({ packet, stateDir: dir, invoke: result }), /EEXIST/);
       const r=result(agent);r.findings[0].key=agent;r.findings[0].evidence_ids=[_.evidence[0].id];return r;
     } });
     assert.equal(visited.length, 4);
@@ -42,7 +42,7 @@ test('independent sequential domains, Council and Astra, lock and failure handli
     assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'runtime','runs',`${bus.run_id}.json`))).status,'completed');
     assert.equal(inboxFor(bus.messages, 'agent-bi-uxui').length, 0);
     assert.equal(inboxFor(bus.messages, 'ai-council').length,4);
-    assert.throws(() => run({ packet, stateDir: dir, invoke() { throw Error('upstream'); } }));
+    await assert.rejects(run({ packet, now:()=>packet.as_of, stateDir: dir, invoke() { throw Error('upstream'); } }));
     const failed = JSON.parse(fs.readFileSync(path.join(dir, 'data_bus.json')));
     assert.equal(failed.status, 'failed');
     assert.equal(failed.messages.length, 0);

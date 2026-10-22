@@ -11,7 +11,7 @@ const file=path.join(dir,'tasks.json'), bus=path.join(dir,'bus.json');
 const base='http://localhost:3101', results={checked_at:new Date().toISOString()};
 let server;
 async function start(vercel=false){
-  server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3101'],{cwd:path.resolve('web'),windowsHide:true,stdio:'ignore',env:{...process.env,...env,VERCEL:vercel?'1':'',OPERATING_TASKS_PATH:file,OPERATING_BUS_PATH:bus}});
+  server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3101'],{cwd:path.resolve('web'),windowsHide:true,stdio:'ignore',env:{...process.env,...env,VERCEL:vercel?'1':'',OPERATING_MANUAL_RUN_ENABLED:'1',OPERATING_TASKS_PATH:file,OPERATING_BUS_PATH:bus}});
   for(let i=0;i<60;i++){try {if((await fetch(base+'/login')).ok)return;}catch{} await new Promise(r=>setTimeout(r,500));}
   throw Error('Isolated server unavailable');
 }
@@ -21,6 +21,19 @@ try{
   let r=await fetch(base+'/api/auth/login',{method:'POST',body:new URLSearchParams({password:env.BI_ACCESS_PASSWORD,next:'/operating'}),redirect:'manual'});
   assert.equal(r.status,303);const cookie=r.headers.get('set-cookie').split(';')[0];
   const headers={cookie,origin:base,'content-type':'application/json'};
+  const availability=await fetch(base+'/api/operating/runs',{headers});
+  assert.equal(availability.status,200);assert.equal((await availability.json()).enabled,false);
+  const blockedRun=await fetch(base+'/api/operating/runs',{method:'POST',headers});
+  assert.equal(blockedRun.status,503);assert.equal((await blockedRun.json()).status,'BLOCKED');
+  results.manual_flag_cannot_enable_provider=blockedRun.status;
+  const foreignRun=await fetch(base+'/api/operating/runs',{method:'POST',headers:{...headers,origin:'https://foreign.invalid'}});
+  assert.equal(foreignRun.status,403);results.manual_foreign_origin=foreignRun.status;
+  const unauthRun=await fetch(base+'/api/operating/runs',{method:'POST',redirect:'manual'});
+  assert.equal(unauthRun.status,307);results.manual_unauthorized=unauthRun.status;
+  const cockpit=await fetch(base+'/operating',{headers:{cookie}});
+  const html=await cockpit.text();assert.equal(cockpit.status,200);
+  assert.ok(html.includes('manual-reasons')&&html.includes('disabled')&&html.includes('Data Quality / Sources'));
+  results.operations_ssr=200;
   const call=(method,data,extra={})=>fetch(base+'/api/operating/tasks',{method,headers:{...headers,...extra},...(data?{body:JSON.stringify(data)}:{}),redirect:'manual'});
   r=await call('GET');assert.equal(r.status,200);results.authorized_read=r.status;
   for(const method of ['GET','POST','PATCH']){r=await fetch(base+'/api/operating/tasks',{method,redirect:'manual'});assert.equal(r.status,307);assert.ok(r.headers.get('location').includes('/login'));results['unauthorized_'+method]=r.status;}
