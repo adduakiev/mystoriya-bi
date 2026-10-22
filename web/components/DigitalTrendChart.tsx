@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMetric, metricNumber } from "@/lib/digital-quality";
 import { useState } from "react";
 import {
   CartesianGrid,
@@ -45,11 +46,11 @@ export function DigitalTrendChart({data}:{data:DigitalTrendRow[]}) {
             <XAxis dataKey="date" stroke="#77808f" tickLine={false} axisLine={false} tickFormatter={v=>String(v).slice(5)}/>
             <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={56}/>
             <Tooltip
-              formatter={raw=>Number(raw).toLocaleString("uk-UA")}
+              formatter={raw=>formatMetric(raw)}
               labelFormatter={label=>String(label)}
               contentStyle={{background:"#111720",border:"1px solid #29313d",borderRadius:12}}
             />
-            <Line type="monotone" dataKey={config.key as string} name={config.label} stroke="#f5a623" strokeWidth={3} dot={false} activeDot={{r:4}}/>
+            <Line connectNulls={false} type="monotone" dataKey={config.key as string} name={config.label} stroke="#f5a623" strokeWidth={3} dot={false} activeDot={{r:4}}/>
           </LineChart>
         </ResponsiveContainer>
       </div>
