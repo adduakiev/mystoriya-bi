@@ -22,6 +22,13 @@
 
 Подальші таблиці описують доступність джерел і задачі команди, а не заперечують LIVE-статус v1.
 
+## Issue #12 — поточне закриття review blocker
+
+Локально реалізовано Ads/GBP empty-period summary guard, nullable UI та регресії.
+Контракт і межі EXECUTABLE / PREPARED / NOT IMPLEMENTED:
+[digital-period-summary-contract.md](digital-period-summary-contract.md).
+Це не підтверджує повне закриття phase 1 або публікацію в production.
+
 ## 1. Що зроблено
 
 | Напрям | Зроблено | Перевірка / межі |

@@ -21,3 +21,10 @@ export function snapshotDate(latest: string | undefined, cutoff: string): string
     new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) === date;
   return latest && valid(latest) && valid(cutoff) && latest <= cutoff ? latest : null;
 }
+
+/** A derived total is unknown when any component is unknown. */
+export function metricSum(...values: (number | null)[]): number | null {
+  if (values.some(value => value === null)) return null;
+  const total = values.reduce<number>((sum, value) => sum + (value as number), 0);
+  return Number.isFinite(total) ? total : null;
+}

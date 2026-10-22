@@ -1,3 +1,4 @@
+import { metricSum } from "@/lib/digital-quality";
 import Link from "next/link";
 import {
   Activity,
@@ -39,7 +40,7 @@ const ICONS = {
 const MONTHS=["Увесь період / YTD","Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
 function first(value:string|string[]|undefined){return Array.isArray(value)?value[0]:value;}
-function compact(value:number){return Math.round(value).toLocaleString("uk-UA");}
+function compact(value:number|null){if(value===null)return "—";return Math.round(value).toLocaleString("uk-UA");}
 function money(value:number|null){if(value===null)return "—";return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;}
 function pct(value:number){return `${(value*100).toFixed(2)}%`;}
 function delta(current:number,previous:number|null){
@@ -181,7 +182,7 @@ export default async function DigitalPage({
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
   const noConversionCampaigns=ads.campaigns.filter(row=>row.cost>=500&&row.conversions===0);
   const noConversionSpend=noConversionCampaigns.reduce((sum,row)=>sum+row.cost,0);
-  const localActions=local.summary.calls+local.summary.directions+local.summary.websiteClicks+local.summary.menuClicks;
+  const localActions=metricSum(local.summary.calls,local.summary.directions,local.summary.websiteClicks,local.summary.menuClicks);
   const attentionSignals=[
     local.pageSpeed&&local.pageSpeed.mobileCategory!=="GOOD"?{
       level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${Math.round(local.pageSpeed.mobileScore)} · LCP ${Math.round(local.pageSpeed.mobileLcp)} ms · CLS ${local.pageSpeed.mobileCls.toFixed(2)}.`,href:"/digital/site"
@@ -277,7 +278,7 @@ export default async function DigitalPage({
         </div>
         <section className="digital-kpi-grid">
           <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{ads.meta.days} днів автоматичного імпорту</small><em>Google Ads</em></article>
-          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{ads.summary.conversions.toFixed(1)} conversions</em></article>
+          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{ads.summary.conversions?.toFixed(1)??"—"} conversions</em></article>
           <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${ads.summary.roas.toFixed(2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
           <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{local.meta.locationCount} власні точки</em></article>
           <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{local.meta.days} днів</em></article>

@@ -3,7 +3,7 @@ import { DigitalTabs } from "@/components/DigitalReportShell";
 import { DigitalAdsTrendChart } from "@/components/DigitalAdsTrendChart";
 import { loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
+function n(v:number|null){if(v===null)return "—";return Math.round(v).toLocaleString("uk-UA");}
 function money(v:number|null){if(v===null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
 function pct(v:number|null){if(v===null)return "—";return `${(v*100).toFixed(2)}%`;}
 function x(v:number|null){if(v===null)return "—";return `${v.toFixed(2)}x`;}
@@ -32,7 +32,7 @@ export default async function Page(){
           <article className="digital-kpi-card"><span>Витрати</span><strong>{money(s.cost)}</strong><small>Google Ads spend</small><em>{data.meta.days} днів імпорту</em></article>
           <article className="digital-kpi-card"><span>Кліки</span><strong>{n(s.clicks)}</strong><small>{n(s.impressions)} показів</small><em>CTR {pct(s.ctr)}</em></article>
           <article className="digital-kpi-card"><span>CPC</span><strong>{money(s.cpc)}</strong><small>вартість кліку</small><em>cost / clicks</em></article>
-          <article className="digital-kpi-card"><span>Conversions</span><strong>{s.conversions.toFixed(1)}</strong><small>конверсії Ads</small><em>CPA {money(s.cpa)}</em></article>
+          <article className="digital-kpi-card"><span>Conversions</span><strong>{s.conversions?.toFixed(1)??"—"}</strong><small>конверсії Ads</small><em>CPA {money(s.cpa)}</em></article>
           <article className="digital-kpi-card"><span>Conversion value</span><strong>{money(s.conversionValue)}</strong><small>цінність конверсій Ads</small><em>Google Ads attribution</em></article>
           <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{x(s.roas)}</strong><small>conversion value / spend</small><em>не P&L ROAS</em></article>
         </section>

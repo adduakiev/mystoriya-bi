@@ -1,16 +1,18 @@
+import { metricRatio, metricSum } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function rate(clicks:number,impressions:number){return impressions?`${(clicks/impressions*100).toFixed(2)}%`:"—";}
+function n(v:number|null){if(v===null)return "—";return Math.round(v).toLocaleString("uk-UA");}
+function rate(clicks:number|null,impressions:number|null){const value=metricRatio(clicks,impressions);return value===null?"—":`${(value*100).toFixed(2)}%`;}
 function pct(v:number){return `${(v*100).toFixed(2)}%`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
 
 export default async function Page(){
   const data=await loadDigitalLocalData();
   const s=data.summary;
-  const available=data.locations.length>0;
+  const available=Object.values(s).some(value=>value!==null);
+  const actions=metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks);
   const ranked=data.locations.map(row=>({
     ...row,
     intentActions:row.calls+row.directions+row.websiteClicks+row.menuClicks,
@@ -28,7 +30,7 @@ export default async function Page(){
       <DigitalTabs active="local"/>
 
       {!available ? <div className="lfl-banner">
-        Google Business Profile підключений для 4 власних точок М’ЯСТОРІЇ, але в бойовій таблиці ще немає імпортованих рядків.
+        Google Business Profile підключений для 4 власних точок М’ЯСТОРІЇ, але за період звіту немає підтверджених вимірювань.
       </div> : <>
         <section className="digital-kpi-grid">
           <article className="digital-kpi-card"><span>Покази</span><strong>{n(s.impressions)}</strong><small>Search + Maps</small><em>{data.meta.days} днів імпорту</em></article>
@@ -45,8 +47,8 @@ export default async function Page(){
           <article className="panel">
             <span className="eyebrow">LOCAL INTENT</span>
             <div className="digital-metric-list">
-              <div><b>Усі локальні дії</b><span>{n(s.calls+s.directions+s.websiteClicks+s.menuClicks)}</span></div>
-              <div><b>Дії / покази</b><span>{rate(s.calls+s.directions+s.websiteClicks+s.menuClicks,s.impressions)}</span></div>
+              <div><b>Усі локальні дії</b><span>{n(actions)}</span></div>
+              <div><b>Дії / покази</b><span>{rate(actions,s.impressions)}</span></div>
               <div><b>Найбільше локальних дій</b><span>{n(topIntent.intentActions)} · ID …{topIntent.locationId.split("/").pop()?.slice(-6)}</span></div>
             </div>
           </article>
