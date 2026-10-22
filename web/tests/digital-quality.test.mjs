@@ -94,7 +94,7 @@ test("legacy coalesced empty periods and synthetic trend days remain unknown; pr
 });
 
 test("Ads/GBP/PageSpeed missing operands are not zero or a fabricated CWV category", () => {
-  const ads=normalizeAds({meta:{available:true},summary:{cost:0,clicks:10,conversions:null},
+  const ads=normalizeAds({meta:{available:true,rows:1},summary:{cost:0,clicks:10,conversions:null},
     campaigns:[{cost:null,clicks:0,conversions:1}],trend:[{cost:0,conversions:null}]});
   assert.equal(ads.summary.cost,0);
   assert.equal(ads.summary.cpc,0);
@@ -104,7 +104,7 @@ test("Ads/GBP/PageSpeed missing operands are not zero or a fabricated CWV catego
   assert.equal(ads.trend[0].cost,0);
   assert.equal(ads.trend[0].conversions,null);
   assert.equal(normalizeAds({summary:{cost:0}}).summary.cost,null);
-  const local=normalizeLocal({meta:{from:meta.from,to:meta.to},locations:[{impressions:0,calls:0}],summary:{calls:0},
+  const local=normalizeLocal({meta:{from:meta.from,to:meta.to,rows:1},locations:[{impressions:0,calls:0}],summary:{calls:0},
     pageSpeed:{captured_on:"2026-10-22",imported_at:"2026-10-22T10:00:00Z",mobile_score:0,mobile_lcp:100,mobile_cls:0,mobile_category:"GOOD"}});
   assert.equal(local.summary.calls,0);
   assert.equal(local.summary.directions,null);
@@ -117,6 +117,38 @@ test("Ads/GBP/PageSpeed missing operands are not zero or a fabricated CWV catego
   assert.equal(local.pageSpeed.fetchedAt,null);
   assert.equal(local.pageSpeed.processedAt,"2026-10-22T10:00:00Z");
   assert.equal(normalizeLocal({summary:{calls:0}}).summary.calls,null);
+});
+
+test("Ads and GBP explicit empty selected periods suppress legacy zero/nonzero summaries", () => {
+  const adsZero={cost:0,clicks:0,impressions:0,conversions:0,conversionValue:0};
+  const gbpZero={impressions:0,clicks:0,calls:0,websiteClicks:0,directions:0,menuClicks:0};
+  for (const counts of [{rows:0},{observedDates:0},{rows:0,observedDates:3},{rows:3,observedDates:0}]) {
+    const ads=normalizeAds({meta:{available:true,...counts},summary:{...adsZero,cost:100}});
+    assert.ok(Object.values(ads.summary).every(value=>value===null));
+    const local=normalizeLocal({meta:{from:meta.from,to:meta.to,...counts},
+      locations:[{location_id:"synthetic-profile"}],summary:{...gbpZero,calls:5},
+      pageSpeed:{captured_on:"2026-10-22",mobile_score:81,desktop_score:95}});
+    assert.ok(Object.values(local.summary).every(value=>value===null));
+    assert.equal(local.pageSpeed?.capturedOn,"2026-10-22");
+  }
+});
+
+test("positive selected-period evidence preserves measured zero; dates/profiles alone do not", () => {
+  for (const counts of [{rows:2},{observedDates:2},{rows:2,observedDates:2}]) {
+    assert.equal(normalizeAds({meta:{available:true,...counts},summary:{cost:0}}).summary.cost,0);
+    assert.equal(normalizeLocal({meta:{...counts},summary:{calls:0}}).summary.calls,0);
+  }
+  assert.equal(normalizeAds({meta:{available:true},summary:{cost:0}}).summary.cost,null);
+  assert.equal(normalizeLocal({meta:{from:meta.from,to:meta.to},locations:[{location_id:"x"}],summary:{calls:0}}).summary.calls,null);
+});
+
+test("collector applies selected-period Ads evidence to spend", async () => {
+  const empty=await collectInput(async name=>name==="bi_digital_ads_payload"
+    ? {meta:{available:true,rows:0,from:meta.from,to:meta.to},summary:{cost:0}} : {},"2026-10-22T12:00:00Z");
+  assert.equal(empty.evidence.find(e=>e.id==="ads.spend").value,null);
+  const measured=await collectInput(async name=>name==="bi_digital_ads_payload"
+    ? {meta:{available:true,rows:1,from:meta.from,to:meta.to},summary:{cost:0}} : {},"2026-10-22T12:00:00Z");
+  assert.equal(measured.evidence.find(e=>e.id==="ads.spend").value,0);
 });
 
 test("coverage/row counts never infer FULL; calendar span and counts have explicit scopes", () => {
