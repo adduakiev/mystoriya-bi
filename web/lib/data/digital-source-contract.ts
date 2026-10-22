@@ -59,4 +59,3 @@ export function normalizeLocal(raw:Raw):DigitalLocalData{
     pageSpeed:hasSpeed?{capturedOn:String(p.captured_on),measurementDate:null,fetchedAt:null,processedAt:typeof p.imported_at === "string" ? p.imported_at : null,desktopScore:metricNumber(p.desktop_score),mobileScore:metricNumber(p.mobile_score),desktopLcp:metricNumber(p.desktop_lcp),desktopInp:metricNumber(p.desktop_inp),desktopCls:metricNumber(p.desktop_cls),mobileLcp:metricNumber(p.mobile_lcp),mobileInp:metricNumber(p.mobile_inp),mobileCls:metricNumber(p.mobile_cls),desktopCategory:coreWebVitalsCategory(p.desktop_lcp,p.desktop_inp,p.desktop_cls),mobileCategory:coreWebVitalsCategory(p.mobile_lcp,p.mobile_inp,p.mobile_cls)}:null
   };
 }
-
