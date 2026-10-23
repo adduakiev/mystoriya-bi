@@ -2,7 +2,8 @@ import { formatMetric, metricSum } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { DigitalAdsTrendChart } from "@/components/DigitalAdsTrendChart";
-import { loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
+import { DigitalSourceEvidence } from "@/components/DigitalSourceEvidence";
+import { loadDigitalMetaAdsData, loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
 
 function n(v:number|null|undefined){return formatMetric(v);}
 function money(v:number|null){if(v===null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
@@ -18,16 +19,20 @@ function signal(r:AdsCampaign){
 }
 
 export default async function Page(){
-  const data=await loadDigitalAdsData();
+  const [googleResult, metaResult]=await Promise.allSettled([loadDigitalAdsData(), loadDigitalMetaAdsData()]);
+  if (googleResult.status === "rejected") throw googleResult.reason;
+  const data=googleResult.value;
+  const meta=metaResult.status === "fulfilled" ? metaResult.value : null;
   const s=data.summary;
   const noConversions=data.campaigns.filter(r=>r.cost!==null&&r.cost>=500&&r.conversions===0);
   const noConversionSpend=metricSum(...noConversions.map(r=>r.cost));
   const unvalued=data.campaigns.filter(r=>r.conversions!==null&&r.conversions>0&&r.conversionValue===0);
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google Ads" statusDetail={data.meta.available?`LIVE · ${formatMetric(data.meta.days)} календарних днів у вікні`:"джерело підключено · sync очікує"}/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Paid Advertising" statusDetail={`Google Ads ${data.meta.available ? "дані є" : "очікує"} · Meta Ads ${meta?.meta.status ?? "недоступно"}`}/>
     <section className="workspace">
-      <header className="topbar"><div><span className="eyebrow">DIGITAL · PAID ADVERTISING</span><h1>Google Ads</h1></div><div className="digital-source-badge">акаунт М’ясторія · 824-018-4168</div></header>
+      <header className="topbar"><div><span className="eyebrow">DIGITAL · PAID ADVERTISING</span><h1>Paid Advertising · Google Ads / Meta Ads</h1></div><div className="digital-source-badge">Google Ads · М’ясторія · 824-018-4168</div></header>
       <DigitalTabs active="ads"/>
+      <h2>Google Ads · окрема атрибуція</h2>
       <div className="lfl-banner">Дати Google Ads: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Календарне вікно не підтверджує кількість днів з даними. Підсумки warehouse та кампанії staging можуть мати різні дати оновлення; валюта не підтверджена контрактом.</div>
       {!data.meta.available?<div className="lfl-banner">Google Ads підключений, але в бойовій таблиці ще немає імпортованих рядків. Нулі не підставляємо — чекаємо фактичний sync.</div>:<>
         <section className="digital-kpi-grid">
@@ -73,6 +78,26 @@ export default async function Page(){
           <small className="table-note">«—» означає, що показник неможливо обчислити: відсутні дані або знаменник дорівнює нулю. ROAS не визначає прибутковість без маржі та перевірки цілей конверсій. Це рекламна атрибуція Google Ads. Реальний бізнес-ROAS згодом рахуємо через фактичні замовлення та виручку warehouse.</small>
         </section>
       </>}
+      <h2>Meta Ads · окрема атрибуція</h2>
+      {meta ? <>
+      <DigitalSourceEvidence name="Meta Ads" evidence={meta.meta}/>
+      <div className="lfl-banner">Google Ads conversion value та Meta purchase value мають різну атрибуцію. Не підсумовуємо їх та не об’єднуємо ROAS. Валюта, акаунти та налаштування атрибуції Meta ще не звірені. Reach / frequency недоступні: їх не можна складати між оголошеннями та днями.</div>
+      <section className="digital-kpi-grid">
+        <article className="digital-kpi-card"><span>Meta spend</span><strong>{n(meta.summary.spend)}</strong><small>валюта не підтверджена</small><em>{meta.meta.status}</em></article>
+        <article className="digital-kpi-card"><span>Meta clicks</span><strong>{n(meta.summary.clicks)}</strong><small>{n(meta.summary.impressions)} показів</small><em>CTR {pct(meta.summary.ctr)}</em></article>
+        <article className="digital-kpi-card"><span>Meta purchases</span><strong>{n(meta.summary.purchases)}</strong><small>атрибуція Meta Ads</small></article>
+        <article className="digital-kpi-card"><span>Meta purchase value</span><strong>{n(meta.summary.purchaseValue)}</strong><small>валюта не підтверджена</small></article>
+        <article className="digital-kpi-card"><span>Meta ROAS</span><strong>{x(meta.summary.roas)}</strong><small>purchase value / spend</small><em>атрибуція Meta Ads</em></article>
+      </section>
+      {meta.campaigns.length > 0 && <section className="panel">
+        <h2>Meta campaigns · за витратами</h2>
+        <div className="management-table-wrap"><div className="management-table" style={{minWidth:800}}>
+          <div className="table-row table-head" style={{gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr"}}><span>Кампанія / account</span><span>Spend</span><span>Purchases</span><span>Purchase value</span><span>ROAS</span></div>
+          {meta.campaigns.map(r => <div className="table-row" style={{gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr"}} key={`${r.accountId}:${r.campaignId}`}><b>{r.campaignName || r.campaignId} · {r.accountId}</b><span>{n(r.spend)}</span><span>{n(r.purchases)}</span><span>{n(r.purchaseValue)}</span><span>{x(r.roas)}</span></div>)}
+        </div></div><small>Ліміт 50 кампаній; повнота невідома. Валюта не підтверджена.</small>
+      </section>}
+      {!meta.meta.available && <small>Для Meta Ads немає підтверджених вимірювань періоду. До перевірки джерела показники недоступні для бюджетних рішень.</small>}
+      </> : <div className="lfl-banner">Meta Ads · джерело недоступне. Статус і показники не визначені; спробуйте пізніше.</div>}
     </section>
   </main>;
 }
