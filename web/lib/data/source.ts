@@ -183,21 +183,40 @@ function isGarbage(value: string): boolean {
 }
 
 type SupabaseCredentialMode = "secret" | "legacy-service-role" | "anon-fallback";
+type SupabaseCredentialReadiness = SupabaseCredentialMode | "misconfigured";
 
 function supabaseCredential(): { mode: SupabaseCredentialMode; key: string } {
-  const secret = process.env.SUPABASE_SECRET_KEY?.trim();
-  if (secret) return { mode: "secret", key: secret };
+  const requestedMode = process.env.BI_SUPABASE_RPC_AUTH_MODE?.trim();
 
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (serviceRole) return { mode: "legacy-service-role", key: serviceRole };
+  // Fail-safe default: production keeps the existing anon transport until an
+  // operator explicitly opts this BI transport into an elevated server mode.
+  if (!requestedMode || requestedMode === "anon" || requestedMode === "anon-fallback") {
+    return { mode: "anon-fallback", key: BI_SUPABASE_ANON_KEY };
+  }
 
-  return { mode: "anon-fallback", key: BI_SUPABASE_ANON_KEY };
+  if (requestedMode === "secret") {
+    const secret = process.env.BI_SUPABASE_SECRET_KEY?.trim();
+    if (!secret) throw new Error("BI_SUPABASE_SECRET_KEY is not configured");
+    return { mode: "secret", key: secret };
+  }
+
+  if (requestedMode === "legacy-service-role") {
+    const serviceRole = process.env.BI_SUPABASE_SERVICE_ROLE_KEY?.trim();
+    if (!serviceRole) throw new Error("BI_SUPABASE_SERVICE_ROLE_KEY is not configured");
+    return { mode: "legacy-service-role", key: serviceRole };
+  }
+
+  throw new Error("BI_SUPABASE_RPC_AUTH_MODE is invalid");
 }
 
 // Configuration readiness only; this does not verify connectivity or RPC grants.
 // Deliberately return no credentials, headers, or password.
-export function supabaseRpcReadiness(): { mode: SupabaseCredentialMode } {
-  return { mode: supabaseCredential().mode };
+export function supabaseRpcReadiness(): { mode: SupabaseCredentialReadiness } {
+  try {
+    return { mode: supabaseCredential().mode };
+  } catch {
+    return { mode: "misconfigured" };
+  }
 }
 
 function supabaseHeaders(): HeadersInit {
