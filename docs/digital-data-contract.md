@@ -1,5 +1,9 @@
 # Current Digital correctness — issue #12
 
+Issue #34 prepares the [Meta Windsor ingestion candidate](meta-windsor-ingestion.md),
+including raw field mapping, currency, controlled refresh and disabled activation plan.
+
+
 Issue #26 extends source correctness to Meta Ads and Social. See
 [Meta/Social contract and NOT-APPLIED SQL scope](meta-social-correctness.md).
 The phase-1 notes below describe the Google baseline.
