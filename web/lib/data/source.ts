@@ -1,3 +1,4 @@
+import "server-only";
 import { unstable_cache } from "next/cache";
 import type { SalesRow } from "./types";
 
@@ -181,10 +182,30 @@ function isGarbage(value: string): boolean {
   return /#REF!|#N\/A|^None$|^nan$/i.test(value.trim());
 }
 
+type SupabaseCredentialMode = "secret" | "legacy-service-role" | "anon-fallback";
+
+function supabaseCredential(): { mode: SupabaseCredentialMode; key: string } {
+  const secret = process.env.SUPABASE_SECRET_KEY?.trim();
+  if (secret) return { mode: "secret", key: secret };
+
+  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (serviceRole) return { mode: "legacy-service-role", key: serviceRole };
+
+  return { mode: "anon-fallback", key: BI_SUPABASE_ANON_KEY };
+}
+
+// Configuration readiness only; this does not verify connectivity or RPC grants.
+// Deliberately return no credentials, headers, or password.
+export function supabaseRpcReadiness(): { mode: SupabaseCredentialMode } {
+  return { mode: supabaseCredential().mode };
+}
+
 function supabaseHeaders(): HeadersInit {
+  const { mode, key } = supabaseCredential();
   return {
-    apikey: BI_SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${BI_SUPABASE_ANON_KEY}`,
+    apikey: key,
+    // New secret keys are opaque API keys, not JWT bearer tokens.
+    ...(mode === "secret" ? {} : { Authorization: `Bearer ${key}` }),
     "Content-Type": "application/json",
     Accept: "application/json"
   };
@@ -340,8 +361,8 @@ async function fetchSalesDataset(): Promise<SalesDataset> {
   if (password) {
     try {
       return await fetchSupabaseDataset(password);
-    } catch (error) {
-      console.error("Supabase BI snapshot failed; falling back to Google Sheets.", error);
+    } catch {
+      console.error("Supabase BI snapshot failed; falling back to Google Sheets.");
     }
   }
 
@@ -404,8 +425,8 @@ const getCachedSalesStatus = unstable_cache(
     if (password) {
       try {
         return await fetchSupabaseStatus(password);
-      } catch (error) {
-        console.error("Supabase BI status failed.", error);
+      } catch {
+        console.error("Supabase BI status failed.");
       }
     }
 
@@ -451,10 +472,8 @@ export async function callBiRpc<T>(
   });
 
   if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(
-      `Supabase RPC ${functionName} returned ${response.status}${message ? `: ${message.slice(0, 240)}` : ""}`
-    );
+    // Upstream response bodies may echo credentials; keep them out of errors/logs.
+    throw new Error(`Supabase RPC ${functionName} returned ${response.status}`);
   }
 
   const raw = await response.json();
