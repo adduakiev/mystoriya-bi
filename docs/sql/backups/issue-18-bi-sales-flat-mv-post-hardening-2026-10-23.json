@@ -1,0 +1,13 @@
+{
+  "migration": "20261023134905_security_revoke_bi_sales_flat_mv_api_access",
+  "object": "public.bi_sales_flat_mv",
+  "acl": [
+    "postgres=arwdDxtm/postgres",
+    "service_role=arwdDxtm/postgres"
+  ],
+  "anonSelect": false,
+  "authenticatedSelect": false,
+  "serviceRoleSelect": true,
+  "rows": 46159,
+  "advisorMaterializedViewWarning": false
+}
