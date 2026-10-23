@@ -1,0 +1,53 @@
+{
+  "acl": [
+    "postgres=arwdDxtm/postgres",
+    "anon=arwdDxtm/postgres",
+    "authenticated=arwdDxtm/postgres",
+    "service_role=arwdDxtm/postgres"
+  ],
+  "rows": 46159,
+  "owner": "postgres",
+  "object": "public.bi_sales_flat_mv",
+  "anonSelect": true,
+  "captured_at": "2026-10-23T13:48:12.582781+00:00",
+  "rpcDependents": [
+    {
+      "args": "p_password text, p_channel text, p_order_type text, p_location text, p_brand text, p_ownership text, p_focus_year integer, p_focus_month integer, p_period text, p_comparison text, p_metric text, p_grain text, p_lfl boolean",
+      "name": "bi_overview_payload"
+    },
+    {
+      "args": "",
+      "name": "refresh_bi_aggregates"
+    },
+    {
+      "args": "p_password text, p_period text, p_comparison text, p_lfl boolean",
+      "name": "bi_aggregators_payload"
+    },
+    {
+      "args": "p_password text, p_brand text, p_ownership text, p_focus_year integer, p_focus_month integer, p_lfl boolean",
+      "name": "bi_locations_payload"
+    },
+    {
+      "args": "p_password text, p_focus_year integer, p_focus_month integer, p_channel text, p_order_type text, p_location text, p_brand text, p_ownership text, p_lfl boolean",
+      "name": "bi_insights_payload"
+    },
+    {
+      "args": "p_password text, p_order_type text, p_location text, p_brand text, p_ownership text, p_focus_year integer, p_focus_month integer, p_metric text, p_grain text, p_lfl boolean",
+      "name": "bi_delivery_payload"
+    },
+    {
+      "args": "p_password text, p_dimension text, p_metric text, p_sort text, p_focus_year integer, p_focus_month integer, p_channel text, p_order_type text, p_location text, p_brand text, p_ownership text, p_lfl boolean",
+      "name": "bi_explorer_payload"
+    },
+    {
+      "args": "p_password text, p_metric text, p_grain text, p_channel text, p_order_type text, p_location text, p_brand text, p_ownership text, p_lfl boolean",
+      "name": "bi_dynamics_payload"
+    },
+    {
+      "args": "p_password text, p_period text, p_comparison text, p_lfl boolean",
+      "name": "bi_aggregators_payload_v2"
+    }
+  ],
+  "serviceRoleSelect": true,
+  "authenticatedSelect": true
+}
