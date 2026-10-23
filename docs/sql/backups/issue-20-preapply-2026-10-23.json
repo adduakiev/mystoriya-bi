@@ -1,0 +1,22 @@
+{
+  "counts": {
+    "ads": 11,
+    "ga4": 660,
+    "gbp": 44,
+    "search": 477,
+    "pagespeed": 6
+  },
+  "latest": {
+    "ads": "2026-10-22",
+    "ga4": "2026-10-22",
+    "gbp": "2026-10-22",
+    "search": "2026-10-20",
+    "pagespeed": "2026-10-23"
+  },
+  "captured_at": "2026-10-23T13:29:03.597254+00:00",
+  "function_hashes": {
+    "bi_digital_payload": "6435015958907cd01ae636dec28f1d01",
+    "bi_digital_ads_payload": "05eda1bab305a5353364c18896a83318",
+    "bi_digital_local_payload": "653c93f8d2b6b04e66fe8d5f5c69a6e3"
+  }
+}
