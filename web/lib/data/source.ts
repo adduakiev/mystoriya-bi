@@ -1,3 +1,4 @@
+import "server-only";
 import { unstable_cache } from "next/cache";
 import type { SalesRow } from "./types";
 
@@ -181,10 +182,49 @@ function isGarbage(value: string): boolean {
   return /#REF!|#N\/A|^None$|^nan$/i.test(value.trim());
 }
 
+type SupabaseCredentialMode = "secret" | "legacy-service-role" | "anon-fallback";
+type SupabaseCredentialReadiness = SupabaseCredentialMode | "misconfigured";
+
+function supabaseCredential(): { mode: SupabaseCredentialMode; key: string } {
+  const requestedMode = process.env.BI_SUPABASE_RPC_AUTH_MODE?.trim();
+
+  // Fail-safe default: production keeps the existing anon transport until an
+  // operator explicitly opts this BI transport into an elevated server mode.
+  if (!requestedMode || requestedMode === "anon" || requestedMode === "anon-fallback") {
+    return { mode: "anon-fallback", key: BI_SUPABASE_ANON_KEY };
+  }
+
+  if (requestedMode === "secret") {
+    const secret = process.env.BI_SUPABASE_SECRET_KEY?.trim();
+    if (!secret) throw new Error("BI_SUPABASE_SECRET_KEY is not configured");
+    return { mode: "secret", key: secret };
+  }
+
+  if (requestedMode === "legacy-service-role") {
+    const serviceRole = process.env.BI_SUPABASE_SERVICE_ROLE_KEY?.trim();
+    if (!serviceRole) throw new Error("BI_SUPABASE_SERVICE_ROLE_KEY is not configured");
+    return { mode: "legacy-service-role", key: serviceRole };
+  }
+
+  throw new Error("BI_SUPABASE_RPC_AUTH_MODE is invalid");
+}
+
+// Configuration readiness only; this does not verify connectivity or RPC grants.
+// Deliberately return no credentials, headers, or password.
+export function supabaseRpcReadiness(): { mode: SupabaseCredentialReadiness } {
+  try {
+    return { mode: supabaseCredential().mode };
+  } catch {
+    return { mode: "misconfigured" };
+  }
+}
+
 function supabaseHeaders(): HeadersInit {
+  const { mode, key } = supabaseCredential();
   return {
-    apikey: BI_SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${BI_SUPABASE_ANON_KEY}`,
+    apikey: key,
+    // New secret keys are opaque API keys, not JWT bearer tokens.
+    ...(mode === "secret" ? {} : { Authorization: `Bearer ${key}` }),
     "Content-Type": "application/json",
     Accept: "application/json"
   };
@@ -340,8 +380,8 @@ async function fetchSalesDataset(): Promise<SalesDataset> {
   if (password) {
     try {
       return await fetchSupabaseDataset(password);
-    } catch (error) {
-      console.error("Supabase BI snapshot failed; falling back to Google Sheets.", error);
+    } catch {
+      console.error("Supabase BI snapshot failed; falling back to Google Sheets.");
     }
   }
 
@@ -404,8 +444,8 @@ const getCachedSalesStatus = unstable_cache(
     if (password) {
       try {
         return await fetchSupabaseStatus(password);
-      } catch (error) {
-        console.error("Supabase BI status failed.", error);
+      } catch {
+        console.error("Supabase BI status failed.");
       }
     }
 
@@ -451,10 +491,8 @@ export async function callBiRpc<T>(
   });
 
   if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(
-      `Supabase RPC ${functionName} returned ${response.status}${message ? `: ${message.slice(0, 240)}` : ""}`
-    );
+    // Upstream response bodies may echo credentials; keep them out of errors/logs.
+    throw new Error(`Supabase RPC ${functionName} returned ${response.status}`);
   }
 
   const raw = await response.json();
