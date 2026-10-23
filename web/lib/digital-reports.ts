@@ -40,8 +40,8 @@ export const DIGITAL_REPORTS: DigitalReport[] = [
     slug: "ads",
     label: "Реклама",
     title: "Платна реклама",
-    description: "Економіка рекламних кампаній — від витрат до реальних замовлень і виручки.",
-    source: "Google Ads + GA4 + дані замовлень",
+    description: "Google Ads і Meta Ads: витрати та конверсії з окремою атрибуцією і статусом кожного джерела.",
+    source: "Google Ads / Meta Ads · окрема атрибуція",
     metrics: ["Витрати", "Кліки", "CPC", "Замовлення", "CPA", "Виручка", "ROAS"],
     decisions: ["Куди переносити бюджет", "Які кампанії окупаються", "Де CPA виходить за ціль"]
   },

@@ -1,5 +1,9 @@
 # Current Digital correctness — issue #12
 
+Issue #26 extends source correctness to Meta Ads and Social. See
+[Meta/Social contract and NOT-APPLIED SQL scope](meta-social-correctness.md).
+The phase-1 notes below describe the Google baseline.
+
 ## Production DB application — issue #20
 
 Applied to production Supabase on 2026-10-23 as migration `20261023133005_digital_correctness_rpc` after pre-apply rollback backup, live read-only validation and temporary PostgreSQL compilation. The production RPCs now expose the selected-period evidence contract for Ads/GBP and the corrected core Digital null/presence semantics. Business source tables were not modified. Rollback backup: `docs/sql/backups/issue-20-preapply-2026-10-23.sql`. Security hardening remains separate in issue #18.
@@ -66,8 +70,9 @@ its original three allowlisted RPCs. Domain and current-run gates remain intact.
 | Snapshot metadata | `periodBasis=REQUESTED_EXACT_30_DAYS`; `snapshotId=null`; completeness UNKNOWN. Known RPC row limits: landing 30, queries 40, pages 30. Display slices (SEO 15 queries/20 pages/10 opportunities) are separate from RPC limits. | Requested period is not proof of actual source coverage, snapshot identity, batch freshness or upstream completeness. Upstream row limits remain null. Query sums can differ from site totals due to GSC omissions. |
 | Coverage | Missing completeness is UNKNOWN, never inferred FULL from a date span or count. Quality cards do not claim OK. History counts are labeled all stored rows; Ads trend length counts returned rows only; GBP rows are unknown. | `days` is calendar span, not observed day count. `days × locationCount` is not an observed GBP row count. Daily Ads summary and staging campaign aggregates can differ in freshness, grain and currency. |
 
-App, Merchant and Social are outside this connected Google correctness phase.
-Their legacy numeric adapters and activation status are unchanged. Ads money
+App and Merchant remain outside the correctness phases. Social now uses the
+issue #26 nullable evidence contract linked above. App/Merchant legacy numeric
+adapters and activation status are unchanged. Ads money
 formatting remains compatible with the existing UI, with the unconfirmed currency
 limitation exposed; no financial reconciliation or ad mutation is performed.
 
