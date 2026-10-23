@@ -28,7 +28,14 @@ const anon = readFileSync(path.join(web, "lib/data/source.ts"), "utf8")
   .match(/const BI_SUPABASE_ANON_KEY =\s*"([^"]+)"/)[1];
 
 function configure(t, env = {}) {
-  for (const name of ["SUPABASE_SECRET_KEY", "SUPABASE_SERVICE_ROLE_KEY", "BI_ACCESS_PASSWORD"]) {
+  for (const name of [
+    "BI_SUPABASE_RPC_AUTH_MODE",
+    "BI_SUPABASE_SECRET_KEY",
+    "BI_SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_SECRET_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "BI_ACCESS_PASSWORD"
+  ]) {
     const previous = process.env[name];
     t.after(() => {
       if (previous === undefined) delete process.env[name];
@@ -40,11 +47,27 @@ function configure(t, env = {}) {
 }
 
 for (const scenario of [
-  { name: "secret wins over legacy", env: { SUPABASE_SECRET_KEY: secret, SUPABASE_SERVICE_ROLE_KEY: legacy }, mode: "secret", key: secret },
-  { name: "legacy service role", env: { SUPABASE_SERVICE_ROLE_KEY: legacy }, mode: "legacy-service-role", key: legacy },
+  {
+    name: "explicit secret mode",
+    env: { BI_SUPABASE_RPC_AUTH_MODE: "secret", BI_SUPABASE_SECRET_KEY: secret, BI_SUPABASE_SERVICE_ROLE_KEY: legacy },
+    mode: "secret", key: secret
+  },
+  {
+    name: "explicit legacy service-role mode",
+    env: { BI_SUPABASE_RPC_AUTH_MODE: "legacy-service-role", BI_SUPABASE_SERVICE_ROLE_KEY: legacy },
+    mode: "legacy-service-role", key: legacy
+  },
   { name: "unconfigured production stays on anon", env: {}, mode: "anon-fallback", key: anon },
-  { name: "empty configuration stays on anon", env: { SUPABASE_SECRET_KEY: " ", SUPABASE_SERVICE_ROLE_KEY: "" }, mode: "anon-fallback", key: anon },
-  { name: "blank secret permits legacy fallback", env: { SUPABASE_SECRET_KEY: "", SUPABASE_SERVICE_ROLE_KEY: legacy }, mode: "legacy-service-role", key: legacy }
+  {
+    name: "generic Supabase server credentials cannot silently elevate BI transport",
+    env: { SUPABASE_SECRET_KEY: secret, SUPABASE_SERVICE_ROLE_KEY: legacy },
+    mode: "anon-fallback", key: anon
+  },
+  {
+    name: "explicit anon fallback ignores BI-specific keys until opt-in",
+    env: { BI_SUPABASE_RPC_AUTH_MODE: "anon-fallback", BI_SUPABASE_SECRET_KEY: secret, BI_SUPABASE_SERVICE_ROLE_KEY: legacy },
+    mode: "anon-fallback", key: anon
+  }
 ]) {
   test(`RPC credential selection: ${scenario.name}`, async t => {
     configure(t, { ...scenario.env, BI_ACCESS_PASSWORD: password });
@@ -87,14 +110,27 @@ for (const scenario of [
   });
 }
 
+
+test("elevated mode is explicit and fails closed when misconfigured", async t => {
+  configure(t, { BI_SUPABASE_RPC_AUTH_MODE: "secret", BI_ACCESS_PASSWORD: password });
+  t.mock.method(globalThis, "fetch", () => assert.fail("must not call RPC with a missing secret"));
+  assert.deepEqual(source.supabaseRpcReadiness(), { mode: "misconfigured" });
+  await assert.rejects(source.callBiRpc("bi_test"), /^Error: BI_SUPABASE_SECRET_KEY is not configured$/);
+});
+
 test("the BI password remains required even with a server secret", async t => {
-  configure(t, { SUPABASE_SECRET_KEY: secret });
+  configure(t, { BI_SUPABASE_RPC_AUTH_MODE: "secret", BI_SUPABASE_SECRET_KEY: secret });
   t.mock.method(globalThis, "fetch", () => assert.fail("must not call RPC without password"));
   await assert.rejects(source.callBiRpc("bi_test"), /^Error: BI_ACCESS_PASSWORD is not configured$/);
 });
 
 test("RPC failures do not echo response secrets or retry using anon", async t => {
-  configure(t, { SUPABASE_SECRET_KEY: secret, SUPABASE_SERVICE_ROLE_KEY: legacy, BI_ACCESS_PASSWORD: password });
+  configure(t, {
+    BI_SUPABASE_RPC_AUTH_MODE: "secret",
+    BI_SUPABASE_SECRET_KEY: secret,
+    BI_SUPABASE_SERVICE_ROLE_KEY: legacy,
+    BI_ACCESS_PASSWORD: password
+  });
   const fetch = t.mock.method(globalThis, "fetch", async () =>
     new Response(`${secret} ${legacy} ${password}`, { status: 401 }));
   await assert.rejects(source.callBiRpc("bi_test"), /^Error: Supabase RPC bi_test returned 401$/);
@@ -103,7 +139,7 @@ test("RPC failures do not echo response secrets or retry using anon", async t =>
 });
 
 test("sales fallback logs do not include transport error credentials", async t => {
-  configure(t, { SUPABASE_SECRET_KEY: secret, BI_ACCESS_PASSWORD: password });
+  configure(t, { BI_SUPABASE_RPC_AUTH_MODE: "secret", BI_SUPABASE_SECRET_KEY: secret, BI_ACCESS_PASSWORD: password });
   const logs = t.mock.method(console, "error", () => {});
   t.mock.method(globalThis, "fetch", async url => {
     if (url.includes("supabase.co")) throw new Error(`${secret} ${password}`);
@@ -138,7 +174,12 @@ test("Next.js rejects a Client Component importing the Supabase transport", { ti
   try {
     result = spawnSync(process.execPath, [path.join(web, "node_modules/next/dist/bin/next"), "build", fixture], {
       cwd: fixture, stdio: ["ignore", fd, fd], timeout: 100_000,
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", SUPABASE_SECRET_KEY: secret }
+      env: {
+        ...process.env,
+        NEXT_TELEMETRY_DISABLED: "1",
+        BI_SUPABASE_RPC_AUTH_MODE: "secret",
+        BI_SUPABASE_SECRET_KEY: secret
+      }
     });
   } finally {
     closeSync(fd);
