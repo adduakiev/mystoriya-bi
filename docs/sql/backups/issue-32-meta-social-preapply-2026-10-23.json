@@ -1,0 +1,47 @@
+{
+  "latest": {
+    "metaAds": null,
+    "facebookDaily": "2026-10-18",
+    "facebookPosts": "2026-10-18T12:54:50+00:00",
+    "instagramDaily": null,
+    "instagramMedia": null
+  },
+  "functions": [
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "anon=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "md5": "f72fb7066e3e3d1009b99fb0d2a6d62e",
+      "args": "p_password text",
+      "name": "bi_digital_meta_ads_payload",
+      "config": [
+        "search_path=public, extensions"
+      ],
+      "securityDefiner": true
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "anon=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "md5": "ab3054d4d51b0ea6c33cc7fe4e250b91",
+      "args": "p_password text",
+      "name": "bi_digital_social_payload",
+      "config": [
+        "search_path=public, extensions"
+      ],
+      "securityDefiner": true
+    }
+  ],
+  "captured_at": "2026-10-23T14:15:07.478104+00:00",
+  "sourceCounts": {
+    "metaAds": 0,
+    "facebookDaily": 90,
+    "facebookPosts": 26,
+    "instagramDaily": 0,
+    "instagramMedia": 0
+  }
+}
