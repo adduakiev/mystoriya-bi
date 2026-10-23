@@ -139,7 +139,7 @@ test("NOT-APPLIED SQL preserves auth gates and selected-window evidence (static 
   for (const prefix of ["fb", "ig"]) {
     assert.match(sql, new RegExp(`'observedDates',count\\(distinct date\\)`));
     assert.ok(sql.includes(`where v_${prefix}_latest is not null and date between v_${prefix}_from and v_${prefix}_latest`));
-    assert.ok(sql.includes(`when v_${prefix}_latest<current_date-2 then 'STALE'`));
+    assert.ok(sql.includes(`when v_${prefix}_latest<(now() at time zone 'UTC')::date-2 then 'STALE'`));
   }
   assert.match(sql, /group by account_id,campaign_id/);
   assert.match(sql, /engagements\/nullif\(reach,0\)/);
