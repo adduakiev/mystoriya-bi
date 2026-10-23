@@ -10,19 +10,25 @@ The existing `BI_ACCESS_PASSWORD` RPC guard remains required.
 import the transport, including through another module. All three RPC paths
 (sales snapshot, sync status, and `callBiRpc`) select credentials at request time:
 
-| First nonblank server environment variable | Readiness `mode` | HTTP headers |
-| --- | --- | --- |
-| `SUPABASE_SECRET_KEY` | `secret` | `apikey: <secret>`; no `Authorization` |
-| `SUPABASE_SERVICE_ROLE_KEY` | `legacy-service-role` | `apikey: <legacy JWT>` and `Authorization: Bearer <legacy JWT>` |
-| Neither configured | `anon-fallback` | Existing legacy anon JWT in both headers |
+| Explicit `BI_SUPABASE_RPC_AUTH_MODE` | Required BI-specific key | Readiness `mode` | HTTP headers |
+| --- | --- | --- | --- |
+| `secret` | `BI_SUPABASE_SECRET_KEY` | `secret` | `apikey: <secret>`; no `Authorization` |
+| `legacy-service-role` | `BI_SUPABASE_SERVICE_ROLE_KEY` | `legacy-service-role` | `apikey: <legacy JWT>` and `Authorization: Bearer <legacy JWT>` |
+| unset / `anon-fallback` | none | `anon-fallback` | Existing legacy anon JWT in both headers |
+
+The mode switch is deliberately explicit. Standard/global variables such as
+`SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY` are ignored by this
+transport, so merging this preparation cannot silently elevate production merely
+because another integration already configured a Supabase server credential.
 
 `supabaseRpcReadiness()` is a server-only helper returning exactly `{ mode }`.
 Call it from trusted server diagnostics to inspect the selected mode; never dump
 the process environment, request headers, or credentials. This is configuration
 readiness, not proof of a working key, project match, permissions, or connectivity.
 It adds no public diagnostics route or credential fields to dashboard data.
-Blank values are treated as unset. A configured but rejected key does not trigger
-an anon retry. Existing sales-to-Google-Sheets fallback remains unchanged.
+A missing key for an explicitly selected elevated mode, or an invalid mode, is
+reported only as readiness `misconfigured` and the transport fails closed; it
+does not retry using anon. Existing sales-to-Google-Sheets fallback remains unchanged.
 
 New `sb_secret_...` keys are opaque API keys, not JWTs. Supabase's API gateway
 accepts them through `apikey` and resolves the backend role; do not send them as
@@ -44,27 +50,27 @@ the exact credential setup:
    secret-management process. Creating a new key also needs approval. Verify it
    belongs to the project used by the transport; do not use a publishable key.
 2. Open the owning team's BI project in **Vercel → Settings → Environment
-   Variables → Add Environment Variable**. Name it exactly `SUPABASE_SECRET_KEY`
-   (never `NEXT_PUBLIC_SUPABASE_SECRET_KEY`). Paste the value directly into the
-   protected value field and mark it **Sensitive**. Select **Preview** and
-   **Production**; verify any Preview branch restrictions before saving. Keep
-   `BI_ACCESS_PASSWORD` configured in both environments. Do not copy the key into
-   GitHub issues/comments, PRs, source files, chat, build arguments, or logs.
+   Variables → Add Environment Variable**. For **Preview only**, add
+   `BI_SUPABASE_SECRET_KEY` (never a `NEXT_PUBLIC_...` name), paste the value
+   directly into the protected value field, and mark it **Sensitive**. Also add
+   `BI_SUPABASE_RPC_AUTH_MODE=secret` for Preview. Keep `BI_ACCESS_PASSWORD`
+   configured. Do not copy the key into GitHub issues/comments, PRs, source files,
+   chat, build arguments, or logs. Do not target Production in this first step.
 3. If using a connector instead of the dashboard, an owner must first authorize
    it to the owning Vercel team/project, then approve the exact environment write.
-   Supply the value through a protected secret input, target Preview and
-   Production, and suppress value output. Do not transmit it in a GitHub comment
-   or ordinary tool output. No connector action is performed by this issue.
-4. Environment changes apply to subsequent deployments. Use the normal preview
-   workflow for review. Any production deployment/promotion remains a separate
-   owner gate; saving a variable is not permission to deploy production.
-5. On an approved preview deployment, confirm server readiness is `secret` and
-   exercise login, sales snapshot, sync status, and read-only dashboard RPCs
-   (including digital/aggregators). Check for expected data and absence of
-   credential-bearing errors. Inspect browser assets/network responses for secret
-   exposure without printing the key. Do not trigger sync/business-write actions
-   as part of this smoke test. Repeat read-only smoke tests in production only
-   after its separately approved deployment.
+   Supply the value through a protected secret input, target Preview first, and
+   suppress value output. Do not transmit it in a GitHub comment or ordinary tool
+   output. No connector action is performed by this issue.
+4. Environment changes apply to subsequent deployments. Create/redeploy the normal
+   preview and confirm server readiness is `secret`. Exercise login, sales
+   snapshot, sync status, and read-only dashboard RPCs (including digital and
+   aggregators). Check expected data and inspect browser assets/network responses
+   for secret exposure without printing the key. Do not trigger sync/business
+   writes as part of this smoke test.
+5. Only after Preview passes and Kostiantyn separately approves the production
+   gate, add the same two BI-specific variables to **Production**, redeploy, and
+   repeat the read-only smoke tests. Saving Preview variables is not permission
+   to change Production.
 
 Do **not** revoke anon EXECUTE in this change. Secret installation plus successful
 preview and production smoke tests must precede a separately approved grant
