@@ -1,0 +1,57 @@
+{
+  "rls": {
+    "raw": true,
+    "curated": true
+  },
+  "rows": {
+    "raw": 0,
+    "curated": 0,
+    "campaign_view": 0
+  },
+  "objects": {
+    "raw_table": true,
+    "campaign_view": true,
+    "receipt_function": true,
+    "refresh_function": true,
+    "evidence_function": true
+  },
+  "meta_rpc": {
+    "md5": "bb58865a4312ee55e230a518dafd7ce6",
+    "anon_execute": true,
+    "service_role_execute": true,
+    "authenticated_execute": false
+  },
+  "migration": {
+    "name": "meta_ads_v3_windsor_gate_a",
+    "present": true,
+    "version": "20261023211306"
+  },
+  "captured_at": "2026-10-23T23:16:42.023638+00:00",
+  "direct_access": {
+    "raw_anon_select": false,
+    "view_anon_select": false,
+    "curated_anon_select": false,
+    "raw_authenticated_select": false,
+    "view_authenticated_select": false,
+    "curated_authenticated_select": false
+  },
+  "service_only_helpers": {
+    "refresh_anon": false,
+    "evidence_anon": false,
+    "refresh_service_role": true,
+    "evidence_service_role": true,
+    "refresh_authenticated": false,
+    "evidence_authenticated": false
+  },
+  "unchanged_other_rpc_hashes": {
+    "social": "ab3054d4d51b0ea6c33cc7fe4e250b91",
+    "google_ads": "5fe04c787108240028b1c3288cd5ee0c"
+  },
+  "validation": {
+    "wrong_password_denied": true,
+    "migration_body_matches_history": true,
+    "migration_file_header_diff_only": true,
+    "security_advisor_notes": "Known fail-closed RLS/no-policy and existing anon SECURITY DEFINER architecture tracked separately in issue #18.",
+    "performance_advisor_notes": "New Meta indexes unused while tables are empty; expected before ingestion."
+  }
+}
