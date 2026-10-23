@@ -1,5 +1,10 @@
 # Current Digital correctness — issue #12
 
+## Production DB application — issue #20
+
+Applied to production Supabase on 2026-10-23 as migration `20261023133005_digital_correctness_rpc` after pre-apply rollback backup, live read-only validation and temporary PostgreSQL compilation. The production RPCs now expose the selected-period evidence contract for Ads/GBP and the corrected core Digital null/presence semantics. Business source tables were not modified. Rollback backup: `docs/sql/backups/issue-20-preapply-2026-10-23.sql`. Security hardening remains separate in issue #18.
+
+
 ## Issue #17 — database gate preparation, NOT APPLIED
 
 The application is live from PR #14, as recorded in issue #17. The earlier local

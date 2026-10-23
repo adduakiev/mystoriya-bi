@@ -1,11 +1,11 @@
--- PREPARED DESIGN ONLY — NOT APPLIED. Issue #12.
--- Outside supabase/migrations intentionally: no deployment/migration execution authorized.
+-- HISTORICAL VALIDATION ARTIFACT — DO NOT EXECUTE DIRECTLY. Issue #12 / #17.
+-- This rollback-only file itself remains NOT APPLIED. Production equivalent is recorded in supabase/migrations/20261023133005_digital_correctness_rpc.sql.
 -- Review with a real PostgreSQL instance and existing RLS/grant contracts before any use.
 -- This transaction always ROLLS BACK. An approved follow-up must prepare application separately.
 -- Does not recover historical NULLs already stored as default 0, prove completeness,
 -- add period-unique users, discover historical eligible snapshots, or invent PSI timestamps.
 -- Unchanged SECURITY DEFINER/password gate and grants; no business writes/schedulers.
--- Issue #17: selected-period Ads/GBP evidence contract; still NOT APPLIED.
+-- Issue #17 validated the selected-period Ads/GBP evidence contract before production application.
 -- Supabase advisor: anon-executable SECURITY DEFINER RPCs require a separate
 -- security architecture follow-up; this correctness design retains compatibility.
 begin;
