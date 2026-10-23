@@ -49,8 +49,8 @@ export type MetaAdsMetrics = {
   purchaseValue: number | null; ctr: number | null; cpc: number | null; cpm: number | null; roas: number | null;
 };
 export type DigitalMetaAdsData = {
-  meta: PeriodEvidence & {limitations: string[]}; summary: MetaAdsMetrics;
-  campaigns: Array<MetaAdsMetrics & {accountId: string; campaignId: string; campaignName: string}>;
+  meta: PeriodEvidence & {currency: string | null; attributionVerified: boolean; limitations: string[]}; summary: MetaAdsMetrics;
+  campaigns: Array<MetaAdsMetrics & {accountId: string; campaignId: string; campaignName: string; currency: string | null}>;
 };
 function metaMetrics(raw: Raw, read: (value: unknown) => number | null): MetaAdsMetrics {
   const spend = read(raw.spend), impressions = read(raw.impressions), clicks = read(raw.clicks);
@@ -65,17 +65,31 @@ export function normalizeMetaAds(raw: Raw, asOf = today()): DigitalMetaAdsData {
   const m = raw?.meta ?? {};
   // Legacy meta.rows counts ALL history, not the summary period. Only zero is
   // conclusive. Require the reviewed versioned contract before trusting totals.
-  const evidence = periodEvidence({...m, rows: m.contractVersion === 2 || count(m.rows) === 0 ? m.rows : null}, asOf);
+  const versioned = m.contractVersion === 2 || m.contractVersion === 3;
+  const evidence = periodEvidence({...m, rows: versioned || count(m.rows) === 0 ? m.rows : null}, asOf);
+  const currency = (value: unknown) => typeof value === "string" && /^[A-Z]{3}$/.test(value) ? value : null;
+  const v3 = m.contractVersion === 3;
+  const summaryCurrency = v3 && evidence.available ? currency(m.currency) : null;
+  const attributionVerified = v3 && m.attributionVerified === true;
+  function metrics(row: Raw, read: (value: unknown) => number | null, unit: string | null) {
+    const result = metaMetrics(row, read);
+    if (v3 && !unit) {
+      result.spend = result.purchaseValue = result.cpc = result.cpm = result.roas = null;
+    }
+    if (v3 && !attributionVerified) result.roas = null;
+    return result;
+  }
   return {
-    meta: {...evidence, limitations: [
-      "Legacy all-history counts cannot establish selected-period measurements; contract v2 SQL is NOT APPLIED.",
+    meta: {...evidence, currency: summaryCurrency, attributionVerified, limitations: [
+      "Legacy all-history counts cannot establish selected-period measurements; ingestion SQL requires separate review/application.",
       "Completeness, account/currency reconciliation and attribution settings are unverified. No cross-provider ROAS.",
       "Reach/frequency cannot be summed across ads or dates and are unavailable. Campaign limit 50; upstream completeness unknown."
     ]},
-    summary: metaMetrics(raw?.summary ?? {}, value => measured(evidence, value)),
+    summary: metrics(raw?.summary ?? {}, value => measured(evidence, value), summaryCurrency),
     campaigns: evidence.available ? (raw?.campaigns ?? []).map((row: Raw) => ({
       accountId: text(row.account_id), campaignId: text(row.campaign_id), campaignName: text(row.campaign_name),
-      ...metaMetrics(row, metricNumber)
+      currency: v3 ? currency(row.account_currency) : null,
+      ...metrics(row, metricNumber, v3 ? currency(row.account_currency) : null)
     })) : []
   };
 }

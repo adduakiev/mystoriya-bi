@@ -66,3 +66,20 @@ test("Meta RPC rejection leaves Google results visible and reports unavailable s
   assert.match(html, /Meta Ads · джерело недоступне/);
   assert.doesNotMatch(html, /Meta Ads · WAITING|Meta Ads · LIVE/);
 });
+
+test("paid SSR labels Windsor USD, keeps null purchases and blocks unverified ROAS", async () => {
+  const google = normalizeAds({meta: {available: true, rows: 1}, summary: {cost: 50, conversionValue: 400}});
+  const meta = normalizeMetaAds({meta: {contractVersion: 3, from: '2026-10-01', to: asOf,
+    rows: 110, observedDates: 19, currency: 'USD', attributionVerified: false},
+    summary: {spend: 896.92, purchases: null, purchaseValue: null},
+    campaigns: [{account_id: 'fixture-account', campaign_id: 'fixture-campaign', account_currency: 'USD', spend: 896.92}]}, asOf);
+  const {default: Page} = loadTsx("../app/digital/ads/page.tsx", {...shell,
+    "@/lib/data/digital-sources": {loadDigitalAdsData: async () => google, loadDigitalMetaAdsData: async () => meta}});
+  const html = renderToStaticMarkup(await Page());
+  assert.match(html, /Meta Ads · PARTIAL/);
+  assert.match(html, /Meta spend<\/span><strong>[^<]+<\/strong><small>USD<\/small>/);
+  assert.match(html, /Meta purchases<\/span><strong>—<\/strong>/);
+  assert.match(html, /Meta ROAS<\/span><strong>—<\/strong>/);
+  assert.match(html, /fixture-account · USD/);
+  assert.match(html, /ROAS Ads<\/span><strong>8.00x<\/strong>/);
+});

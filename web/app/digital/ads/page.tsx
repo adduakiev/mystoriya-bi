@@ -81,20 +81,20 @@ export default async function Page(){
       <h2>Meta Ads · окрема атрибуція</h2>
       {meta ? <>
       <DigitalSourceEvidence name="Meta Ads" evidence={meta.meta}/>
-      <div className="lfl-banner">Google Ads conversion value та Meta purchase value мають різну атрибуцію. Не підсумовуємо їх та не об’єднуємо ROAS. Валюта, акаунти та налаштування атрибуції Meta ще не звірені. Reach / frequency недоступні: їх не можна складати між оголошеннями та днями.</div>
+      <div className="lfl-banner">Google Ads conversion value та Meta purchase value мають різну атрибуцію. Не підсумовуємо їх та не об’єднуємо ROAS. Валюта з джерела показана окремо; акаунти та налаштування атрибуції Meta ще не звірені. ROAS потребує перевірки атрибуції. Reach / frequency недоступні: їх не можна складати між оголошеннями та днями.</div>
       <section className="digital-kpi-grid">
-        <article className="digital-kpi-card"><span>Meta spend</span><strong>{n(meta.summary.spend)}</strong><small>валюта не підтверджена</small><em>{meta.meta.status}</em></article>
+        <article className="digital-kpi-card"><span>Meta spend</span><strong>{n(meta.summary.spend)}</strong><small>{meta.meta.currency || "валюта невідома / змішана"}</small><em>{meta.meta.status}</em></article>
         <article className="digital-kpi-card"><span>Meta clicks</span><strong>{n(meta.summary.clicks)}</strong><small>{n(meta.summary.impressions)} показів</small><em>CTR {pct(meta.summary.ctr)}</em></article>
         <article className="digital-kpi-card"><span>Meta purchases</span><strong>{n(meta.summary.purchases)}</strong><small>атрибуція Meta Ads</small></article>
-        <article className="digital-kpi-card"><span>Meta purchase value</span><strong>{n(meta.summary.purchaseValue)}</strong><small>валюта не підтверджена</small></article>
+        <article className="digital-kpi-card"><span>Meta purchase value</span><strong>{n(meta.summary.purchaseValue)}</strong><small>{meta.meta.currency || "валюта невідома / змішана"}</small></article>
         <article className="digital-kpi-card"><span>Meta ROAS</span><strong>{x(meta.summary.roas)}</strong><small>purchase value / spend</small><em>атрибуція Meta Ads</em></article>
       </section>
       {meta.campaigns.length > 0 && <section className="panel">
         <h2>Meta campaigns · за витратами</h2>
         <div className="management-table-wrap"><div className="management-table" style={{minWidth:800}}>
           <div className="table-row table-head" style={{gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr"}}><span>Кампанія / account</span><span>Spend</span><span>Purchases</span><span>Purchase value</span><span>ROAS</span></div>
-          {meta.campaigns.map(r => <div className="table-row" style={{gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr"}} key={`${r.accountId}:${r.campaignId}`}><b>{r.campaignName || r.campaignId} · {r.accountId}</b><span>{n(r.spend)}</span><span>{n(r.purchases)}</span><span>{n(r.purchaseValue)}</span><span>{x(r.roas)}</span></div>)}
-        </div></div><small>Ліміт 50 кампаній; повнота невідома. Валюта не підтверджена.</small>
+          {meta.campaigns.map(r => <div className="table-row" style={{gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr"}} key={`${r.accountId}:${r.campaignId}:${r.currency}`}><b>{r.campaignName || r.campaignId} · {r.accountId} · {r.currency || "валюта невідома"}</b><span>{n(r.spend)}</span><span>{n(r.purchases)}</span><span>{n(r.purchaseValue)}</span><span>{x(r.roas)}</span></div>)}
+        </div></div><small>Ліміт 50 кампаній; повнота невідома. Різні валюти не підсумовуємо; конвертацію не виконуємо.</small>
       </section>}
       {!meta.meta.available && <small>Для Meta Ads немає підтверджених вимірювань періоду. До перевірки джерела показники недоступні для бюджетних рішень.</small>}
       </> : <div className="lfl-banner">Meta Ads · джерело недоступне. Статус і показники не визначені; спробуйте пізніше.</div>}
