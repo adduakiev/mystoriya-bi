@@ -1,5 +1,35 @@
 # Current Digital correctness — issue #12
 
+## Issue #17 — database gate preparation, NOT APPLIED
+
+The application is live from PR #14, as recorded in issue #17. The earlier local
+implementation/verification notes below describe the issue #12 handoff; they are
+not the current application deployment status. This issue changes only the
+prepared SQL design, static regression checks and this documentation.
+
+The prepared Ads and GBP RPCs now return `meta.rows = count(*)` and
+`meta.observedDates = count(distinct date_id)` from the same effective window and
+source rows used for their summaries. An empty Ads source explicitly returns
+`available=false`, `rows=0`, `observedDates=0` and an empty/unknown summary. Empty
+GBP input returns both counts as zero and all summary sums as null. Positive
+evidence preserves measured zeroes. `locationCount` remains the number of returned
+location groups, not measurement evidence. PageSpeed's latest stored snapshot is
+queried independently, including when GBP is empty.
+
+Ads evidence describes `digital_google_ads_daily`, not campaign rows in
+`staging_google_ads_windsor`. Staging completeness, freshness alignment and
+currency reconciliation remain unknown. The core Digital RPC design is unchanged.
+The artifact stays outside `supabase/migrations`, explicitly NOT APPLIED, and ends
+in `ROLLBACK`. No SQL execution or migration history creation is authorized here.
+Static tests do not prove PostgreSQL, RLS, privilege or concurrency behavior;
+a real database gate remains a separately authorized follow-up.
+
+Separate security architecture follow-up: the Supabase advisor warns about
+anon-executable `SECURITY DEFINER` functions. Review that architecture separately;
+it is not a hidden blocker or an authentication redesign in this correctness
+artifact. Existing password hash gates, `SECURITY DEFINER`, search paths, revokes
+and anon/service_role execution grants remain unchanged for compatibility.
+
 ## Barbara review closure — empty Ads / GBP periods
 
 Final review semantics are now executable in the existing source contract: explicit selected-period `rows=0` or `observedDates=0` forces Ads/GBP summary metrics to `null`, even when legacy SQL returned zeroes or nonzero aggregates. A measured zero is preserved only when positive selected-period row/date evidence exists. GBP profile presence is not treated as measurement evidence, and PageSpeed remains independent from GBP period emptiness. The aggregate collector applies the same rule to Google Ads spend. No SQL was executed and no production deployment was performed.

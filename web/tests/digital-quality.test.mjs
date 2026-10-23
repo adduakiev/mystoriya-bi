@@ -122,10 +122,10 @@ test("Ads/GBP/PageSpeed missing operands are not zero or a fabricated CWV catego
 test("Ads and GBP explicit empty selected periods suppress legacy zero/nonzero summaries", () => {
   const adsZero={cost:0,clicks:0,impressions:0,conversions:0,conversionValue:0};
   const gbpZero={impressions:0,clicks:0,calls:0,websiteClicks:0,directions:0,menuClicks:0};
-  for (const counts of [{rows:0},{observedDates:0},{rows:0,observedDates:3},{rows:3,observedDates:0}]) {
+  for (const counts of [{rows:0},{observedDates:0},{rows:0,observedDates:0},{rows:0,observedDates:3},{rows:3,observedDates:0}]) {
     const ads=normalizeAds({meta:{available:true,...counts},summary:{...adsZero,cost:100}});
     assert.ok(Object.values(ads.summary).every(value=>value===null));
-    const local=normalizeLocal({meta:{from:meta.from,to:meta.to,...counts},
+    const local=normalizeLocal({meta:{from:meta.from,to:meta.to,locationCount:4,...counts},
       locations:[{location_id:"synthetic-profile"}],summary:{...gbpZero,calls:5},
       pageSpeed:{captured_on:"2026-10-22",mobile_score:81,desktop_score:95}});
     assert.ok(Object.values(local.summary).every(value=>value===null));
@@ -237,13 +237,60 @@ test("history preserves missing metrics/quality and requires actual calendar ide
   assert.throws(()=>normalizeDigitalHistory({}),/calendar metadata unavailable/);
 });
 
+const preparedSql=readFileSync(new URL("../../docs/sql/issue-12-digital-correctness-NOT-APPLIED.sql",import.meta.url),"utf8");
+// Static design checks only: never connect to PostgreSQL or execute this artifact.
+function preparedFunction(name) {
+  const start=preparedSql.indexOf(`create or replace function public.${name}(`);
+  assert.ok(start>=0,`missing prepared function ${name}`);
+  const end=preparedSql.indexOf("$function$;",start);
+  assert.ok(end>start);
+  return preparedSql.slice(start,end).replace(/--[^\n]*/g,"");
+}
+
+test("prepared Ads/GBP SQL returns evidence from the same effective window as its summary; static only", () => {
+  for (const [name,table,guard] of [
+    ["bi_digital_ads_payload","digital_google_ads_daily",""],
+    ["bi_digital_local_payload","digital_gbp_daily","v_latest is not null and "]
+  ]) {
+    const sql=preparedFunction(name);
+    assert.match(sql,/v_from:=greatest\(v_first,v_latest-29\)/);
+    assert.match(sql,new RegExp(
+      "select count\\(\\*\\),count\\(distinct date_id\\),jsonb_build_object\\([\\s\\S]*?"+
+      "\\) into v_rows,v_observed_dates,v_summary\\s+from public\\."+table+
+      "\\s+where "+guard+"date_id between v_from and v_latest;"
+    ));
+    assert.match(sql,/'meta',jsonb_build_object\([\s\S]*?'rows',v_rows,'observedDates',v_observed_dates/);
+    assert.doesNotMatch(sql,/coalesce\(sum\(|having\b|group by[\s\S]*?into v_rows/i);
+  }
+  const ads=preparedFunction("bi_digital_ads_payload");
+  assert.match(ads,/if v_latest is null then\s+return jsonb_build_object\(\s*'meta',jsonb_build_object\('available',false,'rows',0,'observedDates',0\),\s*'summary',jsonb_build_object\(\),'campaigns','\[\]'::jsonb,'trend','\[\]'::jsonb\s*\);\s*end if;/);
+  assert.match(ads,/from public\.staging_google_ads_windsor\s+where date between v_from and v_latest/);
+});
+
+test("prepared empty GBP keeps null sums, zero evidence and independent PageSpeed; static only", () => {
+  const sql=preparedFunction("bi_digital_local_payload");
+  // The only branches are the password gate and date-window setup. No empty-GBP
+  // early return or conditional can skip the unfiltered latest PageSpeed query.
+  assert.equal((sql.match(/\bif\b(?!;)/g)||[]).length,2);
+  assert.equal((sql.match(/\breturn\b/g)||[]).length,1);
+  assert.match(sql,/if v_latest is not null then\s+v_from:=greatest\(v_first,v_latest-29\);\s+v_days:=\(v_latest-v_from\)\+1;\s+end if;\s+select count\(\*\),count\(distinct date_id\),jsonb_build_object\(\s*'impressions',sum\(impressions\),\s*'clicks',sum\(clicks\),\s*'calls',sum\(call_clicks\),\s*'websiteClicks',sum\(website_clicks\),\s*'directions',sum\(direction_requests\),\s*'menuClicks',sum\(menu_clicks\)\s*\) into v_rows,v_observed_dates,v_summary\s+from public\.digital_gbp_daily\s+where v_latest is not null and date_id between v_from and v_latest;/);
+  assert.match(sql,/into v_speed\s+from public\.digital_pagespeed_snapshot\s+order by captured_on desc\s+limit 1;\s+return/);
+  assert.match(sql,/'pageSpeed',coalesce\(v_speed,'\{\}'::jsonb\)/);
+  assert.match(sql,/'locationCount',jsonb_array_length\(coalesce\(v_locations,'\[\]'::jsonb\)\)/);
+});
+
 test("prepared SQL stays outside migrations and retains auth gates and rollback; static only", () => {
-  const sql=readFileSync(new URL("../../docs/sql/issue-12-digital-correctness-NOT-APPLIED.sql",import.meta.url),"utf8");
+  const sql=preparedSql;
   assert.match(sql,/NOT APPLIED/);
   assert.match(sql,/rollback;\s*$/);
   assert.doesNotMatch(sql,/sum\(active_users\)|coalesce\(sum\(|then 0 else/);
   assert.match(sql,/'ga4Present',g.date_id is not null/);
   assert.match(sql,/'currentGa4Rows',\(select count\(\*\).*between v_from and v_to/);
   assert.equal((sql.match(/raise exception 'unauthorized'/g)||[]).length,3);
+  assert.equal((sql.match(/security definer\nset search_path to 'public','extensions'/g)||[]).length,3);
+  for (const signature of ["bi_digital_payload(text,date,date)","bi_digital_ads_payload(text)","bi_digital_local_payload(text)"]) {
+    assert.ok(sql.includes(`revoke all on function public.${signature} from public,authenticated;`));
+    assert.ok(sql.includes(`grant execute on function public.${signature} to anon,service_role;`));
+  }
   assert.match(sql,/revoke all on function public.bi_digital_payload/);
 });

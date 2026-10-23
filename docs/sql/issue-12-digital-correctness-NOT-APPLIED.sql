@@ -5,6 +5,9 @@
 -- Does not recover historical NULLs already stored as default 0, prove completeness,
 -- add period-unique users, discover historical eligible snapshots, or invent PSI timestamps.
 -- Unchanged SECURITY DEFINER/password gate and grants; no business writes/schedulers.
+-- Issue #17: selected-period Ads/GBP evidence contract; still NOT APPLIED.
+-- Supabase advisor: anon-executable SECURITY DEFINER RPCs require a separate
+-- security architecture follow-up; this correctness design retains compatibility.
 begin;
 
 create or replace function public.bi_digital_payload(
@@ -191,6 +194,8 @@ declare
   v_summary jsonb;
   v_campaigns jsonb;
   v_trend jsonb;
+  v_rows bigint;
+  v_observed_dates bigint;
 begin
   select value_hash into v_expected_hash from public.bi_runtime_config where config_key='access_password';
   v_actual_hash:=encode(extensions.digest(coalesce(p_password,''),'sha256'),'hex');
@@ -199,7 +204,7 @@ begin
   select min(date_id),max(date_id) into v_first,v_latest from public.digital_google_ads_daily;
   if v_latest is null then
     return jsonb_build_object(
-      'meta',jsonb_build_object('available',false),
+      'meta',jsonb_build_object('available',false,'rows',0,'observedDates',0),
       'summary',jsonb_build_object(),'campaigns','[]'::jsonb,'trend','[]'::jsonb
     );
   end if;
@@ -207,7 +212,9 @@ begin
   v_from:=greatest(v_first,v_latest-29);
   v_days:=(v_latest-v_from)+1;
 
-  select jsonb_build_object(
+  -- Evidence and summary share the effective daily Ads window. Staging campaigns
+  -- below are a separate source/grain; completeness and currency reconciliation unknown.
+  select count(*),count(distinct date_id),jsonb_build_object(
     'cost',sum(cost),
     'clicks',sum(clicks),
     'impressions',sum(impressions),
@@ -217,7 +224,7 @@ begin
     'cpc',sum(cost)/nullif(sum(clicks),0),
     'cpa',sum(cost)/nullif(sum(conversions),0),
     'roas',sum(conversion_value)/nullif(sum(cost),0)
-  ) into v_summary
+  ) into v_rows,v_observed_dates,v_summary
   from public.digital_google_ads_daily
   where date_id between v_from and v_latest;
 
@@ -251,6 +258,7 @@ begin
   return jsonb_build_object(
     'meta',jsonb_build_object(
       'available',true,'from',v_from,'to',v_latest,'days',v_days,
+      'rows',v_rows,'observedDates',v_observed_dates,
       'maxWindowDays',30
     ),
     'summary',v_summary,'campaigns',v_campaigns,'trend',v_trend
@@ -274,6 +282,8 @@ declare
   v_summary jsonb;
   v_locations jsonb;
   v_speed jsonb;
+  v_rows bigint;
+  v_observed_dates bigint;
 begin
   select value_hash into v_expected_hash from public.bi_runtime_config where config_key='access_password';
   v_actual_hash:=encode(extensions.digest(coalesce(p_password,''),'sha256'),'hex');
@@ -285,14 +295,15 @@ begin
     v_days:=(v_latest-v_from)+1;
   end if;
 
-  select jsonb_build_object(
+  -- Empty input yields counts of 0 and NULL sums; measured zeroes stay zero.
+  select count(*),count(distinct date_id),jsonb_build_object(
     'impressions',sum(impressions),
     'clicks',sum(clicks),
     'calls',sum(call_clicks),
     'websiteClicks',sum(website_clicks),
     'directions',sum(direction_requests),
     'menuClicks',sum(menu_clicks)
-  ) into v_summary
+  ) into v_rows,v_observed_dates,v_summary
   from public.digital_gbp_daily
   where v_latest is not null and date_id between v_from and v_latest;
 
@@ -311,6 +322,7 @@ begin
     group by location_id,location_title
   ) x;
 
+  -- Independent snapshot: do not gate PageSpeed on GBP dates, rows or locations.
   select jsonb_build_object(
     'captured_on',captured_on, -- processing/storage date, NOT source measurement
     'imported_at',imported_at,
@@ -332,6 +344,8 @@ begin
   return jsonb_build_object(
     'meta',jsonb_build_object(
       'from',v_from,'to',v_latest,'days',coalesce(v_days,0),
+      'rows',v_rows,'observedDates',v_observed_dates,
+      -- Result/dimension count only, never period measurement evidence.
       'locationCount',jsonb_array_length(coalesce(v_locations,'[]'::jsonb)),
       'maxWindowDays',30
     ),
