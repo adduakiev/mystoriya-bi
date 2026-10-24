@@ -1,0 +1,52 @@
+{
+  "captured_at": "2026-10-24",
+  "migration": {
+    "version": "20261024084849",
+    "name": "meta_ads_gate_d_snapshot_orchestrator"
+  },
+  "orchestrator": {
+    "function": "public.sync_meta_windsor_snapshot(text,date,date,jsonb)",
+    "md5": "a162aa7290d86938bd13cfa4fa64a493",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "service_role_execute": true
+  },
+  "first_production_sync": {
+    "window": {
+      "from": "2026-09-25",
+      "to": "2026-10-24"
+    },
+    "source_rows": 145,
+    "raw_rows": 145,
+    "curated_rows": 145,
+    "raw_to_curated_mismatches": 0,
+    "latest": "2026-10-24",
+    "currency": "USD",
+    "spend": 1349.52,
+    "impressions": 1881133,
+    "clicks": 12426,
+    "link_clicks_known_rows": 139,
+    "link_clicks_partial_sum": 8175,
+    "purchase_known_rows": 0,
+    "purchase_value_known_rows": 0,
+    "raw_evidence_fingerprint": "3e1d2787d8a4a24480c491dd316a093c"
+  },
+  "exact_pre_activation_backup": {
+    "raw_table": "private.meta_ads_gate_d_raw_20261024",
+    "raw_rows": 110,
+    "raw_fingerprint": "0fa0e7eb364c9f680d0675d66a3e4b96",
+    "curated_table": "private.meta_ads_gate_d_curated_20261024",
+    "curated_rows": 110,
+    "curated_fingerprint": "32b15ff2c57156f985415113ca5a7c37"
+  },
+  "recurrence": {
+    "mechanism": "ChatGPT scheduled task using connected Windsor.ai + Supabase integrations",
+    "title": "Meta Ads BI Sync",
+    "cadence": "daily around 08:00 Europe/Kyiv",
+    "source_window": "30 completed UTC days ending yesterday",
+    "force_refresh": false,
+    "notify_policy": "silent on success; notify only on blocked/failed sync or reconciliation mismatch",
+    "windsor_destination_task_created": false
+  },
+  "security_advisors": "No new Gate D finding; existing #18 findings remain unchanged."
+}
