@@ -1,0 +1,24 @@
+{
+  "captured_at": "2026-10-24",
+  "scope": "Gate D #37 exact pre-activation backup",
+  "account_id": "1642925125961488",
+  "private_schema_public_usage": false,
+  "private_schema_anon_usage": false,
+  "private_schema_authenticated_usage": false,
+  "raw_backup": {
+    "table": "private.meta_ads_gate_d_raw_20261024",
+    "rows": 110,
+    "fingerprint": "0fa0e7eb364c9f680d0675d66a3e4b96"
+  },
+  "curated_backup": {
+    "table": "private.meta_ads_gate_d_curated_20261024",
+    "rows": 110,
+    "fingerprint": "32b15ff2c57156f985415113ca5a7c37"
+  },
+  "live_before_activation": {
+    "raw_rows": 110,
+    "curated_rows": 110,
+    "latest": "2026-10-23"
+  },
+  "note": "Backup tables contain the exact production rows and are not exposed to anon/authenticated/service_role. GitHub stores only counts/fingerprints, not business row contents."
+}
