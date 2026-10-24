@@ -1,12 +1,58 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-Оновлено: **21.10.2026**. Статус за результатами поточної роботи.
+Історичний production baseline: **21.10.2026**. Аудит коду та доказів: **24.10.2026**; наявні незалежні production SELECT-only докази Barbara; upstream/source parity UNKNOWN, browser blocked connector 403, див. #43 нижче.
 
 Цей документ розрізняє локальну реалізацію, перевірки та роботу в production.
 Позначка «зроблено» не означає, що зміна вже опублікована.
 Паша — запропонований відповідальний за технічну частину, Соня/агенція —
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
+
+## Issue #43 — аудит 24.10.2026: локальний код та межі доказів
+
+**Оновлення аудиту: 24.10.2026.** Основний production baseline цього документа
+залишається історичним станом 21 жовтня. Поточний deployed commit не перевірено.
+[Повний звіт #43](BI-DATA-AUDIT-2026-10-24.md) містить статичний inventory,
+lineage, register, coverage та відтворювані blockers. Це не підтвердження
+production correctness: independent warehouse SELECT checks Barbara існують,
+upstream/source та rendered UI parity залишаються UNKNOWN.
+
+- **Gate D Meta — ACTIVE за наявним записом активації 24.10**, а не нове
+  спостереження цього аудиту: [activation record](meta-windsor-gate-d-activation.md),
+  [postactivation evidence](sql/backups/issue-37-gate-d-postactivation-2026-10-24.json).
+  Механізм — ChatGPT scheduled task «Meta Ads BI Sync», daily ~08:00 Europe/Kyiv,
+  previous 30 completed UTC dates; Windsor destination для Meta не створено.
+  Історичне «Scheduler — NOT IMPLEMENTED» нижче не описує цей Meta scheduler.
+  Operating live LLM/manual-run/task persistence — окремі контракти.
+- П'ять Google Windsor destinations та source counts від 24.10 наведені в issue
+  як baseline; їхній runtime, field completeness і reconciliation тут **UNKNOWN**.
+  Повторні destinations/exports/schedulers не створювати.
+- **PREVIEW CODE:** App adapter зберігає null, undefined ratios показують «—»,
+  Tracking не видає hard-coded historical App count за актуальний. Revision PR #44
+  додає source currency / unknown money, PARTIAL/UNKNOWN badges, all-campaign App
+  table та окремий Merchant performance gate. SQL-erased
+  missingness, інші legacy null→zero та live data coverage не виправлено.
+- **Barbara independent production SELECT-only evidence (latest PR #44 re-review):**
+  Meta bounded current30 **2026-09-24…10-23 = 138 rows / 25 dates**. Окремий
+  Gate D rolling baseline **2026-09-25…10-24 = raw/curated each 145 / 26 dates**.
+  Не змішувати scopes. [Receipt](audit/2026-10-24/barbara-production-evidence.json)
+  явно відокремлює independent evidence від Astra runner; інші непередані totals,
+  prior30/rolling12 та upstream parity UNKNOWN.
+- **App Ads currency-contract gap proven Barbara:** raw `staging_google_ads_windsor`
+  не має currency column і deployed `bi_digital_app_payload` не expose currency.
+  App Ads money UNKNOWN; UAH/USD/FX не виводяться.
+- Preview build **READY** за Barbara; protected deployment fetch заблокований
+  current Vercel connector team/protection **403**. Browser QA **NOT_EXECUTED**,
+  protection/credentials не змінювалися.
+- D04–D08 мають [concrete follow-up tasks](audit/2026-10-24/follow-up-plan.json)
+  з proposed owners, gates і minimal acceptance criteria; усі OPEN, без DB/source changes.
+- SELECT diagnostics та analytics RPC перевірено на disposable PostgreSQL fixtures;
+  це не production SQL/source parity. Див. [revision provenance](audit/2026-10-24/revision-provenance.json):
+  target існуючий PR #44; branch switch і remote WORKING blocked у sandbox.
+- Повний `npm run check` у source-only копії `/tmp` пройшов; запуск у workspace
+  заблокований трьома тестовими файлами, що пишуть у read-only `.agents/runtime`.
+  Astra runner production SQL/migrations/deploy не виконував; незалежні Barbara
+  SELECT checks описані окремо. Поточні rerun результати — у звіті.
 
 ## Issue #12 — локальна correctness phase 1 (22.10.2026)
 

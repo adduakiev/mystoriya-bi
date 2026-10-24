@@ -1,0 +1,69 @@
+{
+  "provenance": {
+    "observer": "Barbara",
+    "evidence_class": "INDEPENDENT_PRODUCTION_SELECT_ONLY",
+    "reported_on": "2026-10-24",
+    "reference": "PR #44 latest Barbara re-review, relayed in issue #43 trigger",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44",
+    "runner_executed": false,
+    "limitations": "Full review/query output unavailable: GH_TOKEN absent; api.github.com DNS resolution failed. Only facts explicitly relayed in the trigger are transcribed; no additional totals inferred."
+  },
+  "audit_window": {
+    "from": "2026-09-24",
+    "to": "2026-10-23",
+    "inclusive": true,
+    "expected_calendar_dates": 30,
+    "business_account_timezone": "UNKNOWN"
+  },
+  "warehouse_checks": "Live SELECT-only production warehouse checks reported by Barbara; not Astra runner execution",
+  "observations": [
+    {
+      "id": "B01",
+      "source": "meta_ads",
+      "scope": "bounded_current30",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 138,
+      "observed_dates": 25,
+      "relation_specific_counts": "UNKNOWN; full relation-level output not supplied",
+      "raw_curated_parity": "UNKNOWN",
+      "metric_totals": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN"
+    },
+    {
+      "id": "B02",
+      "source": "google_ads_app",
+      "scope": "deployed_schema_and_rpc_contract",
+      "relation": "staging_google_ads_windsor",
+      "currency_column_present": false,
+      "rpc": "bi_digital_app_payload",
+      "rpc_currency_exposed": false,
+      "app_ads_money_status": "UNKNOWN",
+      "currency": "UNKNOWN",
+      "conversion_rate": "UNKNOWN",
+      "upstream_parity": "UNKNOWN"
+    }
+  ],
+  "separate_gate_d_scope": {
+    "source": "meta_ads",
+    "from": "2026-09-25",
+    "to": "2026-10-24",
+    "raw_row_count": 145,
+    "curated_row_count": 145,
+    "observed_dates": 26,
+    "provenance": "Issue #43 Gate D rolling baseline; includes incomplete audit day 2026-10-24; distinct from B01",
+    "scheduler": "Reported ACTIVE; no new scheduler or Windsor destination created"
+  },
+  "other_current30_counts": "UNKNOWN; not transcribed without original results",
+  "prior30": "UNKNOWN",
+  "trailing12months": "UNKNOWN",
+  "upstream_source_parity": "UNKNOWN",
+  "runner_production_sql_execution": "NOT_EXECUTED",
+  "db_source_changes": false
+}
