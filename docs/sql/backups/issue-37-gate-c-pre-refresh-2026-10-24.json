@@ -1,0 +1,35 @@
+{
+  "gate": "Gate C #37 pre-refresh",
+  "scope": {
+    "to": "2026-10-23",
+    "from": "2026-10-01",
+    "account_id": "1642925125961488",
+    "expected_rows": 110,
+    "expected_fingerprint": "0fa0e7eb364c9f680d0675d66a3e4b96"
+  },
+  "evidence": {
+    "to": "2026-10-23",
+    "from": "2026-10-01",
+    "rows": 110,
+    "first": "2026-10-05",
+    "latest": "2026-10-23",
+    "coverage": "UNKNOWN",
+    "accountId": "1642925125961488",
+    "freshness": "FRESH",
+    "currencies": [
+      "USD"
+    ],
+    "fingerprint": "0fa0e7eb364c9f680d0675d66a3e4b96",
+    "lastReceipt": "2026-10-24T06:59:00.813792+00:00",
+    "firstReceipt": "2026-10-24T06:59:00.79915+00:00",
+    "observedDates": 19,
+    "purchaseKnownRows": 0,
+    "purchaseValueKnownRows": 0
+  },
+  "raw_rows": 110,
+  "captured_at": "2026-10-24T08:11:06.156879+00:00",
+  "refresh_md5": "e3d22f6c420f86eb5f5c6ae9fa80d3cb",
+  "curated_rows": 0,
+  "meta_rpc_md5": "bb58865a4312ee55e230a518dafd7ce6",
+  "campaign_view_rows": 0
+}
