@@ -1,0 +1,442 @@
+{
+  "status": "BLOCKED",
+  "preview_url": "http://127.0.0.1:3100",
+  "production_url": null,
+  "attempt": {
+    "command": "npm run dev --prefix web -- --hostname 127.0.0.1 --port 3100",
+    "result": "Next.js failed to start: listen EPERM: operation not permitted 127.0.0.1:3100",
+    "process_exit_code": 0,
+    "server_started": false,
+    "note": "Next dev wrapper exited 0 despite startup failure; no navigation was possible."
+  },
+  "access": {
+    "BI_ACCESS_PASSWORD": "ABSENT",
+    "playwright": "ABSENT",
+    "puppeteer": "ABSENT",
+    "chromium": "AVAILABLE; no running preview"
+  },
+  "screenshots": [],
+  "observed_browser_navigations": 0,
+  "cases": [
+    {
+      "url": "http://127.0.0.1:3100/aggregators",
+      "path": "/aggregators",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/aggregators/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/delivery",
+      "path": "/delivery",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/delivery/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/ads",
+      "path": "/digital/ads",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/ads/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/app",
+      "path": "/digital/app",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/app/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/audience",
+      "path": "/digital/audience",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/audience/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/channels",
+      "path": "/digital/channels",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/channels/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/commerce",
+      "path": "/digital/commerce",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/commerce/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/funnel",
+      "path": "/digital/funnel",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/funnel/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/local",
+      "path": "/digital/local",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/local/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital",
+      "path": "/digital",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/seo",
+      "path": "/digital/seo",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/seo/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/site",
+      "path": "/digital/site",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/site/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/social",
+      "path": "/digital/social",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/social/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/tracking",
+      "path": "/digital/tracking",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/tracking/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/dynamics",
+      "path": "/dynamics",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/dynamics/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/explorer",
+      "path": "/explorer",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/explorer/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/insights",
+      "path": "/insights",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/insights/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/locations",
+      "path": "/locations",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/locations/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/login",
+      "path": "/login",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/login/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/operating",
+      "path": "/operating",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/operating/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/",
+      "path": "/",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/page.tsx"
+    },
+    {
+      "url": "http://127.0.0.1:3100/pnl",
+      "path": "/pnl",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/pnl/page.tsx"
+    }
+  ],
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40120899844",
+  "scope": "CURRENT REVISION; no authenticated browser or production observation"
+}

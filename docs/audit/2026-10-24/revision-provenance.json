@@ -1,0 +1,27 @@
+{
+  "audit_date": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40120899844",
+  "issue": 43,
+  "existing_pr": "https://github.com/adduakiev/mystoriya-bi/pull/44",
+  "required_handoff_branch": "astra/issue-43-40107435112",
+  "actual_runner_branch": "astra/issue-43-40120899844",
+  "actual_runner_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "existing_pr_source_commit": "09a6333",
+  "working_publication": {
+    "attempted": true,
+    "published": false,
+    "command": "gh issue comment 43 --body WORKING\u2026",
+    "exit_code": 4,
+    "reason": "GH_TOKEN unavailable"
+  },
+  "branch_switch": {
+    "attempted": true,
+    "succeeded": false,
+    "reason": "Unable to create .git/index.lock: Read-only file system"
+  },
+  "working_tree_basis": "Existing PR diff restored from local origin/astra/issue-43-40107435112; revision made on writable files only",
+  "follow_up_commit": "NOT CREATED; prohibited in Codex; trusted runner responsibility",
+  "ready_for_review_published": false,
+  "handoff": "UPDATE EXISTING PR #44 ONLY; no duplicate PR. Publish READY FOR REVIEW only after follow-up commit and checks, distinguishing preview review from remaining live audit gates.",
+  "production_audit_acceptance": "BLOCKED_ACCESS; no live warehouse/upstream/UI parity"
+}

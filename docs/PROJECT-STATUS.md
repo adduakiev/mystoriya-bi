@@ -1,12 +1,42 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-Оновлено: **21.10.2026**. Статус за результатами поточної роботи.
+Історичний production baseline: **21.10.2026**. Аудит коду та доказів: **24.10.2026**; live verification заблокована доступом, див. issue #43 нижче.
 
 Цей документ розрізняє локальну реалізацію, перевірки та роботу в production.
 Позначка «зроблено» не означає, що зміна вже опублікована.
 Паша — запропонований відповідальний за технічну частину, Соня/агенція —
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
+
+## Issue #43 — аудит 24.10.2026: локальний код та межі доказів
+
+**Оновлення аудиту: 24.10.2026.** Основний production baseline цього документа
+залишається історичним станом 21 жовтня. Поточний deployed commit не перевірено.
+[Повний звіт #43](BI-DATA-AUDIT-2026-10-24.md) містить статичний inventory,
+lineage, register, coverage та відтворювані blockers. Це не підтвердження
+production correctness: read-only Supabase/upstream та browser parity недоступні.
+
+- **Gate D Meta — ACTIVE за наявним записом активації 24.10**, а не нове
+  спостереження цього аудиту: [activation record](meta-windsor-gate-d-activation.md),
+  [postactivation evidence](sql/backups/issue-37-gate-d-postactivation-2026-10-24.json).
+  Механізм — ChatGPT scheduled task «Meta Ads BI Sync», daily ~08:00 Europe/Kyiv,
+  previous 30 completed UTC dates; Windsor destination для Meta не створено.
+  Історичне «Scheduler — NOT IMPLEMENTED» нижче не описує цей Meta scheduler.
+  Operating live LLM/manual-run/task persistence — окремі контракти.
+- П'ять Google Windsor destinations та source counts від 24.10 наведені в issue
+  як baseline; їхній runtime, field completeness і reconciliation тут **UNKNOWN**.
+  Повторні destinations/exports/schedulers не створювати.
+- **PREVIEW CODE:** App adapter зберігає null, undefined ratios показують «—»,
+  Tracking не видає hard-coded historical App count за актуальний. Revision PR #44
+  додає source currency / unknown money, PARTIAL/UNKNOWN badges, all-campaign App
+  table та окремий Merchant performance gate. SQL-erased
+  missingness, інші legacy null→zero та live data coverage не виправлено.
+- SELECT diagnostics та analytics RPC перевірено на disposable PostgreSQL fixtures;
+  це не production SQL/source parity. Див. [revision provenance](audit/2026-10-24/revision-provenance.json):
+  target існуючий PR #44; branch switch і remote WORKING blocked у sandbox.
+- Повний `npm run check` у source-only копії `/tmp` пройшов; запуск у workspace
+  заблокований трьома тестовими файлами, що пишуть у read-only `.agents/runtime`.
+  Production SQL/migrations/deploy не виконувалися. Деталі перевірок — у звіті.
 
 ## Issue #12 — локальна correctness phase 1 (22.10.2026)
 

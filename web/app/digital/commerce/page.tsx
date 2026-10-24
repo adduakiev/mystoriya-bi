@@ -1,3 +1,4 @@
+import { presenceStatus } from "@/lib/source-evidence";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalMerchantData } from "@/lib/data/digital-sources";
@@ -8,22 +9,23 @@ function money(v:number){return "₴ "+Math.round(v).toLocaleString("uk-UA");}
 
 export default async function Page(){
   const data=await loadDigitalMerchantData();
-  const live=data.meta.performanceRows>0 || data.meta.catalogRows>0 || data.meta.healthRows>0;
+  const hasRows=data.meta.performanceRows>0 || data.meta.catalogRows>0 || data.meta.healthRows>0;
+  const performanceReady=data.meta.performanceRows>0;
   const p=data.performance;
   const latestHealth=data.health[0]??null;
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Merchant" statusDetail={live?"LIVE":"connector ready · destination sync очікує"}/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Merchant" statusDetail={presenceStatus(hasRows?1:0)+" · completeness UNKNOWN"}/>
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · GOOGLE COMMERCE</span><h1>Google Merchant</h1></div><div className="digital-source-badge">Merchant Center · М’ЯСТОРІЯ</div></header>
       <DigitalTabs active="commerce"/>
 
-      {!live&&<div className="lfl-banner">Google Merchant уже підключений у Windsor. Структура Supabase і BI готова; автоматичний destination sync увімкнемо після розширення Windsor plan. Нулі не показуємо як результат — джерело поки очікує імпорт.</div>}
+      {!hasRows&&<div className="lfl-banner">Доступ і schedule Merchant не перевірено; warehouse rows відсутні. Нулі не показуємо як результат — джерело поки очікує імпорт.</div>}
 
       <section className="digital-kpi-grid">
-        <article className="digital-kpi-card"><span>Products with performance</span><strong>{live?n(p.products):"—"}</strong><small>товари з performance rows</small><em>Merchant</em></article>
-        <article className="digital-kpi-card"><span>Impressions</span><strong>{live?n(p.impressions):"—"}</strong><small>видимість товарів у Google</small><em>30-day window</em></article>
-        <article className="digital-kpi-card"><span>Clicks</span><strong>{live?n(p.clicks):"—"}</strong><small>переходи з Merchant surfaces</small><em>{live?pct(p.ctr):"—"} CTR</em></article>
-        <article className="digital-kpi-card"><span>Conversions</span><strong>{live?n(p.conversions):"—"}</strong><small>Merchant conversion attribution</small><em>після sync</em></article>
+        <article className="digital-kpi-card"><span>Products with performance</span><strong>{performanceReady?n(p.products):"—"}</strong><small>товари з performance rows</small><em>Merchant</em></article>
+        <article className="digital-kpi-card"><span>Impressions</span><strong>{performanceReady?n(p.impressions):"—"}</strong><small>видимість товарів у Google</small><em>30-day window</em></article>
+        <article className="digital-kpi-card"><span>Clicks</span><strong>{performanceReady?n(p.clicks):"—"}</strong><small>переходи з Merchant surfaces</small><em>{performanceReady?pct(p.ctr):"—"} CTR</em></article>
+        <article className="digital-kpi-card"><span>Conversions</span><strong>{performanceReady?n(p.conversions):"—"}</strong><small>Merchant conversion attribution</small><em>після sync</em></article>
         <article className="digital-kpi-card"><span>Catalog rows</span><strong>{data.meta.catalogRows?n(data.meta.catalogRows):"—"}</strong><small>{data.catalog.inStock?n(data.catalog.inStock)+" in stock":"—"}</small><em>{data.catalog.outOfStock?n(data.catalog.outOfStock)+" out of stock":"—"}</em></article>
         <article className="digital-kpi-card"><span>Disapproved</span><strong>{latestHealth?n(latestHealth.disapprovedCount):"—"}</strong><small>{latestHealth?latestHealth.reportingContext:"feed health"}</small><em>{latestHealth?n(latestHealth.pendingCount)+" pending":"—"}</em></article>
       </section>
