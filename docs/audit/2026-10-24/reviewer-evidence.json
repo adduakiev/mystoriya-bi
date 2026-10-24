@@ -1,0 +1,149 @@
+{
+  "recorded_on": "2026-10-24",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455",
+  "evidence_kind": "REVIEWER_READ_ONLY_REPORTED",
+  "capture_basis": "Latest trusted trigger explicitly supplies dated redacted Barbara SELECT-only coverage and Meta bounded full-outer key metrics; remote review not fetched by Codex.",
+  "stored_checks": {
+    "coverage": "BOUNDED_VERIFIED_BY_BARBARA_REPORTED",
+    "field_null_checks": "GA4/GSC null core metric rows 0 for reported current30/prior30/365 windows; full field completeness UNKNOWN",
+    "key_checks": "Meta bounded FULL OUTER JOIN on account_id/campaign_id/date/account_currency: no missing sides or mismatches in multiplicity/spend/clicks/impressions; GA4/GSC duplicate keys UNKNOWN",
+    "exact_results": {
+      "ga4": {
+        "rows": 30,
+        "dates": 30,
+        "date_column": "date_id",
+        "null_key_metric_rows": 0,
+        "coverage_windows": {
+          "current30": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": 30,
+            "null_core_metric_rows": 0
+          },
+          "prior30": {
+            "from": "2026-08-25",
+            "to": "2026-09-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": "UNKNOWN",
+            "null_core_metric_rows": 0
+          },
+          "trailing12months": {
+            "from": "2025-10-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 365,
+            "observed_dates": 365,
+            "missing_calendar_dates": 0,
+            "row_count": "UNKNOWN",
+            "null_core_metric_rows": 0
+          }
+        },
+        "null_core_metric_rows": 0
+      },
+      "gsc": {
+        "rows": 28,
+        "dates": 28,
+        "through": "2026-10-21",
+        "null_key_metric_rows": 0,
+        "coverage_windows": {
+          "current30": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 28,
+            "missing_calendar_dates": 2,
+            "row_count": 28,
+            "null_core_metric_rows": 0
+          },
+          "prior30": {
+            "from": "2026-08-25",
+            "to": "2026-09-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": "UNKNOWN",
+            "null_core_metric_rows": 0
+          },
+          "trailing12months": {
+            "from": "2025-10-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 365,
+            "observed_dates": 363,
+            "missing_calendar_dates": 2,
+            "row_count": "UNKNOWN",
+            "null_core_metric_rows": 0
+          }
+        },
+        "null_core_metric_rows": 0
+      },
+      "meta_ads": {
+        "raw_rows": 138,
+        "curated_rows": 138,
+        "dates_each": 25,
+        "raw_spend": 1311.75,
+        "curated_spend": 1311.75,
+        "currency": "USD",
+        "group_count_each": 138,
+        "key_join": {
+          "method": "FULL OUTER JOIN",
+          "keys": [
+            "account_id",
+            "campaign_id",
+            "date",
+            "account_currency"
+          ],
+          "currency": "USD",
+          "raw_groups": 138,
+          "curated_groups": 138,
+          "missing_raw_groups": 0,
+          "missing_curated_groups": 0,
+          "multiplicity_mismatch_groups": 0,
+          "spend_mismatch_groups": 0,
+          "clicks_mismatch_groups": 0,
+          "impressions_mismatch_groups": 0,
+          "all_field_parity": "UNKNOWN",
+          "absolute_duplicate_key_count": "UNKNOWN: matching multiplicity does not prove uniqueness",
+          "query_execution_timestamp": "UNKNOWN"
+        },
+        "all_field_parity": "UNKNOWN"
+      }
+    },
+    "new_sql_execution_in_this_run": false
+  },
+  "parity": {
+    "upstream": "UNKNOWN",
+    "warehouse_to_rpc": "UNKNOWN",
+    "rendered_ui": "UNKNOWN",
+    "raw_curated_equal_counts": "Bounded Meta key join verifies specified stored metrics only; all-field and upstream completeness UNKNOWN"
+  },
+  "baseline_provenance": "Issue #43 Supabase baseline remains separately attributed; not relabeled as reviewer query output",
+  "windows": {
+    "current30": [
+      "2026-09-24",
+      "2026-10-23"
+    ],
+    "prior30": [
+      "2026-08-25",
+      "2026-09-23"
+    ],
+    "trailing12months": [
+      "2025-10-24",
+      "2026-10-23"
+    ]
+  },
+  "bounded_sql": "read-only-qa.sql; rpc-read-only-qa.sql (requires existing authorized session)",
+  "fixture_evidence": "sql-validation.json: historical disposable PostgreSQL fixtures, not live Supabase results",
+  "required_follow_up": "Attach exact SQL/execution-time receipts and all-field/upstream/RPC/UI reconciliation; GA4/GSC current30/prior30/365 date coverage and bounded Meta key metrics already reported, not UNKNOWN.",
+  "observer": "Barbara",
+  "production_receipt": "barbara-production-evidence.json"
+}

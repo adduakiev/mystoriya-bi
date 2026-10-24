@@ -1,0 +1,63 @@
+{
+  "checked_on": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40131698750",
+  "code_basis": "Exact existing PR source fc05b4843dd85d958633df72515e4b527c6fc4d8 restored from local git object; requested evidence/provenance/regression corrections in working tree. New revision SHA pending trusted runner commit.",
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types web/tests/bi-audit.test.mjs; node --experimental-strip-types web/tests/merchant-contract.test.mjs; node --experimental-strip-types web/tests/bi-audit-postgres.test.mjs (separate direct executions in current run)",
+    "exit_code": 0,
+    "files_passed": 3,
+    "individual_tests_direct_execution": 14,
+    "postgres_fixture_tests_executed": 2,
+    "skipped": 0
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 11,
+    "files_failed": 3,
+    "cause": "Reproduced current run: sandbox-protected .agents/runtime writes fail with ENOENT on mkdir. Same-source full check passes in writable /tmp copy; no global BLOCKED state.",
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "typescript_build": "NOT REACHED by workspace check"
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40131698750-check-9fux9vbx",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 14,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "source_copy": "Same final code/tests and evidence assertions; copied all tracked/unignored source files excluding secrets/.env/runtime; installed dependency symlink. Final verification receipt/QA narrative updated afterward only."
+  },
+  "browser_matrix": {
+    "command": "node scripts/bi-audit-browser-qa.mjs --matrix",
+    "exit_code": 0,
+    "generated_cases": 66,
+    "browser_navigations": 0,
+    "browser_result": "NOT VERIFIED"
+  },
+  "live_sql": "NOT EXECUTED by Codex",
+  "upstream_rpc_ui": "UNKNOWN",
+  "migrations": "NOT APPLIED; no migration execution",
+  "git_diff_check": "PASS: git diff --check for tracked files; git diff --no-index --check /dev/null for every new file (no whitespace diagnostics)",
+  "commit_push_pr_creation": "DELEGATED_TO_TRUSTED_WORKFLOW; no Codex commit/push/PR creation. Historical trusted push/PR recovery separately recorded in revision-provenance.json.",
+  "merchant_and_app_preservation": "Byte-for-byte compared with fc05b4843dd85d958633df72515e4b527c6fc4d8: merchant-contract.ts, merchant-contract.test.mjs, commerce/page.tsx, digital-sources.ts, app-contract.ts, app/page.tsx, APP-CONTRACT-PROPOSAL.md, follow-up-plan.json; AGENTS.md and astra-runner.yml unchanged.",
+  "independent_production_evidence": "Barbara SELECT-only, reported 2026-10-24: GA4/GSC current30/prior30/365 coverage and Meta bounded USD full-outer key metrics; not runner SQL. See production and reviewer receipts.",
+  "full_production_audit_acceptance": "INCOMPLETE: all-field/upstream/RPC/UI parity and protected preview browser QA unresolved; GA4/GSC bounded date coverage and Meta specified key metrics reported, not UNKNOWN.",
+  "remote_ci": "UNKNOWN to Codex: GH_TOKEN unavailable; trusted runner must attach actual checks to actual new pushed SHA. Local PASS and reported Vercel READY do not establish remote CI.",
+  "preview": {
+    "source_sha": "fc05b4843dd85d958633df72515e4b527c6fc4d8",
+    "deployment_state": "READY (latest trusted trigger; not fresh API check)",
+    "browser": "NOT VERIFIED: protected preview 403",
+    "new_revision_deployment": "UNKNOWN pending actual runner revision SHA"
+  }
+}

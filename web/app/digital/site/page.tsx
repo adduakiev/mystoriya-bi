@@ -23,7 +23,7 @@ export default async function Page(){
   const unknown=snapshots.landings.find(x=>x.landingPage==="(not set)");
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Сайт / UX" statusDetail="GA4 + PageSpeed · live"/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Сайт / UX" statusDetail="GA4 + PageSpeed · PARTIAL · completeness UNKNOWN"/>
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · SITE / UX</span><h1>Сайт та поведінка</h1></div><div className="digital-source-badge">GA4 + Google PageSpeed</div></header>
       <DigitalTabs active="site"/>

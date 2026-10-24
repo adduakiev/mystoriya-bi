@@ -1,0 +1,795 @@
+{
+  "audit_date": "2026-10-24",
+  "actual_live_observations": "Independent Barbara SELECT-only bounded observations reported 2026-10-24; no runner SQL",
+  "null_semantics": "null means UNKNOWN; baseline_reported_rows=0 only where the issue reports an empty source",
+  "sources": [
+    {
+      "id": "sales",
+      "upstream": "Google Sheets CSV; SYRVE origin unverified",
+      "warehouse": [
+        "fact_sales_daily",
+        "agg_sales_monthly",
+        "agg_sales_weekly",
+        "bi_sales_flat",
+        "bi_sales_flat_mv"
+      ],
+      "grain": "date/location/brand/ownership/channel/order_type",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 46159,
+      "baseline_reported_latest_date": "2026-10-22",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "Distinct dates by eligible store/channel; reconcile 46,159 rows to original export",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "Existing manual/SQL sync design; runtime UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "web/lib/data/source.ts",
+        "supabase/schema.sql"
+      ]
+    },
+    {
+      "id": "syrve",
+      "upstream": "SYRVE / Кнайпа",
+      "warehouse": [],
+      "grain": "order/events/refund/items",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "docs/PROJECT-STATUS.md"
+      ]
+    },
+    {
+      "id": "backend_orders",
+      "upstream": "Web/app backend",
+      "warehouse": [
+        "staging_app_orders",
+        "staging_app_users"
+      ],
+      "grain": "order_id; pseudonymous user; status/refund history missing",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261019_app_analytics_contract.sql"
+      ]
+    },
+    {
+      "id": "ga4",
+      "upstream": "GA4 web",
+      "warehouse": [
+        "staging_ga4_daily_windsor",
+        "digital_ga4_daily",
+        "digital_ga4_channel_daily",
+        "digital_ga4_device_daily"
+      ],
+      "grain": "date (property dimension absent in curated key)",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 661,
+      "baseline_reported_latest_date": "2026-10-23",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "One of five existing Windsor daily destinations reported successful in #43; runtime not inspected",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Runner has no read-only session. Barbara reported bounded coverage and Meta key-metric join. Remaining: exact SQL/time receipts, full-field/upstream/RPC reconciliation and authenticated preview browser evidence.",
+      "evidence": [
+        "supabase/migrations/20261015_windsor_google_alignment.sql"
+      ],
+      "warehouse_observations": [
+        {
+          "id": "B03",
+          "source": "ga4",
+          "relation": "digital_ga4_daily",
+          "date_column": "date_id",
+          "scope": "bounded_current30_prior30_365",
+          "window": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "business_account_timezone": "UNKNOWN"
+          },
+          "row_count": 30,
+          "observed_dates": 30,
+          "null_key_metric_rows": 0,
+          "latest_event_time": "UNKNOWN",
+          "duplicate_keys": "UNKNOWN",
+          "upstream_parity": "UNKNOWN",
+          "rpc_ui_parity": "UNKNOWN",
+          "coverage_windows": {
+            "current30": {
+              "from": "2026-09-24",
+              "to": "2026-10-23",
+              "inclusive": true,
+              "expected_calendar_dates": 30,
+              "observed_dates": 30,
+              "missing_calendar_dates": 0,
+              "row_count": 30,
+              "null_core_metric_rows": 0
+            },
+            "prior30": {
+              "from": "2026-08-25",
+              "to": "2026-09-23",
+              "inclusive": true,
+              "expected_calendar_dates": 30,
+              "observed_dates": 30,
+              "missing_calendar_dates": 0,
+              "row_count": "UNKNOWN",
+              "null_core_metric_rows": 0
+            },
+            "trailing12months": {
+              "from": "2025-10-24",
+              "to": "2026-10-23",
+              "inclusive": true,
+              "expected_calendar_dates": 365,
+              "observed_dates": 365,
+              "missing_calendar_dates": 0,
+              "row_count": "UNKNOWN",
+              "null_core_metric_rows": 0
+            }
+          },
+          "null_core_metric_rows": 0,
+          "evidence": "barbara-production-evidence.json#B03",
+          "observer": "Barbara",
+          "reported_on": "2026-10-24"
+        }
+      ]
+    },
+    {
+      "id": "gsc",
+      "upstream": "Google Search Console",
+      "warehouse": [
+        "staging_searchconsole_daily_windsor",
+        "digital_search_daily"
+      ],
+      "grain": "date (site dimension absent in curated key)",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 478,
+      "baseline_reported_latest_date": "2026-10-21",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "One of five existing Windsor daily destinations reported successful in #43; runtime not inspected",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Runner has no read-only session. Barbara reported bounded coverage and Meta key-metric join. Remaining: exact SQL/time receipts, full-field/upstream/RPC reconciliation and authenticated preview browser evidence.",
+      "evidence": [
+        "supabase/migrations/20261015_windsor_google_alignment.sql"
+      ],
+      "warehouse_observations": [
+        {
+          "id": "B04",
+          "source": "gsc",
+          "relation": "digital_search_daily",
+          "date_column": "date_id",
+          "scope": "bounded_current30_prior30_365",
+          "window": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "business_account_timezone": "UNKNOWN"
+          },
+          "row_count": 28,
+          "observed_dates": 28,
+          "latest_observed_date": "2026-10-21",
+          "null_key_metric_rows": 0,
+          "latest_event_time": "UNKNOWN",
+          "duplicate_keys": "UNKNOWN",
+          "upstream_parity": "UNKNOWN",
+          "rpc_ui_parity": "UNKNOWN",
+          "coverage_windows": {
+            "current30": {
+              "from": "2026-09-24",
+              "to": "2026-10-23",
+              "inclusive": true,
+              "expected_calendar_dates": 30,
+              "observed_dates": 28,
+              "missing_calendar_dates": 2,
+              "row_count": 28,
+              "null_core_metric_rows": 0
+            },
+            "prior30": {
+              "from": "2026-08-25",
+              "to": "2026-09-23",
+              "inclusive": true,
+              "expected_calendar_dates": 30,
+              "observed_dates": 30,
+              "missing_calendar_dates": 0,
+              "row_count": "UNKNOWN",
+              "null_core_metric_rows": 0
+            },
+            "trailing12months": {
+              "from": "2025-10-24",
+              "to": "2026-10-23",
+              "inclusive": true,
+              "expected_calendar_dates": 365,
+              "observed_dates": 363,
+              "missing_calendar_dates": 2,
+              "row_count": "UNKNOWN",
+              "null_core_metric_rows": 0
+            }
+          },
+          "null_core_metric_rows": 0,
+          "evidence": "barbara-production-evidence.json#B04",
+          "observer": "Barbara",
+          "reported_on": "2026-10-24"
+        }
+      ]
+    },
+    {
+      "id": "google_ads",
+      "upstream": "Google Ads",
+      "warehouse": [
+        "staging_google_ads_windsor",
+        "digital_google_ads_daily",
+        "digital_google_ads_campaign_snapshot"
+      ],
+      "grain": "raw date/account/campaign; curated daily loses account/currency",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 12,
+      "baseline_reported_latest_date": "2026-10-23",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "One of five existing Windsor daily destinations reported successful in #43; runtime not inspected",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261015_windsor_google_alignment.sql"
+      ],
+      "app_ads_currency_contract": {
+        "id": "B02",
+        "source": "google_ads_app",
+        "scope": "deployed_schema_and_rpc_contract",
+        "relation": "staging_google_ads_windsor",
+        "currency_column_present": false,
+        "rpc": "bi_digital_app_payload",
+        "rpc_currency_exposed": false,
+        "app_ads_money_status": "UNKNOWN",
+        "currency": "UNKNOWN",
+        "conversion_rate": "UNKNOWN",
+        "upstream_parity": "UNKNOWN",
+        "present_columns": [
+          "account_id",
+          "campaign_id",
+          "date"
+        ],
+        "absent_columns": [
+          "currency",
+          "account_currency",
+          "currency_code"
+        ],
+        "evidence": "barbara-production-evidence.json#B02",
+        "observer": "Barbara",
+        "money_status": "UNKNOWN",
+        "note": "Google Ads staging schema only; does not prove currency for separate native App acquisition source. No conversion inferred."
+      }
+    },
+    {
+      "id": "gbp",
+      "upstream": "Google Business Profile / Maps actions",
+      "warehouse": [
+        "staging_gbp_windsor",
+        "digital_gbp_daily"
+      ],
+      "grain": "date/location; four profiles per reported date",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 48,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "One of five existing Windsor daily destinations reported successful in #43; runtime not inspected",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261015_windsor_google_alignment.sql"
+      ]
+    },
+    {
+      "id": "pagespeed",
+      "upstream": "PageSpeed / CrUX",
+      "warehouse": [
+        "staging_pagespeed_windsor",
+        "digital_pagespeed_snapshot"
+      ],
+      "grain": "raw account; curated captured_on processing date; measurement UNKNOWN",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "One of five existing Windsor daily destinations reported successful in #43; runtime not inspected",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261015_windsor_google_alignment.sql"
+      ]
+    },
+    {
+      "id": "ga4_landing",
+      "upstream": "GA4 landing pages",
+      "warehouse": [
+        "digital_ga4_landing_daily",
+        "digital_ga4_landing_snapshot"
+      ],
+      "grain": "daily empty; snapshot period_end/period_days/landing_page",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261023133005_digital_correctness_rpc.sql"
+      ]
+    },
+    {
+      "id": "gsc_slices",
+      "upstream": "GSC queries/pages",
+      "warehouse": [
+        "digital_search_query_daily",
+        "digital_search_page_daily",
+        "digital_search_query_snapshot",
+        "digital_search_page_snapshot"
+      ],
+      "grain": "daily empty; snapshot period_end/period_days/query|page",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "web/lib/data/digital-contract.ts"
+      ]
+    },
+    {
+      "id": "meta_ads",
+      "upstream": "Meta Ads via Windsor",
+      "warehouse": [
+        "staging_meta_ads_windsor",
+        "staging_meta_ads_daily",
+        "meta_windsor_campaign_metrics"
+      ],
+      "grain": "date/account/campaign/currency; curated adset/ad empty for Windsor",
+      "status": "PARTIAL",
+      "account_property_id": "1642925125961488",
+      "account_id_verification": "REPOSITORY_METADATA_ONLY",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 145,
+      "baseline_reported_latest_date": "2026-10-24",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "Active campaign-day keys from completed snapshot; cannot demand a row for each inactive campaign/day",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "Gate D ACTIVE documented: ChatGPT Meta Ads BI Sync, daily ~08:00 Europe/Kyiv, prior 30 completed UTC dates, no Windsor destination",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Runner has no read-only session. Barbara reported bounded coverage and Meta key-metric join. Remaining: exact SQL/time receipts, full-field/upstream/RPC reconciliation and authenticated preview browser evidence.",
+      "evidence": [
+        "docs/meta-windsor-gate-d-activation.md",
+        "docs/sql/backups/issue-37-gate-d-postactivation-2026-10-24.json"
+      ],
+      "warehouse_observations": [
+        {
+          "id": "B01",
+          "source": "meta_ads",
+          "scope": "bounded_current30",
+          "window": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "business_account_timezone": "UNKNOWN"
+          },
+          "row_count": 138,
+          "observed_dates": 25,
+          "relation_specific_counts": {
+            "staging_meta_ads_windsor": 138,
+            "staging_meta_ads_daily": 138
+          },
+          "raw_curated_parity": "BOUNDED_KEY_METRICS_MATCH_REVIEWER_REPORTED: multiplicity, spend, clicks, impressions only",
+          "metric_totals": {
+            "raw_spend": 1311.75,
+            "curated_spend": 1311.75,
+            "currency": "USD"
+          },
+          "upstream_parity": "UNKNOWN",
+          "rpc_ui_parity": "UNKNOWN",
+          "group_count_each": 138,
+          "key_join": {
+            "method": "FULL OUTER JOIN",
+            "keys": [
+              "account_id",
+              "campaign_id",
+              "date",
+              "account_currency"
+            ],
+            "currency": "USD",
+            "raw_groups": 138,
+            "curated_groups": 138,
+            "missing_raw_groups": 0,
+            "missing_curated_groups": 0,
+            "multiplicity_mismatch_groups": 0,
+            "spend_mismatch_groups": 0,
+            "clicks_mismatch_groups": 0,
+            "impressions_mismatch_groups": 0,
+            "all_field_parity": "UNKNOWN",
+            "absolute_duplicate_key_count": "UNKNOWN: matching multiplicity does not prove uniqueness",
+            "query_execution_timestamp": "UNKNOWN"
+          },
+          "all_field_parity": "UNKNOWN",
+          "evidence": "barbara-production-evidence.json#B01",
+          "observer": "Barbara",
+          "reported_on": "2026-10-24"
+        }
+      ],
+      "baseline_scope": {
+        "source": "meta_ads",
+        "from": "2026-09-25",
+        "to": "2026-10-24",
+        "raw_row_count": 145,
+        "curated_row_count": 145,
+        "observed_dates": 26,
+        "provenance": "Issue #43 Gate D rolling baseline; includes incomplete audit day 2026-10-24; distinct from B01",
+        "scheduler": "Reported ACTIVE; no new scheduler or Windsor destination created"
+      }
+    },
+    {
+      "id": "facebook",
+      "upstream": "Facebook Organic",
+      "warehouse": [
+        "staging_facebook_organic_daily",
+        "staging_facebook_organic_posts"
+      ],
+      "grain": "daily Page stock/flows; posts lifetime metrics at observation",
+      "status": "PARTIAL",
+      "account_property_id": "1517291715191497",
+      "account_id_verification": "REPOSITORY_METADATA_ONLY",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 90,
+      "baseline_reported_latest_date": "2026-10-18",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261019_social_organic_foundation.sql"
+      ]
+    },
+    {
+      "id": "instagram",
+      "upstream": "Instagram Insights",
+      "warehouse": [
+        "staging_instagram_organic_daily",
+        "staging_instagram_organic_media"
+      ],
+      "grain": "date/account; media/observed_at required",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "merchant",
+      "upstream": "Google Merchant Center",
+      "warehouse": [
+        "staging_google_merchant_performance",
+        "staging_google_merchant_catalog",
+        "staging_google_merchant_status"
+      ],
+      "grain": "date/product performance; product catalog; snapshot/context/country health",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "supabase/migrations/20261019_google_merchant_contract.sql"
+      ]
+    },
+    {
+      "id": "app_stores",
+      "upstream": "App Store Connect / Google Play",
+      "warehouse": [
+        "staging_app_store_daily"
+      ],
+      "grain": "date/platform",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "firebase",
+      "upstream": "Firebase / app GA4",
+      "warehouse": [
+        "staging_app_firebase_daily"
+      ],
+      "grain": "date/platform",
+      "status": "WAITING",
+      "account_property_id": "321739013 (historical UI metadata; correctness UNKNOWN)",
+      "account_id_verification": "REPOSITORY_METADATA_ONLY",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "app_quality",
+      "upstream": "Crashlytics / native quality",
+      "warehouse": [
+        "staging_app_quality_daily"
+      ],
+      "grain": "date/platform/version",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "app_acquisition",
+      "upstream": "MMP / app attribution",
+      "warehouse": [
+        "staging_app_acquisition_daily"
+      ],
+      "grain": "date/platform/source/campaign",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": 0,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [],
+      "app_ads_currency_contract": {
+        "id": "B02",
+        "source": "google_ads_app",
+        "scope": "deployed_schema_and_rpc_contract",
+        "relation": "staging_google_ads_windsor",
+        "currency_column_present": false,
+        "rpc": "bi_digital_app_payload",
+        "rpc_currency_exposed": false,
+        "app_ads_money_status": "UNKNOWN",
+        "currency": "UNKNOWN",
+        "conversion_rate": "UNKNOWN",
+        "upstream_parity": "UNKNOWN",
+        "present_columns": [
+          "account_id",
+          "campaign_id",
+          "date"
+        ],
+        "absent_columns": [
+          "currency",
+          "account_currency",
+          "currency_code"
+        ],
+        "evidence": "barbara-production-evidence.json#B02",
+        "observer": "Barbara",
+        "money_status": "UNKNOWN",
+        "note": "Google Ads staging schema only; does not prove currency for separate native App acquisition source. No conversion inferred."
+      }
+    },
+    {
+      "id": "reviews",
+      "upstream": "Maps ratings / reviews",
+      "warehouse": [],
+      "grain": "place/review/observation; GBP action metrics are not reviews",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "call_center",
+      "upstream": "Call center / Binotel",
+      "warehouse": [],
+      "grain": "call/order linkage UNKNOWN; workbook cost is not order attribution",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "courier_ops",
+      "upstream": "Courier / kitchen / operations",
+      "warehouse": [],
+      "grain": "order/status/event timestamps/zone/SLA",
+      "status": "WAITING",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": null,
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "UNKNOWN",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": []
+    },
+    {
+      "id": "finance",
+      "upstream": "Imported finance workbook",
+      "warehouse": [],
+      "grain": "month/metric/fact2025|plan2026|fact2026; Jan–Aug only",
+      "status": "PARTIAL",
+      "account_property_id": null,
+      "account_id_verification": "UNKNOWN",
+      "actual_latest_event_time": null,
+      "actual_row_count": null,
+      "baseline_reported_rows": null,
+      "baseline_reported_latest_date": "2026-08",
+      "baseline_provenance": "Issue #43 supplied observations; not rerun in this session",
+      "expected_volume": "UNKNOWN; requires upstream export and eligibility calendar",
+      "ownership": "UNKNOWN; proposed technical owner Паша",
+      "connector_schedule": "Versioned static import loadedAt 2026-10-14; no live connector",
+      "schedule_runtime_verification": "UNKNOWN",
+      "upstream_warehouse_rpc_ui_reconciliation": "UNKNOWN",
+      "missing_access": "Authenticated read-only database and upstream export; authenticated BI preview",
+      "evidence": [
+        "web/lib/data/pnl-source.ts",
+        "web/lib/data/pnl.ts"
+      ]
+    }
+  ],
+  "independent_production_evidence": "barbara-production-evidence.json"
+}

@@ -1,12 +1,63 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-Оновлено: **21.10.2026**. Статус за результатами поточної роботи.
+Історичний production baseline: **21.10.2026**. Аудит коду та доказів: **24.10.2026**; bounded Barbara SELECT-only evidence recorded; upstream/RPC/UI та browser NOT VERIFIED, див. issue #43 нижче.
 
 Цей документ розрізняє локальну реалізацію, перевірки та роботу в production.
 Позначка «зроблено» не означає, що зміна вже опублікована.
 Паша — запропонований відповідальний за технічну частину, Соня/агенція —
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
+
+## Issue #43 — аудит 24.10.2026: локальний код та межі доказів
+
+**Оновлення аудиту: 24.10.2026.** Основний production baseline цього документа
+залишається історичним станом 21 жовтня. Поточний deployed commit не перевірено.
+[Повний звіт #43](BI-DATA-AUDIT-2026-10-24.md) містить статичний inventory,
+lineage, register, coverage та відтворювані blockers. Це не підтвердження
+production correctness: bounded Barbara read-only stored observations доступні;
+upstream/RPC/browser parity залишається UNKNOWN.
+
+- **Gate D Meta — ACTIVE за наявним записом активації 24.10**, а не нове
+  спостереження цього аудиту: [activation record](meta-windsor-gate-d-activation.md),
+  [postactivation evidence](sql/backups/issue-37-gate-d-postactivation-2026-10-24.json).
+  Механізм — ChatGPT scheduled task «Meta Ads BI Sync», daily ~08:00 Europe/Kyiv,
+  previous 30 completed UTC dates; Windsor destination для Meta не створено.
+  Історичне «Scheduler — NOT IMPLEMENTED» нижче не описує цей Meta scheduler.
+  Operating live LLM/manual-run/task persistence — окремі контракти.
+- П'ять Google Windsor destinations та source counts від 24.10 наведені в issue
+  як baseline; їхній runtime, field completeness і reconciliation тут **UNKNOWN**.
+  Повторні destinations/exports/schedulers не створювати.
+- **PREVIEW CODE, PR #44 revision:** App nullable/currency/ratio guards,
+  PARTIAL/UNKNOWN badges та all-campaign table збережено. Merchant nullable adapter
+  тепер зберігає missing fields навіть при positive performance rows; confirmed
+  zero показується як 0, missing source counts UNKNOWN ≠ empty counts WAITING.
+  SQL-erased missingness та D04–D11 залишаються unresolved.
+- **Trusted provenance:** existing PR #44 source HEAD `fc05b4843dd85d958633df72515e4b527c6fc4d8` відновлено
+  з local git object. Поточний run 40131698750 готує working-tree revision;
+  runner виконує commit/push і READY FOR REVIEW з actual new SHA після checks.
+  Remote CI не fetched (GH_TOKEN unavailable); local checks — окрема evidence.
+  Sandbox failures не є global BLOCKED, owner action NONE; без duplicate PR.
+- **Barbara SELECT-only, reported 24.10:** current30/prior30/365 GA4 date coverage
+  **30/30, 30/30, 365/365**; GSC **28/30, 30/30, 363/365**; null core metric rows 0.
+  Meta bounded 2026-09-24…10-23: **138 USD groups per raw/curated side**;
+  FULL OUTER JOIN account_id/campaign_id/date/account_currency: 0 missing sides,
+  0 multiplicity/spend/clicks/impressions mismatches. Stored spend 1311.75 USD each.
+  Separate Gate D rolling scope 145/26. All-field/upstream/RPC/UI UNKNOWN;
+  prior30/365 date coverage не доводить row counts чи keys. Див.
+  [redacted receipt](audit/2026-10-24/REVIEWER-EVIDENCE.md).
+- **Preview:** exact `fc05b4843dd85d958633df72515e4b527c6fc4d8` Vercel READY за latest trusted trigger;
+  protected preview 403 → browser QA NOT VERIFIED. Нова revision SHA/CI/deployment
+  потребує власного runner receipt. Credentials/protection не змінено.
+- **App grain:** account/campaign/currency та conversion-action ambiguity описано
+  в [NOT-APPLIED proposal](audit/2026-10-24/APP-CONTRACT-PROPOSAL.md); money без
+  source currency withheld, жодного money/backend-order inference. Barbara reports
+  Google staging account_id/campaign_id/date present, currency/account_currency/currency_code absent.
+  Source-money UNKNOWN; no exchange conversion. D04–D11 OPEN tasks мають owner/gate/acceptance
+  у [follow-up plan](audit/2026-10-24/follow-up-plan.json); owner action зараз NONE.
+- Поточні результати tests/TypeScript/build і sandbox runtime write limitation —
+  у [QA table](BI-DATA-AUDIT-2026-10-24.md#qa-та-перевірки). SQL diagnostics
+  перевірено на disposable PostgreSQL fixtures; це не live Supabase parity.
+  Production/staging SQL/migrations/deploy не виконувалися.
 
 ## Issue #12 — локальна correctness phase 1 (22.10.2026)
 

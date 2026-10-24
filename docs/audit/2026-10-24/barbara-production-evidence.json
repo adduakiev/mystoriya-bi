@@ -1,0 +1,218 @@
+{
+  "provenance": {
+    "observer": "Barbara",
+    "evidence_class": "INDEPENDENT_PRODUCTION_SELECT_ONLY",
+    "reported_on": "2026-10-24",
+    "reference": "Latest trusted issue #43 trigger: Barbara SELECT-only current30/prior30/365 coverage and bounded Meta full-outer key join",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455",
+    "runner_executed": false,
+    "limitations": "Redacted aggregates relayed in trusted trigger dated 2026-10-24; exact execution timestamp, full SQL text and business/account timezone not supplied. Not runner SQL. Account and campaign identifiers redacted."
+  },
+  "audit_window": {
+    "from": "2026-09-24",
+    "to": "2026-10-23",
+    "inclusive": true,
+    "expected_calendar_dates": 30,
+    "business_account_timezone": "UNKNOWN"
+  },
+  "warehouse_checks": "Live SELECT-only production warehouse checks reported by Barbara; not Astra runner execution",
+  "observations": [
+    {
+      "id": "B01",
+      "source": "meta_ads",
+      "scope": "bounded_current30",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 138,
+      "observed_dates": 25,
+      "relation_specific_counts": {
+        "staging_meta_ads_windsor": 138,
+        "staging_meta_ads_daily": 138
+      },
+      "raw_curated_parity": "BOUNDED_KEY_METRICS_MATCH_REVIEWER_REPORTED: multiplicity, spend, clicks, impressions only",
+      "metric_totals": {
+        "raw_spend": 1311.75,
+        "curated_spend": 1311.75,
+        "currency": "USD"
+      },
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN",
+      "group_count_each": 138,
+      "key_join": {
+        "method": "FULL OUTER JOIN",
+        "keys": [
+          "account_id",
+          "campaign_id",
+          "date",
+          "account_currency"
+        ],
+        "currency": "USD",
+        "raw_groups": 138,
+        "curated_groups": 138,
+        "missing_raw_groups": 0,
+        "missing_curated_groups": 0,
+        "multiplicity_mismatch_groups": 0,
+        "spend_mismatch_groups": 0,
+        "clicks_mismatch_groups": 0,
+        "impressions_mismatch_groups": 0,
+        "all_field_parity": "UNKNOWN",
+        "absolute_duplicate_key_count": "UNKNOWN: matching multiplicity does not prove uniqueness",
+        "query_execution_timestamp": "UNKNOWN"
+      },
+      "all_field_parity": "UNKNOWN"
+    },
+    {
+      "id": "B02",
+      "source": "google_ads_app",
+      "scope": "deployed_schema_and_rpc_contract",
+      "relation": "staging_google_ads_windsor",
+      "currency_column_present": false,
+      "rpc": "bi_digital_app_payload",
+      "rpc_currency_exposed": false,
+      "app_ads_money_status": "UNKNOWN",
+      "currency": "UNKNOWN",
+      "conversion_rate": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "present_columns": [
+        "account_id",
+        "campaign_id",
+        "date"
+      ],
+      "absent_columns": [
+        "currency",
+        "account_currency",
+        "currency_code"
+      ]
+    },
+    {
+      "id": "B03",
+      "source": "ga4",
+      "relation": "digital_ga4_daily",
+      "date_column": "date_id",
+      "scope": "bounded_current30_prior30_365",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 30,
+      "observed_dates": 30,
+      "null_key_metric_rows": 0,
+      "latest_event_time": "UNKNOWN",
+      "duplicate_keys": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN",
+      "coverage_windows": {
+        "current30": {
+          "from": "2026-09-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "observed_dates": 30,
+          "missing_calendar_dates": 0,
+          "row_count": 30,
+          "null_core_metric_rows": 0
+        },
+        "prior30": {
+          "from": "2026-08-25",
+          "to": "2026-09-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "observed_dates": 30,
+          "missing_calendar_dates": 0,
+          "row_count": "UNKNOWN",
+          "null_core_metric_rows": 0
+        },
+        "trailing12months": {
+          "from": "2025-10-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 365,
+          "observed_dates": 365,
+          "missing_calendar_dates": 0,
+          "row_count": "UNKNOWN",
+          "null_core_metric_rows": 0
+        }
+      },
+      "null_core_metric_rows": 0
+    },
+    {
+      "id": "B04",
+      "source": "gsc",
+      "relation": "digital_search_daily",
+      "date_column": "date_id",
+      "scope": "bounded_current30_prior30_365",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 28,
+      "observed_dates": 28,
+      "latest_observed_date": "2026-10-21",
+      "null_key_metric_rows": 0,
+      "latest_event_time": "UNKNOWN",
+      "duplicate_keys": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN",
+      "coverage_windows": {
+        "current30": {
+          "from": "2026-09-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "observed_dates": 28,
+          "missing_calendar_dates": 2,
+          "row_count": 28,
+          "null_core_metric_rows": 0
+        },
+        "prior30": {
+          "from": "2026-08-25",
+          "to": "2026-09-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "observed_dates": 30,
+          "missing_calendar_dates": 0,
+          "row_count": "UNKNOWN",
+          "null_core_metric_rows": 0
+        },
+        "trailing12months": {
+          "from": "2025-10-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 365,
+          "observed_dates": 363,
+          "missing_calendar_dates": 2,
+          "row_count": "UNKNOWN",
+          "null_core_metric_rows": 0
+        }
+      },
+      "null_core_metric_rows": 0
+    }
+  ],
+  "separate_gate_d_scope": {
+    "source": "meta_ads",
+    "from": "2026-09-25",
+    "to": "2026-10-24",
+    "raw_row_count": 145,
+    "curated_row_count": 145,
+    "observed_dates": 26,
+    "provenance": "Issue #43 Gate D rolling baseline; includes incomplete audit day 2026-10-24; distinct from B01",
+    "scheduler": "Reported ACTIVE; no new scheduler or Windsor destination created"
+  },
+  "other_current30_counts": "UNKNOWN outside B01/B03/B04; no inference from historical date spans",
+  "prior30": "GA4 30/30, GSC 30/30; null core metric rows 0; other sources UNKNOWN",
+  "trailing12months": "GA4 365/365, GSC 363/365; null core metric rows 0; other sources UNKNOWN",
+  "upstream_source_parity": "UNKNOWN",
+  "runner_production_sql_execution": "NOT_EXECUTED",
+  "db_source_changes": false
+}
