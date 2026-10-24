@@ -1,0 +1,42 @@
+{
+  "audit_date": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40129297280",
+  "issue": 43,
+  "existing_pr": "https://github.com/adduakiev/mystoriya-bi/pull/44",
+  "review_comment": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389068370",
+  "required_handoff_branch": "astra/issue-43-40107435112",
+  "actual_runner_branch": "astra/issue-43-40129297280",
+  "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "existing_pr_source_commit": "58d98421e28653675803383f34d138e16cbaa86f",
+  "trusted_workflow_history": {
+    "evidence_basis": "Latest trusted trigger identifies PR intended head 58d9842; earlier trigger reports a261c82 push and PR recovery. Not newly fetched by sandbox.",
+    "working_published": true,
+    "pushed_commit": "a261c82b6f6d7cd1ae2a316a108cadd121972b61",
+    "existing_pr_recovered": 44,
+    "intended_pr_head": "58d98421e28653675803383f34d138e16cbaa86f"
+  },
+  "sandbox_history": {
+    "scope": "Earlier Codex process only, NOT global trusted runner outcome",
+    "gh_token_failure": "Earlier CLI could not post; trusted Actions nevertheless posted WORKING",
+    "index_lock_failure": "Earlier branch switch failed; trusted Actions nevertheless pushed a261c82"
+  },
+  "current_run": {
+    "local_working_acknowledgment": true,
+    "github_working_post": "CLI attempt exit 4: GH_TOKEN unavailable; workflow has separate Mark task WORKING step; remote outcome unverified here",
+    "review_fetch": "gh api exit 4: GH_TOKEN unavailable; using explicitly supplied trusted trigger evidence",
+    "working_tree_basis": "58d9842 diff restored from local object; bounded evidence/follow-up classification from 17dec08 reconciled with latest trigger",
+    "commit_push_pr_creation": "DELEGATED_TO_TRUSTED_WORKFLOW; Codex performs no commit/push/PR creation",
+    "ready_for_review_post": "PENDING trusted commit/push and deterministic checks"
+  },
+  "preview": {
+    "head": "a261c82b6f6d7cd1ae2a316a108cadd121972b61",
+    "deployment_state": "READY",
+    "evidence_basis": "Trusted trigger summarizing independent reviewer; not a fresh Vercel API check",
+    "browser_qa": "NOT VERIFIED",
+    "protected_preview_http_status": 403,
+    "new_revision_deployment": "UNKNOWN until runner push and exact SHA check"
+  },
+  "handoff": "Update PR #44 only; if temporary branch pushed, report its full SHA for Barbara recovery. Post READY FOR REVIEW after trusted push, with SHA/checks/evidence/remaining gaps.",
+  "production_audit_acceptance": "INCOMPLETE: stored reviewer evidence does not prove upstream/RPC/UI parity",
+  "incorporated_parallel_revision": "17dec08bfce48c2dc4853ae0da422276c70af460"
+}

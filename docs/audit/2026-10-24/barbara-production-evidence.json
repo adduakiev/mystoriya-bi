@@ -1,0 +1,129 @@
+{
+  "provenance": {
+    "observer": "Barbara",
+    "evidence_class": "INDEPENDENT_PRODUCTION_SELECT_ONLY",
+    "reported_on": "2026-10-24",
+    "reference": "Independent Barbara CHANGES REQUESTED and bounded results explicitly relayed in latest issue #43 trigger",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389068370",
+    "runner_executed": false,
+    "limitations": "Trusted trigger supplies redacted aggregate results; full query receipts, execution timestamp and account timezone unavailable. Not runner SQL. No accounts, keys or confidential rows transcribed."
+  },
+  "audit_window": {
+    "from": "2026-09-24",
+    "to": "2026-10-23",
+    "inclusive": true,
+    "expected_calendar_dates": 30,
+    "business_account_timezone": "UNKNOWN"
+  },
+  "warehouse_checks": "Live SELECT-only production warehouse checks reported by Barbara; not Astra runner execution",
+  "observations": [
+    {
+      "id": "B01",
+      "source": "meta_ads",
+      "scope": "bounded_current30",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 138,
+      "observed_dates": 25,
+      "relation_specific_counts": {
+        "staging_meta_ads_windsor": 138,
+        "staging_meta_ads_daily": 138
+      },
+      "raw_curated_parity": "UNKNOWN: equal row/date counts and spend only; full field/key parity unproven",
+      "metric_totals": {
+        "raw_spend": 1311.75,
+        "curated_spend": 1311.75,
+        "currency": "UNKNOWN"
+      },
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN"
+    },
+    {
+      "id": "B02",
+      "source": "google_ads_app",
+      "scope": "deployed_schema_and_rpc_contract",
+      "relation": "staging_google_ads_windsor",
+      "currency_column_present": false,
+      "rpc": "bi_digital_app_payload",
+      "rpc_currency_exposed": false,
+      "app_ads_money_status": "UNKNOWN",
+      "currency": "UNKNOWN",
+      "conversion_rate": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "present_columns": [
+        "account_id",
+        "campaign_id",
+        "date"
+      ],
+      "absent_columns": [
+        "currency",
+        "account_currency",
+        "currency_code"
+      ]
+    },
+    {
+      "id": "B03",
+      "source": "ga4",
+      "relation": "digital_ga4_daily",
+      "date_column": "date_id",
+      "scope": "bounded_current30",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 30,
+      "observed_dates": 30,
+      "null_key_metric_rows": 0,
+      "latest_event_time": "UNKNOWN",
+      "duplicate_keys": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN"
+    },
+    {
+      "id": "B04",
+      "source": "gsc",
+      "relation": "digital_search_daily",
+      "date_column": "date_id",
+      "scope": "bounded_current30",
+      "window": {
+        "from": "2026-09-24",
+        "to": "2026-10-23",
+        "inclusive": true,
+        "expected_calendar_dates": 30,
+        "business_account_timezone": "UNKNOWN"
+      },
+      "row_count": 28,
+      "observed_dates": 28,
+      "latest_observed_date": "2026-10-21",
+      "null_key_metric_rows": 0,
+      "latest_event_time": "UNKNOWN",
+      "duplicate_keys": "UNKNOWN",
+      "upstream_parity": "UNKNOWN",
+      "rpc_ui_parity": "UNKNOWN"
+    }
+  ],
+  "separate_gate_d_scope": {
+    "source": "meta_ads",
+    "from": "2026-09-25",
+    "to": "2026-10-24",
+    "raw_row_count": 145,
+    "curated_row_count": 145,
+    "observed_dates": 26,
+    "provenance": "Issue #43 Gate D rolling baseline; includes incomplete audit day 2026-10-24; distinct from B01",
+    "scheduler": "Reported ACTIVE; no new scheduler or Windsor destination created"
+  },
+  "other_current30_counts": "UNKNOWN outside B01/B03/B04; no inferred prior30 or trailing12months results",
+  "prior30": "UNKNOWN",
+  "trailing12months": "UNKNOWN",
+  "upstream_source_parity": "UNKNOWN",
+  "runner_production_sql_execution": "NOT_EXECUTED",
+  "db_source_changes": false
+}

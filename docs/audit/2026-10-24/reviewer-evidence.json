@@ -1,0 +1,60 @@
+{
+  "recorded_on": "2026-10-24",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389068370",
+  "evidence_kind": "REVIEWER_READ_ONLY_REPORTED",
+  "capture_basis": "Trusted latest trigger supplies explicit dated redacted Barbara results; full remote comment unavailable in sandbox.",
+  "stored_checks": {
+    "coverage": "BOUNDED_VERIFIED_BY_BARBARA_REPORTED",
+    "field_null_checks": "GA4/GSC current30 null key metric rows 0 only; individual field definitions/counts not supplied",
+    "key_checks": "UNKNOWN: do not infer duplicate-key outcomes",
+    "exact_results": {
+      "ga4": {
+        "rows": 30,
+        "dates": 30,
+        "date_column": "date_id",
+        "null_key_metric_rows": 0
+      },
+      "gsc": {
+        "rows": 28,
+        "dates": 28,
+        "through": "2026-10-21",
+        "null_key_metric_rows": 0
+      },
+      "meta_ads": {
+        "raw_rows": 138,
+        "curated_rows": 138,
+        "dates_each": 25,
+        "raw_spend": 1311.75,
+        "curated_spend": 1311.75,
+        "currency": "UNKNOWN"
+      }
+    },
+    "new_sql_execution_in_this_run": false
+  },
+  "parity": {
+    "upstream": "UNKNOWN",
+    "warehouse_to_rpc": "UNKNOWN",
+    "rendered_ui": "UNKNOWN",
+    "raw_curated_equal_counts": "NOT evidence of upstream parity or field completeness"
+  },
+  "baseline_provenance": "Issue #43 Supabase baseline remains separately attributed; not relabeled as reviewer query output",
+  "windows": {
+    "current30": [
+      "2026-09-24",
+      "2026-10-23"
+    ],
+    "prior30": [
+      "2026-08-25",
+      "2026-09-23"
+    ],
+    "trailing12months": [
+      "2025-10-24",
+      "2026-10-23"
+    ]
+  },
+  "bounded_sql": "read-only-qa.sql; rpc-read-only-qa.sql (requires existing authorized session)",
+  "fixture_evidence": "sql-validation.json: historical disposable PostgreSQL fixtures, not live Supabase results",
+  "required_follow_up": "Existing authorized reviewer to attach redacted field/key definitions, query and execution time, prior30/12-month coverage and upstream/RPC/UI receipts. Bounded supplied counts are recorded, not UNKNOWN.",
+  "observer": "Barbara",
+  "production_receipt": "barbara-production-evidence.json"
+}

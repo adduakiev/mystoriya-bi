@@ -1,0 +1,190 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "status": "PLANNED_NOT_IMPLEMENTED",
+  "scope": "Machine-readable follow-up tasks; no GitHub issues created, DB/source changes or external actions performed",
+  "owner_assignment": "Proposed roles only; no confirmed assignment or deadline",
+  "gates": {
+    "PREVIEW_CODE": "Local reversible code/tests allowed; no production changes",
+    "DATA_CONTRACT_THEN_PREVIEW_CODE": "Agree field semantics before code/SQL design",
+    "SOURCE_CONTRACT_THEN_SQL_DESIGN": "Inspect existing source contract read-only; prepare design only",
+    "BUSINESS_COHORT_THEN_PREVIEW_CODE": "Retail validates lifecycle/cohort definition",
+    "FINANCE_DECISION_THEN_PREVIEW_CODE": "Finance validates allocation/cost methodology",
+    "DB_APPLICATION": "Separate exact Kostiantyn approval required for staging/production migrations; designs NOT APPLIED",
+    "DB_APPLICATION_IF_RPC_CHANGE": "Same DB_APPLICATION gate if RPC SQL must change",
+    "DB_APPLICATION_IF_SQL_CHANGE": "Same DB_APPLICATION gate if SQL must change",
+    "RELEASE": "Separate exact Kostiantyn approval for merge/deploy/promote",
+    "SOURCE_CHANGE_OWNER_APPROVAL": "No connector/destination/credential/provider/scheduler/source mutation in this revision; future actions require applicable exact owner gates",
+    "BUSINESS_METHODOLOGY": "Named business owner validates definition; does not authorize production release",
+    "SOURCE_ACCESS": "Existing authorized read-only access only; no new credentials or mutations"
+  },
+  "tasks": [
+    {
+      "id": "D04",
+      "finding": "D04",
+      "severity": "P1",
+      "status": "OPEN",
+      "title": "Preserve field missingness through Sales/Merchant/App/P&L",
+      "proposed_owner": "Astra implementation; data-contract reviewer (assignment pending)",
+      "gate_classification": "DATA_CONTRACT_THEN_PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Define nullable fields and source-presence semantics for each affected adapter/RPC; distinguish empty source, null field and measured zero.",
+        "Prepare minimal code/SQL design with regressions for null, empty and measured zero; do not apply SQL.",
+        "Verify warehouse→RPC null counts on authorized isolated fixtures; field-level production parity stays UNKNOWN until evidenced.",
+        "Preserve D18 Merchant nullable preview fix; restoring SQL-erased missingness remains OPEN."
+      ],
+      "subsequent_gates": [
+        "DB_APPLICATION",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D04",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D05",
+      "finding": "D05",
+      "severity": "P1",
+      "status": "OPEN",
+      "title": "Align Digital selected periods and source windows",
+      "proposed_owner": "Astra implementation; BI reviewer (assignment pending)",
+      "gate_classification": "PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Selecting current30 and prior30 passes explicit dates to supported contracts or visibly labels independent Ads/GBP windows.",
+        "Regression verifies no selected-period total combines mismatched source windows; empty period remains UNKNOWN.",
+        "Browser evidence records period/segment changes after authorized protected preview access."
+      ],
+      "subsequent_gates": [
+        "DB_APPLICATION_IF_RPC_CHANGE",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D05",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D06",
+      "finding": "D06",
+      "severity": "P1",
+      "status": "OPEN",
+      "title": "Restore Google Ads identity and App currency contract",
+      "proposed_owner": "Data engineering + marketing account owner (assignment pending)",
+      "gate_classification": "SOURCE_CONTRACT_THEN_SQL_DESIGN",
+      "minimal_acceptance_criteria": [
+        "Document account_id/campaign_id/date/currency grain and field mappings; B02 reports Google staging has IDs/date but no currency/account_currency/currency_code; repository App RPC omits currency.",
+        "Prepare NOT APPLIED design preserving stable IDs and currency; no inference from names, UI symbols, country or another source.",
+        "Regressions cover two accounts, same campaign name, missing/mixed currencies and conversion-action duplication; money remains UNKNOWN without evidence.",
+        "Reconcile raw→curated→dated RPC on authorized fixtures by account/currency; upstream parity requires independent completed export."
+      ],
+      "subsequent_gates": [
+        "SOURCE_CHANGE_OWNER_APPROVAL",
+        "DB_APPLICATION",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D06",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D07",
+      "finding": "D07",
+      "severity": "P1",
+      "status": "OPEN",
+      "title": "Unify LFL lifecycle cohort across SQL and fallback",
+      "proposed_owner": "Astra implementation + retail lifecycle steward (assignment pending)",
+      "gate_classification": "BUSINESS_COHORT_THEN_PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Agree opening/closure and comparison-date eligibility rules with retail owner; record effective dates.",
+        "One fixture cohort yields identical SQL/fallback inclusion for newly opened, closed, reopened and missing-lifecycle stores.",
+        "Regressions verify filters and comparison totals use the same cohort; unknown lifecycle is explicit."
+      ],
+      "subsequent_gates": [
+        "BUSINESS_METHODOLOGY",
+        "DB_APPLICATION_IF_SQL_CHANGE",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D07",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D08",
+      "finding": "D08",
+      "severity": "P1",
+      "status": "OPEN",
+      "title": "Make P&L coverage and Glovo cost methodology auditable",
+      "proposed_owner": "Finance owner + retail operations; Astra implementation (assignment pending)",
+      "gate_classification": "FINANCE_DECISION_THEN_PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Display Jan–Aug workbook coverage and missing months/fields as UNKNOWN; regression distinguishes measured zero.",
+        "Finance documents and approves 70/30 payroll allocation or replacement; no invented allocation in code.",
+        "Reconcile anonymized Glovo gross/net, refunds, commission, promo, logistics, tax and COGS once each; preserve UNKNOWN margin until proof.",
+        "Record finance workbook version and order/source reconciliation limits; do not claim daily live P&L."
+      ],
+      "subsequent_gates": [
+        "BUSINESS_METHODOLOGY",
+        "SOURCE_ACCESS",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D08",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D09",
+      "finding": "D09",
+      "severity": "P2",
+      "status": "OPEN",
+      "title": "Expose snapshot scope and top-N completeness",
+      "proposed_owner": "Data engineering + SEO analyst; Astra implementation (assignment pending)",
+      "gate_classification": "DATA_CONTRACT_THEN_PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Label snapshot dates and caps independently of daily coverage.",
+        "Show empty daily slices as UNKNOWN; do not allocate snapshots across dates.",
+        "Regressions distinguish top-N rows from source totals and preserve omitted-query limits."
+      ],
+      "subsequent_gates": [
+        "DB_APPLICATION_IF_RPC_CHANGE",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D09",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D10",
+      "finding": "D10",
+      "severity": "P2",
+      "status": "OPEN",
+      "title": "Separate PageSpeed measurement time from processing time",
+      "proposed_owner": "Web performance owner + data engineering (assignment pending)",
+      "gate_classification": "SOURCE_CONTRACT_THEN_SQL_DESIGN",
+      "minimal_acceptance_criteria": [
+        "Inspect available source measurement timestamp with existing read-only access.",
+        "Missing measurement time remains UNKNOWN; imported_at is never substituted.",
+        "Prepare preview adapter regressions for old measurement with recent processing and missing timestamp."
+      ],
+      "subsequent_gates": [
+        "SOURCE_ACCESS",
+        "DB_APPLICATION_IF_SQL_CHANGE",
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D10",
+      "db_source_changes_in_this_revision": false
+    },
+    {
+      "id": "D11",
+      "finding": "D11",
+      "severity": "P2",
+      "status": "OPEN",
+      "title": "Resolve KPI button drilldown semantics",
+      "proposed_owner": "BI UX owner + Astra implementation (assignment pending)",
+      "gate_classification": "PREVIEW_CODE",
+      "minimal_acceptance_criteria": [
+        "Choose a supported detail destination or render the KPI with noninteractive semantics.",
+        "Verify keyboard and touch activation and focus behavior on authorized desktop/mobile preview.",
+        "Record screenshot and navigation evidence without invoking mutation controls."
+      ],
+      "subsequent_gates": [
+        "RELEASE"
+      ],
+      "evidence": "discrepancies.json#D11",
+      "db_source_changes_in_this_revision": false
+    }
+  ],
+  "owner_action_now": "NONE: preview revision and read-only follow-up preparation require no production approval request"
+}
