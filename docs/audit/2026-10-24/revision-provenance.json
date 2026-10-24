@@ -1,0 +1,40 @@
+{
+  "audit_date": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40123899500",
+  "issue": 43,
+  "existing_pr": "https://github.com/adduakiev/mystoriya-bi/pull/44",
+  "review_comment": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+  "required_handoff_branch": "astra/issue-43-40107435112",
+  "actual_runner_branch": "astra/issue-43-40123899500",
+  "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "existing_pr_source_commit": "a261c82b6f6d7cd1ae2a316a108cadd121972b61",
+  "trusted_workflow_history": {
+    "evidence_basis": "Latest trusted issue trigger; not newly fetched by sandbox",
+    "working_published": true,
+    "pushed_commit": "a261c82b6f6d7cd1ae2a316a108cadd121972b61",
+    "existing_pr_recovered": 44
+  },
+  "sandbox_history": {
+    "scope": "Earlier Codex process only, NOT global trusted runner outcome",
+    "gh_token_failure": "Earlier CLI could not post; trusted Actions nevertheless posted WORKING",
+    "index_lock_failure": "Earlier branch switch failed; trusted Actions nevertheless pushed a261c82"
+  },
+  "current_run": {
+    "local_working_acknowledgment": true,
+    "github_working_post": "Trusted workflow responsibility; not verified from sandbox",
+    "review_fetch": "gh API exit 4: GH_TOKEN unavailable; curl exit 6: api.github.com DNS unresolved",
+    "working_tree_basis": "Existing a261c82 diff restored from local object; code/docs revision on writable files",
+    "commit_push_pr_creation": "NOT PERFORMED; trusted runner only",
+    "ready_for_review_post": "PENDING trusted commit/push and deterministic checks"
+  },
+  "preview": {
+    "head": "a261c82b6f6d7cd1ae2a316a108cadd121972b61",
+    "deployment_state": "READY",
+    "evidence_basis": "Trusted trigger summarizing independent reviewer; not a fresh Vercel API check",
+    "browser_qa": "NOT VERIFIED",
+    "protected_preview_http_status": 403,
+    "new_revision_deployment": "UNKNOWN until runner push and exact SHA check"
+  },
+  "handoff": "Update PR #44 only; if temporary branch pushed, report its full SHA for Barbara recovery. Post READY FOR REVIEW after trusted push, with SHA/checks/evidence/remaining gaps.",
+  "production_audit_acceptance": "INCOMPLETE: stored reviewer evidence does not prove upstream/RPC/UI parity"
+}

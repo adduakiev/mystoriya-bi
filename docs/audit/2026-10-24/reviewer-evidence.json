@@ -1,0 +1,37 @@
+{
+  "recorded_on": "2026-10-24",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+  "evidence_kind": "REVIEWER_READ_ONLY_REPORTED",
+  "capture_basis": "Trusted trigger summary only; remote comment unavailable in sandbox. No confidential rows/keys/accounts copied.",
+  "stored_checks": {
+    "coverage": "VERIFIED_BY_REVIEWER_REPORTED",
+    "field_null_checks": "VERIFIED_BY_REVIEWER_REPORTED",
+    "key_checks": "VERIFIED_BY_REVIEWER_REPORTED",
+    "exact_results": "UNKNOWN: full comment/results not available; do not infer null counts, duplicate counts or per-window totals",
+    "new_sql_execution_in_this_run": false
+  },
+  "parity": {
+    "upstream": "UNKNOWN",
+    "warehouse_to_rpc": "UNKNOWN",
+    "rendered_ui": "UNKNOWN",
+    "raw_curated_equal_counts": "NOT evidence of upstream parity or field completeness"
+  },
+  "baseline_provenance": "Issue #43 Supabase baseline remains separately attributed; not relabeled as reviewer query output",
+  "windows": {
+    "current30": [
+      "2026-09-24",
+      "2026-10-23"
+    ],
+    "prior30": [
+      "2026-08-25",
+      "2026-09-23"
+    ],
+    "trailing12months": [
+      "2025-10-24",
+      "2026-10-23"
+    ]
+  },
+  "bounded_sql": "read-only-qa.sql; rpc-read-only-qa.sql (requires existing authorized session)",
+  "fixture_evidence": "sql-validation.json: historical disposable PostgreSQL fixtures, not live Supabase results",
+  "required_follow_up": "Trusted reviewer/runner attach redacted actual aggregate receipts with query, executed_at, relation/window, row/date/null/key results. Until then exact result cells remain UNKNOWN."
+}
