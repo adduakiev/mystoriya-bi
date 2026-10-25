@@ -21,13 +21,13 @@ const LOCATION_MAPPING: Record<string, string> = {
 };
 
 export type SalesDataStatus = {
-  source: "supabase" | "google-sheets";
+  source: "supabase" | "google-sheets" | "unknown";
   cutoffDate: string | null;
   lastSuccessfulSync: string | null;
   warehouseRows: number | null;
   monthlyAggregateRows: number | null;
   weeklyAggregateRows: number | null;
-  status: "success" | "fallback";
+  status: "success" | "fallback" | "unavailable";
 };
 
 type SalesDataset = {
@@ -407,7 +407,7 @@ async function fetchSupabaseStatus(password: string): Promise<SalesDataStatus> {
     headers: supabaseHeaders(),
     body: JSON.stringify({ p_password: password }),
     cache: "no-store",
-    signal: AbortSignal.timeout(8_000)
+    signal: AbortSignal.timeout(2_000)
   });
 
   if (!response.ok) {
@@ -416,6 +416,10 @@ async function fetchSupabaseStatus(password: string): Promise<SalesDataStatus> {
 
   const raw = await response.json();
   const payload = unwrapRpcPayload<SupabaseStatusPayload>(raw, "bi_sync_status");
+
+  if (payload.status !== "success") {
+    throw new Error("Supabase status is unavailable");
+  }
 
   return {
     source: "supabase",
@@ -449,10 +453,11 @@ const getCachedSalesStatus = unstable_cache(
       }
     }
 
-    const dataset = await getCachedSalesDataset();
-    return dataset.status;
+    // Sidebar metadata must never initiate a snapshot or Google Sheets download.
+    // A failed status request provides no evidence about either data source.
+    return unavailableSalesStatus();
   },
-  ["myastoriya-sales-status-v1"],
+  ["myastoriya-sales-status-v2"],
   {
     revalidate: 60,
     tags: ["sales-data-status"]
@@ -464,7 +469,24 @@ export async function loadSalesData(): Promise<SalesRow[]> {
 }
 
 export async function loadSalesDataStatus(): Promise<SalesDataStatus> {
-  return getCachedSalesStatus();
+  try {
+    return await getCachedSalesStatus();
+  } catch {
+    // Cache infrastructure failures must not break unrelated report rendering.
+    return unavailableSalesStatus();
+  }
+}
+
+function unavailableSalesStatus(): SalesDataStatus {
+  return {
+    source: "unknown",
+    cutoffDate: null,
+    lastSuccessfulSync: null,
+    warehouseRows: null,
+    monthlyAggregateRows: null,
+    weeklyAggregateRows: null,
+    status: "unavailable"
+  };
 }
 
 
