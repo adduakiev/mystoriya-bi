@@ -1,4 +1,6 @@
 import { formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
+import { sourceMoney } from "@/lib/source-evidence";
+import { hasSpendWithoutConversions } from "@/lib/ads-presentation";
 import Link from "next/link";
 import {
   Activity,
@@ -180,15 +182,14 @@ export default async function DigitalPage({
   const seoOpportunities=data.seoQueries.filter(row=>row.impressions!==null&&row.impressions>=1000&&row.position!==null&&row.position<=10&&row.ctr!==null&&seo.ctr!==null&&row.ctr<seo.ctr);
   const topTrafficChannel=data.channels[0]??null;
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
-  const noConversionCampaigns=ads.campaigns.filter(row=>row.cost!==null&&row.cost>=500&&row.conversions===0);
-  const noConversionSpend=metricSum(...noConversionCampaigns.map(row=>row.cost));
+  const noConversionCampaigns=ads.campaigns.filter(hasSpendWithoutConversions);
   const localActions=metricSum(local.summary.calls,local.summary.directions,local.summary.websiteClicks,local.summary.menuClicks);
   const attentionSignals=[
     local.pageSpeed&&["POOR","NEEDS_IMPROVEMENT"].includes(local.pageSpeed.mobileCategory)?{
       level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${formatMetric(local.pageSpeed.mobileScore)} · LCP ${formatMetric(local.pageSpeed.mobileLcp)} ms · CLS ${formatMetric(local.pageSpeed.mobileCls, 2)}.`,href:"/digital/site"
     }:null,
     noConversionCampaigns.length?{
-      level:"HIGH",title:"Google Ads · 0 conversions у вибірці",text:`${noConversionCampaigns.length} кампаній витратили ${money(noConversionSpend)} і мають 0 Google Ads conversions у доступному вікні.`,href:"/digital/ads"
+      level:"DATA",title:"Google Ads · 0 conversions у вибірці",text:`${noConversionCampaigns.length} кампаній з витратами і 0 Google Ads conversions у доступному вікні. Валюта UNKNOWN; без грошового порогу, суми витрат та ранжування бюджету.`,href:"/digital/ads"
     }:null,
     seoOpportunities.length?{
       level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
@@ -273,12 +274,12 @@ export default async function DigitalPage({
         </section>
 
         <div className="pnl-section-heading">
-          <div><span className="eyebrow">GOOGLE LAYER · LIVE</span><h2>Реклама, локальний попит та швидкість</h2></div>
+          <div><span className="eyebrow">GOOGLE LAYER · PARTIAL</span><h2>Реклама, локальний попит та швидкість</h2></div>
           <small>Ads: {formatMetric(ads.meta.days)} днів · Maps: {formatMetric(local.meta.days)} днів · PageSpeed оброблено: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}; дата вимірювання невідома</small>
         </div>
         <section className="digital-kpi-grid">
-          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{formatMetric(ads.meta.days)} календарних днів у вікні</small><em>Google Ads</em></article>
-          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{formatMetric(ads.summary.conversions, 1)} conversions</em></article>
+          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{sourceMoney(ads.summary.cost)}</strong><small>{formatMetric(ads.meta.days)} календарних днів у вікні</small><em>Google Ads · currency UNKNOWN</em></article>
+          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{sourceMoney(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{formatMetric(ads.summary.conversions, 1)} conversions · currency UNKNOWN</em></article>
           <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${formatMetric(ads.summary.roas, 2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
           <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{formatMetric(local.meta.locationCount)} власні точки</em></article>
           <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{formatMetric(local.meta.days)} днів</em></article>
@@ -353,17 +354,19 @@ export default async function DigitalPage({
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
-          <small>Google layer LIVE · GA4 + Search Console + Ads + Maps + PageSpeed</small>
+          <small>Google layer PARTIAL · completeness UNKNOWN · GA4 + Search Console + Ads + Maps + PageSpeed</small>
         </div>
 
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","local","audience"].includes(report.slug);
-            const partial=report.slug==="app";
-            const sourceStatus=["social","ads"].includes(report.slug);
-            const prepared=report.slug==="commerce";
-            const state=live?"LIVE":partial?"PARTIAL":sourceStatus?"ЗА ДЖЕРЕЛАМИ":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
+            // Stored values prove only presence for that source, never completeness.
+            // Native App, Merchant and Social sources are not loaded on this route.
+            const hasObservedValues=report.slug==="ads"?ads.meta.available:
+              report.slug==="local"?Object.values(local.summary).some(v=>v!==null):
+              ["app","commerce","social"].includes(report.slug)?false:
+              Object.values(report.slug==="seo"?data.seo:c).some(v=>v!==null);
+            const state=hasObservedValues?"PARTIAL":"UNKNOWN";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>

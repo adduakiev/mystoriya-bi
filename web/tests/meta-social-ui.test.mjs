@@ -5,6 +5,8 @@ import {createRequire} from "node:module";
 import {normalizeSocial, normalizeMetaAds} from "../lib/data/meta-social-contract.ts";
 import {normalizeAds} from "../lib/data/digital-source-contract.ts";
 import * as quality from "../lib/digital-quality.ts";
+import * as evidence from "../lib/source-evidence.ts";
+import * as presentation from "../lib/ads-presentation.ts";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -25,6 +27,8 @@ const shell = {
   "@/components/DigitalReportShell": {DigitalTabs: () => null},
   "@/components/DigitalAdsTrendChart": {DigitalAdsTrendChart: () => null},
   "@/lib/digital-quality": quality,
+  "@/lib/source-evidence": evidence,
+  "@/lib/ads-presentation": presentation,
   "@/components/DigitalSourceEvidence": loadTsx("../components/DigitalSourceEvidence.tsx", {"@/lib/digital-quality": quality})
 };
 const asOf = "2026-10-23";
