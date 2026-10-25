@@ -54,7 +54,7 @@ export function DashboardSidebar({
             <Link
               key={label}
               href={target}
-              prefetch={true}
+              prefetch={false}
               className={href === activeHref ? "nav-item active" : "nav-item"}
             >
               <Icon size={18} />
