@@ -27,8 +27,8 @@ function format(raw:unknown,m:Metric){
   const v=metricNumber(raw);
   if(v===null)return "—";
   if(CONFIG[m].money){
-    if(Math.abs(v)>=1000) return `₴${(v/1000).toFixed(1)}K`;
-    return `₴${Math.round(v)}`;
+    if(Math.abs(v)>=1000) return `${(v/1000).toFixed(1)}K`;
+    return `${Math.round(v)}`;
   }
   return v.toLocaleString("uk-UA",{maximumFractionDigits:1});
 }
@@ -44,14 +44,18 @@ export function DigitalAdsTrendChart({data}:{data:Row[]}){
         onClick={()=>setMetric(key)}
       >{CONFIG[key].label}</button>)}
     </div>
+    {CONFIG[metric].money && <small>{CONFIG[metric].label} · валюта невідома</small>}
     <div className="chart-wrap">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid stroke="#222833" vertical={false}/>
           <XAxis dataKey="date" stroke="#77808f" tickLine={false} axisLine={false} tickFormatter={v=>String(v).slice(5)}/>
-          <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={64} tickFormatter={v=>format(Number(v),metric)}/>
+          <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={64} tickFormatter={v=>format(v,metric)}/>
           <Tooltip
-            formatter={raw=>format(raw,metric)}
+            formatter={raw=>{
+              const value=format(raw,metric);
+              return CONFIG[metric].money && value!=="—" ? `${value} (валюта невідома)` : value;
+            }}
             labelFormatter={label=>String(label)}
             contentStyle={{background:"#111720",border:"1px solid #29313d",borderRadius:12}}
           />

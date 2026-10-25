@@ -6,7 +6,7 @@ import { DigitalSourceEvidence } from "@/components/DigitalSourceEvidence";
 import { loadDigitalMetaAdsData, loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
 
 function n(v:number|null|undefined){return formatMetric(v);}
-function money(v:number|null){if(v===null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
+function money(v:number|null){if(v===null)return "—";return `${Math.round(v).toLocaleString("uk-UA")} (валюта невідома)`;}
 function pct(v:number|null){if(v===null)return "—";return `${(v*100).toFixed(2)}%`;}
 function x(v:number|null){if(v===null)return "—";return `${v.toFixed(2)}x`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
@@ -49,7 +49,7 @@ export default async function Page(){
           <article className="panel">
             <span className="eyebrow">ПОТРЕБУЄ УВАГИ</span>
             <div className="digital-metric-list">
-              <div><b>Кампанії у вибірці з витратами ≥ ₴500 і 0 conversions</b><span>{n(noConversions.length)} · {money(noConversionSpend)}</span></div>
+              <div><b>Кампанії у вибірці з витратами ≥ {money(500)} і 0 conversions</b><span>{n(noConversions.length)} · {money(noConversionSpend)}</span></div>
               <div><b>Conversions є, але conversion value = 0</b><span>{n(unvalued.length)} кампаній</span></div>
               <div><b>Середній Google Ads ROAS</b><span>{x(s.roas)}</span></div>
             </div>

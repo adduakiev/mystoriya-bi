@@ -76,9 +76,21 @@ its original three allowlisted RPCs. Domain and current-run gates remain intact.
 
 App and Merchant remain outside the correctness phases. Social now uses the
 issue #26 nullable evidence contract linked above. App/Merchant legacy numeric
-adapters and activation status are unchanged. Ads money
-formatting remains compatible with the existing UI, with the unconfirmed currency
-limitation exposed; no financial reconciliation or ad mutation is performed.
+adapters and activation status are unchanged. Google Ads amounts carry no currency symbol because the current contract does not
+confirm currency. Summary cards (spend, CPC, CPA and conversion value), campaign
+rows and the spend threshold explicitly show «валюта невідома». Trend monetary
+metrics show the same unit warning and tooltip label; numeric axis ticks have no
+currency symbol. Nulls remain «—» and measured zero remains zero. Meta's separate
+source-provided USD/unknown-currency labels and nullable purchases/value/ROAS are
+unchanged. No financial reconciliation or ad mutation is performed.
+
+Issue #43 / PR #44 review comment #6396712436: this is a preview-code correction
+for `/digital/ads`, not a production release or a completed source audit.
+Deterministic regressions render the actual Ads page with synthetic normalized
+fixtures and invoke the actual chart axis/tooltip callbacks for both monetary
+metrics and both count metrics. They cover summary/campaign values, nulls, zero,
+compact amounts and currency labels; the existing Meta USD/null SSR checks remain.
+These checks do not prove live browser rendering or upstream currency correctness.
 
 ## PREPARED — NOT APPLIED
 
