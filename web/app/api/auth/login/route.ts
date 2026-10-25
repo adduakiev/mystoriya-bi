@@ -32,8 +32,15 @@ export async function POST(request: NextRequest) {
   }
 
   const submittedPassword = String(formData.get("password") ?? "");
+  const previewQaPassword =
+    process.env.VERCEL_ENV === "preview"
+      ? process.env.BI_PREVIEW_QA_PASSWORD
+      : undefined;
+  const validPassword =
+    safeEqual(submittedPassword, configuredPassword) ||
+    Boolean(previewQaPassword && safeEqual(submittedPassword, previewQaPassword));
 
-  if (!safeEqual(submittedPassword, configuredPassword)) {
+  if (!validPassword) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "1");
     loginUrl.searchParams.set("next", nextPath);
