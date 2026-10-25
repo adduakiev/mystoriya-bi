@@ -273,7 +273,7 @@ export default async function DigitalPage({
         </section>
 
         <div className="pnl-section-heading">
-          <div><span className="eyebrow">GOOGLE LAYER · LIVE</span><h2>Реклама, локальний попит та швидкість</h2></div>
+          <div><span className="eyebrow">GOOGLE LAYER · PARTIAL</span><h2>Реклама, локальний попит та швидкість</h2></div>
           <small>Ads: {formatMetric(ads.meta.days)} днів · Maps: {formatMetric(local.meta.days)} днів · PageSpeed оброблено: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}; дата вимірювання невідома</small>
         </div>
         <section className="digital-kpi-grid">
@@ -353,17 +353,19 @@ export default async function DigitalPage({
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
-          <small>Google layer LIVE · GA4 + Search Console + Ads + Maps + PageSpeed</small>
+          <small>Google layer PARTIAL · completeness UNKNOWN · GA4 + Search Console + Ads + Maps + PageSpeed</small>
         </div>
 
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","local","audience"].includes(report.slug);
-            const partial=report.slug==="app";
-            const sourceStatus=["social","ads"].includes(report.slug);
-            const prepared=report.slug==="commerce";
-            const state=live?"LIVE":partial?"PARTIAL":sourceStatus?"ЗА ДЖЕРЕЛАМИ":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
+            // Stored values prove only presence for that source, never completeness.
+            // Native App, Merchant and Social sources are not loaded on this route.
+            const hasObservedValues=report.slug==="ads"?ads.meta.available:
+              report.slug==="local"?Object.values(local.summary).some(v=>v!==null):
+              ["app","commerce","social"].includes(report.slug)?false:
+              Object.values(report.slug==="seo"?data.seo:c).some(v=>v!==null);
+            const state=hasObservedValues?"PARTIAL":"UNKNOWN";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>

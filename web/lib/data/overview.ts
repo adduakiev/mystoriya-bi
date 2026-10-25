@@ -1,3 +1,4 @@
+import { overviewRpcArgs } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableMonths,
@@ -336,22 +337,6 @@ function normalizeDrivers(input: RpcDriver[] | undefined) {
   }));
 }
 
-function rpcArgs(query: OverviewQuery): Record<string, unknown> {
-  return {
-    p_channel: query.channel ?? null,
-    p_order_type: query.orderType ?? null,
-    p_location: query.location ?? null,
-    p_brand: query.brand ?? null,
-    p_ownership: query.ownership ?? null,
-    p_focus_year: query.year ?? null,
-    p_focus_month: query.month ?? null,
-    p_period: query.period,
-    p_comparison: query.compare,
-    p_metric: query.metric,
-    p_grain: query.grain,
-    p_lfl: query.lfl
-  };
-}
 
 function queryCacheKey(query: OverviewQuery): string {
   return JSON.stringify([
@@ -374,7 +359,7 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
   const key = queryCacheKey(query);
 
   const payload = await unstable_cache(
-    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", rpcArgs(query), 10_000),
+    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", overviewRpcArgs(query), 10_000),
     ["bi-overview-sql-v1", key],
     {
       revalidate: 180,

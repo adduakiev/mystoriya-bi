@@ -1,0 +1,28 @@
+{
+  "recorded_on": "2026-10-25",
+  "evidence_class": "TRUSTED_TRIGGER_POST_HANDOFF_CONFIRMATION",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016",
+  "verified_by_codex_remote_api": false,
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40131698750",
+  "statuses": {
+    "WORKING": "PASS",
+    "Codex": "PASS",
+    "checks": "PASS",
+    "commit": "PASS",
+    "push": "PASS"
+  },
+  "commit_push_actor": "TRUSTED_GITHUB_ACTIONS_WORKFLOW_NOT_CODEX",
+  "temporary_branch": "astra/issue-43-40131698750",
+  "temporary_sha": "485c5a5d16c18a56b286e167f05749b51db0c365",
+  "existing_pr": "https://github.com/adduakiev/mystoriya-bi/pull/44",
+  "recovered_pr_head": "485c5a5d16c18a56b286e167f05749b51db0c365",
+  "recovered_pr_branch": "astra/issue-43-40107435112",
+  "preview": {
+    "sha": "485c5a5d16c18a56b286e167f05749b51db0c365",
+    "state": "READY",
+    "http_status": 403,
+    "browser_qa": "NOT VERIFIED"
+  },
+  "historical_local_pending": "Historical Codex-local PENDING/UNKNOWN in revision-provenance-history-40131698750.json describes the pre-handoff process only; superseded for that run by this confirmed receipt.",
+  "new_revision_scope": "This confirms 485c5a5 only; no claim about the uncommitted revision or its future push/CI/deployment."
+}
