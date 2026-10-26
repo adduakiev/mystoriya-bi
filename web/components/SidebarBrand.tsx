@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { Suspense } from "react";
 import { DataSyncControl } from "@/components/DataSyncControl";
 import { loadSalesDataStatus } from "@/lib/data/source";
 
@@ -8,18 +9,51 @@ const OFFICIAL_MYASTORIYA_LOGO =
 function formatCutoff(value: string | null): string {
   if (!value) return "—";
 
+  const date = new Date(`${value}T00:00:00Z`);
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    !Number.isFinite(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) return "—";
+
   return new Intl.DateTimeFormat("uk-UA", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     timeZone: "UTC"
-  }).format(new Date(`${value}T00:00:00Z`));
+  }).format(date);
 }
 
-export async function SidebarBrand() {
-  const status = await loadSalesDataStatus();
-  const isWarehouse = status.source === "supabase" && status.status === "success";
+export function SidebarStatusPending() {
+  return (
+    <div className="data-health" role="status">
+      <span className="data-health-dot" aria-hidden="true" />
+      <div className="data-health-content">
+        <b>Дані по —</b>
+        <span>Статус даних перевіряється…</span>
+      </div>
+    </div>
+  );
+}
 
+export async function SidebarSalesStatus() {
+  const status = await loadSalesDataStatus();
+  const cutoff = formatCutoff(status.cutoffDate);
+  const isWarehouse = status.source === "supabase" && status.status === "success" && cutoff !== "—";
+
+  return (
+    <div className={isWarehouse ? "data-health ok" : "data-health"} role="status">
+      <span className="data-health-dot" aria-hidden="true" />
+      <div className="data-health-content">
+        <b>Дані по {cutoff}</b>
+        <span>{isWarehouse ? "Warehouse · статус отримано" : "Статус даних недоступний"}</span>
+      </div>
+      <DataSyncControl initialCutoff={cutoff === "—" ? null : status.cutoffDate} />
+    </div>
+  );
+}
+
+export function SidebarBrand() {
   return (
     <div className="brand brand-stack">
       <div className="brand-official">
@@ -31,14 +65,9 @@ export async function SidebarBrand() {
         <span>CONTROL CENTER</span>
       </div>
 
-      <div className={isWarehouse ? "data-health ok" : "data-health fallback"}>
-        <span className="data-health-dot" aria-hidden="true" />
-        <div className="data-health-content">
-          <b>Дані по {formatCutoff(status.cutoffDate)}</b>
-          <span>{isWarehouse ? "Warehouse · Sync OK" : "Google Sheets · fallback"}</span>
-        </div>
-        <DataSyncControl initialCutoff={status.cutoffDate} />
-      </div>
+      <Suspense fallback={<SidebarStatusPending />}>
+        <SidebarSalesStatus />
+      </Suspense>
 
       <form action="/api/auth/logout" method="post">
         <button className="logout-button" type="submit" title="Вийти з Control Center">

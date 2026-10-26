@@ -11,7 +11,7 @@ export default async function Page(){
   const [data,history]=await Promise.all([loadDigitalData(),loadDigitalHistory()]);
   const total=data.current.sessions;
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Канали" statusDetail="GA4 · live"/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Канали" statusDetail="GA4 · PARTIAL · completeness UNKNOWN"/>
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · КАНАЛИ</span><h1>Канали залучення</h1></div><div className="digital-source-badge">GA4 · Session default channel group</div></header>
       <DigitalTabs active="channels"/>
