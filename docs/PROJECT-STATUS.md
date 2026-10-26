@@ -1,12 +1,176 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-Оновлено: **21.10.2026**. Статус за результатами поточної роботи.
+Історичний production baseline: **21.10.2026**. Аудит коду та доказів: **24.10.2026**; bounded Barbara SELECT-only evidence recorded; upstream/RPC/UI та browser NOT VERIFIED, див. issue #43 нижче.
 
 Цей документ розрізняє локальну реалізацію, перевірки та роботу в production.
 Позначка «зроблено» не означає, що зміна вже опублікована.
 Паша — запропонований відповідальний за технічну частину, Соня/агенція —
 за маркетинг. Їхні фактичні повноваження та доступи потрібно підтвердити.
 Строки виконання командою ще не погоджені.
+
+## Issue #43 — аудит 24.10.2026: локальний код та межі доказів
+
+## D05 source-window correction — 2026-10-26 (preview code)
+
+[Bounded D05 report](audit/2026-10-24/D05-SOURCE-WINDOW-REVISION-2026-10-26.md)
+continues exact PR #44 source `6055ab54746be16a99c75d1bd4989d033894a4e5`.
+GA4/GSC selected dates and comparisons remain intact. Ads/Local overview cards
+now display independent returned source windows, explicit completeness/freshness
+UNKNOWN and no selected-period comparison. Both boundaries must match before
+stating a match; upstream coverage is still unproven. Ads measured-zero signal
+names its source period; null/unknown conversions do not trigger it. D22 Ads
+money/ROAS UNKNOWN, D23 GA4 currency UNKNOWN and Meta USD/null guards preserved.
+[Actual checks and limitations](audit/2026-10-24/d05-source-window-verification-2026-10-26.json)
+record the workspace runtime restriction separately from writable-copy checks.
+No new production data proofs; all 66 authenticated browser cases remain
+NOT_EXECUTED. D05 overall audit acceptance remains OPEN; runner owns exact
+candidate SHA/status and same-PR handoff. Owner action NONE; broader audit INCOMPLETE.
+
+## GA4 currency correction — Actions 40279645896 (2026-10-26)
+
+[Bounded D23 report](audit/2026-10-24/GA4-CURRENCY-REVISION-2026-10-26.md)
+continues requested PR #44 source `9c89d854d9f8b0906e348fc430ecf6451e85c8b0`.
+GA4 revenue/AOV, channel/device/landing money, monetary comparisons and monthly/YTD
+revenue plots now fail closed with currency UNKNOWN until verified reporting
+currency/property/account/grain provenance exists. Numeric source data, zero/null
+and nonmonetary KPIs remain intact; Google Ads ROAS UNKNOWN and Meta USD/null
+regressions pass. Production catalog zero currency/property columns is relayed
+from the trusted trigger, not rerun. No SQL/migration changes or production writes.
+See [dated lineage](audit/2026-10-24/ga4-monetary-lineage-2026-10-26.json) and
+[actual checks](audit/2026-10-24/ga4-currency-verification-2026-10-26.json).
+Full tests/types/build pass in a writable identical-source copy; the workspace
+check is blocked by the read-only .agents/runtime mount. **66 authenticated browser
+cases remain NOT_EXECUTED**; broader audit INCOMPLETE, provenance UNKNOWN.
+Remote WORKING could not be posted without GH_TOKEN. Runner owns acknowledgement,
+new candidate SHA and same-PR publication; no Codex commit/push/release.
+Owner action NONE for bounded code/tests. Earlier sections are historical.
+
+## Historical QA continuation — Actions 40255887088 (2026-10-26)
+
+[QA report](audit/2026-10-24/PREVIEW-QA-2026-10-26.md) and
+[66-case execution matrix](audit/2026-10-24/qa-execution-matrix.json) continue
+existing PR #44 from reviewed `6f624cf64a50ba4f33ca24998f6140fa79ad9957`.
+Trigger reports exact-SHA Preview READY and former Vercel 403 resolved; HTTP 200
+is the app login shell, not authenticated BI. This is relayed evidence, not an
+independent probe. Local credential-free middleware/API and synthetic SSR tests
+cover all 22 pages, filter→RPC bindings, null/zero, currency, freshness and source
+failure. **All 66 real browser cases remain NOT_EXECUTED**. Chromium at
+360/768/1440 fails before rendering (`SIGABRT`/`EPERM`); external DNS and local
+HTTP binding are unavailable. Mock SSR is not viewport, upstream or live parity
+proof. Full tests/types/build pass in a writable source copy; workspace runtime
+writes remain sandbox-blocked. See the [current receipt](audit/2026-10-24/preview-qa-verification-2026-10-26.json).
+No app/SQL changes relative to reviewed source; prior Ads stored parity,
+Meta USD/null, fail-closed ROAS and App/Merchant/GA4/GSC guards preserved.
+WORKING acknowledged in transcript; GitHub post failed without GH_TOKEN.
+Runner owns publication to existing PR #44 and new commit SHA; no Codex
+commit/push/deploy or credential action. Broader audit acceptance INCOMPLETE;
+owner action NONE for bounded QA. The sections below are dated historical work.
+
+Historical bounded follow-up: [Actions 40206730240](https://github.com/adduakiev/mystoriya-bi/actions/runs/40206730240),
+PR #44 requested base `922d04d2afec8181ab17e175b582e113c95c5c17`.
+[25 Oct report](audit/2026-10-24/GOOGLE-ADS-DAILY-RECONCILIATION-2026-10-25.md):
+independent SELECT-only results relayed by trigger, UTC 12–24 Oct Google Ads raw
+157 rows / 13 dates → curated 13 / 13; 0 missing-date groups, 0 five-metric daily
+mismatch groups, 0 duplicate raw keys. Query prepared/tested on synthetic local
+PostgreSQL only. New 25 Sep–24 Oct coverage: GA4 30/30 dates, GSC 28/30 through
+22 Oct, Ads 13/30 since 12 Oct (13/13 onboarded dates). Earlier GSC 29 rows /
+29 observed dates is the different 24 Sep–23 Oct window with 30 expected dates.
+Source currency, account/action attribution, timezone and upstream/RPC/UI parity
+UNKNOWN; D06 OPEN and D22 fail-closed. Shifted prior30/12-month not recounted.
+66 browser cases NOT_EXECUTED; exact-SHA gate 6398044302 open. No release; NOT
+READY FOR GATE; owner action NONE for code/docs/tests. Runner owns status posts,
+commit/push to existing PR #44 and actual revision SHA. Historical review follows.
+
+Historical code-only review: [Actions 40193841845](https://github.com/adduakiev/mystoriya-bi/actions/runs/40193841845),
+recovered PR #44 source `ac64aad96628da197a3e02fd0d12e33cb324e3b1`.
+D22 blocks Google Ads summary/campaign/overview ROAS and comparative value/spend
+signals without verified same-account/same-currency evidence. Known counts/CTR,
+null/zero, UNKNOWN-money guard, Meta USD/nulls, App/Merchant and sidebar preserved.
+Latest independent receipt dated 25.10: fixed UTC 24.09–23.10 GA4 **30/30**, GSC
+**29/29**, Google Ads staging **0 currency columns**. Earlier GSC **28/28** below
+is dated historical evidence; prior30/12-month/null checks were not repeated.
+See [revision receipt](audit/2026-10-24/GOOGLE-ADS-ROAS-REVISION-40193841845.md)
+and [checks](audit/2026-10-24/verification.json). No production release or parity
+claim. Browser **66 NOT_EXECUTED**, no authorized preview session. Code-only
+owner action NONE; trusted runner handles existing PR #44 and commit/push SHA.
+
+Historical code-only review:
+ [Actions 40186524170](https://github.com/adduakiev/mystoriya-bi/actions/runs/40186524170),
+existing PR #44 source `7cbe56147f5a65eeeda1136b0f63627e64bd3542`.
+D21 removes inferred Google Ads UAH, unverified monetary charts and the 500-unit
+threshold across Paid Advertising and Digital overview. Shared App currency
+formatting keeps UNKNOWN/MULTI fail-closed; Meta USD/nulls and sidebar/prefetch
+fixes preserved. D06 currency/account grain remains OPEN. See
+[current revision](audit/2026-10-24/GOOGLE-ADS-CURRENCY-REVISION-40186524170.md)
+and [current check receipt](audit/2026-10-24/verification.json).
+No new production data observation or release; prior dated evidence below remains
+historical. GitHub status publication and commit/push SHA belong to trusted runner.
+
+Historical contract review revision: [Actions 40140314226](https://github.com/adduakiev/mystoriya-bi/actions/runs/40140314226),
+existing PR #44 source `bd126b802068553dc45194bfb8429516c7bc2569`.
+Six representative [static RPC contracts](audit/2026-10-24/rpc-contract-lineage.json)
+now record signatures/hashes and source→RPC→adapter→UI. Deployed exact-definition
+parity UNKNOWN; reviewer reports VOLATILE + SECURITY DEFINER, consistent with
+repo default volatility. Audit SQL now inspects catalogs only; payload calls
+withdrawn. Unsupported currency handling strengthened with regression tests.
+**CODE/DOCS TESTED:** focused checks and all 15 test files/TypeScript/build in a writable same-source copy PASS (workspace runtime-write sandbox failure recorded in verification.json);
+**END-TO-END AUDIT NOT VERIFIED** (upstream/all-field/RPC/UI/timezone and protected
+403 browser access unresolved; 66 cases NOT_EXECUTED). No release/data-write gate
+used or changed. WORKING post attempt failed: no configured GitHub CLI auth;
+trusted runner handles publication and actual new revision SHA.
+
+**Аудит: 24.10.2026; reviewer verification/post-handoff receipt: 25.10.2026.** Основний production baseline цього документа
+залишається історичним станом 21 жовтня. Поточний deployed commit не перевірено.
+[Повний звіт #43](BI-DATA-AUDIT-2026-10-24.md) містить статичний inventory,
+lineage, register, coverage та відтворювані blockers. Це не підтвердження
+production correctness: bounded Barbara read-only stored observations доступні;
+upstream/RPC/browser parity залишається UNKNOWN.
+
+- **Gate D Meta — ACTIVE за наявним записом активації 24.10**, а не нове
+  спостереження цього аудиту: [activation record](meta-windsor-gate-d-activation.md),
+  [postactivation evidence](sql/backups/issue-37-gate-d-postactivation-2026-10-24.json).
+  Механізм — ChatGPT scheduled task «Meta Ads BI Sync», daily ~08:00 Europe/Kyiv,
+  previous 30 completed UTC dates; Windsor destination для Meta не створено.
+  Історичне «Scheduler — NOT IMPLEMENTED» нижче не описує цей Meta scheduler.
+  Operating live LLM/manual-run/task persistence — окремі контракти.
+- П'ять Google Windsor destinations та source counts від 24.10 наведені в issue
+  як baseline; їхній runtime, field completeness і reconciliation тут **UNKNOWN**.
+  Повторні destinations/exports/schedulers не створювати.
+- **PREVIEW CODE, PR #44 revision:** App nullable/currency/ratio guards,
+  PARTIAL/UNKNOWN badges та all-campaign table збережено. Merchant nullable adapter
+  тепер зберігає missing fields навіть при positive performance rows; confirmed
+  zero показується як 0, missing source counts UNKNOWN ≠ empty counts WAITING.
+  SQL-erased missingness та D04–D11 залишаються unresolved.
+- **Trusted post-handoff receipt 25.10:** run 40131698750 WORKING/Codex/checks/commit/push
+  PASS; GitHub Actions pushed `485c5a5d16c18a56b286e167f05749b51db0c365`; existing PR #44 recovered
+  to that HEAD; exact-SHA Vercel READY. [Receipt](audit/2026-10-24/POST-HANDOFF-2026-10-25.json).
+  This is trusted-trigger evidence, not a fresh API check. Historical local
+  PENDING is superseded for that run. Current run 40140314226 prepares a new
+  working-tree revision; its future commit/push/checks need a separate receipt.
+- **Barbara SELECT-only, verification 25.10:** fixed audit windows unchanged.
+  GA4 current30/prior30/trailing365 **rows/dates 30/30, 30/30, 365/365**; GSC
+  **28/28, 30/30, 363/363** (expected dates 30/30/365). Current30 core metric
+  null rows 0. Earlier prior30/365 null checks remain separately attributed.
+  New Meta current30 **138 raw/curated rows, 25 dates, USD 1311.75 each**.
+  Earlier 138-group full-outer key/four-metric evidence retained separately;
+  Gate D rolling **145/26** remains a different scope. Earlier dated independent
+  Sales **966 rows/29 dates**, Google Ads daily **12/12**, GBP **48/12** restored
+  from comment 6388338141, **not newly queried**. No upstream/RPC/UI parity inferred.
+  [Redacted receipt](audit/2026-10-24/REVIEWER-EVIDENCE.md).
+- **Preview:** exact `485c5a5d16c18a56b286e167f05749b51db0c365` READY confirmed; protected preview
+  HTTP 403 leaves desktop/mobile/runtime/filter/role/browser QA NOT VERIFIED.
+  No screenshots/navigation or protection bypass. Owner action NONE for this
+  preview/code/docs loop; production gates remain unchanged.
+- **App grain:** account/campaign/currency та conversion-action ambiguity описано
+  в [NOT-APPLIED proposal](audit/2026-10-24/APP-CONTRACT-PROPOSAL.md); money без
+  source currency withheld, жодного money/backend-order inference. Barbara reports
+  Google staging account_id/campaign_id/date present, currency/account_currency/currency_code absent.
+  Source-money UNKNOWN; no exchange conversion. D04–D11 OPEN tasks мають owner/gate/acceptance
+  у [follow-up plan](audit/2026-10-24/follow-up-plan.json); owner action зараз NONE.
+- Поточні результати tests/TypeScript/build і sandbox runtime write limitation —
+  у [QA table](BI-DATA-AUDIT-2026-10-24.md#qa-та-перевірки). SQL diagnostics
+  перевірено на disposable PostgreSQL fixtures; це не live Supabase parity.
+  Production/staging SQL/migrations/deploy не виконувалися.
 
 ## Issue #12 — локальна correctness phase 1 (22.10.2026)
 
