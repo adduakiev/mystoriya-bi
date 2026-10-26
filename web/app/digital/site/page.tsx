@@ -1,3 +1,4 @@
+import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
 import { formatMetric } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
@@ -5,7 +6,6 @@ import { loadDigitalData, loadDigitalHistory, loadSeoSnapshots } from "@/lib/dat
 import { loadDigitalLocalData } from "@/lib/data/digital-sources";
 
 function n(v:number|null|undefined){return formatMetric(v);}
-function money(v:number|null){return v===null?"—":`₴ ${formatMetric(v)}`;}
 function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
 function ms(v:number|null){return v===null?"—":`${formatMetric(v)} ms`;}
 function categoryLabel(v:string){
@@ -23,10 +23,11 @@ export default async function Page(){
   const unknown=snapshots.landings.find(x=>x.landingPage==="(not set)");
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Сайт / UX" statusDetail="GA4 + PageSpeed · live"/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Сайт / UX" statusDetail="GA4 + PageSpeed · PARTIAL · completeness UNKNOWN"/>
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · SITE / UX</span><h1>Сайт та поведінка</h1></div><div className="digital-source-badge">GA4 + Google PageSpeed</div></header>
       <DigitalTabs active="site"/>
+      <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
       <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата пристроїв: {history.quality.devices.to ?? "невідомо"}. Landing pages: {snapshots.landingPeriod?.from ?? "недоступно"} — {snapshots.landingPeriod?.to ?? "недоступно"}, RPC до 30 рядків; повнота UNKNOWN. PageSpeed оброблено: {speed?.capturedOn ?? "невідомо"}; дата вимірювання невідома. CrUX-вікно невідоме. Історія показує лише найновішу дату знімка: якщо вона після cutoff, старіший знімок недоступний.</div>
 
       {speed&&<section className="digital-kpi-grid">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ga4Money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
 import { historyCumulative, metricNumber } from "@/lib/digital-quality";
 import { useMemo, useState } from "react";
 import {
@@ -28,14 +29,10 @@ const CONFIG: Record<Metric,{label:string;rate?:boolean;money?:boolean}> = {
 };
 
 function format(raw:unknown,metric:Metric){
+  if(CONFIG[metric].money) return ga4Money(raw);
   const value=metricNumber(raw);
   if(value===null)return "—";
   if(CONFIG[metric].rate) return `${(value*100).toFixed(2)}%`;
-  if(CONFIG[metric].money) {
-    if(Math.abs(value)>=1_000_000) return `₴${(value/1_000_000).toFixed(1)}M`;
-    if(Math.abs(value)>=1_000) return `₴${(value/1_000).toFixed(0)}K`;
-    return `₴${Math.round(value)}`;
-  }
   return Math.round(value).toLocaleString("uk-UA");
 }
 
@@ -80,11 +77,11 @@ export function DigitalHistoryChart({rows,currentYear,cutoffMonth,cutoffDay}:{ro
         <button type="button" className={`segment ${mode==="ytd"?"active":""}`} onClick={()=>setMode("ytd")}>Накопичення YTD</button>
       </div>
     </div>
-    <ResponsiveContainer width="100%" height={330}>
+    {CONFIG[metric].money ? <p>{GA4_MONEY_NOTICE}</p> : <ResponsiveContainer width="100%" height={330}>
       <LineChart data={data}>
         <CartesianGrid stroke="#222833" vertical={false}/>
         <XAxis dataKey="month" stroke="#77808f" tickLine={false} axisLine={false}/>
-        <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={70} tickFormatter={v=>format(Number(v),metric)}/>
+        <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={70} tickFormatter={v=>format(v,metric)}/>
         <Tooltip
           formatter={(raw,name)=>[format(raw,metric),String(name)]}
           contentStyle={{background:"#111720",border:"1px solid #29313d",borderRadius:12}}
@@ -104,7 +101,7 @@ export function DigitalHistoryChart({rows,currentYear,cutoffMonth,cutoffDay}:{ro
           />
         ))}
       </LineChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer>}
     <small className="table-note">
       {currentYear} · поточний місяць зіставлено до {cutoffDay} числа. Показники без історії залишаються порожніми, а не перетворюються на нулі.
     </small>

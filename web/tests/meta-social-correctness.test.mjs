@@ -114,11 +114,11 @@ test("top content preserves nulls, measured zeroes and recomputes ratios without
   assert.equal(legacy.facebook.followersStart, null);
 });
 
-test("Meta attribution ratios stay separate from unchanged Google normalization", () => {
+test("Meta attribution stays separate from Google ROAS without verified account/currency", () => {
   const meta = normalizeMetaAds({meta: {...window, contractVersion: 2, rows: 1}, summary: {spend: 100, purchaseValue: 200}}, asOf);
   const google = normalizeAds({meta: {available: true, rows: 1, observedDates: 1}, summary: {cost: 50, conversionValue: 400, conversions: 0}});
   assert.equal(meta.summary.roas, 2);
-  assert.equal(google.summary.roas, 8);
+  assert.equal(google.summary.roas, null);
   assert.equal(google.summary.conversions, 0);
   assert.equal(normalizeAds({meta: {available: true, rows: 0}, summary: {cost: 0}}).summary.cost, null);
   assert.equal(normalizeMetaAds({meta: {...window, contractVersion: 2, rows: 1}, summary: {spend: 10, purchaseValue: null}}, asOf).summary.roas, null);
