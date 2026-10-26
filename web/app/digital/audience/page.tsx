@@ -1,10 +1,10 @@
+import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
 import { formatMetric, metricRatio } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalData, loadDigitalHistory } from "@/lib/data/digital";
 
 function n(v:number|null|undefined){return formatMetric(v);}
-function money(v:number|null){return v===null?"—":`₴ ${formatMetric(v)}`;}
 function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
 function dec(v:number|null){return formatMetric(v,2);}
 
@@ -22,6 +22,7 @@ export default async function Page(){
         <div className="digital-source-badge">GA4 · Web</div>
       </header>
       <DigitalTabs active="audience"/>
+      <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
       <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата зрізу пристроїв: {history.quality.devices.to ?? "невідомо"}. Повнота UNKNOWN. Унікальні користувачі за період недоступні: сума денних active_users не є унікальною аудиторією.</div>
 
       <section className="digital-kpi-grid">

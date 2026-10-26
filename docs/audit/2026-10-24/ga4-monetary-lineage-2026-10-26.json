@@ -1,0 +1,110 @@
+{
+  "recorded_date": "2026-10-26",
+  "issue": 43,
+  "existing_pr": 44,
+  "discrepancy_id": "D23",
+  "requested_source_sha": "9c89d854d9f8b0906e348fc430ecf6451e85c8b0",
+  "evidence_basis": "STATIC_SOURCE_AND_SYNTHETIC_SSR_COMPONENT_TESTS; production catalog result relayed by trusted trigger, not rerun",
+  "reporting_currency": null,
+  "property_id": null,
+  "account_identity": "UNKNOWN",
+  "monetary_grain_provenance": "UNKNOWN",
+  "trigger_reported_catalog": {
+    "currency_property_column_count": 0,
+    "independently_executed_by_runner": false,
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6409667904"
+  },
+  "presentation": "Known amounts including zero withheld as currency UNKNOWN; null remains dash; monetary comparisons and plots unavailable",
+  "underlying_data": "UNMODIFIED; numeric values/zero/null preserved; no SQL changes",
+  "bindings": [
+    {
+      "path": "/digital",
+      "block": "Revenue GA4",
+      "warehouse_candidate": "digital_ga4_daily.purchase_revenue",
+      "rpc_field": "bi_digital_payload.current.purchaseRevenue",
+      "adapter": "normalizeDigital.current.purchaseRevenue",
+      "ui_binding": "money(c.purchaseRevenue); change=null",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital",
+      "block": "AOV GA4",
+      "warehouse_candidate": "digital_ga4_daily.purchase_revenue / purchases",
+      "rpc_field": "bi_digital_payload.current.purchaseRevenue / purchases",
+      "adapter": "normalizeDigital.current.averageOrderValue",
+      "ui_binding": "money(c.averageOrderValue); change=null",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital/channels",
+      "block": "channel revenue",
+      "warehouse_candidate": "digital_ga4_channel_daily.purchase_revenue",
+      "rpc_field": "bi_digital_payload.channels[].purchase_revenue",
+      "adapter": "normalizeDigital.channels[].purchaseRevenue",
+      "ui_binding": "money(row.purchaseRevenue)",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital/audience",
+      "block": "device revenue",
+      "warehouse_candidate": "digital_ga4_device_daily.purchase_revenue",
+      "rpc_field": "bi_digital_payload.devices[].purchase_revenue",
+      "adapter": "normalizeDigital.devices[].purchaseRevenue",
+      "ui_binding": "money(row.purchaseRevenue)",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital/site",
+      "block": "device revenue",
+      "warehouse_candidate": "digital_ga4_device_daily.purchase_revenue",
+      "rpc_field": "bi_digital_payload.devices[].purchase_revenue",
+      "adapter": "normalizeDigital.devices[].purchaseRevenue",
+      "ui_binding": "money(row.purchaseRevenue)",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital/site",
+      "block": "landing revenue",
+      "warehouse_candidate": "digital_ga4_landing_snapshot.purchase_revenue (daily table also exists; deployed parity UNKNOWN)",
+      "rpc_field": "bi_digital_payload.landingPages[].purchase_revenue",
+      "adapter": "normalizeDigital.landingPages[].purchaseRevenue via selectDigitalSnapshots",
+      "ui_binding": "money(row.purchaseRevenue)",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    },
+    {
+      "path": "/digital",
+      "block": "monthly/YTD revenue history",
+      "warehouse_candidate": "digital_ga4_daily.purchase_revenue",
+      "rpc_field": "bi_digital_history_payload.monthly[].revenue",
+      "adapter": "normalizeDigitalHistory.monthly[].revenue",
+      "ui_binding": "DigitalHistoryChart: revenue => notice; chart/axis/tooltip not mounted",
+      "guard": "web/lib/ga4-presentation.ts",
+      "period": "selected from/to and comparison on overview; source-specific default/snapshot periods on subroutes; monthly/YTD history",
+      "timezone": "UNKNOWN account/property timezone; no new parity proof",
+      "production_parity": "UNKNOWN"
+    }
+  ],
+  "browser_cases": {
+    "NOT_EXECUTED": 66,
+    "PASS": 0
+  },
+  "restoration_gate": "Separately reviewed verified reporting currency + property/account + monetary grain and period provenance; arbitrary payload labels never suffice"
+}
