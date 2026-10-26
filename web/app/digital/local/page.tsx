@@ -20,7 +20,7 @@ export default async function Page(){
   const topIntent=ranked[0]??null;
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`LIVE · ${formatMetric(data.meta.locationCount)} власні точки · ${formatMetric(data.meta.days)} днів`:"джерело підключено · sync очікує"}/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} власні точки · ${formatMetric(data.meta.days)} днів`:"джерело підключено · sync очікує"}/>
     <section className="workspace">
       <header className="topbar">
         <div><span className="eyebrow">DIGITAL · LOCAL INTELLIGENCE</span><h1>Google / Maps</h1></div>

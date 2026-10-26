@@ -1,0 +1,160 @@
+{
+  "recorded_at": "2026-10-26T09:28:12.762729+00:00",
+  "issue": 43,
+  "existing_pr": 44,
+  "discrepancy_id": "D05",
+  "status": "BOUNDED_PREVIEW_CODE_VERIFIED_IN_IDENTICAL_COPY_RUNNER_HANDOFF_PENDING_FULL_AUDIT_INCOMPLETE",
+  "requested_source_sha": "6055ab54746be16a99c75d1bd4989d033894a4e5",
+  "candidate_branch": "astra/issue-43-40298989021",
+  "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "candidate_commit_sha": null,
+  "candidate_sha_owner": "TRUSTED_GITHUB_RUNNER",
+  "restoration": {
+    "all_tracked_blobs_matched_before_edits": true,
+    "archive_read_only_agents_errors": "Existing .agents blobs verified identical despite archive write errors",
+    "git_metadata_mutated": false,
+    "baseline_deleted_paths": []
+  },
+  "baseline_modified_files": [
+    "docs/BI-DATA-AUDIT-2026-10-24.md",
+    "docs/PROJECT-STATUS.md",
+    "docs/audit/2026-10-24/discrepancies.json",
+    "docs/audit/2026-10-24/follow-up-plan.json",
+    "docs/audit/2026-10-24/inventory.json",
+    "docs/audit/2026-10-24/rpc-contract-lineage.json",
+    "docs/audit/2026-10-24/tab-block-matrix.csv",
+    "web/app/digital/page.tsx",
+    "web/lib/source-evidence.ts",
+    "web/tests/preview-ui-contracts.test.mjs"
+  ],
+  "baseline_preserved_blobs": 253,
+  "new_revision_files": [
+    "web/tests/source-window.test.mjs",
+    "docs/audit/2026-10-24/D05-SOURCE-WINDOW-REVISION-2026-10-26.md",
+    "docs/audit/2026-10-24/d05-source-window-verification-2026-10-26.json"
+  ],
+  "source_byte_identity_with_full_check_copy": true,
+  "source_files_compared": 265,
+  "code_and_targeted_test_sha256": {
+    "web/app/digital/page.tsx": "791eb364e8a6af083343bbcafb7bfcf03d282a80cb9820e6c6fbcc9bdd63c8b0",
+    "web/lib/source-evidence.ts": "157123dc65efd9b2dee6ddef8ea80c000b975bf810ed9acdc34a5c9a7af348eb",
+    "web/tests/source-window.test.mjs": "8e4d9e06ccec592d9b0f1773461f7a15c6b6cffb1974e0efd11a7b86729c6f86",
+    "web/tests/preview-ui-contracts.test.mjs": "f0401fedba06fe5d3079a65ebcd190ab65d312c4d3c2588995ea472074876a38"
+  },
+  "checks": [
+    {
+      "command": "npm ci --prefix web",
+      "scope": "WORKSPACE",
+      "result": "PASS",
+      "packages": 71
+    },
+    {
+      "command": "node --experimental-strip-types web/tests/source-window.test.mjs",
+      "scope": "WORKSPACE_SYNTHETIC_HELPER_AND_ACTUAL_SSR",
+      "result": "PASS",
+      "tests": 7,
+      "failures": 0,
+      "skips": 0
+    },
+    {
+      "command": "node --experimental-strip-types --test web/tests/google-ads-currency.test.mjs web/tests/ga4-currency.test.mjs web/tests/preview-ui-contracts.test.mjs",
+      "scope": "WORKSPACE_PRIOR_ACCEPTED_REGRESSIONS",
+      "result": "PASS",
+      "test_files_passed": 3,
+      "failures": 0
+    },
+    {
+      "command": "node --experimental-strip-types --test web/tests/source-window.test.mjs web/tests/preview-ui-contracts.test.mjs web/tests/bi-audit-contracts.test.mjs web/tests/bi-audit.test.mjs",
+      "scope": "WORKSPACE_AFTER_GENERATED_ARTIFACT_REFRESH",
+      "result": "PASS",
+      "test_files_passed": 4,
+      "failures": 0
+    },
+    {
+      "command": "npm run check",
+      "scope": "FINAL_OVERLAID_WORKSPACE",
+      "result": "BLOCKED_BY_READ_ONLY_RUNTIME_MOUNT",
+      "test_files_passed": 21,
+      "test_files_failed": 3,
+      "failure_files": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs"
+      ],
+      "reproduced_error": "ENOENT creating .agents/runtime on read-only .agents mount; types/build not reached by combined script"
+    },
+    {
+      "command": "npm ci --prefix web; npm run check (executed sequentially)",
+      "scope": "WRITABLE_BYTE_IDENTICAL_SOURCE_COPY",
+      "result": "PASS",
+      "test_files_passed": 24,
+      "test_files_failed": 0,
+      "skips": 0,
+      "typescript": "PASS",
+      "optimized_next_build": "PASS",
+      "network_or_production_data_io": "NONE; synthetic fixtures and existing local PostgreSQL regression tests only"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "scope": "FINAL_OVERLAID_WORKSPACE_WEB",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run build --prefix web",
+      "scope": "FINAL_OVERLAID_WORKSPACE",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "static_templates": 751
+    },
+    {
+      "command": "node scripts/bi-audit-contracts.mjs --check",
+      "result": "PASS",
+      "static_kpi_contracts": 6,
+      "production_rpc_invocations": 0
+    },
+    {
+      "command": "git diff --check",
+      "scope": "WORKSPACE_TRACKED_DIFF",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --no-index --check for each PR-relative modified/new revision file",
+      "scope": "INCLUDING_UNTRACKED_BASELINE_AND_NEW_FILES",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/bi-audit-browser-qa.mjs --check",
+      "result": "PASS_PLAN_CONSISTENCY_ONLY",
+      "browser_cases_not_executed": 66
+    }
+  ],
+  "browser": {
+    "authenticated_cases": 66,
+    "NOT_EXECUTED": 66,
+    "PASS": 0,
+    "screenshots": []
+  },
+  "production_data_proof": "NONE NEW; upstream coverage, source freshness, timezone, campaign-snapshot boundaries and live discrepancy amounts UNKNOWN",
+  "remote_status": {
+    "working_comment": "OUTER_WORKFLOW_OWNED_NOT_VERIFIED_HERE",
+    "acceptance_comment_read": "GH_API_EXIT_4_GH_TOKEN_UNAVAILABLE; exact requirements relayed in trusted trigger",
+    "ready_for_review": "NOT_CLAIMED; runner must independently check and publish exact candidate SHA to same PR"
+  },
+  "unchanged_gates": [
+    "AGENTS.md",
+    ".github/workflows/astra-runner.yml",
+    "all .agents files",
+    "all supabase SQL/migrations",
+    "Google Ads money/ROAS UNKNOWN guard",
+    "GA4 currency UNKNOWN guard",
+    "Meta USD/null contracts",
+    "no production/external writes"
+  ],
+  "residual_risk": "Workspace full check blocked by runtime mount. Runner must verify recovered tree, commit/publish to same PR #44 and provide actual candidate SHA. D05 overall acceptance OPEN until authenticated preview/release review; full #43 audit incomplete.",
+  "owner_action_needed_for_code_tests": false
+}

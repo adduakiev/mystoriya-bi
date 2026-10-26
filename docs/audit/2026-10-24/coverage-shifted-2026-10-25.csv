@@ -1,0 +1,4 @@
+source,window,from,to,expected_calendar_dates,observed_dates,row_count,missing_calendar_dates,onboarded_from,onboarded_expected_dates,onboarded_observed_dates,upstream_completeness,business_account_timezone,evidence_reference
+ga4,shifted_current30,2026-09-25,2026-10-24,30,30,UNKNOWN,0,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6399469440
+gsc,shifted_current30,2026-09-25,2026-10-24,30,28,UNKNOWN,2,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6399469440
+google_ads,shifted_current30,2026-09-25,2026-10-24,30,13,13,17,2026-10-12,13,13,UNKNOWN,UNKNOWN,https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6399469440

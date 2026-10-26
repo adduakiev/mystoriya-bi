@@ -1,4 +1,5 @@
 import { metricNumber, metricRatio, sourceCoverage, coreWebVitalsCategory } from "../digital-quality.ts";
+import { verifiedAdsRoas } from "../ads-roas.ts";
 
 type Raw=Record<string,any>;
 
@@ -42,9 +43,9 @@ export function normalizeAds(raw:Raw):DigitalAdsData{
   const summary=raw?.meta?.available === true ? raw?.summary??{} : {};
   const s=Object.fromEntries(Object.entries(summary).map(([key,value])=>[key,selectedPeriodMetric(raw?.meta,value)]));
   return {
-    meta:{coverage:sourceCoverage(raw?.meta?.coverage),limitations:["Calendar span is not observed days; daily summary and staging campaigns may differ in freshness/currency. Completeness unknown."],available:raw?.meta?.available === true,from:String(raw?.meta?.from??""),to:String(raw?.meta?.to??""),days:metricNumber(raw?.meta?.days),maxWindowDays:metricNumber(raw?.meta?.maxWindowDays)},
-    summary:{cost:metricNumber(s.cost),clicks:metricNumber(s.clicks),impressions:metricNumber(s.impressions),conversions:metricNumber(s.conversions),conversionValue:metricNumber(s.conversionValue),ctr:metricRatio(s.clicks,s.impressions),cpc:metricRatio(s.cost,s.clicks),cpa:metricRatio(s.cost,s.conversions),roas:metricRatio(s.conversionValue,s.cost)},
-    campaigns:(raw?.campaigns??[]).map((x:Raw)=>({campaignName:String(x.campaign_name??"—"),cost:metricNumber(x.cost),clicks:metricNumber(x.clicks),impressions:metricNumber(x.impressions),conversions:metricNumber(x.conversions),conversionValue:metricNumber(x.conversion_value),ctr:metricRatio(x.clicks,x.impressions),cpc:metricRatio(x.cost,x.clicks),cpa:metricRatio(x.cost,x.conversions),roas:metricRatio(x.conversion_value,x.cost)})),
+    meta:{coverage:sourceCoverage(raw?.meta?.coverage),limitations:["Calendar span is not observed days; daily summary and staging campaigns may differ in freshness/currency. Completeness unknown. ROAS withheld: same-account/same-currency value and spend unverified."],available:raw?.meta?.available === true,from:String(raw?.meta?.from??""),to:String(raw?.meta?.to??""),days:metricNumber(raw?.meta?.days),maxWindowDays:metricNumber(raw?.meta?.maxWindowDays)},
+    summary:{cost:metricNumber(s.cost),clicks:metricNumber(s.clicks),impressions:metricNumber(s.impressions),conversions:metricNumber(s.conversions),conversionValue:metricNumber(s.conversionValue),ctr:metricRatio(s.clicks,s.impressions),cpc:metricRatio(s.cost,s.clicks),cpa:metricRatio(s.cost,s.conversions),roas:verifiedAdsRoas(s.conversionValue,s.cost)},
+    campaigns:(raw?.campaigns??[]).map((x:Raw)=>({campaignName:String(x.campaign_name??"—"),cost:metricNumber(x.cost),clicks:metricNumber(x.clicks),impressions:metricNumber(x.impressions),conversions:metricNumber(x.conversions),conversionValue:metricNumber(x.conversion_value),ctr:metricRatio(x.clicks,x.impressions),cpc:metricRatio(x.cost,x.clicks),cpa:metricRatio(x.cost,x.conversions),roas:verifiedAdsRoas(x.conversion_value,x.cost)})),
     trend:(raw?.trend??[]).map((x:Raw)=>({date:String(x.date??""),cost:metricNumber(x.cost),clicks:metricNumber(x.clicks),impressions:metricNumber(x.impressions),conversions:metricNumber(x.conversions),conversionValue:metricNumber(x.conversionValue)}))
   };
 }

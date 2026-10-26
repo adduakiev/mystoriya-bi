@@ -78,7 +78,7 @@ for (const scenario of [
         rows: [["2026-10-23", "test", "test", "test", "test", "test", 1, 1, 1]],
         meta: { cutoffDate: "2026-10-23" }
       });
-      if (url.endsWith("/bi_sync_status")) return Response.json({ cutoffDate: "2026-10-23" });
+      if (url.endsWith("/bi_sync_status")) return Response.json({ status: "success", cutoffDate: "2026-10-23" });
       return Response.json([{ bi_test: { measured: 7 } }]);
     });
     const readiness = source.supabaseRpcReadiness();
@@ -138,17 +138,22 @@ test("RPC failures do not echo response secrets or retry using anon", async t =>
   assert.deepEqual(source.supabaseRpcReadiness(), { mode: "secret" });
 });
 
-test("sales fallback logs do not include transport error credentials", async t => {
+test("status fails soft without loading sales; explicit sales fallback still redacts transport errors", async t => {
   configure(t, { BI_SUPABASE_RPC_AUTH_MODE: "secret", BI_SUPABASE_SECRET_KEY: secret, BI_ACCESS_PASSWORD: password });
   const logs = t.mock.method(console, "error", () => {});
+  const requests = [];
   t.mock.method(globalThis, "fetch", async url => {
+    requests.push(url);
     if (url.includes("supabase.co")) throw new Error(`${secret} ${password}`);
     return new Response("header\n");
   });
   const status = await source.loadSalesDataStatus();
-  assert.equal(status.source, "google-sheets");
-  assert.equal(status.status, "fallback");
+  assert.equal(status.source, "unknown");
+  assert.equal(status.status, "unavailable");
   assert.equal(status.warehouseRows, null);
+  assert.equal(requests.length, 1, "sidebar must only request lightweight status");
+  assert.ok(requests[0].endsWith("/bi_sync_status"));
+  assert.deepEqual(await source.loadSalesData(), [], "explicit report fallback remains available");
   assert.equal(logs.mock.callCount(), 2);
   const output = JSON.stringify(logs.mock.calls.map(call => call.arguments));
   assert.ok(!output.includes(secret) && !output.includes(password));

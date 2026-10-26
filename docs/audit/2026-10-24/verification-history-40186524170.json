@@ -1,0 +1,91 @@
+{
+  "checked_on": "2026-10-25",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40186524170",
+  "code_basis": "Existing PR #44 HEAD 7cbe56147f5a65eeeda1136b0f63627e64bd3542 restored over checkout 4f0cfcec48408428d51ee916cb87a97a256e4807 with git apply, without index/ref changes. P1 Google Ads currency fix layered on top.",
+  "statuses": {
+    "code_docs": "READY FOR REVIEW — local code/tests only; remote publication pending runner",
+    "end_to_end_audit": "NOT VERIFIED"
+  },
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types --test web/tests/google-ads-currency.test.mjs web/tests/meta-social-ui.test.mjs web/tests/meta-windsor-contract.test.mjs web/tests/navigation-prefetch.test.mjs web/tests/sidebar-status.test.mjs",
+    "exit_code": 0,
+    "files_passed": 5,
+    "files_failed": 0,
+    "currency_subtests": {
+      "command": "node --experimental-strip-types web/tests/google-ads-currency.test.mjs",
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 15,
+    "files_failed": 3,
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "cause": "Sandbox denies .agents/runtime writes: mkdir ENOENT. TypeScript/build not reached in workspace command."
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40186524170-check-61fxqrbs",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 18,
+    "files_failed": 0,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "source_copy": "Source-only writable copy, excluding .git/.env/runtime/build artifacts and credentials directories, installed dependencies symlinked. Code/tests/artifact generators identical; subsequent edits only narrative/discrepancy/check receipts."
+  },
+  "deterministic_artifacts": {
+    "commands": [
+      "node scripts/bi-audit-inventory.mjs --check",
+      "node scripts/bi-audit-contracts.mjs --check",
+      "node scripts/bi-audit-queries.mjs --check"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "route_pages": 22,
+    "api_routes": 7,
+    "visual_control_templates": 745,
+    "static_contracts": 6
+  },
+  "code_sha256": {
+    "web/app/digital/ads/page.tsx": "8a452c479a68a28f604718ef007cd5fe94f3f21ef27ff14afe28e3e560ee6307",
+    "web/app/digital/page.tsx": "462514a75807cf7e8607f1b914a91f48cb246c0704900449f7e714277cf51e44",
+    "web/components/DigitalAdsTrendChart.tsx": "e2a9ea845751278559e675dffcae7ae8829908fbaf22e0ed8552d94fb8ff3789",
+    "web/lib/ads-presentation.ts": "59f187c5eac038ce1688fe203ddea52e0a397ca31545308646bc8d139d456a5f",
+    "web/tests/google-ads-currency.test.mjs": "94eb68724f1d893558ce68cd2d89ddc9cff3b9fe5f7e9a521828cd4ce0c99b5b",
+    "web/tests/meta-social-ui.test.mjs": "a0e3ab5a514bc4844c889da964f87b8433adc94aacd596ffcbe5cc782ea1c5f0"
+  },
+  "git_diff_check": "PASS; tracked git diff --check plus untracked restored/new files checked with git diff --no-index --check against /dev/null",
+  "preservation": "All existing PR files retained. App/Merchant contracts/pages, Meta normalizer and USD/null/status handling, sidebar fail-soft/Suspense, navigation prefetch guards, independent production receipts, coverage/source register, SQL/migrations, AGENTS.md and runner workflow unchanged from 7cbe561. Prior verification retained as verification-history-40140314226.json.",
+  "github_working_post": "Attempted gh api with trusted run URL: exit 4, no configured GH_TOKEN; no remote post claimed. Runner must post WORKING before remote READY.",
+  "handoff": {
+    "existing_pr": 44,
+    "intended_branch": "astra/issue-43-40107435112",
+    "actual_runner_branch": "astra/issue-43-40186524170",
+    "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+    "new_revision_sha": "PENDING_TRUSTED_RUNNER_COMMIT_AND_PUSH",
+    "commit_push_create_pr": "NOT PERFORMED BY CODEX",
+    "remote_ready": "PENDING_TRUSTED_RUNNER_WITH_ACTUAL_FULL_SHA"
+  },
+  "production_queries": 0,
+  "payload_rpc_invocations": 0,
+  "migrations": "NOT APPLIED; no migration files changed",
+  "browser_qa": "No new navigation/screenshots; actual server/component synthetic rendering tests only. Prior protected-preview receipts remain historical.",
+  "upstream_completeness": "UNKNOWN",
+  "source_currency": "Google Ads RPC has no evidence: UNKNOWN; monetary displays/trends suppressed; account/currency grain D06 remains OPEN. No invented source fields or conversions.",
+  "owner_action_now": "NONE for code-only fix; existing release/data-write gates unchanged."
+}

@@ -1,3 +1,4 @@
+import { overviewRpcArgs } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableMonths,
@@ -72,11 +73,11 @@ export type OverviewData = {
 };
 
 type RpcMetricSet = {
-  revenue?: number | string;
-  checks?: number | string;
-  markup?: number | string;
-  averageCheck?: number | string;
-  markupRate?: number | string;
+  revenue?: number | string | null;
+  checks?: number | string | null;
+  markup?: number | string | null;
+  averageCheck?: number | string | null;
+  markupRate?: number | string | null;
 };
 
 type RpcChannel = {
@@ -207,17 +208,41 @@ function toMetricSet(raw: RpcMetricSet | undefined): MetricSet {
   };
 }
 
-function buildSignal(
-  current: MetricSet,
-  previous: MetricSet,
+export function buildOverviewSignal(
+  current: RpcMetricSet | undefined,
+  previous: RpcMetricSet | undefined,
   comparisonLabel: string
 ): DashboardSnapshot["signal"] {
-  const revenueGrowth = pctDelta(current.revenue, previous.revenue) ?? 0;
-  const markupPp = ppDelta(current.markupRate, previous.markupRate) ?? 0;
-  const checksGrowth = pctDelta(current.checks, previous.checks) ?? 0;
-  const aovGrowth = pctDelta(current.averageCheck, previous.averageCheck) ?? 0;
+  // Inspect raw fields before the legacy MetricSet normalization erases missingness.
+  function value(raw: unknown): number | null {
+    if (typeof raw !== "number" && typeof raw !== "string") return null;
+    if (typeof raw === "string" && raw.trim() === "") return null;
+    return nullableNum(raw);
+  }
 
-  if (revenueGrowth > 0 && markupPp < -0.5) {
+  function growth(key: keyof RpcMetricSet): number | null {
+    const now = value(current?.[key]);
+    const before = value(previous?.[key]);
+    if (now === null || before === null) return null;
+    return pctDelta(now, before);
+  }
+
+  function comparison(key: keyof RpcMetricSet, delta: number | null): string {
+    if (delta !== null) return `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
+    const before = value(previous?.[key]);
+    return before === null || before === 0 ? "немає зіставної бази" : "дані відсутні";
+  }
+
+  const revenueGrowth = growth("revenue");
+  const checksGrowth = growth("checks");
+  const aovGrowth = growth("averageCheck");
+  const currentMarkupRate = value(current?.markupRate);
+  const previousMarkupRate = value(previous?.markupRate);
+  const markupPp = currentMarkupRate === null || previousMarkupRate === null
+    ? null
+    : ppDelta(currentMarkupRate, previousMarkupRate);
+
+  if (revenueGrowth !== null && revenueGrowth > 0 && markupPp !== null && markupPp < -0.5) {
     return {
       severity: "warning",
       title: "Оборот росте швидше за націнку %",
@@ -227,8 +252,13 @@ function buildSignal(
 
   return {
     severity: "info",
-    title: revenueGrowth >= 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
-    body: `Оборот: ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth >= 0 ? "+" : ""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth >= 0 ? "+" : ""}${aovGrowth.toFixed(1)}% vs ${comparisonLabel}.`
+    title: revenueGrowth === null
+      ? (value(previous?.revenue) === null || value(previous?.revenue) === 0
+        ? "Немає зіставної бази для обороту"
+        : "Недостатньо даних для порівняння обороту")
+      : revenueGrowth === 0 ? "Без змін обороту"
+      : revenueGrowth > 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
+    body: `Оборот: ${comparison("revenue", revenueGrowth)}. Чеки: ${comparison("checks", checksGrowth)}. Середній чек: ${comparison("averageCheck", aovGrowth)} vs ${comparisonLabel}.`
   };
 }
 
@@ -312,7 +342,7 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
       deliveryShare: num(item.deliveryShare),
       isPartial: Boolean(item.isPartial)
     })),
-    signal: buildSignal(current, previous, comparisonLabel)
+    signal: buildOverviewSignal(payload.current, payload.previous, comparisonLabel)
   };
 }
 
@@ -336,22 +366,6 @@ function normalizeDrivers(input: RpcDriver[] | undefined) {
   }));
 }
 
-function rpcArgs(query: OverviewQuery): Record<string, unknown> {
-  return {
-    p_channel: query.channel ?? null,
-    p_order_type: query.orderType ?? null,
-    p_location: query.location ?? null,
-    p_brand: query.brand ?? null,
-    p_ownership: query.ownership ?? null,
-    p_focus_year: query.year ?? null,
-    p_focus_month: query.month ?? null,
-    p_period: query.period,
-    p_comparison: query.compare,
-    p_metric: query.metric,
-    p_grain: query.grain,
-    p_lfl: query.lfl
-  };
-}
 
 function queryCacheKey(query: OverviewQuery): string {
   return JSON.stringify([
@@ -374,7 +388,7 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
   const key = queryCacheKey(query);
 
   const payload = await unstable_cache(
-    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", rpcArgs(query), 10_000),
+    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", overviewRpcArgs(query), 10_000),
     ["bi-overview-sql-v1", key],
     {
       revalidate: 180,
@@ -458,6 +472,8 @@ async function fetchLegacyOverview(query: OverviewQuery): Promise<OverviewData> 
     focusYear: selectedYear,
     focusMonth: selectedMonth
   });
+  // Keep the Overview presentation contract when the SQL adapter falls back.
+  snapshot.signal = buildOverviewSignal(snapshot.current, snapshot.previous, snapshot.comparisonLabel);
 
   const dimensionRows = filterSalesRows(sourceRows, { lfl: query.lfl });
   const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));

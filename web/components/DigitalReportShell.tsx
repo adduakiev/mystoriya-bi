@@ -6,11 +6,12 @@ import { DIGITAL_REPORTS, type DigitalReport } from "@/lib/digital-reports";
 export function DigitalTabs({active}:{active:string}) {
   return (
     <div className="digital-tabs">
-      <Link href="/digital" className={active==="overview"?"active":""}>Огляд</Link>
+      <Link href="/digital" prefetch={false} className={active==="overview"?"active":""}>Огляд</Link>
       {DIGITAL_REPORTS.map(report=>(
         <Link
           key={report.slug}
           href={`/digital/${report.slug}`}
+          prefetch={false}
           className={active===report.slug?"active":""}
         >
           {report.label}
