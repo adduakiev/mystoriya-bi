@@ -128,3 +128,13 @@ Required:
 - Firebase `purchase.transaction_id` must equal backend `order_id`.
 - Revenue from Firebase is diagnostic. Backend order revenue is financial truth.
 - Google Ads conversions are not treated as installs or buyers until conversion action definitions are confirmed.
+
+## Issue #43 account/campaign/currency review — NOT APPLIED
+
+The legacy App Ads RPC groups all history by campaign name/inferred platform,
+losing account/campaign identity and omitting source currency. Reported conversions
+and values have ambiguous action scope. Preview currency guards withhold unknown
+money; they cannot reconstruct the lost grain. See the bounded
+[SQL/adapter proposal](audit/2026-10-24/APP-CONTRACT-PROPOSAL.md) for stable
+account/campaign/currency keys and separate action facts. No migration, financial
+inference, source activation or production write is part of this proposal.

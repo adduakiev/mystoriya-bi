@@ -1,0 +1,300 @@
+{
+  "recorded_on": "2026-10-25",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016",
+  "evidence_kind": "REVIEWER_READ_ONLY_REPORTED",
+  "capture_basis": "Trusted issue #43 trigger: new Barbara SELECT-only verification dated 2026-10-25; fixed audit windows retained",
+  "stored_checks": {
+    "coverage": "BOUNDED_VERIFIED_BY_BARBARA_REPORTED",
+    "field_null_checks": "New 2026-10-25 current30 GA4/GSC core metric null rows 0; earlier prior30/365 null checks retained separately. Full field completeness UNKNOWN.",
+    "key_checks": "Earlier 2026-10-24 Meta bounded full-outer key join only (see key_join.provenance); new 2026-10-25 count/spend receipt does not re-run that join. GA4/GSC duplicate keys UNKNOWN.",
+    "exact_results": {
+      "ga4": {
+        "rows": 30,
+        "dates": 30,
+        "date_column": "date_id",
+        "null_key_metric_rows": 0,
+        "coverage_windows": {
+          "current30": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": 30,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            }
+          },
+          "prior30": {
+            "from": "2026-08-25",
+            "to": "2026-09-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": 30,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-24",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455"
+            }
+          },
+          "trailing12months": {
+            "from": "2025-10-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 365,
+            "observed_dates": 365,
+            "missing_calendar_dates": 0,
+            "row_count": 365,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-24",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455"
+            }
+          }
+        },
+        "null_core_metric_rows": 0
+      },
+      "gsc": {
+        "rows": 28,
+        "dates": 28,
+        "through": "2026-10-21",
+        "null_key_metric_rows": 0,
+        "coverage_windows": {
+          "current30": {
+            "from": "2026-09-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 28,
+            "missing_calendar_dates": 2,
+            "row_count": 28,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            }
+          },
+          "prior30": {
+            "from": "2026-08-25",
+            "to": "2026-09-23",
+            "inclusive": true,
+            "expected_calendar_dates": 30,
+            "observed_dates": 30,
+            "missing_calendar_dates": 0,
+            "row_count": 30,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-24",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455"
+            }
+          },
+          "trailing12months": {
+            "from": "2025-10-24",
+            "to": "2026-10-23",
+            "inclusive": true,
+            "expected_calendar_dates": 365,
+            "observed_dates": 363,
+            "missing_calendar_dates": 2,
+            "row_count": 363,
+            "null_core_metric_rows": 0,
+            "row_count_evidence": {
+              "reported_on": "2026-10-25",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016"
+            },
+            "null_core_metric_evidence": {
+              "reported_on": "2026-10-24",
+              "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455"
+            }
+          }
+        },
+        "null_core_metric_rows": 0
+      },
+      "meta_ads": {
+        "raw_rows": 138,
+        "curated_rows": 138,
+        "dates_each": 25,
+        "raw_spend": 1311.75,
+        "curated_spend": 1311.75,
+        "currency": "USD",
+        "group_count_each": 138,
+        "key_join": {
+          "method": "FULL OUTER JOIN",
+          "keys": [
+            "account_id",
+            "campaign_id",
+            "date",
+            "account_currency"
+          ],
+          "currency": "USD",
+          "raw_groups": 138,
+          "curated_groups": 138,
+          "missing_raw_groups": 0,
+          "missing_curated_groups": 0,
+          "multiplicity_mismatch_groups": 0,
+          "spend_mismatch_groups": 0,
+          "clicks_mismatch_groups": 0,
+          "impressions_mismatch_groups": 0,
+          "all_field_parity": "UNKNOWN",
+          "absolute_duplicate_key_count": "UNKNOWN: matching multiplicity does not prove uniqueness",
+          "query_execution_timestamp": "UNKNOWN",
+          "provenance": {
+            "reported_on": "2026-10-24",
+            "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389387455",
+            "scope": "Earlier bounded 138-group FULL OUTER JOIN; not re-executed or re-attested by the new count/spend receipt"
+          }
+        },
+        "all_field_parity": "UNKNOWN"
+      },
+      "sales": {
+        "id": "B05",
+        "source": "sales",
+        "relation": "fact_sales_daily",
+        "scope": "bounded_current30_earlier_receipt",
+        "window": {
+          "from": "2026-09-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "business_account_timezone": "UNKNOWN"
+        },
+        "row_count": 966,
+        "observed_dates": 29,
+        "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+        "receipt_class": "EARLIER_DATED_INDEPENDENT_RECEIPT_NOT_NEWLY_QUERIED",
+        "reported_on": null,
+        "null_core_metric_rows": "UNKNOWN",
+        "upstream_parity": "UNKNOWN",
+        "rpc_ui_parity": "UNKNOWN",
+        "all_field_parity": "UNKNOWN"
+      },
+      "google_ads": {
+        "id": "B06",
+        "source": "google_ads",
+        "relation": "digital_google_ads_daily",
+        "scope": "bounded_current30_earlier_receipt",
+        "window": {
+          "from": "2026-09-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "business_account_timezone": "UNKNOWN"
+        },
+        "row_count": 12,
+        "observed_dates": 12,
+        "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+        "receipt_class": "EARLIER_DATED_INDEPENDENT_RECEIPT_NOT_NEWLY_QUERIED",
+        "reported_on": null,
+        "null_core_metric_rows": "UNKNOWN",
+        "upstream_parity": "UNKNOWN",
+        "rpc_ui_parity": "UNKNOWN",
+        "all_field_parity": "UNKNOWN"
+      },
+      "gbp": {
+        "id": "B07",
+        "source": "gbp",
+        "relation": "digital_gbp_daily",
+        "scope": "bounded_current30_earlier_receipt",
+        "window": {
+          "from": "2026-09-24",
+          "to": "2026-10-23",
+          "inclusive": true,
+          "expected_calendar_dates": 30,
+          "business_account_timezone": "UNKNOWN"
+        },
+        "row_count": 48,
+        "observed_dates": 12,
+        "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+        "receipt_class": "EARLIER_DATED_INDEPENDENT_RECEIPT_NOT_NEWLY_QUERIED",
+        "reported_on": null,
+        "null_core_metric_rows": "UNKNOWN",
+        "upstream_parity": "UNKNOWN",
+        "rpc_ui_parity": "UNKNOWN",
+        "all_field_parity": "UNKNOWN"
+      }
+    },
+    "new_sql_execution_in_this_run": false
+  },
+  "parity": {
+    "upstream": "UNKNOWN",
+    "warehouse_to_rpc": "UNKNOWN",
+    "rendered_ui": "UNKNOWN",
+    "raw_curated_equal_counts": "Bounded Meta key join verifies specified stored metrics only; all-field and upstream completeness UNKNOWN"
+  },
+  "baseline_provenance": "Issue #43 Supabase baseline remains separately attributed; not relabeled as reviewer query output",
+  "windows": {
+    "current30": [
+      "2026-09-24",
+      "2026-10-23"
+    ],
+    "prior30": [
+      "2026-08-25",
+      "2026-09-23"
+    ],
+    "trailing12months": [
+      "2025-10-24",
+      "2026-10-23"
+    ]
+  },
+  "bounded_sql": "read-only-qa.sql; rpc-read-only-qa.sql (requires existing authorized session)",
+  "fixture_evidence": "sql-validation.json: historical disposable PostgreSQL fixtures, not live Supabase results",
+  "required_follow_up": "Attach exact SQL/execution-time receipts and all-field/upstream/RPC/UI reconciliation; GA4/GSC current30/prior30/365 date coverage and bounded Meta key metrics already reported, not UNKNOWN.",
+  "observer": "Barbara",
+  "production_receipt": "barbara-production-evidence.json",
+  "earlier_independent_receipt": {
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6388338141",
+    "classification": "EARLIER_DATED_INDEPENDENT_RECEIPT_NOT_NEWLY_QUERIED",
+    "reported_on": null,
+    "date_note": "Earlier receipt recorded 2026-10-24; exact query execution timestamp not supplied. Numeric observations restored from latest trusted trigger, not newly queried.",
+    "runner_executed": false,
+    "recorded_on": "2026-10-24",
+    "recorded_on_evidence": "58d9842:docs/audit/2026-10-24/REVIEWER-EVIDENCE.md header records this linked review on 2026-10-24; exact query timestamp remains unavailable"
+  },
+  "latest_dated_reviewer_receipt": {
+    "file": "REVIEWER-RECEIPT-2026-10-25-6397712491.json",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6397712491",
+    "recorded_on": "2026-10-25",
+    "current30_rows_dates": {
+      "ga4": [
+        30,
+        30
+      ],
+      "gsc": [
+        29,
+        29
+      ]
+    },
+    "google_ads_staging_currency_columns": 0,
+    "historical_evidence_note": "Existing stored_checks/warehouse_observations retain earlier dated results, including GSC 28/28. Latest receipt supersedes only current30 counts; no new null/key/upstream/RPC/UI or 12-month claim."
+  },
+  "bounded_follow_up_2026_10_25": {
+    "receipt": "REVIEWER-RECEIPT-2026-10-25-6399469440.json",
+    "report": "GOOGLE-ADS-DAILY-RECONCILIATION-2026-10-25.md",
+    "coverage": "coverage-shifted-2026-10-25.csv",
+    "scope": "Separate shifted UTC window; historical receipts and original coverage.csv unchanged; D06 OPEN; upstream/account/currency/timezone/RPC/UI UNKNOWN"
+  }
+}

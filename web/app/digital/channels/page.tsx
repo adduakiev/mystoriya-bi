@@ -1,20 +1,21 @@
+import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
 import { formatMetric, metricRatio } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalData, loadDigitalHistory } from "@/lib/data/digital";
 
 function n(v:number|null|undefined){return formatMetric(v);}
-function money(v:number|null){return v===null?"—":`₴ ${formatMetric(v)}`;}
 function pct(v:number|null){return v===null?"—":`${(v*100).toFixed(2)}%`;}
 
 export default async function Page(){
   const [data,history]=await Promise.all([loadDigitalData(),loadDigitalHistory()]);
   const total=data.current.sessions;
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Канали" statusDetail="GA4 · live"/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Канали" statusDetail="GA4 · PARTIAL · completeness UNKNOWN"/>
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · КАНАЛИ</span><h1>Канали залучення</h1></div><div className="digital-source-badge">GA4 · Session default channel group</div></header>
       <DigitalTabs active="channels"/>
+      <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
       <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата каналів: {history.quality.channels.to ?? "невідомо"}; повнота та пропуски каналів UNKNOWN.</div>
       <section className="digital-kpi-grid">
         {data.channels.slice(0,4).map(row=><article className="digital-kpi-card" key={row.channel}>

@@ -1,0 +1,65 @@
+{
+  "checked_on": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40135370633",
+  "code_basis": "Exact preserved PR head 485c5a5d16c18a56b286e167f05749b51db0c365 restored without git ref/index changes; evidence/provenance/regression corrections layered on top. New revision SHA belongs to trusted runner.",
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types --test web/tests/bi-audit.test.mjs web/tests/merchant-contract.test.mjs web/tests/bi-audit-postgres.test.mjs",
+    "exit_code": 0,
+    "files_passed": 3,
+    "declared_tests": 15,
+    "postgres_fixture_tests_executed": 2,
+    "skipped_files": 0,
+    "note": "Node runner reports file-level results: 3 passed; files declare 10 audit, 3 Merchant, 2 PostgreSQL tests."
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 11,
+    "files_failed": 3,
+    "cause": "Reproduced current run: sandbox-protected .agents/runtime writes fail with ENOENT on mkdir. Same-source full check passes in writable /tmp copy; no global BLOCKED state.",
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "typescript_build": "NOT REACHED by workspace check"
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40135370633-check-03n3iyz7",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 14,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "source_copy": "Same code/tests and evidence assertions; source-only copy excludes .env/secrets/runtime/build artifacts, with installed dependency symlink. Subsequent changes only receipt metadata and QA narrative; no code changes after full check."
+  },
+  "browser_matrix": {
+    "command": "node scripts/bi-audit-browser-qa.mjs --matrix",
+    "exit_code": 0,
+    "generated_cases": 66,
+    "browser_navigations": 0,
+    "browser_result": "NOT VERIFIED"
+  },
+  "live_sql": "NOT EXECUTED by Codex",
+  "upstream_rpc_ui": "UNKNOWN",
+  "migrations": "NOT APPLIED; no migration execution",
+  "git_diff_check": "PASS: git diff --check for tracked files; git diff --no-index --check /dev/null for every new file (no whitespace diagnostics)",
+  "commit_push_pr_creation": "DELEGATED_TO_TRUSTED_WORKFLOW; no Codex commit/push/PR creation. Historical trusted push/PR recovery separately recorded in revision-provenance.json.",
+  "merchant_and_app_preservation": "Byte-identical to 485c5a5d16c18a56b286e167f05749b51db0c365: Merchant adapter/tests/page, digital-sources.ts, App adapter/page, APP-CONTRACT-PROPOSAL.md, follow-up-plan.json, AGENTS.md and astra-runner.yml (10 files checked).",
+  "independent_production_evidence": "Trusted-trigger 2026-10-25 Barbara SELECT-only rows/dates for all GA4/GSC windows, current30 core null rows 0, Meta current30 counts/dates/USD spend. Earlier Sales/Ads/GBP and Meta key-join receipts separately attributed; no Codex warehouse execution.",
+  "full_production_audit_acceptance": "INCOMPLETE: all-field/upstream/RPC/UI parity and protected preview browser QA unresolved; GA4/GSC bounded date coverage and Meta specified key metrics reported, not UNKNOWN.",
+  "remote_ci": "Prior trusted run 40131698750 checks/commit/push PASS and recovered PR SHA 485c5a5... confirmed by POST-HANDOFF-2026-10-25.json. Current uncommitted revision CI/SHA awaits trusted runner; no fresh Codex API query.",
+  "preview": {
+    "source_sha": "485c5a5d16c18a56b286e167f05749b51db0c365",
+    "deployment_state": "READY confirmed in dated post-handoff receipt from trusted trigger; not fresh API check",
+    "browser": "NOT VERIFIED: protected preview 403",
+    "new_revision_deployment": "UNKNOWN for new uncommitted revision only"
+  },
+  "evidence_date_note": "Local check date is separate from Barbara verification/post-handoff receipt date 2026-10-25 as explicitly supplied in trusted trigger; fixed audit windows remain unchanged."
+}
