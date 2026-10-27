@@ -122,3 +122,35 @@ test('profile keys remain the upstream raw ID', () => {
   const page = readFileSync(new URL('../app/digital/local/page.tsx', import.meta.url), 'utf8');
   assert.match(page, /key=\{row\.locationId\}/);
 });
+
+test('GBP ownership and brand exclusions remain UNKNOWN; profile count is data-driven', async () => {
+  for (const count of [2, 4]) {
+    const h = previewHarness();
+    const rows = Array.from({length:count}, (_, i) => ({
+      location_id:`locations/synthetic-${i}`, location_title:'М’ясторія',
+      impressions:100, calls:0, directions:0, website_clicks:null, menu_clicks:null,
+    }));
+    h.load('lib/data/digital-sources.ts').loadDigitalLocalData = async () => normalizeLocal({
+      meta:{from:'2026-10-12',to:'2026-10-26',rows:15*count,days:15,locationCount:count,coverage:'UNKNOWN'},
+      summary:{impressions:100*count,clicks:null,calls:0,directions:0,websiteClicks:null,menuClicks:null},
+      locations:rows,
+    });
+    const html = await h.render('/digital/local');
+    assert.ok(html.includes(`Google Business Profile · ${count} GBP-профілів`));
+    assert.match(html, /Прив’язка GBP ID до фізичних адрес/);
+    assert.match(html, /виключення франшиз та інших брендів не доведене/);
+    assert.doesNotMatch(html, /4 власні точки|власні точки|Франшизи, MARMOO та Meat Bar сюди не змішуємо/);
+  }
+});
+
+test('GBP empty state does not invent ownership', async () => {
+  const h = previewHarness();
+  h.load('lib/data/digital-sources.ts').loadDigitalLocalData = async () => normalizeLocal({
+    meta:{from:'',to:'',rows:0,days:0,locationCount:0,coverage:'UNKNOWN'},
+    summary:{impressions:null,clicks:null,calls:null,directions:null,websiteClicks:null,menuClicks:null},
+    locations:[],
+  });
+  const html = await h.render('/digital/local');
+  assert.match(html, /Належність профілів до власних закладів не підтверджена/);
+  assert.doesNotMatch(html, /4 власні точки|Франшизи, MARMOO та Meat Bar сюди не змішуємо/);
+});
