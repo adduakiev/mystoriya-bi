@@ -59,6 +59,13 @@ export function coreWebVitalsCategory(lcp: unknown, inp: unknown, cls: unknown):
   return "NEEDS_IMPROVEMENT";
 }
 
+export function coreWebVitalsLabel(category: string | null | undefined): string {
+  if (category === "GOOD") return "Добре";
+  if (category === "NEEDS_IMPROVEMENT") return "Потребує покращення";
+  if (category === "POOR") return "Погано";
+  return "Невідомо";
+}
+
 export function formatMetric(value: unknown, digits = 0): string {
   const number = metricNumber(value);
   return number === null ? "—" : number.toLocaleString("uk-UA", {

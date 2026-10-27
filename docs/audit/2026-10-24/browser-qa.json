@@ -1,0 +1,682 @@
+{
+  "status": "NOT_VERIFIED",
+  "preview_url": "http://127.0.0.1:3100",
+  "production_url": null,
+  "attempt": {
+    "command": "npm run dev --prefix web -- --hostname 127.0.0.1 --port 3100",
+    "result": "Next.js failed to start: listen EPERM: operation not permitted 127.0.0.1:3100",
+    "process_exit_code": 0,
+    "server_started": false,
+    "note": "Next dev wrapper exited 0 despite startup failure; no navigation was possible.",
+    "scope": "HISTORICAL local attempt, not current trusted deployment state"
+  },
+  "access": {
+    "BI_ACCESS_PASSWORD": "ABSENT",
+    "playwright": "ABSENT",
+    "puppeteer": "ABSENT",
+    "chromium": "AVAILABLE; no running preview"
+  },
+  "screenshots": [],
+  "observed_browser_navigations": 0,
+  "cases": [
+    {
+      "url": "http://127.0.0.1:3100/aggregators",
+      "path": "/aggregators",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/aggregators/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/delivery",
+      "path": "/delivery",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/delivery/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/ads",
+      "path": "/digital/ads",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/ads/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/app",
+      "path": "/digital/app",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/app/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/audience",
+      "path": "/digital/audience",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/audience/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/channels",
+      "path": "/digital/channels",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/channels/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/commerce",
+      "path": "/digital/commerce",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/commerce/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/funnel",
+      "path": "/digital/funnel",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/funnel/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/local",
+      "path": "/digital/local",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/local/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital",
+      "path": "/digital",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/seo",
+      "path": "/digital/seo",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/seo/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/site",
+      "path": "/digital/site",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/site/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/social",
+      "path": "/digital/social",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/social/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/digital/tracking",
+      "path": "/digital/tracking",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/digital/tracking/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/dynamics",
+      "path": "/dynamics",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/dynamics/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/explorer",
+      "path": "/explorer",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/explorer/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/insights",
+      "path": "/insights",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/insights/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/locations",
+      "path": "/locations",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/locations/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/login",
+      "path": "/login",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/login/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/operating",
+      "path": "/operating",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/operating/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/",
+      "path": "/",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    },
+    {
+      "url": "http://127.0.0.1:3100/pnl",
+      "path": "/pnl",
+      "viewport_widths": [
+        360,
+        768,
+        1440
+      ],
+      "status": "NOT_EXECUTED",
+      "period_segment_changes": "UNKNOWN",
+      "loading_error_empty_stale": "UNKNOWN",
+      "cross_tab_consistency": "UNKNOWN",
+      "chart_drilldown": "UNKNOWN",
+      "runtime_404_500": "UNKNOWN",
+      "keyboard_focus_contrast_overflow": "UNKNOWN",
+      "role_sensitive_data_boundary": "UNKNOWN",
+      "performance": "UNKNOWN",
+      "evidence": "web/app/pnl/page.tsx",
+      "steps": [
+        "Open URL in an already authorized browser session at each specified viewport; record exact deployment SHA.",
+        "Verify loading then heading/cards/table; record redacted screenshot and console/network 404/500 evidence.",
+        "Exercise every visible period/segment/metric control; record selected label, query string, source window and displayed values before/after. Mark absent controls N/A.",
+        "Compare shared metrics only for the same account/currency/period/segment; inspect chart tooltip, touch and drilldown.",
+        "Exercise empty/stale/error states only in isolated preview fixtures. Verify keyboard/focus/overflow and authorized role boundaries.",
+        "Do not click sync, task create/update, manual analysis or submit forms; inspect mutation controls without dispatching requests."
+      ],
+      "url_basis": "Local continuation URL only; use exact authorized preview base for remote run"
+    }
+  ],
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40140314226",
+  "scope": "Actionable manual desktop/mobile/runtime matrix; protected preview 403 reported by reviewer, no current browser navigation",
+  "preview_evidence": {
+    "head": "485c5a5d16c18a56b286e167f05749b51db0c365",
+    "deployment_state": "READY",
+    "evidence_basis": "Confirmed post-handoff trusted trigger receipt dated 2026-10-25; not a fresh Codex API check",
+    "browser_qa": "NOT VERIFIED",
+    "protected_preview_http_status": 403,
+    "new_revision_deployment": "UNKNOWN for this uncommitted revision only; 485c5a5 exact-SHA READY confirmed separately",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016",
+    "preview_url": "UNKNOWN: exact deployment hostname not supplied in trigger",
+    "protection_or_credentials_changed": false
+  },
+  "execution": {
+    "command": "node scripts/bi-audit-browser-qa.mjs --matrix",
+    "authenticated_continuation": "BI_AUDIT_BASE_URL=<exact authorized preview URL> node scripts/bi-audit-browser-qa.mjs --matrix",
+    "automation": "Matrix generation executes locally without browser dependencies; browser steps are manual and NOT_EXECUTED",
+    "protection": "403 prevents page QA. No protection bypass, credential changes or mutation actions."
+  },
+  "continuation_2026_10_26": {
+    "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40255887088",
+    "reviewed_source_sha": "6f624cf64a50ba4f33ca24998f6140fa79ad9957",
+    "deployment_id": "dpl_AVPAkndup2LzBitj9p5Ztict5GUp",
+    "deployment_state": "READY_TRUSTED_TRIGGER_RELAY_NOT_INDEPENDENTLY_VERIFIED",
+    "vercel_403": "RESOLVED_REPORTED_BY_TRUSTED_TRIGGER; prior preview_evidence is historical",
+    "reported_get_paths": [
+      "/",
+      "/digital",
+      "/operating"
+    ],
+    "reported_get_status": 200,
+    "reported_body": "APPLICATION_LOGIN_SHELL_NOT_BI_DATA",
+    "independent_remote_http": "NOT_EXECUTED_DNS_UNAVAILABLE_AND_ORIGIN_NOT_SUPPLIED",
+    "real_browser_cases": 66,
+    "real_browser_completed": 0,
+    "mock_login_viewport_attempts": 3,
+    "mock_login_viewport_completed": 0,
+    "mock_login_browser_result": "BLOCKED_BROWSER_STARTUP_SIGABRT_EPERM",
+    "matrix": "qa-execution-matrix.json",
+    "report": "PREVIEW-QA-2026-10-26.md",
+    "receipt": "preview-qa-verification-2026-10-26.json",
+    "owner_action": "NONE_FOR_BOUNDED_QA_CODE_TASKS"
+  }
+}

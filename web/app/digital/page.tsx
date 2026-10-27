@@ -1,4 +1,7 @@
-import { formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
+import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
+import { coreWebVitalsLabel, formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
+import { sourceMoney, sourceWindow, SOURCE_WINDOW_LIMITATIONS } from "@/lib/source-evidence";
+import { hasSpendWithoutConversions } from "@/lib/ads-presentation";
 import Link from "next/link";
 import {
   Activity,
@@ -41,7 +44,6 @@ const MONTHS=["Увесь період / YTD","Січень","Лютий","Бе�
 
 function first(value:string|string[]|undefined){return Array.isArray(value)?value[0]:value;}
 function compact(value:number|null|undefined){return formatMetric(value);}
-function money(value:number|null){if(value===null)return "—";return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;}
 function pct(value:number|null){return value===null?"—":`${(value*100).toFixed(2)}%`;}
 function delta(current:number|null,previous:number|null){
   if(current===null||previous===null||previous===0) return null;
@@ -180,15 +182,16 @@ export default async function DigitalPage({
   const seoOpportunities=data.seoQueries.filter(row=>row.impressions!==null&&row.impressions>=1000&&row.position!==null&&row.position<=10&&row.ctr!==null&&seo.ctr!==null&&row.ctr<seo.ctr);
   const topTrafficChannel=data.channels[0]??null;
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
-  const noConversionCampaigns=ads.campaigns.filter(row=>row.cost!==null&&row.cost>=500&&row.conversions===0);
-  const noConversionSpend=metricSum(...noConversionCampaigns.map(row=>row.cost));
+  const noConversionCampaigns=ads.campaigns.filter(hasSpendWithoutConversions);
+  const adsWindow=sourceWindow(ads.meta,range);
+  const localWindow=sourceWindow(local.meta,range);
   const localActions=metricSum(local.summary.calls,local.summary.directions,local.summary.websiteClicks,local.summary.menuClicks);
   const attentionSignals=[
     local.pageSpeed&&["POOR","NEEDS_IMPROVEMENT"].includes(local.pageSpeed.mobileCategory)?{
       level:"HIGH",title:"Mobile Core Web Vitals",text:`PageSpeed ${formatMetric(local.pageSpeed.mobileScore)} · LCP ${formatMetric(local.pageSpeed.mobileLcp)} ms · CLS ${formatMetric(local.pageSpeed.mobileCls, 2)}.`,href:"/digital/site"
     }:null,
     noConversionCampaigns.length?{
-      level:"HIGH",title:"Google Ads · 0 conversions у вибірці",text:`${noConversionCampaigns.length} кампаній витратили ${money(noConversionSpend)} і мають 0 Google Ads conversions у доступному вікні.`,href:"/digital/ads"
+      level:"DATA",title:"Google Ads · 0 conversions за період джерела",text:`${noConversionCampaigns.length} кампаній з витратами і 0 Google Ads conversions. Період джерела Google Ads: ${adsWindow.period}; незалежний від вибраного періоду GA4/GSC. ${adsWindow.relationship} Межі campaign snapshot окремо не підтверджені. ${SOURCE_WINDOW_LIMITATIONS} Валюта UNKNOWN; без грошового порогу, суми витрат та ранжування бюджету.`,href:"/digital/ads"
     }:null,
     seoOpportunities.length?{
       level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
@@ -217,10 +220,11 @@ export default async function DigitalPage({
         </header>
 
         <DigitalTabs active="overview"/>
+        <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
         <div className="lfl-banner">Дати даних: GA4 — {history.quality.ga4.to ?? "невідомо"}; канали — {history.quality.channels.to ?? "невідомо"}; пристрої — {history.quality.devices.to ?? "невідомо"}; GSC — {history.quality.searchConsole.to ?? "невідомо"}. Зрізи з різними датами не є повністю зіставними. Дата обробки не підтверджує свіжість джерела. Повнота UNKNOWN; пропуски та атомарність між запитами не підтверджені. Landing / SEO таблиці — окремі 30-денні знімки лише за точного збігу періоду (RPC ліміти: 30 / 40 / 30); upstream ліміти невідомі. Сумарні active_users не є унікальними користувачами за період.</div>
 
         <section className="digital-control-bar">
-          <div className="digital-control-title"><Filter size={15}/><b>Період огляду</b></div>
+          <div className="digital-control-title"><Filter size={15}/><b>Період GA4 / GSC</b></div>
           <div className="digital-quick-periods">
             {[
               ["7d","7 днів"],["30d","30 днів"],["90d","90 днів"],["mtd","MTD"],["qtd","QTD"],["ytd","YTD"]
@@ -265,24 +269,26 @@ export default async function DigitalPage({
           <Kpi label="Сесії" value={compact(c.sessions)} hint="візити на сайт · GA4" change={delta(c.sessions,p?.sessions??null)} compareLabel={compare.label}/>
           <Kpi label="Purchase GA4" value={compact(c.purchases)} hint="події purchase · не фінансовий облік" change={delta(c.purchases,p?.purchases??null)} compareLabel={compare.label}/>
           <Kpi label="Конверсія" value={pct(c.conversionRate)} hint="purchase / sessions · діагностична метрика" change={delta(c.conversionRate,p?.conversionRate??null)} compareLabel={compare.label}/>
-          <Kpi label="Revenue GA4" value={money(c.purchaseRevenue)} hint="аналітична purchase revenue" change={delta(c.purchaseRevenue,p?.purchaseRevenue??null)} compareLabel={compare.label}/>
-          <Kpi label="Середній чек GA4" value={money(c.averageOrderValue)} hint="purchase revenue / purchase" change={delta(c.averageOrderValue,p?.averageOrderValue??null)} compareLabel={compare.label}/>
+          <Kpi label="Revenue GA4" value={money(c.purchaseRevenue)} hint="аналітична purchase revenue" change={null} compareLabel={compare.label}/>
+          <Kpi label="Середній чек GA4" value={money(c.averageOrderValue)} hint="purchase revenue / purchase" change={null} compareLabel={compare.label}/>
           <Kpi label="Engagement rate" value={pct(c.engagementRate)} hint="залучені сесії / сесії" change={delta(c.engagementRate,p?.engagementRate??null)} compareLabel={compare.label}/>
           <Kpi label="SEO кліки" value={seoAvailable?compact(seo.clicks):"—"} hint={seoPartial?`часткове покриття з ${dateLabel(searchMin)}`:seoAvailable?"Google Search Console":`немає даних до ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.clicks,prevSeo?.clicks??null):null} compareLabel={compare.label}/>
           <Kpi label="SEO CTR" value={seoAvailable?pct(seo.ctr):"—"} hint={seoAvailable?`середня позиція ${formatMetric(seo.position, 1)} · зважено показами`:`історія GSC з ${dateLabel(searchMin)}`} change={seoAvailable?delta(seo.ctr,prevSeo?.ctr??null):null} compareLabel={compare.label}/>
         </section>
 
         <div className="pnl-section-heading">
-          <div><span className="eyebrow">GOOGLE LAYER · LIVE</span><h2>Реклама, локальний попит та швидкість</h2></div>
+          <div><span className="eyebrow">GOOGLE LAYER · PARTIAL</span><h2>Реклама, локальний попит та швидкість</h2></div>
           <small>Ads: {formatMetric(ads.meta.days)} днів · Maps: {formatMetric(local.meta.days)} днів · PageSpeed оброблено: {local.pageSpeed?dateLabel(local.pageSpeed.capturedOn):"—"}; дата вимірювання невідома</small>
         </div>
+        <div className="lfl-banner"><b>Google Ads · період джерела: {adsWindow.period}</b>. Незалежний від вибраного періоду GA4/GSC ({range.from} → {range.to}). {adsWindow.relationship} {SOURCE_WINDOW_LIMITATIONS} Daily summary та campaign snapshot можуть мати різні дати; межі кампаній окремо не підтверджені.</div>
+        <div className="lfl-banner"><b>Local / GBP · період джерела: {localWindow.period}</b>. Незалежний від вибраного періоду GA4/GSC ({range.from} → {range.to}). {localWindow.relationship} {SOURCE_WINDOW_LIMITATIONS} PageSpeed — окремий знімок, дата вимірювання UNKNOWN.</div>
         <section className="digital-kpi-grid">
-          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{money(ads.summary.cost)}</strong><small>{formatMetric(ads.meta.days)} календарних днів у вікні</small><em>Google Ads</em></article>
-          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{money(ads.summary.cpa)}</strong><small>cost / Google Ads conversions</small><em>{formatMetric(ads.summary.conversions, 1)} conversions</em></article>
-          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${formatMetric(ads.summary.roas, 2)}x`}</strong><small>conversion value / spend</small><em>не фінальний P&L ROAS</em></article>
-          <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>дзвінки + маршрути + сайт + меню</small><em>{formatMetric(local.meta.locationCount)} власні точки</em></article>
-          <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Search + Maps</small><em>{formatMetric(local.meta.days)} днів</em></article>
-          <article className="digital-kpi-card"><span>PageSpeed Mobile</span><strong>{local.pageSpeed?compact(local.pageSpeed.mobileScore):"—"}</strong><small>PSI score · CrUX</small><em>{local.pageSpeed?.mobileCategory==="GOOD"?"Добре":local.pageSpeed?.mobileCategory==="POOR"?"Погано":"Потребує покращення"}</em></article>
+          <article className="digital-kpi-card"><span>Google Ads Spend</span><strong>{sourceMoney(ads.summary.cost)}</strong><small>Google Ads · період джерела: {adsWindow.period}</small><small>{formatMetric(ads.meta.days)} календарних днів у вікні</small><em>Google Ads · currency UNKNOWN</em></article>
+          <article className="digital-kpi-card"><span>CPA Ads</span><strong>{sourceMoney(ads.summary.cpa)}</strong><small>Google Ads · період джерела: {adsWindow.period}</small><small>cost / Google Ads conversions</small><em>{formatMetric(ads.summary.conversions, 1)} conversions · currency UNKNOWN</em></article>
+          <article className="digital-kpi-card"><span>ROAS Ads</span><strong>{ads.summary.roas===null?"—":`${formatMetric(ads.summary.roas, 2)}x`}</strong><small>Google Ads · період джерела: {adsWindow.period}</small><small>conversion value / spend</small><em>акаунт і валюта value / spend не підтверджені</em></article>
+          <article className="digital-kpi-card"><span>Local actions</span><strong>{compact(localActions)}</strong><small>Local / GBP · період джерела: {localWindow.period}</small><small>дзвінки + маршрути + сайт + меню</small><em>{formatMetric(local.meta.locationCount)} власні точки</em></article>
+          <article className="digital-kpi-card"><span>Google / Maps покази</span><strong>{compact(local.summary.impressions)}</strong><small>Local / GBP · період джерела: {localWindow.period}</small><small>Search + Maps</small><em>{formatMetric(local.meta.days)} днів</em></article>
+          <article className="digital-kpi-card"><span>PageSpeed Mobile</span><strong>{local.pageSpeed?compact(local.pageSpeed.mobileScore):"—"}</strong><small>PSI score · CrUX · дата вимірювання UNKNOWN</small><em>{coreWebVitalsLabel(local.pageSpeed?.mobileCategory)}</em></article>
         </section>
 
         <section className="panel">
@@ -353,17 +359,19 @@ export default async function DigitalPage({
 
         <div className="pnl-section-heading">
           <div><span className="eyebrow">ГРУПА ЗВІТІВ</span><h2>Digital-звіти для бізнес-рішень</h2></div>
-          <small>Google layer LIVE · GA4 + Search Console + Ads + Maps + PageSpeed</small>
+          <small>Google layer PARTIAL · completeness UNKNOWN · GA4 + Search Console + Ads + Maps + PageSpeed</small>
         </div>
 
         <section className="digital-report-grid">
           {DIGITAL_REPORTS.map(report=>{
             const Icon=ICONS[report.slug as keyof typeof ICONS] ?? Activity;
-            const live=["funnel","channels","seo","site","tracking","local","audience"].includes(report.slug);
-            const partial=report.slug==="app";
-            const sourceStatus=["social","ads"].includes(report.slug);
-            const prepared=report.slug==="commerce";
-            const state=live?"LIVE":partial?"PARTIAL":sourceStatus?"ЗА ДЖЕРЕЛАМИ":prepared?"ПІДКЛЮЧЕНО":"ПІДГОТОВЛЕНО";
+            // Stored values prove only presence for that source, never completeness.
+            // Native App, Merchant and Social sources are not loaded on this route.
+            const hasObservedValues=report.slug==="ads"?ads.meta.available:
+              report.slug==="local"?Object.values(local.summary).some(v=>v!==null):
+              ["app","commerce","social"].includes(report.slug)?false:
+              Object.values(report.slug==="seo"?data.seo:c).some(v=>v!==null);
+            const state=hasObservedValues?"PARTIAL":"UNKNOWN";
             return <Link href={`/digital/${report.slug}`} className="digital-report-card" key={report.slug}>
               <div className="digital-report-icon"><Icon size={18}/></div>
               <div>

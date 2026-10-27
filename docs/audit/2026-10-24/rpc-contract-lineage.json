@@ -1,0 +1,491 @@
+{
+  "schema_version": 1,
+  "issue": 43,
+  "existing_pr": 44,
+  "verification": {
+    "code_docs": "STATIC_CONTRACTS; CHECK_RESULTS_IN_VERIFICATION_JSON",
+    "end_to_end_audit": "NOT_VERIFIED",
+    "live_rpc_invocations": 0
+  },
+  "reviewer_metadata": {
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6390540921",
+    "evidence_class": "TRUSTED_TRIGGER_RELAY_NOT_INDEPENDENTLY_FETCHED",
+    "reported_volatility": "VOLATILE",
+    "reported_security_definer": true,
+    "exact_deployed_signatures": "NOT_SUPPLIED",
+    "exact_deployed_definitions": "NOT_SUPPLIED",
+    "exact_deployed_hashes": "NOT_SUPPLIED"
+  },
+  "contracts": [
+    {
+      "id": "sales",
+      "rpc": "bi_overview_payload",
+      "source": [
+        "fact_sales_daily.revenue"
+      ],
+      "json": "current.revenue",
+      "adapter": "web/lib/data/overview.ts",
+      "adapter_binding": "current.revenue → snapshot.kpis",
+      "ui": "web/app/page.tsx",
+      "ui_binding": "snapshot.kpis.map → KpiCard",
+      "grain": "date/location/brand/ownership/channel/order_type; joins and lifecycle must be reconciled",
+      "period": "p_focus_year/p_focus_month/p_period/p_comparison plus channel/order_type/location/brand/ownership/LFL",
+      "limitations": [
+        "SQL and adapter coalesce missing metrics; Sales null recovery and LFL D04/D07 OPEN",
+        "Fallback Google Sheets is a distinct path; no parity implied"
+      ],
+      "repository": {
+        "name": "bi_overview_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          },
+          {
+            "name": "p_channel",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_order_type",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_location",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_brand",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_ownership",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_focus_year",
+            "type": "integer",
+            "has_default": true
+          },
+          {
+            "name": "p_focus_month",
+            "type": "integer",
+            "has_default": true
+          },
+          {
+            "name": "p_period",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_comparison",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_metric",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_grain",
+            "type": "text",
+            "has_default": true
+          },
+          {
+            "name": "p_lfl",
+            "type": "boolean",
+            "has_default": true
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "fb27b05f79560d010204d1b61bd296c00ae9a3814fbe81eb9e64558f29a7af64",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261009_performance_tuning_flat_cache.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261009_performance_tuning_flat_cache.sql",
+          "file_sha256": "85bd2088c0ff4f0773868b3a2c4d13c00a812f0e7e732772a8763cc1405684c6"
+        },
+        {
+          "path": "web/lib/data/overview.ts",
+          "file_sha256": "2029f2864e0d640ab39529135d9fdfd9998b307bc8865438839a9fa5b6856f32"
+        },
+        {
+          "path": "web/app/page.tsx",
+          "file_sha256": "ba4926c8955f9b09f29fdb43a4fae0dca19c6bbdc048a5e3a338f8c7aee579bf"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "ga4",
+      "rpc": "bi_digital_payload",
+      "source": [
+        "staging_ga4_daily_windsor.sessions",
+        "digital_ga4_daily.sessions"
+      ],
+      "json": "current.sessions",
+      "adapter": "web/lib/data/digital-contract.ts",
+      "adapter_binding": "normalizeDigital → current.sessions",
+      "ui": "web/app/digital/page.tsx",
+      "ui_binding": "c.sessions",
+      "grain": "curated date_id; property/account identity not exposed",
+      "period": "p_from/p_to inclusive; previous window same day count immediately before from",
+      "limitations": [
+        "currentGa4Rows guards empty periods; partial nonnull SUM is not field completeness",
+        "Daily users are not period uniques; business timezone and revenue currency UNKNOWN"
+      ],
+      "repository": {
+        "name": "bi_digital_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          },
+          {
+            "name": "p_from",
+            "type": "date",
+            "has_default": true
+          },
+          {
+            "name": "p_to",
+            "type": "date",
+            "has_default": true
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "8141cf13d5ff8fd4ac90919f80ba5f24590b822bc3bc6b8ff3e6a0c8b4bb54b5",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261023133005_digital_correctness_rpc.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261023133005_digital_correctness_rpc.sql",
+          "file_sha256": "363bbbd3fef1866b73a576742dad7c00bccd7cc9e97c9bdef0f5ee29d8bcd28e"
+        },
+        {
+          "path": "web/lib/data/digital-contract.ts",
+          "file_sha256": "fbf1f57498e651ed180eb01d6030bfc310d7ef70dac2998f18a2f7b179b4bd9c"
+        },
+        {
+          "path": "web/app/digital/page.tsx",
+          "file_sha256": "53ac2b9bd6d5a4e56be9d01d5555170ea46c30431bfafece05769684597a1c1b"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "gsc",
+      "rpc": "bi_digital_payload",
+      "source": [
+        "staging_searchconsole_daily_windsor.clicks",
+        "digital_search_daily.clicks/impressions"
+      ],
+      "json": "seo.clicks / seo.impressions",
+      "adapter": "web/lib/data/digital-contract.ts",
+      "adapter_binding": "seo → metricRatio(clicks,impressions)",
+      "ui": "web/app/digital/seo/page.tsx",
+      "ui_binding": "s.ctr",
+      "grain": "curated date_id; site/property identity not exposed",
+      "period": "p_from/p_to inclusive; snapshot query/page periods separate (40/30 row caps)",
+      "limitations": [
+        "CTR recomputed; zero denominator UNKNOWN",
+        "Stored daily coverage does not prove omitted-query or upstream completeness"
+      ],
+      "repository": {
+        "name": "bi_digital_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          },
+          {
+            "name": "p_from",
+            "type": "date",
+            "has_default": true
+          },
+          {
+            "name": "p_to",
+            "type": "date",
+            "has_default": true
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "8141cf13d5ff8fd4ac90919f80ba5f24590b822bc3bc6b8ff3e6a0c8b4bb54b5",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261023133005_digital_correctness_rpc.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261023133005_digital_correctness_rpc.sql",
+          "file_sha256": "363bbbd3fef1866b73a576742dad7c00bccd7cc9e97c9bdef0f5ee29d8bcd28e"
+        },
+        {
+          "path": "web/lib/data/digital-contract.ts",
+          "file_sha256": "fbf1f57498e651ed180eb01d6030bfc310d7ef70dac2998f18a2f7b179b4bd9c"
+        },
+        {
+          "path": "web/app/digital/seo/page.tsx",
+          "file_sha256": "160ecbc1077fd94f51af99c2ecae6c0a21bf21b57a2e146df572bc6a61429d5d"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "meta",
+      "rpc": "bi_digital_meta_ads_payload",
+      "source": [
+        "staging_meta_ads_windsor.spend",
+        "staging_meta_ads_daily.spend",
+        "meta_windsor_campaign_metrics.spend"
+      ],
+      "json": "summary.spend; meta.currency; campaigns[].account_id/campaign_id/account_currency",
+      "adapter": "web/lib/data/meta-social-contract.ts",
+      "adapter_binding": "normalizeMetaAds → summary.spend; meta.currency",
+      "ui": "web/app/digital/ads/page.tsx",
+      "ui_binding": "meta.summary.spend",
+      "grain": "date/account_id/campaign_id/account_currency; Windsor campaign-only rows; campaigns grouped by account/campaign/currency",
+      "period": "no caller period; latest curated date minus 29 through latest, campaign cap 50",
+      "limitations": [
+        "Attribution unverified suppresses ROAS; Meta USD cannot supply App currency",
+        "Bounded 138-group reviewer receipt is separate from rolling Gate D 145-row baseline"
+      ],
+      "repository": {
+        "name": "bi_digital_meta_ads_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "e4c1d1be57342957590145a6f6954fe7163795d7772708d23ae3ad6ec0115f08",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261023211306_meta_ads_v3_windsor_gate_a.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261023211306_meta_ads_v3_windsor_gate_a.sql",
+          "file_sha256": "99e97f88aea77244fb0f7fa0bbd5c0b56281f911fa4e630926ad5c11e833dcab"
+        },
+        {
+          "path": "web/lib/data/meta-social-contract.ts",
+          "file_sha256": "bbc9afded82f779d2ebb221d132a123b736858256c2c998ccd6d1454f3f51ee5"
+        },
+        {
+          "path": "web/app/digital/ads/page.tsx",
+          "file_sha256": "f0af026760d80e031e979cbd8041fcdf90519506f82ec3018ffa439bd6616f90"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "google_ads_app",
+      "rpc": "bi_digital_app_payload",
+      "source": [
+        "staging_google_ads_windsor.cost/conversions/conversions_value"
+      ],
+      "json": "googleAdsApp[].spend/conversions/conversion_value/from_date/to_date",
+      "adapter": "web/lib/data/app-contract.ts",
+      "adapter_binding": "normalizeApp → currencyEvidence; costPerConversion = spend/conversions",
+      "ui": "web/app/digital/app/page.tsx",
+      "ui_binding": "money(row.spend,row); const money=sourceMoney",
+      "grain": "REPOSITORY MISMATCH: platform guessed from campaign_name + campaign_name; account_id/campaign_id/date/currency lost",
+      "period": "all history WHERE lower(campaign_name) LIKE 'app_%'; underscore is SQL wildcard; min/max dates only",
+      "limitations": [
+        "Reviewer reports deployed RPC references staging Google Ads and omits currency; exact definition/hash not supplied",
+        "No source currency column per earlier reviewer B02; money UNKNOWN, no FX or Meta currency inheritance",
+        "Proposed account/campaign/date/currency contract remains NOT APPLIED; no p_from/p_to arguments"
+      ],
+      "repository": {
+        "name": "bi_digital_app_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "b7c8a66f2c6acb3428e2d8d980ba5f0e8c2aa0368420d21338c2951fa85bd5e7",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261019_app_analytics_contract.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261019_app_analytics_contract.sql",
+          "file_sha256": "fc6ca29d8e43b8ed16d73e219e29a58ba56c628181ca4d0f16ceb0bdd9cb5952"
+        },
+        {
+          "path": "web/lib/data/app-contract.ts",
+          "file_sha256": "7d56542c1d91d48c49a578be23a5030f788deb7b9eba8194a8ef304e137e2a8f"
+        },
+        {
+          "path": "web/app/digital/app/page.tsx",
+          "file_sha256": "184a1ba7dacb352592cc7f6d30420992e5c959b99ea59fe1460d8510155322c0"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "merchant",
+      "rpc": "bi_digital_merchant_payload",
+      "source": [
+        "staging_google_merchant_performance.impressions"
+      ],
+      "json": "performance.impressions; meta.performanceRows",
+      "adapter": "web/lib/data/merchant-contract.ts",
+      "adapter_binding": "normalizeMerchant → metricNumber; merchantPresence",
+      "ui": "web/app/digital/commerce/page.tsx",
+      "ui_binding": "performanceReady?n(p.impressions):\"—\"",
+      "grain": "date/product_id; account/country/context absent in performance key",
+      "period": "latest performance date minus 29 through latest; catalog stock all rows; health latest 20; products cap 50",
+      "limitations": [
+        "performanceRows is all-history presence, not field completeness",
+        "SQL COALESCE/SUM can erase nulls; adapter cannot restore them",
+        "Catalog currency does not prove performance or App currency"
+      ],
+      "repository": {
+        "name": "bi_digital_merchant_payload",
+        "parameters": [
+          {
+            "name": "p_password",
+            "type": "text",
+            "has_default": false
+          }
+        ],
+        "volatility": "VOLATILE",
+        "volatility_basis": "POSTGRESQL_DEFAULT",
+        "security_definer": true,
+        "repository_definition_sha256": "3ed9623dbb3a2b7f974e4d7a0e88cec591f6e84d41a1a970bc68351508340911",
+        "hash_scope": "CREATE statement with line comments removed; NOT pg_get_functiondef and NOT a deployed hash",
+        "path": "supabase/migrations/20261019_google_merchant_contract.sql"
+      },
+      "reviewer_observation": {
+        "volatility": "VOLATILE",
+        "security_definer": true,
+        "parameters": null
+      },
+      "comparison": {
+        "metadata_comparison": "MATCH_ON_REPORTED_FIELDS_ONLY",
+        "mismatches": [],
+        "deployed_definition_parity": "UNKNOWN"
+      },
+      "static_evidence": [
+        {
+          "path": "supabase/migrations/20261019_google_merchant_contract.sql",
+          "file_sha256": "7fa6101f234d602b68db30b3bebd0deb4a97d9434ddcc65a5248ff62e8714321"
+        },
+        {
+          "path": "web/lib/data/merchant-contract.ts",
+          "file_sha256": "de335c254e2aaf1405cda78799ca434abc258735967e5bb69780e2efee020dd9"
+        },
+        {
+          "path": "web/app/digital/commerce/page.tsx",
+          "file_sha256": "cf3e89d9d168ba0ce882a93317b263d739108de7d8e3a1ed4c32d84714e0ab88"
+        }
+      ],
+      "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
+      "upstream_completeness": "UNKNOWN",
+      "all_field_rpc_rendered_parity": "UNKNOWN",
+      "business_timezone": "UNKNOWN",
+      "production_rpc_execution": "PROHIBITED_IN_THIS_AUDIT",
+      "status": "PARTIAL"
+    }
+  ]
+}
