@@ -22,8 +22,10 @@ function parseMetric(value: string | undefined): MetricMode {
     : "revenue";
 }
 
-function parseGrain(value: string | undefined): GrainMode {
-  return value === "week" ? "week" : "month";
+function parseGrain(_value: string | undefined): GrainMode {
+  // P1 safety gate: installed bi_dynamics_payload mixes calendar YEAR with ISO WEEK.
+  // Disable weekly SQL data until an independently verified, owner-approved migration.
+  return "month";
 }
 
 function buildHref(
@@ -166,7 +168,7 @@ export default async function DynamicsPage({
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
                 <option value="month">Місяці</option>
-                <option value="week">Тижні</option>
+                <option value="week" disabled>Тижні (тимчасово недоступні)</option>
               </select>
             </label>
 
@@ -255,18 +257,14 @@ export default async function DynamicsPage({
 
             <div className="chart-controls">
               <div className="metric-switcher grain-switcher">
-                {([
-                  ["month", "Місяці"],
-                  ["week", "Тижні"]
-                ] as const).map(([value, label]) => (
-                  <Link
-                    key={value}
-                    className={grain === value ? "metric-pill active" : "metric-pill"}
-                    href={buildHref(state, { grain: value })}
-                  >
-                    {label}
-                  </Link>
-                ))}
+                <Link className="metric-pill active" href={buildHref(state, { grain: "month" })}>Місяці</Link>
+                <span
+                  className="metric-pill"
+                  aria-disabled="true"
+                  title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
+                >
+                  Тижні (тимчасово недоступні)
+                </span>
               </div>
               <div className="metric-switcher">
                 {METRICS.map(([value, label]) => (
