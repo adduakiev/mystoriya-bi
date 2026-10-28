@@ -144,3 +144,17 @@ test('legacy Overview fallback uses the same signal; measured zero rows keep val
     assert.match(html,body);
   }
 });
+
+test('Overview weekly ISO-year P1 fails closed at SSR/RPC boundary', async t => {
+  t.mock.method(globalThis, 'fetch', () => assert.fail('Synthetic weekly guard cannot reach network'));
+  const h = harness(metrics, zero);
+  const html = await h.render({year:'2025', location:'Черкаси', grain:'week'});
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.calls[0].name, 'bi_overview_payload');
+  assert.equal(h.calls[0].args.p_grain, 'month', 'Never request incorrect installed SQL weekly grouping');
+  assert.match(html, /Тижні \(тимчасово недоступні\)/);
+  assert.match(html, /aria-disabled="true"/);
+  assert.doesNotMatch(html, /href="[^"]*grain=week/);
+  assert.match(html, /MULTI-YEAR DYNAMICS · МІСЯЦІ/);
+  assert.match(html, /class="kpi-grid"/, 'Other verified KPIs remain visible');
+});
