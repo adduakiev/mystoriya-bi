@@ -290,8 +290,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
     ),
     kpi(
       "Середній чек",
-      `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,
-      pctDelta(current.averageCheck, previous.averageCheck),
+      current.checks === 0 ? "—" : `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,
+      current.checks === 0 || previous.checks === 0 ? null : pctDelta(current.averageCheck, previous.averageCheck),
       comparisonLabel
     ),
     kpi(
@@ -302,8 +302,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
     ),
     kpi(
       "Націнка %",
-      `${current.markupRate.toFixed(1)}%`,
-      ppDelta(current.markupRate, previous.markupRate),
+      current.revenue === 0 ? "—" : `${current.markupRate.toFixed(1)}%`,
+      current.revenue === 0 || previous.revenue === 0 ? null : ppDelta(current.markupRate, previous.markupRate),
       `п.п. vs ${comparisonLabel}`
     )
   ];
