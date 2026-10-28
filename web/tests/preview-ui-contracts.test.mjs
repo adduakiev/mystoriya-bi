@@ -156,7 +156,7 @@ test('Delivery unscoped week URL is fail-closed before unsafe SQL RPC (P1 ISO-we
   assert.ok(rpc, 'delivery RPC must execute');
   assert.equal(rpc.args.p_grain, 'month', 'never request unsafe ISO-week aggregation');
   assert.match(html, /<option value="week" disabled="">/);
-  assert.match(html, /Тижні \\(тимчасово недоступні\\)/);
+  assert.ok(html.includes('Тижні (тимчасово недоступні)'));
   assert.match(html, /aria-disabled="true"/);
   assert.doesNotMatch(html, /grain=week/);
 });
