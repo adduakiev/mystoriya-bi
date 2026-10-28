@@ -148,3 +148,15 @@ test('66-case plan is reproducible, covers 360/768/1440 and never upgrades SSR t
   const result = spawnSync(process.execPath,['scripts/bi-audit-browser-qa.mjs','--check'], {encoding:'utf8'});
   assert.equal(result.status, 0, result.stderr);
 });
+
+test('Delivery unscoped week URL is fail-closed before unsafe SQL RPC (P1 ISO-week)', async () => {
+  const h = previewHarness();
+  const html = await h.render('/delivery', {year:'2026', grain:'week'});
+  const rpc = h.calls.find(c => c.name === 'bi_delivery_payload');
+  assert.ok(rpc, 'delivery RPC must execute');
+  assert.equal(rpc.args.p_grain, 'month', 'never request unsafe ISO-week aggregation');
+  assert.match(html, /<option value="week" disabled="">/);
+  assert.match(html, /Тижні \\(тимчасово недоступні\\)/);
+  assert.match(html, /aria-disabled="true"/);
+  assert.doesNotMatch(html, /grain=week/);
+});
