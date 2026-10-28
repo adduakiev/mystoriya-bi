@@ -99,3 +99,33 @@ export function periodSourceDate(latest: unknown, from: unknown, to: unknown): s
   return typeof from === "string" && typeof to === "string" && typeof latest === "string" &&
     snapshotDate(from, to) && snapshotDate(latest, to) && latest >= from ? latest : null;
 }
+
+/** Global first/last dates are only an upper bound on period coverage.
+ * The history RPC has no selected-period DISTINCT date count or independently
+ * reconciled session denominator. It cannot certify traffic share. */
+export type DimensionWindowEvidence = {
+  selectedDays: number | null;
+  maximumPossibleDays: number | null;
+  status: "PARTIAL" | "UNKNOWN";
+  shareComparable: false;
+};
+
+export function dimensionWindowEvidence(
+  selectedFrom: unknown, selectedTo: unknown, sourceFrom: unknown, sourceTo: unknown
+): DimensionWindowEvidence {
+  const validRange = (from: unknown, to: unknown): from is string =>
+    typeof from === "string" && typeof to === "string" && snapshotDate(from, to) !== null;
+  if (!validRange(selectedFrom, selectedTo))
+    return {selectedDays: null, maximumPossibleDays: null, status: "UNKNOWN", shareComparable: false};
+  const days = (from: string, to: string) =>
+    Math.floor((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000) + 1;
+  const selectedDays = days(selectedFrom, selectedTo as string);
+  if (!validRange(sourceFrom, sourceTo))
+    return {selectedDays, maximumPossibleDays: null, status: "UNKNOWN", shareComparable: false};
+  const first = selectedFrom > sourceFrom ? selectedFrom : sourceFrom;
+  const last = (selectedTo as string) < (sourceTo as string) ? selectedTo as string : sourceTo as string;
+  const maximumPossibleDays = first <= last ? days(first, last) : 0;
+  return {selectedDays, maximumPossibleDays,
+    status: maximumPossibleDays < selectedDays ? "PARTIAL" : "UNKNOWN",
+    shareComparable: false};
+}
