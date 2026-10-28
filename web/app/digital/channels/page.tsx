@@ -17,7 +17,7 @@ export default async function Page(){
       <header className="topbar"><div><span className="eyebrow">DIGITAL · КАНАЛИ</span><h1>Канали залучення</h1></div><div className="digital-source-badge">GA4 · Session default channel group</div></header>
       <DigitalTabs active="channels"/>
       <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
-      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата каналів: {history.quality.channels.to ?? "невідомо"}; за датами джерела доступно ${bound}; фактична кількість днів UNKNOWN. Частка від усіх GA4-сесій прихована: немає доказу повноти та зіставності знаменника.</div>
+      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата каналів: {history.quality.channels.to ?? "невідомо"}; за датами джерела доступно {bound}; фактична кількість днів UNKNOWN. Частка від усіх GA4-сесій прихована: немає доказу повноти та зіставності знаменника.</div>
       <section className="digital-kpi-grid">
         {data.channels.slice(0,4).map(row=><article className="digital-kpi-card" key={row.channel}>
           <span>{row.channel}</span><strong>{n(row.sessions)}</strong>
