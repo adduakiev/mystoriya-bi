@@ -39,8 +39,11 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
-function parseGrain(value: string | undefined): GrainMode {
-  return value === "week" ? "week" : "month";
+function parseGrain(_value: string | undefined): GrainMode {
+  // P1 safety gate: installed bi_overview_payload mixes calendar YEAR with ISO WEEK.
+  // Until the SQL contract is corrected at an approved migration gate, never request
+  // or render a weekly multi-year series as verified live data.
+  return "month";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -341,18 +344,16 @@ export default async function Home({
               <div className="chart-controls">
                 {!selectedMonth && (
                   <div className="metric-switcher grain-switcher">
-                    {([
-                      ["month", "Місяці"],
-                      ["week", "Тижні"]
-                    ] as const).map(([value, label]) => (
-                      <Link
-                        key={value}
-                        className={grain === value ? "metric-pill active" : "metric-pill"}
-                        href={queryHref(filters, { grain: value })}
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    <Link className="metric-pill active" href={queryHref(filters, { grain: "month" })}>
+                      Місяці
+                    </Link>
+                    <span
+                      className="metric-pill"
+                      aria-disabled="true"
+                      title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
+                    >
+                      Тижні (тимчасово недоступні)
+                    </span>
                   </div>
                 )}
                 <div className="metric-switcher">
