@@ -165,3 +165,27 @@ test('Overview weekly ISO-year P1 fails closed at SSR/RPC boundary', async t => 
   assert.match(html, /MULTI-YEAR DYNAMICS · МІСЯЦІ/);
   assert.match(html, /class="kpi-grid"/, 'Other verified KPIs remain visible');
 });
+
+test('Overview markup percentage does not invent +pp growth without prior-year revenue', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('Synthetic ratio QA cannot reach network'));
+  // Warehouse-proven 2025 Cherkasy: revenue 1,446,111.70, markup 812,241.42;
+  // no 2024 location revenue. The 2024 ratio is undefined, not measured 0%.
+  const h = harness({
+    revenue:1446111.70, checks:3724, averageCheck:1446111.70/3724,
+    markup:812241.42, markupRate:812241.42/1446111.70*100
+  },zero);
+  const html = await h.render();
+  assert.match(html, /<span class="kpi-label">Націнка %<\/span><strong>56\\.2%<\/strong><span class="delta[^"]*">—<\/span>/);
+  assert.doesNotMatch(html, /\+56\\.2 п\\.п\\./);
+  assert.match(html, /<span class="kpi-label">Середній чек<\/span><strong>₴ /);
+  assert.match(html, /<span class="kpi-label">Середній чек<\/span><strong>[^<]+<\/strong><span class="delta[^"]*">—<\/span>/);
+});
+
+test('Overview ratios without current denominators render unknown, not measured zero', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('Synthetic zero-denominator QA cannot reach network'));
+  const html = await harness(zero,metrics).render();
+  for (const label of ['Середній чек','Націнка %']) {
+    assert.ok(html.includes(`<span class="kpi-label">${label}</span><strong>—</strong>`), label);
+  }
+  assert.doesNotMatch(html, /NaN|Infinity/);
+});
