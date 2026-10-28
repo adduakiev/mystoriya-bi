@@ -59,7 +59,11 @@ for (const route of ['/', '/delivery', '/locations', '/dynamics', '/explorer', '
     if (['/', '/delivery'].includes(route)) assert.equal(args.p_grain, 'month', 'month overrides week');
     if (route === '/') assert.equal(args.p_period, 'month');
     if (route === '/dynamics') {
-      assert.equal(args.p_grain, 'week');
+      assert.equal(args.p_grain, 'month', 'unsafe ISO-week RPC is fail-closed');
+      assert.match(html, /Тижні \(тимчасово недоступні\)/);
+      assert.match(html, /<option value="week" disabled="">/);
+      assert.match(html, /aria-disabled="true"/);
+      assert.doesNotMatch(html, /href="\/dynamics\?grain=week/);
       assert.equal(Object.hasOwn(args, 'p_focus_year'), false, 'Dynamics does not implement a focus-year filter');
     }
     if (route === '/explorer') {
