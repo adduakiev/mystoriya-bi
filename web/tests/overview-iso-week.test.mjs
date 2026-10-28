@@ -57,3 +57,30 @@ test('Jan 1 in next calendar year does not reset ISO cutoff week', () => {
   assert.equal(result[52]['2026'], 30);
   assert.equal(result[52]['2027'], 0);
 });
+
+test('two consecutive year crossings preserve full ISO W01 revenue and checks (2024→25→26)', () => {
+  // Aggregated daily fixtures independently reconciled against warehouse on 2026-10-28.
+  // 2025-12-29..31 belong to ISO 2026 W01, not ISO 2025 W01.
+  const rows = [
+    row('2024-01-01', 1995997.10, 3098),
+    row('2024-12-30', 1327824.20, 1317),
+    row('2024-12-31', 2406932.20, 2078),
+    row('2025-01-01', 1952076.90, 3061),
+    row('2025-12-29', 779921.60, 904),
+    row('2025-12-30', 1253767.60, 1245),
+    row('2025-12-31', 2723043.70, 1745),
+    row('2026-01-01', 1528939.60, 2234),
+    row('2026-10-26', 1, 1) // Keep W01 visible in a 44-week current-year chart.
+  ];
+  const before = structuredClone(rows);
+  const revenue = weekly(rows, [2024, 2025, 2026], 'revenue');
+  const checks = weekly(rows, [2024, 2025, 2026], 'checks');
+  assert.equal(revenue[0].label, 'W01');
+  assert.equal(Math.round(revenue[0]['2024'] * 100), 199599710);
+  assert.equal(Math.round(revenue[0]['2025'] * 100), 568683330);
+  assert.equal(Math.round(revenue[0]['2026'] * 100), 628567250);
+  assert.equal(checks[0]['2024'], 3098);
+  assert.equal(checks[0]['2025'], 6456);
+  assert.equal(checks[0]['2026'], 6128);
+  assert.deepEqual(rows, before, 'Weekly grouping must not mutate input');
+});
