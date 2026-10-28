@@ -175,8 +175,8 @@ test('Overview markup percentage does not invent +pp growth without prior-year r
     markup:812241.42, markupRate:812241.42/1446111.70*100
   },zero);
   const html = await h.render();
-  assert.match(html, /<span class="kpi-label">Націнка %<\/span><strong>56\\.2%<\/strong><span class="delta[^"]*">—<\/span>/);
-  assert.doesNotMatch(html, /\+56\\.2 п\\.п\\./);
+  assert.match(html, /<span class="kpi-label">Націнка %<\/span><strong>56\.2%<\/strong><span class="delta[^"]*">—<\/span>/);
+  assert.doesNotMatch(html, /\+56\.2 п\.п\./);
   assert.match(html, /<span class="kpi-label">Середній чек<\/span><strong>₴ /);
   assert.match(html, /<span class="kpi-label">Середній чек<\/span><strong>[^<]+<\/strong><span class="delta[^"]*">—<\/span>/);
 });
