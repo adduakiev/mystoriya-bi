@@ -126,6 +126,9 @@ test('selected year/location and month/comparison reach RPC without altering the
   assert.equal(h.calls[0].args.p_grain,'month');
   assert.equal(h.calls[0].args.p_comparison,'previous');
   assert.ok(html.includes(`<b>${noBaseline}</b>`));
+  assert.match(html, /BUSINESS PERFORMANCE · LIVE/);
+  assert.match(html, />LIVE SIGNAL</);
+  assert.doesNotMatch(html, /FALLBACK \/ UNVERIFIED/);
 });
 
 test('legacy Overview fallback uses the same signal; measured zero rows keep valid -100% comparisons', async t => {
@@ -142,6 +145,10 @@ test('legacy Overview fallback uses the same signal; measured zero rows keep val
     const html = await h.render();
     assert.ok(html.includes(`<b>${title}</b>`));
     assert.match(html,body);
+    assert.match(html, /BUSINESS PERFORMANCE · FALLBACK \/ UNVERIFIED/);
+    assert.match(html, /SQL RPC недоступний або повернув помилку/);
+    assert.match(html, /FALLBACK SIGNAL · UNVERIFIED/);
+    assert.doesNotMatch(html, /BUSINESS PERFORMANCE · LIVE|>LIVE SIGNAL</);
   }
 });
 

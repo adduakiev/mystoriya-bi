@@ -100,6 +100,8 @@ export default async function Home({
   } = overview;
 
   const ready = overview.status === "ready" ? overview : null;
+  const sqlVerified = ready?.source === "supabase-sql";
+  const fallbackReady = ready?.source === "legacy";
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -140,14 +142,14 @@ export default async function Home({
       <DashboardSidebar
         activeHref="/"
         lfl={lfl}
-        statusTitle={ready ? "Live data connected" : "NO DATA / UNKNOWN"}
-        statusDetail={ready ? `${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows` : "Обраний період не підтверджено"}
+        statusTitle={sqlVerified ? "Live data connected" : fallbackReady ? "FALLBACK / UNVERIFIED" : "NO DATA / UNKNOWN"}
+        statusDetail={sqlVerified ? `${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows` : fallbackReady ? "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN" : "Обраний період не підтверджено"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">BUSINESS PERFORMANCE · {ready ? "LIVE" : "UNKNOWN"}</span>
+            <span className="eyebrow">BUSINESS PERFORMANCE · {sqlVerified ? "LIVE" : fallbackReady ? "FALLBACK / UNVERIFIED" : "UNKNOWN"}</span>
             <h1>Огляд</h1>
           </div>
 
@@ -269,6 +271,13 @@ export default async function Home({
             </div>
           </form>
         </details>
+
+        {fallbackReady && (
+          <section className="panel" role="status">
+            <span className="eyebrow">FALLBACK / UNVERIFIED</span>
+            <p>SQL RPC недоступний або повернув помилку. Показано альтернативний розрахунок; свіжість, повнота й відповідність основному SQL-контракту не підтверджені. Не використовуйте цей зріз як перевірений LIVE-звіт.</p>
+          </section>
+        )}
 
         {ready && <div className="context-line">
           <b>{ready.snapshot.periodLabel}</b>
@@ -589,7 +598,7 @@ export default async function Home({
           </article>
 
           <article className="panel insight-panel">
-            <span className="eyebrow">LIVE SIGNAL</span>
+            <span className="eyebrow">{sqlVerified ? "LIVE SIGNAL" : "FALLBACK SIGNAL · UNVERIFIED"}</span>
             <h2>Що потребує уваги</h2>
             <div className="signal">
               <span className="signal-badge">1</span>
