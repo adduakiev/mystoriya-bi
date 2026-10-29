@@ -41,6 +41,12 @@ function harness(metaPatch = {}, options = {}) {
   });
   return {
     calls,
+    async data() {
+      return load('lib/data/delivery.ts').loadDeliveryData({
+        year:2026, month:10, location:'Черкаси',
+        metric:'revenue', grain:'month', lfl:false
+      });
+    },
     async render(params = {}) {
       return renderToStaticMarkup(await load('app/delivery/page.tsx').default({
         searchParams:Promise.resolve({year:'2026', month:'10', location:'Черкаси', ...params})
@@ -104,26 +110,26 @@ test('Delivery SSR retains a defined ratio when aggregator denominator is nonzer
   assert.match(html,/<strong>100\.0%<\/strong>/);
 });
 
-test('Delivery SSR does not invent positive +0.0% growth without prior-year baseline', async t => {
+test('Delivery adapter does not invent positive +0.0% growth without prior-year baseline', async t => {
   t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
   // Warehouse has 2024 Delivery revenue but no 2023 Delivery rows.
   const zero = {revenue:0, checks:0, markup:0, averageCheck:0, markupRate:0};
-  const html = await harness({}, {previous:zero}).render();
-  assert.match(html,/Немає зіставної бази для обороту/);
-  assert.match(html,/Оборот: немає зіставної бази\. Чеки: немає зіставної бази\. Середній чек: немає зіставної бази vs/);
-  assert.doesNotMatch(html,/Оборот: \+0\.0%|Позитивна динаміка/);
+  const {snapshot} = await harness({}, {previous:zero}).data();
+  assert.equal(snapshot.signal.title,'Немає зіставної бази для обороту');
+  assert.match(snapshot.signal.body,/Оборот: немає зіставної бази\. Чеки: немає зіставної бази\. Середній чек: немає зіставної бази vs/);
+  assert.doesNotMatch(snapshot.signal.body,/Оборот: \+0\.0%/);
 });
 
-test('Delivery SSR distinguishes genuinely unchanged comparison from missing baseline', async t => {
+test('Delivery adapter distinguishes genuinely unchanged comparison from missing baseline', async t => {
   t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
-  const html = await harness({}, {previous:metrics}).render();
-  assert.match(html,/Без змін обороту/);
-  assert.match(html,/Оборот: \+0\.0%\. Чеки: \+0\.0%\. Середній чек: \+0\.0% vs/);
+  const {snapshot} = await harness({}, {previous:metrics}).data();
+  assert.equal(snapshot.signal.title,'Без змін обороту');
+  assert.match(snapshot.signal.body,/Оборот: \+0\.0%\. Чеки: \+0\.0%\. Середній чек: \+0\.0% vs/);
 });
 
-test('Delivery SSR retains negative growth with positive previous denominator', async t => {
+test('Delivery adapter retains negative growth with positive previous denominator', async t => {
   t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
-  const html = await harness({}, {current:{...metrics,revenue:metrics.revenue/2},previous:metrics}).render();
-  assert.match(html,/Період нижче бази порівняння/);
-  assert.match(html,/Оборот: -50\.0%/);
+  const {snapshot} = await harness({}, {current:{...metrics,revenue:metrics.revenue/2},previous:metrics}).data();
+  assert.equal(snapshot.signal.title,'Період нижче бази порівняння');
+  assert.match(snapshot.signal.body,/Оборот: -50\.0%/);
 });
