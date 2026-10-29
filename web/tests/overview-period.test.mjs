@@ -150,3 +150,15 @@ test('UNKNOWN SSR retains every selected filter and navigation argument', async 
   assert.equal(h.calls[0].args.p_ownership,'Owner fixture');
   assert.equal(h.legacyCalls,0);
 });
+
+
+test('Overview SQL connectivity does not certify source freshness', async () => {
+  const h = harness({latestSourceDate:'2026-10-26'});
+  const html = await h.render();
+  assert.match(html, /SQL CONNECTED · FRESHNESS UNVERIFIED/);
+  assert.match(html, /остання дата джерела: 2026-10-26/);
+  assert.match(html, /SQL SIGNAL · FRESHNESS UNVERIFIED/);
+  assert.doesNotMatch(html, /Live data connected|LIVE SIGNAL|BUSINESS PERFORMANCE · LIVE/);
+  assert.equal(h.legacyCalls,0);
+  h.assertUnchanged();
+});
