@@ -50,6 +50,11 @@ export function rpcFixture(name, args = {}, state = 'partial') {
     orderTypes: ['Fixture order'], channels: ['Fixture channel']};
   const metrics = {sessions: value, purchases: value, revenue: value, checks: value, markup: value,
     averageCheck: value, markupRate: value, addToCarts: value, checkouts: value, clicks: value, impressions: value};
+  if (name === 'bi_dynamics_payload') return {
+    meta,
+    series: rows ? [{label:'Січ', '2025': value ?? 0, '2026': value ?? 0}] : [],
+    summary: {latestYearTotal:value, previousYearTotal:value, growth:null}
+  };
   if (name === 'bi_digital_history_payload') return {meta,
     quality: {ga4: {from: '2025-01-01', to}, searchConsole: {from: '2025-07-01', to}}, monthly: []};
   if (name === 'bi_digital_app_payload') return {sources: {store: {rows}, firebase: {rows}, orders: {rows}},
