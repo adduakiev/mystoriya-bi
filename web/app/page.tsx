@@ -142,14 +142,14 @@ export default async function Home({
       <DashboardSidebar
         activeHref="/"
         lfl={lfl}
-        statusTitle={sqlVerified ? "Live data connected" : fallbackReady ? "FALLBACK / UNVERIFIED" : "NO DATA / UNKNOWN"}
-        statusDetail={sqlVerified ? `${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows` : fallbackReady ? "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN" : "Обраний період не підтверджено"}
+        statusTitle={sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : fallbackReady ? "FALLBACK / UNVERIFIED" : "NO DATA / UNKNOWN"}
+        statusDetail={sqlVerified ? `${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows · остання дата джерела: ${latestSourceDate || "UNKNOWN"}` : fallbackReady ? "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN" : "Обраний період не підтверджено"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">BUSINESS PERFORMANCE · {sqlVerified ? "LIVE" : fallbackReady ? "FALLBACK / UNVERIFIED" : "UNKNOWN"}</span>
+            <span className="eyebrow">BUSINESS PERFORMANCE · {sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : fallbackReady ? "FALLBACK / UNVERIFIED" : "UNKNOWN"}</span>
             <h1>Огляд</h1>
           </div>
 
@@ -598,7 +598,7 @@ export default async function Home({
           </article>
 
           <article className="panel insight-panel">
-            <span className="eyebrow">{sqlVerified ? "LIVE SIGNAL" : "FALLBACK SIGNAL · UNVERIFIED"}</span>
+            <span className="eyebrow">{sqlVerified ? "SQL SIGNAL · FRESHNESS UNVERIFIED" : "FALLBACK SIGNAL · UNVERIFIED"}</span>
             <h2>Що потребує уваги</h2>
             <div className="signal">
               <span className="signal-badge">1</span>
