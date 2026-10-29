@@ -40,6 +40,24 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+function deliveryPeriodMatches(
+  requestedYear: number | undefined,
+  requestedMonth: number | undefined,
+  data: Awaited<ReturnType<typeof loadDeliveryData>>
+): boolean {
+  const expectedYear = requestedYear ?? data.selectedYear;
+  const cutoff = data.snapshot.cutoffDate;
+  if (typeof cutoff !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) return false;
+  const date = new Date(`${cutoff}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
+  return data.selectedYear === expectedYear
+    && data.selectedMonth === requestedMonth
+    && data.snapshot.currentYear === expectedYear
+    && data.snapshot.period === (requestedMonth === undefined ? "ytd" : "month")
+    && date.getUTCFullYear() === expectedYear
+    && (requestedMonth === undefined || (requestedMonth <= 12 && date.getUTCMonth() + 1 === requestedMonth));
+}
+
 function pctLabel(value: number | null): string {
   if (value === null) return "—";
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
@@ -111,6 +129,40 @@ export default async function DeliveryPage({
     lfl
   });
 
+  // The deployed Delivery RPC falls back to the latest date across all years
+  // when a requested year/month has no rows. Never render that other period
+  // as LIVE (or turn missing sales into a measured zero).
+  if (!deliveryPeriodMatches(requestedYear, selectedMonth, data)) {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/delivery"
+          lfl={lfl}
+          statusTitle="NO DATA / UNKNOWN"
+          statusDetail="Обраний період не підтверджено"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">OWN DELIVERY · UNKNOWN</span>
+              <h1>Доставка</h1>
+            </div>
+          </header>
+          <section className="panel" role="status">
+            <h2>Немає підтверджених даних за обраний період</h2>
+            <p>
+              {requestedYear ?? data.selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1] ?? "невідомий місяць"}` : " · YTD"}
+              {location ? ` · ${location}` : ""}.
+              SQL не підтвердив дату обраного періоду. Відсутність даних не означає нуль;
+              показники, порівняння та графіки приховано.
+            </p>
+            <Link className="clear-filter" href="/delivery">Повернутися до доступних даних</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
   const {
     rowCount,
     years,
@@ -146,14 +198,16 @@ export default async function DeliveryPage({
       <DashboardSidebar
         activeHref="/delivery"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${rowCount.toLocaleString("uk-UA")} delivery rows`}
+        statusTitle={data.source === "supabase-sql" ? "Live data connected" : "FALLBACK / UNVERIFIED"}
+        statusDetail={data.source === "supabase-sql"
+          ? `${rowCount.toLocaleString("uk-UA")} delivery rows`
+          : "Альтернативне джерело · повнота UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">OWN DELIVERY · LIVE</span>
+            <span className="eyebrow">OWN DELIVERY · {data.source === "supabase-sql" ? "LIVE" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Доставка</h1>
           </div>
 <div className="quick-context">
