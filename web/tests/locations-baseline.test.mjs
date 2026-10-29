@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {moduleLoader} from './support/bi-preview-harness.mjs';
+import {moduleLoader, React, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
 
 const baseline = {revenue: 100, checks: 10, markup: 20, averageCheck: 10, markupRate: 20};
 const zeros = {revenue: 0, checks: 0, markup: 0, averageCheck: 0, markupRate: 0};
@@ -72,4 +72,36 @@ test('Locations: zero current checks/revenue do not invent AOV or markup percent
 test('Locations: genuine prior 0% markup with positive revenue permits a pp delta', async () => {
   const s = await locationsSnapshot({...baseline, markupRate: 10}, {...baseline, markupRate: 0, markup: 0});
   assert.equal(s.kpis.find(k => k.label === 'Націнка %').delta, 10);
+});
+
+
+test('Locations source badge and visible warning distinguish SQL from unverified Google Sheets fallback', async () => {
+  for (const source of ['legacy', 'supabase-sql']) {
+    const data = {
+      source, years:[2025], selectedYear:2025, months:[1], brands:[], ownerships:[],
+      snapshot:{periodLabel:'2025 YTD', cutoffDate:'2025-01-31', kpis:[]},
+      locationRows:[], lflCount:0, lflCurrentRevenue:0, lflPreviousRevenue:0, lflGrowth:null
+    };
+    const load = moduleLoader({
+      'next/link': {default: ({prefetch,children,...props}) => React.createElement('a',props,children)},
+      'lucide-react': {Filter: () => null},
+      '@/components/DashboardSidebar': {
+        DashboardSidebar: ({statusTitle,statusDetail}) => React.createElement('aside',null,statusTitle,' ',statusDetail)
+      },
+      '@/components/KpiCard': {KpiCard: () => null},
+      '@/components/LocationsComparisonChart': {LocationsComparisonChart: () => null},
+      '@/lib/data/locations': {loadLocationsData: async () => data}
+    });
+    const html = renderToStaticMarkup(await load('app/locations/page.tsx').default({searchParams:Promise.resolve({})}));
+    if (source === 'legacy') {
+      assert.match(html,/LOCATIONS PERFORMANCE · FALLBACK \/ UNVERIFIED/);
+      assert.match(html,/SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN/);
+      assert.match(html,/Google Sheets/);
+      assert.doesNotMatch(html,/Live data connected|LOCATIONS PERFORMANCE · LIVE/);
+    } else {
+      assert.match(html,/LOCATIONS PERFORMANCE · LIVE/);
+      assert.match(html,/Live data connected/);
+      assert.doesNotMatch(html,/FALLBACK \/ UNVERIFIED|SQL-джерело недоступне/);
+    }
+  }
 });
