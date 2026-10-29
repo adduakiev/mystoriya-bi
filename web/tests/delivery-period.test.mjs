@@ -85,7 +85,7 @@ test('Delivery SSR renders valid requested October period without suppressing co
   const h = harness();
   const html = await h.render();
   assert.equal(h.calls.length,1);
-  assert.match(html,/OWN DELIVERY · LIVE/);
+  assert.match(html,/OWN DELIVERY · SQL CONNECTED · FRESHNESS UNVERIFIED/);
   assert.match(html,/kpi-grid/);
   assert.match(html,/LEAKED PERIOD/);
   assert.doesNotMatch(html,/NO DATA \/ UNKNOWN/);
@@ -97,7 +97,7 @@ test('Delivery SSR shows undefined ratio, not measured zero, when aggregator den
   const h = harness({}, {aggregatorRevenue:0});
   const html = await h.render();
   assert.equal(h.calls.length,1);
-  assert.match(html,/OWN DELIVERY · LIVE/);
+  assert.match(html,/OWN DELIVERY · SQL CONNECTED · FRESHNESS UNVERIFIED/);
   assert.match(html,/<strong>—<\/strong>/);
   assert.match(html,/<span>—<\/span>/);
   assert.doesNotMatch(html,/<span>Доставка \/ Агрегатори<\/span><strong>0\.0%<\/strong>/);
