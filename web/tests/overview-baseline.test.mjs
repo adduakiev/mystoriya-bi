@@ -126,8 +126,8 @@ test('selected year/location and month/comparison reach RPC without altering the
   assert.equal(h.calls[0].args.p_grain,'month');
   assert.equal(h.calls[0].args.p_comparison,'previous');
   assert.ok(html.includes(`<b>${noBaseline}</b>`));
-  assert.match(html, /BUSINESS PERFORMANCE · LIVE/);
-  assert.match(html, />LIVE SIGNAL</);
+  assert.match(html, /BUSINESS PERFORMANCE · SQL CONNECTED · FRESHNESS UNVERIFIED/);
+  assert.match(html, />SQL SIGNAL · FRESHNESS UNVERIFIED</);
   assert.doesNotMatch(html, /FALLBACK \/ UNVERIFIED/);
 });
 
