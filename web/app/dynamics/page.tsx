@@ -157,8 +157,10 @@ export default async function DynamicsPage({
       <DashboardSidebar
         activeHref="/dynamics"
         lfl={lfl}
-        statusTitle={result.source === "legacy" ? "Резервне джерело · не звірено" : "Live data connected"}
-        statusDetail={`${rowCount.toLocaleString("uk-UA")} рядків у зрізі`}
+        statusTitle={result.source === "legacy" ? "Резервне джерело · не звірено" : "SQL CONNECTED · FRESHNESS UNVERIFIED"}
+        statusDetail={result.source === "supabase-sql"
+          ? `${rowCount.toLocaleString("uk-UA")} рядків у зрізі · остання дата джерела: ${result.latestSourceDate || "UNKNOWN"} · freshness UNKNOWN`
+          : `${rowCount.toLocaleString("uk-UA")} рядків у зрізі · резервне джерело, freshness UNKNOWN`}
       />
 
       <section className="workspace">

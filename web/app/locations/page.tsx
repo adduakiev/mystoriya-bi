@@ -73,16 +73,16 @@ export default async function LocationsPage({
       <DashboardSidebar
         activeHref="/locations"
         lfl={lfl}
-        statusTitle={sqlVerified ? "Live data connected" : "FALLBACK / UNVERIFIED"}
+        statusTitle={sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}
         statusDetail={sqlVerified
-          ? `${locationRows.length} активних точок у зрізі`
+          ? `${locationRows.length} активних точок у зрізі · cutoff ${snapshot.cutoffDate || "UNKNOWN"} · freshness UNKNOWN`
           : "SQL RPC недоступний · резервний шлях, джерело UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">LOCATIONS PERFORMANCE · {sqlVerified ? "LIVE" : "FALLBACK / UNVERIFIED"}</span>
+            <span className="eyebrow">LOCATIONS PERFORMANCE · {sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Заклади</h1>
           </div>
 <div className="quick-context">

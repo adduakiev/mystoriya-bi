@@ -167,3 +167,15 @@ test('Delivery unscoped week URL is fail-closed before unsafe SQL RPC (P1 ISO-we
   assert.match(html, /aria-disabled="true"/);
   assert.doesNotMatch(html, /grain=week/);
 });
+
+
+test('Sales SSR badges do not confuse SQL connectivity with source-event freshness', async () => {
+  for (const route of ['/delivery', '/dynamics', '/locations']) {
+    const html = await previewHarness().render(route);
+    assert.match(html, /SQL CONNECTED · FRESHNESS UNVERIFIED/, route);
+    assert.match(html, /freshness UNKNOWN/, route);
+    assert.doesNotMatch(html, /Live data connected|LOCATIONS PERFORMANCE · LIVE|OWN DELIVERY · LIVE/, route);
+    if (route === '/dynamics') assert.match(html, /остання дата джерела: 2026-10-23/);
+    else assert.match(html, /cutoff 2026-10-23/);
+  }
+});

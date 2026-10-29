@@ -198,16 +198,16 @@ export default async function DeliveryPage({
       <DashboardSidebar
         activeHref="/delivery"
         lfl={lfl}
-        statusTitle={data.source === "supabase-sql" ? "Live data connected" : "FALLBACK / UNVERIFIED"}
+        statusTitle={data.source === "supabase-sql" ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}
         statusDetail={data.source === "supabase-sql"
-          ? `${rowCount.toLocaleString("uk-UA")} delivery rows`
+          ? `${rowCount.toLocaleString("uk-UA")} delivery rows · cutoff ${snapshot.cutoffDate || "UNKNOWN"} · freshness UNKNOWN`
           : "Альтернативне джерело · повнота UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">OWN DELIVERY · {data.source === "supabase-sql" ? "LIVE" : "FALLBACK / UNVERIFIED"}</span>
+            <span className="eyebrow">OWN DELIVERY · {data.source === "supabase-sql" ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Доставка</h1>
           </div>
 <div className="quick-context">

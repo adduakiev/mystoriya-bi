@@ -99,8 +99,8 @@ test('Locations source badge and visible warning distinguish SQL from unverified
       assert.match(html,/фактичне джерело \(Supabase snapshot або Google Sheets\)/);
       assert.doesNotMatch(html,/Live data connected|LOCATIONS PERFORMANCE · LIVE/);
     } else {
-      assert.match(html,/LOCATIONS PERFORMANCE · LIVE/);
-      assert.match(html,/Live data connected/);
+      assert.match(html,/LOCATIONS PERFORMANCE · SQL CONNECTED · FRESHNESS UNVERIFIED/);
+      assert.match(html,/SQL CONNECTED · FRESHNESS UNVERIFIED/);
       assert.doesNotMatch(html,/FALLBACK \/ UNVERIFIED|SQL-джерело недоступне/);
     }
   }
