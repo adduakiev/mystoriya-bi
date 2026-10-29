@@ -95,8 +95,8 @@ test('Locations source badge and visible warning distinguish SQL from unverified
     const html = renderToStaticMarkup(await load('app/locations/page.tsx').default({searchParams:Promise.resolve({})}));
     if (source === 'legacy') {
       assert.match(html,/LOCATIONS PERFORMANCE · FALLBACK \/ UNVERIFIED/);
-      assert.match(html,/SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN/);
-      assert.match(html,/Google Sheets/);
+      assert.match(html,/SQL RPC недоступний · резервний шлях, джерело UNKNOWN/);
+      assert.match(html,/фактичне джерело \(Supabase snapshot або Google Sheets\)/);
       assert.doesNotMatch(html,/Live data connected|LOCATIONS PERFORMANCE · LIVE/);
     } else {
       assert.match(html,/LOCATIONS PERFORMANCE · LIVE/);
