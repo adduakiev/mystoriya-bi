@@ -26,7 +26,7 @@ export type DeliveryLocationRow = {
   markupRate: number;
   deliveryShare: number;
   aggregatorRevenue: number;
-  versusAggregator: number;
+  versusAggregator: number | null;
 };
 
 export type DeliveryData = {
@@ -45,7 +45,7 @@ export type DeliveryData = {
   typeSummary: DeliveryTypeSummary[];
   deliveryMetrics: DeliveryMetricSet;
   aggregatorMetrics: DeliveryMetricSet;
-  ownVsAggregatorRatio: number;
+  ownVsAggregatorRatio: number | null;
   compareSeries: Array<{ label: string; delivery: number; aggregator: number }>;
   locationRows: DeliveryLocationRow[];
 };
@@ -290,7 +290,7 @@ async function legacy(query:DeliveryQuery):Promise<DeliveryData> {
       name,revenue:dm.revenue,growth:pct(dm.revenue,pm.revenue),checks:dm.checks,
       averageCheck:dm.averageCheck,markupRate:dm.markupRate,
       deliveryShare:total>0?dm.revenue/total*100:0,
-      aggregatorRevenue:ar,versusAggregator:ar>0?dm.revenue/ar*100:0
+      aggregatorRevenue:ar,versusAggregator:ar!==0?dm.revenue/ar*100:null
     };
   }).filter((r)=>r.revenue>0).sort((a,b)=>b.revenue-a.revenue);
 
@@ -316,7 +316,7 @@ async function legacy(query:DeliveryQuery):Promise<DeliveryData> {
       ?buildMultiYearWeeklyMetricSeries(main,years,query.metric)
       :buildMultiYearMetricSeries(main,years,query.metric,selectedMonth),
     typeSummary,deliveryMetrics,aggregatorMetrics,
-    ownVsAggregatorRatio:aggregatorMetrics.revenue>0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:0,
+    ownVsAggregatorRatio:aggregatorMetrics.revenue!==0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:null,
     compareSeries,locationRows
   };
 }
@@ -368,7 +368,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
       })),
       deliveryMetrics,
       aggregatorMetrics,
-      ownVsAggregatorRatio:aggregatorMetrics.revenue>0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:0,
+      ownVsAggregatorRatio:aggregatorMetrics.revenue!==0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:null,
       compareSeries:(payload.compareSeries ?? []).map((item)=>({
         label:item.label ?? "",
         delivery:num(item.delivery),
@@ -383,7 +383,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
         markupRate:num(item.markupRate),
         deliveryShare:num(item.deliveryShare),
         aggregatorRevenue:num(item.aggregatorRevenue),
-        versusAggregator:num(item.versusAggregator)
+        versusAggregator:num(item.aggregatorRevenue)!==0?nullableNum(item.versusAggregator):null
       }))
     };
   } catch(error) {

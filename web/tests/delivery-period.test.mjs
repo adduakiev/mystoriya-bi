@@ -6,7 +6,7 @@ import {moduleLoader, rpcFixture, React, renderToStaticMarkup} from './support/b
 // No browser authentication, database, credentials or external network.
 const metrics = {revenue:987654321, checks:67891, markup:34567890, averageCheck:14547, markupRate:35};
 
-function harness(metaPatch = {}) {
+function harness(metaPatch = {}, options = {}) {
   const calls = [];
   const load = moduleLoader({
     'next/cache': {unstable_cache: fn => fn},
@@ -27,12 +27,12 @@ function harness(metaPatch = {}) {
           meta: {...fixture.meta, selectedYear:2026, currentYear:2026,
             cutoffDate:'2026-10-22', periodLabel:'LEAKED PERIOD', ...metaPatch},
           current:metrics, previous:{...metrics, revenue:100},
-          deliveryMetrics:metrics, aggregatorMetrics:metrics,
+          deliveryMetrics:metrics, aggregatorMetrics:{...metrics, revenue:options.aggregatorRevenue ?? metrics.revenue},
           multiYearData:[{label:'LEAKED CHART', 2026:metrics.revenue}],
           typeSummary:[{name:'LEAKED TYPE', ...metrics, share:100}],
           compareSeries:[{label:'LEAKED SERIES',delivery:metrics.revenue,aggregator:100}],
           locationRows:[{name:'LEAKED LOCATION', ...metrics, growth:100,
-            deliveryShare:100, aggregatorRevenue:100, versusAggregator:100}]
+            deliveryShare:100, aggregatorRevenue:options.aggregatorRevenue ?? 100, versusAggregator:100}]
         };
       },
       loadSalesData: async () => assert.fail('A known period mismatch must not use legacy')
@@ -82,4 +82,23 @@ test('Delivery SSR renders valid requested October period without suppressing co
   assert.match(html,/kpi-grid/);
   assert.match(html,/LEAKED PERIOD/);
   assert.doesNotMatch(html,/NO DATA \/ UNKNOWN/);
+});
+
+
+test('Delivery SSR shows undefined ratio, not measured zero, when aggregator denominator is absent', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const h = harness({}, {aggregatorRevenue:0});
+  const html = await h.render();
+  assert.equal(h.calls.length,1);
+  assert.match(html,/OWN DELIVERY · LIVE/);
+  assert.match(html,/<strong>—<\/strong>/);
+  assert.match(html,/<span>—<\/span>/);
+  assert.doesNotMatch(html,/0\.0%/);
+});
+
+test('Delivery SSR retains a defined ratio when aggregator denominator is nonzero', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const h = harness();
+  const html = await h.render();
+  assert.match(html,/<strong>100\.0%<\/strong>/);
 });

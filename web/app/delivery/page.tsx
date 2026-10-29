@@ -327,7 +327,7 @@ export default async function DeliveryPage({
           </div>
           <div className="trend-summary-card">
             <span>Доставка / Агрегатори</span>
-            <strong>{ownVsAggregatorRatio.toFixed(1)}%</strong>
+            <strong>{ownVsAggregatorRatio === null ? "—" : `${ownVsAggregatorRatio.toFixed(1)}%`}</strong>
             <small>співвідношення обороту</small>
           </div>
         </section>
@@ -464,7 +464,7 @@ export default async function DeliveryPage({
                   <span>{row.markupRate.toFixed(1)}%</span>
                   <span>{row.deliveryShare.toFixed(1)}%</span>
                   <span>{formatUah(row.aggregatorRevenue)}</span>
-                  <span>{row.versusAggregator.toFixed(1)}%</span>
+                  <span>{row.versusAggregator === null ? "—" : `${row.versusAggregator.toFixed(1)}%`}</span>
                 </Link>
               ))}
             </div>
