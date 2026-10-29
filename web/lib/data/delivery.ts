@@ -171,10 +171,15 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
   const previous=metricSet(payload.previous);
   const label=String(meta.previousYear ?? "");
 
-  const revenueGrowth=pct(current.revenue,previous.revenue)??0;
-  const checksGrowth=pct(current.checks,previous.checks)??0;
-  const aovGrowth=pct(current.averageCheck,previous.averageCheck)??0;
-  const markupPp=pp(current.markupRate,previous.markupRate)??0;
+  // A missing/zero prior-year denominator is not measured 0% growth.
+  const revenueGrowth=pct(current.revenue,previous.revenue);
+  const checksGrowth=pct(current.checks,previous.checks);
+  const aovGrowth=pct(current.averageCheck,previous.averageCheck);
+  const markupPp=current.revenue>0&&previous.revenue>0
+    ? pp(current.markupRate,previous.markupRate) : null;
+  const comparison=(delta:number|null,baseline:number):string =>
+    delta===null ? (baseline===0?"немає зіставної бази":"дані відсутні")
+      : `${delta>=0?"+":""}${delta.toFixed(1)}%`;
 
   return {
     sourceRows:num(meta.rowCount),
@@ -199,9 +204,11 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
     locations:[],
     monthlyTable:[],
     signal:{
-      severity:revenueGrowth>0&&markupPp< -0.5?"warning":"info",
-      title:revenueGrowth>=0?"Позитивна динаміка":"Період нижче бази порівняння",
-      body:`Оборот: ${revenueGrowth>=0?"+":""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth>=0?"+":""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth>=0?"+":""}${aovGrowth.toFixed(1)}% vs ${label}.`
+      severity:revenueGrowth!==null&&revenueGrowth>0&&markupPp!==null&&markupPp< -0.5?"warning":"info",
+      title:revenueGrowth===null?"Немає зіставної бази для обороту"
+        :revenueGrowth===0?"Без змін обороту"
+        :revenueGrowth>0?"Позитивна динаміка":"Період нижче бази порівняння",
+      body:`Оборот: ${comparison(revenueGrowth,previous.revenue)}. Чеки: ${comparison(checksGrowth,previous.checks)}. Середній чек: ${comparison(aovGrowth,previous.averageCheck)} vs ${label}.`
     }
   };
 }
