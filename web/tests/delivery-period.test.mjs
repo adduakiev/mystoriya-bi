@@ -76,7 +76,7 @@ for (const scenario of mismatches) {
     assert.match(html,/NO DATA \/ UNKNOWN/);
     assert.match(html,/Немає підтверджених даних за обраний період/);
     assert.match(html,/Відсутність даних не означає нуль/);
-    assert.doesNotMatch(html,/987654321|LEAKED|kpi-grid|delivery-table|data-chart|LIVE|₴/);
+    assert.doesNotMatch(html,/987654321|LEAKED|kpi-grid|delivery-table|data-chart|OWN DELIVERY · LIVE|Live data connected|₴/);
   });
 }
 
@@ -100,7 +100,7 @@ test('Delivery SSR shows undefined ratio, not measured zero, when aggregator den
   assert.match(html,/OWN DELIVERY · LIVE/);
   assert.match(html,/<strong>—<\/strong>/);
   assert.match(html,/<span>—<\/span>/);
-  assert.doesNotMatch(html,/0\.0%/);
+  assert.doesNotMatch(html,/<span>Доставка \/ Агрегатори<\/span><strong>0\.0%<\/strong>/);
 });
 
 test('Delivery SSR retains a defined ratio when aggregator denominator is nonzero', async t => {
