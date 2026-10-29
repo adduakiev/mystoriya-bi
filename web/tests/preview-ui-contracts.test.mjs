@@ -50,11 +50,11 @@ for (const route of ['/', '/delivery', '/locations', '/dynamics', '/explorer', '
     if (route !== '/dynamics') {
       assert.equal(args.p_focus_year, 2026);
       assert.equal(args.p_focus_month, 9);
-      if (route === '/delivery') {
-        // Synthetic RPC returns October cutoff for a September selection: fail closed, no stale KPI.
+      if (route === '/delivery' || route === '/locations') {
+        // Synthetic RPC returns October cutoff for a September selection: both routes must fail closed.
         assert.match(html, /NO DATA \/ UNKNOWN/);
         assert.match(html, /Вересень/);
-        assert.doesNotMatch(html, /kpi-grid/);
+        assert.doesNotMatch(html, /kpi-grid|locations-matrix/);
       } else assert.match(html, /value="9" selected=""/);
     }
     if (!['/locations'].includes(route)) {

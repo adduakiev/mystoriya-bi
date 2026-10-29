@@ -32,7 +32,7 @@ function locationsPeriodMatches(
   data: Awaited<ReturnType<typeof loadLocationsData>>
 ): boolean {
   const cutoff = data.snapshot.cutoffDate;
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(cutoff)) return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) return false;
   const date = new Date(`${cutoff}T00:00:00Z`);
   if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
   const expectedYear = requestedYear ?? data.selectedYear;
@@ -83,8 +83,12 @@ export default async function LocationsPage({
           </header>
           <section className="panel" role="status">
             <h2>Немає підтверджених даних за обраний період</h2>
-            <p>Обрані рік, місяць або фільтри не відповідають даті отриманих даних.
-              Відсутність даних не означає нуль; показники, порівняння та графіки приховано.</p>
+            <p>
+              {requestedYear ?? data.selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1] ?? "невідомий місяць"}` : " · YTD"}
+              {brand ? ` · ${brand}` : ""}.
+              Обрані рік, місяць або фільтри не відповідають даті отриманих даних.
+              Відсутність даних не означає нуль; показники, порівняння та графіки приховано.
+            </p>
             <Link className="clear-filter" href="/locations">Скинути фільтри</Link>
           </section>
         </section>
