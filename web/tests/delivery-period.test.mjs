@@ -133,3 +133,23 @@ test('Delivery adapter retains negative growth with positive previous denominato
   assert.equal(snapshot.signal.title,'Період нижче бази порівняння');
   assert.match(snapshot.signal.body,/Оборот: -50\.0%/);
 });
+
+test('Delivery markup percentage-point KPI is UNKNOWN without a prior-year revenue baseline', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const zero = {revenue:0, checks:0, markup:0, averageCheck:0, markupRate:0};
+  const {snapshot} = await harness({}, {previous:zero}).data();
+  const item = snapshot.kpis.find(kpi => kpi.label === 'Націнка %');
+  assert.ok(item);
+  assert.equal(item.value, '35.0%');
+  assert.equal(item.delta, null);
+  assert.equal(item.direction, 'flat');
+});
+
+test('Delivery markup percentage-point KPI retains a measured delta with comparable revenue', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const {snapshot} = await harness({}, {previous:{...metrics, markupRate:30}}).data();
+  const item = snapshot.kpis.find(kpi => kpi.label === 'Націнка %');
+  assert.ok(item);
+  assert.equal(item.delta, 5);
+  assert.equal(item.direction, 'up');
+});

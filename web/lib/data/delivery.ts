@@ -197,7 +197,7 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
       kpi("Чеки",Math.round(current.checks).toLocaleString("uk-UA"),pct(current.checks,previous.checks),label),
       kpi("Середній чек",`₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,pct(current.averageCheck,previous.averageCheck),label),
       kpi("Націнка",compactUah(current.markup),pct(current.markup,previous.markup),label),
-      kpi("Націнка %",`${current.markupRate.toFixed(1)}%`,pp(current.markupRate,previous.markupRate),`п.п. vs ${label}`)
+      kpi("Націнка %",`${current.markupRate.toFixed(1)}%`,markupPp,`п.п. vs ${label}`)
     ],
     trend:[],
     channels:[],
