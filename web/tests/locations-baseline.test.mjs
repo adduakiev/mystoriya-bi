@@ -111,10 +111,10 @@ function locationsPeriodHarness(metaPatch = {}, source = 'supabase-sql') {
   const data = {
     source, years:[2024,2025,2026], selectedYear:2025, selectedMonth:10,
     months:[10], brands:['Marmoo'], ownerships:[],
+    ...metaPatch,
     snapshot:{periodLabel:'LEAKED PERIOD', cutoffDate:'2026-10-26', kpis:[], ...metaPatch.snapshot},
     locationRows:[], lflCount:0, lflCurrentRevenue:987654321,
-    lflPreviousRevenue:0, lflGrowth:null,
-    ...metaPatch
+    lflPreviousRevenue:0, lflGrowth:null
   };
   const load = moduleLoader({
     'next/link': {default: ({prefetch,children,...props}) => React.createElement('a',props,children)},
