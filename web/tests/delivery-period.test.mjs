@@ -26,7 +26,8 @@ function harness(metaPatch = {}, options = {}) {
           ...fixture,
           meta: {...fixture.meta, selectedYear:2026, currentYear:2026,
             cutoffDate:'2026-10-22', periodLabel:'LEAKED PERIOD', ...metaPatch},
-          current:metrics, previous:{...metrics, revenue:100},
+          current:options.current ?? metrics,
+          previous:options.previous ?? {...metrics, revenue:100},
           deliveryMetrics:metrics, aggregatorMetrics:{...metrics, revenue:options.aggregatorRevenue ?? metrics.revenue},
           multiYearData:[{label:'LEAKED CHART', 2026:metrics.revenue}],
           typeSummary:[{name:'LEAKED TYPE', ...metrics, share:100}],
@@ -101,4 +102,28 @@ test('Delivery SSR retains a defined ratio when aggregator denominator is nonzer
   const h = harness();
   const html = await h.render();
   assert.match(html,/<strong>100\.0%<\/strong>/);
+});
+
+test('Delivery SSR does not invent positive +0.0% growth without prior-year baseline', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  // Warehouse has 2024 Delivery revenue but no 2023 Delivery rows.
+  const zero = {revenue:0, checks:0, markup:0, averageCheck:0, markupRate:0};
+  const html = await harness({}, {previous:zero}).render();
+  assert.match(html,/Немає зіставної бази для обороту/);
+  assert.match(html,/Оборот: немає зіставної бази\. Чеки: немає зіставної бази\. Середній чек: немає зіставної бази vs/);
+  assert.doesNotMatch(html,/Оборот: \+0\.0%|Позитивна динаміка/);
+});
+
+test('Delivery SSR distinguishes genuinely unchanged comparison from missing baseline', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const html = await harness({}, {previous:metrics}).render();
+  assert.match(html,/Без змін обороту/);
+  assert.match(html,/Оборот: \+0\.0%\. Чеки: \+0\.0%\. Середній чек: \+0\.0% vs/);
+});
+
+test('Delivery SSR retains negative growth with positive previous denominator', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const html = await harness({}, {current:{...metrics,revenue:metrics.revenue/2},previous:metrics}).render();
+  assert.match(html,/Період нижче бази порівняння/);
+  assert.match(html,/Оборот: -50\.0%/);
 });
