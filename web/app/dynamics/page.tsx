@@ -109,6 +109,32 @@ export default async function DynamicsPage({
     lfl
   });
 
+  if (result.source === "unavailable") {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/dynamics"
+          lfl={lfl}
+          statusTitle="Дані не підтверджені"
+          statusDetail="SQL RPC повернув порожню або некоректну відповідь"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">TREND ANALYSIS · UNAVAILABLE</span>
+              <h1>Динаміка</h1>
+            </div>
+          </header>
+          <section className="panel dynamics-main-panel" role="status">
+            <h2>Немає підтверджених даних для вибраних фільтрів</h2>
+            <p>SQL RPC не повернув перевіреного набору показників. Відсутні дані не є нульовими, а резервне джерело не підставляється.</p>
+            <Link href="/dynamics">Скинути фільтри</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
   const {
     rowCount,
     years,
@@ -131,7 +157,7 @@ export default async function DynamicsPage({
       <DashboardSidebar
         activeHref="/dynamics"
         lfl={lfl}
-        statusTitle="Live data connected"
+        statusTitle={result.source === "legacy" ? "Резервне джерело · не звірено" : "Live data connected"}
         statusDetail={`${rowCount.toLocaleString("uk-UA")} рядків у зрізі`}
       />
 
