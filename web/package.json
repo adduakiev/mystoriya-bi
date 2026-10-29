@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prebuild": "node --test tests/delivery-period.test.mjs tests/preview-auth-boundary.test.mjs tests/preview-auth-probe.test.mjs tests/preview-ui-contracts.test.mjs"
+    "prebuild": "node --test --test-concurrency=2 tests/*.test.mjs"
   },
   "dependencies": {
     "next": "15.5.27",
