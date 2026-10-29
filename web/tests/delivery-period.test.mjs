@@ -1,0 +1,85 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {moduleLoader, rpcFixture, React, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
+
+// Exact Delivery page and adapter with synthetic SQL responses only.
+// No browser authentication, database, credentials or external network.
+const metrics = {revenue:987654321, checks:67891, markup:34567890, averageCheck:14547, markupRate:35};
+
+function harness(metaPatch = {}) {
+  const calls = [];
+  const load = moduleLoader({
+    'next/cache': {unstable_cache: fn => fn},
+    'next/link': {default: ({prefetch, children, ...props}) => React.createElement('a', props, children)},
+    '@/components/DashboardSidebar': {DashboardSidebar: props =>
+      React.createElement('aside', null, props.statusTitle, props.statusDetail)},
+    '@/components/MultiYearMetricChart': {MultiYearMetricChart: () =>
+      React.createElement('div', {'data-chart':'multi'})},
+    '@/components/DeliveryVsAggregatorChart': {DeliveryVsAggregatorChart: () =>
+      React.createElement('div', {'data-chart':'delivery'})},
+    '@/lib/data/source': {
+      callBiRpc: async (name, args) => {
+        assert.equal(name, 'bi_delivery_payload');
+        calls.push(args);
+        const fixture = rpcFixture(name, args);
+        return {
+          ...fixture,
+          meta: {...fixture.meta, selectedYear:2026, currentYear:2026,
+            cutoffDate:'2026-10-22', periodLabel:'LEAKED PERIOD', ...metaPatch},
+          current:metrics, previous:{...metrics, revenue:100},
+          deliveryMetrics:metrics, aggregatorMetrics:metrics,
+          multiYearData:[{label:'LEAKED CHART', 2026:metrics.revenue}],
+          typeSummary:[{name:'LEAKED TYPE', ...metrics, share:100}],
+          compareSeries:[{label:'LEAKED SERIES',delivery:metrics.revenue,aggregator:100}],
+          locationRows:[{name:'LEAKED LOCATION', ...metrics, growth:100,
+            deliveryShare:100, aggregatorRevenue:100, versusAggregator:100}]
+        };
+      },
+      loadSalesData: async () => assert.fail('A known period mismatch must not use legacy')
+    }
+  });
+  return {
+    calls,
+    async render(params = {}) {
+      return renderToStaticMarkup(await load('app/delivery/page.tsx').default({
+        searchParams:Promise.resolve({year:'2026', month:'10', location:'Черкаси', ...params})
+      }));
+    }
+  };
+}
+
+const mismatches = [
+  {name:'October 2026 filter falls back to July 2026', meta:{cutoffDate:'2026-07-14'}},
+  {name:'2026 YTD falls back to December 2025', params:{month:undefined,location:'Європарк'},
+    meta:{cutoffDate:'2025-12-31',currentYear:2025,selectedMonth:null}},
+  {name:'RPC echoes a different year', meta:{selectedYear:2025}},
+  {name:'RPC echoes a different month', meta:{selectedMonth:7}},
+  {name:'RPC currentYear differs', meta:{currentYear:2025}},
+  {name:'invalid calendar cutoff', meta:{cutoffDate:'2026-02-30'}},
+  {name:'missing cutoff', meta:{cutoffDate:undefined}}
+];
+
+for (const scenario of mismatches) {
+  test(`Delivery SSR fails closed: ${scenario.name}`, async t => {
+    t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+    const h = harness(scenario.meta);
+    const html = await h.render(scenario.params);
+    assert.equal(h.calls.length,1);
+    assert.equal(h.calls[0].p_grain,'month');
+    assert.match(html,/NO DATA \/ UNKNOWN/);
+    assert.match(html,/Немає підтверджених даних за обраний період/);
+    assert.match(html,/Відсутність даних не означає нуль/);
+    assert.doesNotMatch(html,/987654321|LEAKED|kpi-grid|delivery-table|data-chart|LIVE|₴/);
+  });
+}
+
+test('Delivery SSR renders valid requested October period without suppressing confirmed data', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const h = harness();
+  const html = await h.render();
+  assert.equal(h.calls.length,1);
+  assert.match(html,/OWN DELIVERY · LIVE/);
+  assert.match(html,/kpi-grid/);
+  assert.match(html,/LEAKED PERIOD/);
+  assert.doesNotMatch(html,/NO DATA \/ UNKNOWN/);
+});
