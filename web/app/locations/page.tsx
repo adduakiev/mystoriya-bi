@@ -76,7 +76,7 @@ export default async function LocationsPage({
         statusTitle={sqlVerified ? "Live data connected" : "FALLBACK / UNVERIFIED"}
         statusDetail={sqlVerified
           ? `${locationRows.length} активних точок у зрізі`
-          : "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN"}
+          : "SQL RPC недоступний · резервний шлях, джерело UNKNOWN"}
       />
 
       <section className="workspace">
@@ -144,7 +144,7 @@ export default async function LocationsPage({
         {!sqlVerified && (
           <section className="panel" role="status">
             <span className="eyebrow">FALLBACK / UNVERIFIED</span>
-            <p>SQL-джерело недоступне. Показники отримані з резервного джерела Google Sheets; їхня повнота та відповідність сховищу не підтверджені.</p>
+            <p>SQL RPC недоступний. Показники розраховані резервним шляхом; фактичне джерело (Supabase snapshot або Google Sheets), свіжість і повнота не підтверджені.</p>
           </section>
         )}
 
