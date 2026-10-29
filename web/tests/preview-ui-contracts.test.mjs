@@ -4,6 +4,7 @@ import {previewHarness, moduleLoader, renderToStaticMarkup} from './support/bi-p
 import {routeAssertions} from '../../scripts/bi-audit-qa-contracts.mjs';
 import {executionMatrix} from '../../scripts/bi-audit-browser-qa.mjs';
 import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 
 for (const [route, [heading, rpc]] of Object.entries(routeAssertions)) {
   test(`mock SSR ${route}: actual page and adapter render fixture states`, async t => {
@@ -49,7 +50,12 @@ for (const route of ['/', '/delivery', '/locations', '/dynamics', '/explorer', '
     if (route !== '/dynamics') {
       assert.equal(args.p_focus_year, 2026);
       assert.equal(args.p_focus_month, 9);
-      assert.match(html, /value="9" selected=""/);
+      if (route === '/delivery') {
+        // Synthetic RPC returns October cutoff for a September selection: fail closed, no stale KPI.
+        assert.match(html, /NO DATA \/ UNKNOWN/);
+        assert.match(html, /Вересень/);
+        assert.doesNotMatch(html, /kpi-grid/);
+      } else assert.match(html, /value="9" selected=""/);
     }
     if (!['/locations'].includes(route)) {
       assert.equal(args.p_order_type, selected.orderType);
@@ -145,7 +151,8 @@ test('66-case plan is reproducible, covers 360/768/1440 and never upgrades SSR t
   }
   for (const url of ['https://name:secret@preview.invalid','https://preview.invalid/?token=x','https://preview.invalid/path'])
     assert.throws(()=>executionMatrix(url));
-  const result = spawnSync(process.execPath,['scripts/bi-audit-browser-qa.mjs','--check'], {encoding:'utf8'});
+  const script = fileURLToPath(new URL('../../scripts/bi-audit-browser-qa.mjs', import.meta.url));
+  const result = spawnSync(process.execPath,[script,'--check'], {encoding:'utf8'});
   assert.equal(result.status, 0, result.stderr);
 });
 
