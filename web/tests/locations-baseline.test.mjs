@@ -105,3 +105,60 @@ test('Locations source badge and visible warning distinguish SQL from unverified
     }
   }
 });
+
+function locationsPeriodHarness(metaPatch = {}, source = 'supabase-sql') {
+  const calls = [];
+  const data = {
+    source, years:[2024,2025,2026], selectedYear:2025, selectedMonth:10,
+    months:[10], brands:['Marmoo'], ownerships:[],
+    snapshot:{periodLabel:'LEAKED PERIOD', cutoffDate:'2026-10-26', kpis:[], ...metaPatch.snapshot},
+    locationRows:[], lflCount:0, lflCurrentRevenue:987654321,
+    lflPreviousRevenue:0, lflGrowth:null,
+    ...metaPatch
+  };
+  const load = moduleLoader({
+    'next/link': {default: ({prefetch,children,...props}) => React.createElement('a',props,children)},
+    'lucide-react': {Filter: () => null},
+    '@/components/DashboardSidebar': {DashboardSidebar: ({statusTitle,statusDetail}) =>
+      React.createElement('aside',null,statusTitle,' ',statusDetail)},
+    '@/components/KpiCard': {KpiCard: () => React.createElement('div',null,'LEAKED KPI')},
+    '@/components/LocationsComparisonChart': {LocationsComparisonChart: () =>
+      React.createElement('div',null,'LEAKED CHART')},
+    '@/lib/data/locations': {loadLocationsData: async options => {calls.push(options);return data;}}
+  });
+  return {calls, async render(params = {}) {
+    return renderToStaticMarkup(await load('app/locations/page.tsx').default({
+      searchParams:Promise.resolve({year:'2025',month:'10',brand:'Marmoo',...params})
+    }));
+  }};
+}
+
+for (const scenario of [
+  {name:'Marmoo has no 2025 sales but RPC uses October 2026', patch:{}},
+  {name:'requested month is not the SQL cutoff month', patch:{selectedYear:2026, snapshot:{cutoffDate:'2026-10-26'}}, params:{year:'2026',month:'5'}},
+  {name:'RPC echoes a different selected year', patch:{selectedYear:2026}, params:{year:'2025'}},
+  {name:'RPC echoes a different selected month', patch:{selectedMonth:9}},
+  {name:'invalid calendar cutoff', patch:{snapshot:{cutoffDate:'2025-02-30'}}},
+  {name:'missing cutoff', patch:{snapshot:{cutoffDate:''}}}
+]) {
+  test(`Locations SSR fails closed: ${scenario.name}`, async t => {
+    t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+    const h = locationsPeriodHarness(scenario.patch);
+    const html = await h.render(scenario.params);
+    assert.equal(h.calls.length,1);
+    assert.match(html,/NO DATA \/ UNKNOWN/);
+    assert.match(html,/Немає підтверджених даних за обраний період/);
+    assert.match(html,/Відсутність даних не означає нуль/);
+    assert.doesNotMatch(html,/987654321|LEAKED|kpi-grid|locations-matrix|LOCATIONS PERFORMANCE · SQL CONNECTED|₴/);
+  });
+}
+
+test('Locations SSR renders a confirmed selected year and month', async t => {
+  t.mock.method(globalThis,'fetch', () => assert.fail('No network allowed'));
+  const h = locationsPeriodHarness({selectedYear:2026, snapshot:{cutoffDate:'2026-10-26'}});
+  const html = await h.render({year:'2026',month:'10'});
+  assert.equal(h.calls.length,1);
+  assert.match(html,/LOCATIONS PERFORMANCE · SQL CONNECTED · FRESHNESS UNVERIFIED/);
+  assert.match(html,/LEAKED PERIOD|locations-matrix/);
+  assert.doesNotMatch(html,/NO DATA \/ UNKNOWN/);
+});

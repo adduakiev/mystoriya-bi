@@ -26,6 +26,22 @@ function pctLabel(value: number | null): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
 }
 
+function locationsPeriodMatches(
+  requestedYear: number | undefined,
+  requestedMonth: number | undefined,
+  data: Awaited<ReturnType<typeof loadLocationsData>>
+): boolean {
+  const cutoff = data.snapshot.cutoffDate;
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(cutoff)) return false;
+  const date = new Date(`${cutoff}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
+  const expectedYear = requestedYear ?? data.selectedYear;
+  return data.selectedYear === expectedYear
+    && data.selectedMonth === requestedMonth
+    && date.getUTCFullYear() === expectedYear
+    && (requestedMonth === undefined || (requestedMonth <= 12 && date.getUTCMonth() + 1 === requestedMonth));
+}
+
 export default async function LocationsPage({
   searchParams
 }: {
@@ -45,6 +61,36 @@ export default async function LocationsPage({
     month: selectedMonth,
     lfl
   });
+
+  // The installed Locations RPC falls back to a later year/month when the
+  // requested filtered period has no sales. Never render that other period's
+  // KPIs as though they belong to the requested year/month.
+  if (!locationsPeriodMatches(requestedYear, selectedMonth, data)) {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/locations"
+          lfl={lfl}
+          statusTitle="NO DATA / UNKNOWN"
+          statusDetail="Обраний період не підтверджено"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">LOCATIONS PERFORMANCE · UNKNOWN</span>
+              <h1>Заклади</h1>
+            </div>
+          </header>
+          <section className="panel" role="status">
+            <h2>Немає підтверджених даних за обраний період</h2>
+            <p>Обрані рік, місяць або фільтри не відповідають даті отриманих даних.
+              Відсутність даних не означає нуль; показники, порівняння та графіки приховано.</p>
+            <Link className="clear-filter" href="/locations">Скинути фільтри</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
 
   const {
     years,
