@@ -60,6 +60,8 @@ export default async function LocationsPage({
     lflGrowth
   } = data;
 
+  const sqlVerified = data.source === "supabase-sql";
+
   const chartData = locationRows.map((row) => ({
     location: row.location,
     venue: row.venueRevenue,
@@ -71,14 +73,16 @@ export default async function LocationsPage({
       <DashboardSidebar
         activeHref="/locations"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${locationRows.length} активних точок у зрізі`}
+        statusTitle={sqlVerified ? "Live data connected" : "FALLBACK / UNVERIFIED"}
+        statusDetail={sqlVerified
+          ? `${locationRows.length} активних точок у зрізі`
+          : "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">LOCATIONS PERFORMANCE · LIVE</span>
+            <span className="eyebrow">LOCATIONS PERFORMANCE · {sqlVerified ? "LIVE" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Заклади</h1>
           </div>
 <div className="quick-context">
@@ -136,6 +140,13 @@ export default async function LocationsPage({
             </div>
           </form>
         </details>
+
+        {!sqlVerified && (
+          <section className="panel" role="status">
+            <span className="eyebrow">FALLBACK / UNVERIFIED</span>
+            <p>SQL-джерело недоступне. Показники отримані з резервного джерела Google Sheets; їхня повнота та відповідність сховищу не підтверджені.</p>
+          </section>
+        )}
 
         <div className="context-line">
           <b>{snapshot.periodLabel}</b>
