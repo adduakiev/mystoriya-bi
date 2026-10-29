@@ -36,7 +36,7 @@ test('Locations: real 2024 sales with no 2023 baseline are UNKNOWN, never +0.0%'
   assert.equal(s.signal.title, 'Немає зіставної бази для обороту');
   assert.equal(s.signal.body, 'Оборот: немає зіставної бази. Чеки: немає зіставної бази. Середній чек: немає зіставної бази vs 2023.');
   for (const k of s.kpis) assert.equal(k.delta, null, k.label);
-  assert.doesNotMatch(s.signal.body, /[+-]?0\\.0%|NaN|Infinity|undefined/);
+  assert.doesNotMatch(s.signal.body, /[+-]?0\.0%|NaN|Infinity|undefined/);
 });
 
 test('Locations: missing previous object also cannot become measured zero', async () => {
@@ -48,7 +48,7 @@ test('Locations: missing previous object also cannot become measured zero', asyn
 test('Locations: measured unchanged values stay +0.0%, not unknown', async () => {
   const s = await locationsSnapshot(baseline, baseline);
   assert.equal(s.signal.title, 'Без змін обороту');
-  assert.match(s.signal.body, /Оборот: \\+0\\.0%\\. Чеки: \\+0\\.0%\\. Середній чек: \\+0\\.0%/);
+  assert.match(s.signal.body, /Оборот: \+0\.0%\. Чеки: \+0\.0%\. Середній чек: \+0\.0%/);
   assert.equal(s.kpis.find(k => k.label === 'Націнка %').delta, 0);
 });
 
@@ -56,14 +56,14 @@ test('Locations: valid growth and falling markup produce a real warning', async 
   const s = await locationsSnapshot({...baseline, revenue: 120, checks: 12, averageCheck: 10, markupRate: 19}, baseline);
   assert.equal(s.signal.title, 'Позитивна динаміка');
   assert.equal(s.signal.severity, 'warning');
-  assert.match(s.signal.body, /Оборот: \\+20\\.0%\\. Чеки: \\+20\\.0%\\. Середній чек: \\+0\\.0%/);
+  assert.match(s.signal.body, /Оборот: \+20\.0%\. Чеки: \+20\.0%\. Середній чек: \+0\.0%/);
   assert.equal(s.kpis.find(k => k.label === 'Націнка %').delta, -1);
 });
 
 test('Locations: zero current checks/revenue do not invent AOV or markup percentages', async () => {
   const s = await locationsSnapshot(zeros, baseline);
   assert.equal(s.signal.title, 'Період нижче бази порівняння');
-  assert.match(s.signal.body, /Оборот: -100\\.0%\\. Чеки: -100\\.0%\\. Середній чек: немає зіставної бази/);
+  assert.match(s.signal.body, /Оборот: -100\.0%\. Чеки: -100\.0%\. Середній чек: немає зіставної бази/);
   assert.equal(s.kpis.find(k => k.label === 'Середній чек').value, '—');
   assert.equal(s.kpis.find(k => k.label === 'Націнка %').value, '—');
   assert.equal(s.kpis.find(k => k.label === 'Націнка %').delta, null);
