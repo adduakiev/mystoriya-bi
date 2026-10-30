@@ -45,6 +45,11 @@ test('synthetic channels and devices SSR never present partial-period data as co
   assert.match(channels,/— трафіку/);
   assert.doesNotMatch(channels,/41[.,]36%/);
   assert.match(channels,/Organic Search/);
+  const audience=renderToStaticMarkup(await load('app/digital/audience/page.tsx').default());
+  assert.match(audience,/не більше 19 із 30 днів/);
+  assert.match(audience,/фактична кількість днів UNKNOWN, статус PARTIAL/);
+  assert.match(audience,/не повний період GA4/);
+  assert.match(audience,/mobile/);
   const site=renderToStaticMarkup(await load('app/digital/site/page.tsx').default());
   assert.match(site,/не більше 19 із 30 днів/);
   assert.match(site,/наявний зріз/);
