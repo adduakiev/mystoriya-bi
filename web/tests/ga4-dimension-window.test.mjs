@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {dimensionWindowEvidence} from '../lib/digital-quality.ts';
 import {moduleLoader, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
 
@@ -55,4 +56,14 @@ test('synthetic channels and devices SSR never present partial-period data as co
   assert.match(site,/наявний зріз/);
   assert.match(site,/не зіставні з повним періодом GA4/);
   assert.match(site,/mobile/);
+});
+
+// Source-level contract only: authenticated rendered browser QA remains separate.
+test('Digital overview suppresses channel shares and cross-window signals without day-level GA4 parity',()=>{
+  const page=fs.readFileSync(new URL('../app/digital/page.tsx',import.meta.url),'utf8');
+  assert.match(page,/const channelWindow=dimensionWindowEvidence\(range\.from,range\.to,history\.quality\.channels\.from,history\.quality\.channels\.to\)/);
+  assert.match(page,/Частка каналів від усіх сесій GA4 UNKNOWN/);
+  assert.match(page,/<span className="share">— · UNKNOWN<\/span>/);
+  assert.doesNotMatch(page,/metricRatio\(row\.sessions,c\.sessions\)|metricRatio\(topTrafficChannel\.sessions,c\.sessions\)|topTrafficChannel/);
+  assert.match(page,/topChannels\.map\(row=>/,'raw channel labels and in-slice purchase metrics remain visible');
 });
