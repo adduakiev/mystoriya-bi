@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prebuild": "node --test --test-concurrency=2 $(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'bi-audit.test.mjs' | sort)",
+    "prebuild": "node ../scripts/test.mjs",
     "test:full": "node --test --test-concurrency=2 tests/*.test.mjs"
   },
   "dependencies": {

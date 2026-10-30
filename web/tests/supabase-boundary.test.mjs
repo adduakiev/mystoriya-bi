@@ -163,7 +163,8 @@ test("Next.js rejects a Client Component importing the Supabase transport", { ti
   const fixture = mkdtempSync(path.join(tmpdir(), "bi-server-boundary-"));
   t.after(() => rmSync(fixture, { recursive: true, force: true }));
   mkdirSync(path.join(fixture, "app"));
-  symlinkSync(path.join(web, "node_modules"), path.join(fixture, "node_modules"), "dir");
+  // Windows directory junctions do not require symlink elevation.
+  symlinkSync(path.join(web, "node_modules"), path.join(fixture, "node_modules"), process.platform === "win32" ? "junction" : "dir");
   writeFileSync(path.join(fixture, "package.json"), JSON.stringify({ private: true }));
   // Keep compiler diagnostics in this process rather than an extra build worker.
   writeFileSync(path.join(fixture, "next.config.mjs"),
