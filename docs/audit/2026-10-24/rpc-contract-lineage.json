@@ -206,7 +206,7 @@
         },
         {
           "path": "web/app/digital/page.tsx",
-          "file_sha256": "53ac2b9bd6d5a4e56be9d01d5555170ea46c30431bfafece05769684597a1c1b"
+          "file_sha256": "ba2428ee2c2a311a58274ed773eb06f707dac73a516868d9f7a9b37149e7efee"
         }
       ],
       "freshness": "UNKNOWN; reviewer bounded date receipts in barbara-production-evidence.json are separate",
