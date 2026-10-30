@@ -1,5 +1,5 @@
 import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
-import { formatMetric, metricRatio } from "@/lib/digital-quality";
+import { formatMetric, metricRatio, dimensionWindowEvidence } from "@/lib/digital-quality";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalData, loadDigitalHistory } from "@/lib/data/digital";
@@ -13,6 +13,8 @@ export default async function Page(){
   const c=data.current;
   const sessionsPerUser=metricRatio(c.sessions,c.activeUsers);
   const purchasesPerUser=metricRatio(c.purchases,c.activeUsers);
+  const deviceEvidence=dimensionWindowEvidence(data.meta.from,data.meta.to,history.quality.devices.from,history.quality.devices.to);
+  const deviceBound=deviceEvidence.maximumPossibleDays===null?"UNKNOWN":`не більше ${deviceEvidence.maximumPossibleDays} із ${deviceEvidence.selectedDays} днів`;
 
   return <main className="shell">
     <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Аудиторія" statusDetail="GA4 · web audience"/>
@@ -23,7 +25,7 @@ export default async function Page(){
       </header>
       <DigitalTabs active="audience"/>
       <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
-      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата зрізу пристроїв: {history.quality.devices.to ?? "невідомо"}. Повнота UNKNOWN. Унікальні користувачі за період недоступні: сума денних active_users не є унікальною аудиторією.</div>
+      <div className="lfl-banner">GA4: {data.meta.from} — {data.meta.to}; дані до {data.meta.ga4Latest || "невідомо"}. Дата зрізу пристроїв: {history.quality.devices.to ?? "невідомо"}. За датами джерела доступно {deviceBound}; фактична кількість днів UNKNOWN, статус {deviceEvidence.status}. Показники пристроїв - лише наявний зріз, не повний період GA4. Унікальні користувачі за період недоступні: сума денних active_users не є унікальною аудиторією.</div>
 
       <section className="digital-kpi-grid">
         <article className="digital-kpi-card"><span>Active users</span><strong>{n(c.activeUsers)}</strong><small>унікальні за період · недоступно</small><em>web</em></article>
@@ -52,7 +54,7 @@ export default async function Page(){
         <article className="panel">
           <span className="eyebrow">ЩО ВЖЕ МОЖЕМО ВИРІШУВАТИ</span>
           <div className="digital-decision-list">
-            <div><span>1</span><b>На яких пристроях найслабша purchase/session конверсія.</b></div>
+            <div><span>1</span><b>На яких пристроях найслабша purchase/session конверсія за наявним зрізом (не повний період).</b></div>
             <div><span>2</span><b>Чи достатньо залучені користувачі після входу на сайт.</b></div>
             <div><span>3</span><b>Де UX-проблема може впливати на продажі.</b></div>
           </div>
