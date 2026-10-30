@@ -1,5 +1,5 @@
 import { ga4Money as money, GA4_MONEY_NOTICE } from "@/lib/ga4-presentation";
-import { coreWebVitalsLabel, formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
+import { coreWebVitalsLabel, dimensionWindowEvidence, formatMetric, metricRatio, metricSum } from "@/lib/digital-quality";
 import { sourceMoney, sourceWindow, SOURCE_WINDOW_LIMITATIONS } from "@/lib/source-evidence";
 import { hasSpendWithoutConversions } from "@/lib/ads-presentation";
 import Link from "next/link";
@@ -159,6 +159,8 @@ export default async function DigitalPage({
   const ga4Min=history.quality.ga4.from??"2025-01-01";
   const searchMin=history.quality.searchConsole.from??"9999-12-31";
   const range=resolveRange(params,latest,ga4Min);
+  const channelWindow=dimensionWindowEvidence(range.from,range.to,history.quality.channels.from,history.quality.channels.to);
+  const channelBound=channelWindow.maximumPossibleDays===null?"UNKNOWN":`не більше ${channelWindow.maximumPossibleDays} із ${channelWindow.selectedDays} днів`;
   const compareMode=first(params.compare)==="previous"?"previous":"yoy";
   const compare=comparisonRange(range.from,range.to,compareMode);
 
@@ -180,7 +182,6 @@ export default async function DigitalPage({
   const selectedYear=Number(first(params.year)??currentYear);
   const selectedMonth=Number(first(params.month)??0);
   const seoOpportunities=data.seoQueries.filter(row=>row.impressions!==null&&row.impressions>=1000&&row.position!==null&&row.position<=10&&row.ctr!==null&&seo.ctr!==null&&row.ctr<seo.ctr);
-  const topTrafficChannel=data.channels[0]??null;
   const unknownLanding=data.landingPages.find(row=>row.landingPage==="(not set)");
   const noConversionCampaigns=ads.campaigns.filter(hasSpendWithoutConversions);
   const adsWindow=sourceWindow(ads.meta,range);
@@ -195,9 +196,6 @@ export default async function DigitalPage({
     }:null,
     seoOpportunities.length?{
       level:"MEDIUM",title:"SEO CTR можливості",text:`${seoOpportunities.length} запитів у ТОП-10 мають ≥1 000 показів і CTR нижче середнього.`,href:"/digital/seo"
-    }:null,
-    topTrafficChannel&&topTrafficChannel.conversionRate!==null&&c.conversionRate!==null&&topTrafficChannel.conversionRate<c.conversionRate?{
-      level:"MEDIUM",title:`Канал: ${topTrafficChannel.channel}`,text:`${pct(metricRatio(topTrafficChannel.sessions,c.sessions))} трафіку, але purchase/session ${pct(topTrafficChannel.conversionRate)} проти ${pct(c.conversionRate)} по сайту.`,href:"/digital/channels"
     }:null,
     unknownLanding&&unknownLanding.sessions!==null&&unknownLanding.sessions>0?{
       level:"DATA",title:"Tracking landing page",text:`${compact(unknownLanding.sessions)} сесій мають landing page “(not set)”. Перевіряємо session_start / tracking.`,href:"/digital/tracking"
@@ -221,6 +219,7 @@ export default async function DigitalPage({
 
         <DigitalTabs active="overview"/>
         <div className="lfl-banner">{GA4_MONEY_NOTICE}</div>
+        <div className="lfl-banner">Канали: дата останнього зрізу {history.quality.channels.to ?? "невідомо"}; за межами дат максимум {channelBound}, фактична кількість днів UNKNOWN, статус {channelWindow.status}. Частка каналів від усіх сесій GA4 UNKNOWN: зрізи не доведено зіставними, тому відсотки та міжзрізові сигнали приховано.</div>
         <div className="lfl-banner">Дати даних: GA4 — {history.quality.ga4.to ?? "невідомо"}; канали — {history.quality.channels.to ?? "невідомо"}; пристрої — {history.quality.devices.to ?? "невідомо"}; GSC — {history.quality.searchConsole.to ?? "невідомо"}. Зрізи з різними датами не є повністю зіставними. Дата обробки не підтверджує свіжість джерела. Повнота UNKNOWN; пропуски та атомарність між запитами не підтверджені. Landing / SEO таблиці — окремі 30-денні знімки лише за точного збігу періоду (RPC ліміти: 30 / 40 / 30); upstream ліміти невідомі. Сумарні active_users не є унікальними користувачами за період.</div>
 
         <section className="digital-control-bar">
@@ -331,8 +330,7 @@ export default async function DigitalPage({
               {topChannels.map(row=>(
                 <div className="channel-row" key={row.channel}>
                   <div><b>{row.channel}</b><span>{compact(row.purchases)} purchase · {pct(row.conversionRate)} purchase/session</span></div>
-                  <span className="share">{pct(metricRatio(row.sessions,c.sessions))}</span>
-                  {metricRatio(row.sessions,c.sessions)!==null&&<div className="track"><span style={{width:`${Math.min(100,metricRatio(row.sessions,c.sessions)!*100)}%`}}/></div>}
+                  <span className="share">— · UNKNOWN</span>
                 </div>
               ))}
             </div>
