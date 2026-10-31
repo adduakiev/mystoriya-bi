@@ -196,7 +196,8 @@ export default async function Home({
             </span>
           </summary>
 
-          <form className="filter-form" method="get" action="/">
+          {/* Re-key uncontrolled selectors after URL-driven navigation (MTD/LFL/segments). */}
+          <form key={JSON.stringify(filters)} className="filter-form" method="get" action="/">
             {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Рік</span>
