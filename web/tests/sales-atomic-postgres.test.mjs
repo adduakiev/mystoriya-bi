@@ -162,6 +162,19 @@ test('atomic sales snapshot on disposable PostgreSQL',{
       assert.equal(sql(`select status from public.import_runs where id='${b}'`),'running');
       persistedRows=winner;
     });
+    await t.test('historical location rebrand preserves fact-level brand and materialized views',()=>{
+      // Live Олимпийская has legacy МитБАР facts and a current Marmoo location brand.
+      // Current dimension metadata may advance; historical fact attribution must not.
+      const added={...row('Old',9),accounting_date:'2026-10-31',brand:'Marmoo'};
+      const rows=[...persistedRows,added];const id=begin(rows);stage(id,rows);commit(id);
+      assert.equal(sql("select b.name from public.dim_location l join public.dim_brand b on b.id=l.brand_id where l.canonical_name='Old'"),'Marmoo');
+      assert.equal(sql("select string_agg(b.name, ',' order by f.date_id) from public.fact_sales_daily f join public.dim_location l on l.id=f.location_id join public.dim_brand b on b.id=f.brand_id where l.canonical_name='Old'"),'Fixture,Marmoo');
+      assert.equal(sql("select string_agg(brand, ',' order by date) from public.bi_sales_flat_mv where location='Old'"),'Fixture,Marmoo');
+      assert.equal(sql("select count(*) from public.fact_sales_daily where date_id='2026-10-30'"),'4');
+      assert.equal(sql("select count(*) from public.fact_sales_daily where date_id='2026-10-31'"),'1');
+      assert.equal(sql('select sum(revenue) from public.bi_sales_flat_mv'),'114.00');
+      persistedRows=rows;
+    });
     await t.test('expired and source-cutoff regression are rejected without changing accepted data',()=>{
       const before=snapshot();const expired=begin([row()]);stage(expired,[row()]);
       sql(`update bi_import_private.sales_runs set expires_at=now()-interval '1 second' where id='${expired}'`);
