@@ -14373,12 +14373,12 @@
       "evidence": "web/app/page.tsx:193"
     },
     {
-      "id": "web/app/page.tsx:6875",
+      "id": "web/app/page.tsx:6971",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 199,
+      "line": 200,
       "kind": "form",
       "displayed_kpi_definition": "Рік Місяць Весь рік Канал Всі канали Заклад Агрегатор Доставка Деталізація каналу Вся деталізація Бренд Всі бренди Власність Вся власність Локація Всі локації Порівняння Минулого р",
       "props": {
@@ -14395,15 +14395,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:199"
+      "evidence": "web/app/page.tsx:200"
     },
     {
-      "id": "web/app/page.tsx:6950",
+      "id": "web/app/page.tsx:7076",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 200,
+      "line": 201,
       "kind": "input",
       "displayed_kpi_definition": "input",
       "props": {
@@ -14414,15 +14414,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:200"
+      "evidence": "web/app/page.tsx:201"
     },
     {
-      "id": "web/app/page.tsx:7061",
+      "id": "web/app/page.tsx:7187",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 203,
+      "line": 204,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -14436,15 +14436,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:203"
+      "evidence": "web/app/page.tsx:204"
     },
     {
-      "id": "web/app/page.tsx:7319",
+      "id": "web/app/page.tsx:7445",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 210,
+      "line": 211,
       "kind": "select",
       "displayed_kpi_definition": "Весь рік",
       "props": {
@@ -14459,15 +14459,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:210"
+      "evidence": "web/app/page.tsx:211"
     },
     {
-      "id": "web/app/page.tsx:7720",
+      "id": "web/app/page.tsx:7846",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 220,
+      "line": 221,
       "kind": "select",
       "displayed_kpi_definition": "Всі канали Заклад Агрегатор Доставка",
       "props": {
@@ -14479,15 +14479,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:220"
+      "evidence": "web/app/page.tsx:221"
     },
     {
-      "id": "web/app/page.tsx:8135",
+      "id": "web/app/page.tsx:8261",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 230,
+      "line": 231,
       "kind": "select",
       "displayed_kpi_definition": "Вся деталізація",
       "props": {
@@ -14501,15 +14501,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:230"
+      "evidence": "web/app/page.tsx:231"
     },
     {
-      "id": "web/app/page.tsx:8533",
+      "id": "web/app/page.tsx:8659",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 238,
+      "line": 239,
       "kind": "select",
       "displayed_kpi_definition": "Всі бренди",
       "props": {
@@ -14523,15 +14523,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:238"
+      "evidence": "web/app/page.tsx:239"
     },
     {
-      "id": "web/app/page.tsx:8914",
+      "id": "web/app/page.tsx:9040",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 246,
+      "line": 247,
       "kind": "select",
       "displayed_kpi_definition": "Вся власність",
       "props": {
@@ -14545,15 +14545,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:246"
+      "evidence": "web/app/page.tsx:247"
     },
     {
-      "id": "web/app/page.tsx:9275",
+      "id": "web/app/page.tsx:9401",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 252,
+      "line": 253,
       "kind": "label",
       "displayed_kpi_definition": "Локація Всі локації",
       "props": {},
@@ -14564,15 +14564,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:252"
+      "evidence": "web/app/page.tsx:253"
     },
     {
-      "id": "web/app/page.tsx:9356",
+      "id": "web/app/page.tsx:9482",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 254,
+      "line": 255,
       "kind": "select",
       "displayed_kpi_definition": "Всі локації",
       "props": {
@@ -14586,15 +14586,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:254"
+      "evidence": "web/app/page.tsx:255"
     },
     {
-      "id": "web/app/page.tsx:9766",
+      "id": "web/app/page.tsx:9892",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 262,
+      "line": 263,
       "kind": "select",
       "displayed_kpi_definition": "Минулого року Попередній період",
       "props": {
@@ -14606,30 +14606,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:262"
+      "evidence": "web/app/page.tsx:263"
     },
     {
-      "id": "web/app/page.tsx:9997",
+      "id": "web/app/page.tsx:10123",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 268,
+      "line": 269,
       "kind": "div",
       "displayed_kpi_definition": "Застосувати",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:268"
+      "evidence": "web/app/page.tsx:269"
     },
     {
-      "id": "web/app/page.tsx:10044",
+      "id": "web/app/page.tsx:10170",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 269,
+      "line": 270,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -14638,15 +14638,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:269"
+      "evidence": "web/app/page.tsx:270"
     },
     {
-      "id": "web/app/page.tsx:10126",
+      "id": "web/app/page.tsx:10252",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 270,
+      "line": 271,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути все",
       "props": {
@@ -14655,15 +14655,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:270"
+      "evidence": "web/app/page.tsx:271"
     },
     {
-      "id": "web/app/page.tsx:10665",
+      "id": "web/app/page.tsx:10791",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 282,
+      "line": 283,
       "kind": "div",
       "displayed_kpi_definition": "cutoff vs LFL · активна мережа",
       "props": {},
@@ -14677,30 +14677,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:282"
+      "evidence": "web/app/page.tsx:283"
     },
     {
-      "id": "web/app/page.tsx:11017",
+      "id": "web/app/page.tsx:11143",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 288,
+      "line": 289,
       "kind": "span",
       "displayed_kpi_definition": "LFL · активна мережа",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:288"
+      "evidence": "web/app/page.tsx:289"
     },
     {
-      "id": "web/app/page.tsx:11144",
+      "id": "web/app/page.tsx:11270",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 292,
+      "line": 293,
       "kind": "div",
       "displayed_kpi_definition": "ACTIVE VIEW Канал: Тип: Локація: Бренд: Власність: LFL: без закритих точок",
       "props": {},
@@ -14714,15 +14714,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:292"
+      "evidence": "web/app/page.tsx:293"
     },
     {
-      "id": "web/app/page.tsx:11266",
+      "id": "web/app/page.tsx:11392",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 294,
+      "line": 295,
       "kind": "span",
       "displayed_kpi_definition": "Канал:",
       "props": {},
@@ -14731,15 +14731,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:294"
+      "evidence": "web/app/page.tsx:295"
     },
     {
-      "id": "web/app/page.tsx:11363",
+      "id": "web/app/page.tsx:11489",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 295,
+      "line": 296,
       "kind": "span",
       "displayed_kpi_definition": "Тип:",
       "props": {},
@@ -14748,15 +14748,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:295"
+      "evidence": "web/app/page.tsx:296"
     },
     {
-      "id": "web/app/page.tsx:11459",
+      "id": "web/app/page.tsx:11585",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 296,
+      "line": 297,
       "kind": "span",
       "displayed_kpi_definition": "Локація:",
       "props": {},
@@ -14765,15 +14765,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:296"
+      "evidence": "web/app/page.tsx:297"
     },
     {
-      "id": "web/app/page.tsx:11555",
+      "id": "web/app/page.tsx:11681",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 297,
+      "line": 298,
       "kind": "span",
       "displayed_kpi_definition": "Бренд:",
       "props": {},
@@ -14782,15 +14782,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:297"
+      "evidence": "web/app/page.tsx:298"
     },
     {
-      "id": "web/app/page.tsx:11650",
+      "id": "web/app/page.tsx:11776",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 298,
+      "line": 299,
       "kind": "span",
       "displayed_kpi_definition": "Власність:",
       "props": {},
@@ -14799,30 +14799,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:298"
+      "evidence": "web/app/page.tsx:299"
     },
     {
-      "id": "web/app/page.tsx:11739",
+      "id": "web/app/page.tsx:11865",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 299,
+      "line": 300,
       "kind": "span",
       "displayed_kpi_definition": "LFL: без закритих точок",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:299"
+      "evidence": "web/app/page.tsx:300"
     },
     {
-      "id": "web/app/page.tsx:11822",
+      "id": "web/app/page.tsx:11948",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 300,
+      "line": 301,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути зріз",
       "props": {
@@ -14834,15 +14834,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:300"
+      "evidence": "web/app/page.tsx:301"
     },
     {
-      "id": "web/app/page.tsx:12136",
+      "id": "web/app/page.tsx:12262",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 310,
+      "line": 311,
       "kind": "X",
       "displayed_kpi_definition": "X",
       "props": {},
@@ -14852,15 +14852,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:310"
+      "evidence": "web/app/page.tsx:311"
     },
     {
-      "id": "web/app/page.tsx:12704",
+      "id": "web/app/page.tsx:12830",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 322,
+      "line": 323,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
@@ -14869,15 +14869,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:322"
+      "evidence": "web/app/page.tsx:323"
     },
     {
-      "id": "web/app/page.tsx:12780",
+      "id": "web/app/page.tsx:12906",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 323,
+      "line": 324,
       "kind": "KpiCard",
       "displayed_kpi_definition": "KpiCard",
       "props": {},
@@ -14889,15 +14889,15 @@
       ],
       "repeat_template": "ready.snapshot.kpis",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:323"
+      "evidence": "web/app/page.tsx:324"
     },
     {
-      "id": "web/app/page.tsx:13073",
+      "id": "web/app/page.tsx:13199",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 330,
+      "line": 331,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -14913,15 +14913,15 @@
       ],
       "repeat_template": "[\"Заклад\", \"Агрегатор\", \"Доставка\"]",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:330"
+      "evidence": "web/app/page.tsx:331"
     },
     {
-      "id": "web/app/page.tsx:13696",
+      "id": "web/app/page.tsx:13822",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 347,
+      "line": 348,
       "kind": "article",
       "displayed_kpi_definition": "MULTI-YEAR DYNAMICS · · 2024–2026 Тижні (тимчасово недоступні)",
       "props": {},
@@ -14933,15 +14933,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:347"
+      "evidence": "web/app/page.tsx:348"
     },
     {
-      "id": "web/app/page.tsx:14065",
+      "id": "web/app/page.tsx:14191",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 353,
+      "line": 354,
       "kind": "div",
       "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
       "props": {},
@@ -14951,15 +14951,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:353"
+      "evidence": "web/app/page.tsx:354"
     },
     {
-      "id": "web/app/page.tsx:14222",
+      "id": "web/app/page.tsx:14348",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 356,
+      "line": 357,
       "kind": "Link",
       "displayed_kpi_definition": "Місяці",
       "props": {
@@ -14971,15 +14971,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:356"
+      "evidence": "web/app/page.tsx:357"
     },
     {
-      "id": "web/app/page.tsx:15068",
+      "id": "web/app/page.tsx:15194",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 375,
+      "line": 376,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -14995,15 +14995,15 @@
       ],
       "repeat_template": "([ [\"revenue\", \"Оборот\"], [\"checks\", \"Чеки\"], [\"averageCheck\", \"Ср. чек\"], [\"markupRate\", \"Націнка %\"] ] as const)",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:375"
+      "evidence": "web/app/page.tsx:376"
     },
     {
-      "id": "web/app/page.tsx:15442",
+      "id": "web/app/page.tsx:15568",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 386,
+      "line": 387,
       "kind": "MultiYearMetricChart",
       "displayed_kpi_definition": "MultiYearMetricChart",
       "props": {
@@ -15019,15 +15019,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:386"
+      "evidence": "web/app/page.tsx:387"
     },
     {
-      "id": "web/app/page.tsx:15610",
+      "id": "web/app/page.tsx:15736",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 393,
+      "line": 394,
       "kind": "article",
       "displayed_kpi_definition": "STRUCTURE Канали продажів",
       "props": {},
@@ -15036,15 +15036,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:393"
+      "evidence": "web/app/page.tsx:394"
     },
     {
-      "id": "web/app/page.tsx:15851",
+      "id": "web/app/page.tsx:15977",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 400,
+      "line": 401,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -15053,15 +15053,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:400"
+      "evidence": "web/app/page.tsx:401"
     },
     {
-      "id": "web/app/page.tsx:15956",
+      "id": "web/app/page.tsx:16082",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 402,
+      "line": 403,
       "kind": "Link",
       "displayed_kpi_definition": "· чеків · ср. чек %",
       "props": {
@@ -15077,15 +15077,15 @@
       ],
       "repeat_template": "ready.snapshot.channels",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:402"
+      "evidence": "web/app/page.tsx:403"
     },
     {
-      "id": "web/app/page.tsx:17177",
+      "id": "web/app/page.tsx:17303",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 430,
+      "line": 431,
       "kind": "ChannelMixChart",
       "displayed_kpi_definition": "ChannelMixChart",
       "props": {},
@@ -15095,15 +15095,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:430"
+      "evidence": "web/app/page.tsx:431"
     },
     {
-      "id": "web/app/page.tsx:17310",
+      "id": "web/app/page.tsx:17436",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 434,
+      "line": 435,
       "kind": "article",
       "displayed_kpi_definition": "GROWTH DECOMPOSITION Що зробило зміну обороту Δ Ефект чеків зміна кількості чеків × базовий ср. чек Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -15117,15 +15117,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:434"
+      "evidence": "web/app/page.tsx:435"
     },
     {
-      "id": "web/app/page.tsx:17749",
+      "id": "web/app/page.tsx:17875",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 445,
+      "line": 446,
       "kind": "div",
       "displayed_kpi_definition": "Ефект чеків зміна кількості чеків × базовий ср. чек Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -15139,15 +15139,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:445"
+      "evidence": "web/app/page.tsx:446"
     },
     {
-      "id": "web/app/page.tsx:17801",
+      "id": "web/app/page.tsx:17927",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 446,
+      "line": 447,
       "kind": "div",
       "displayed_kpi_definition": "Ефект чеків зміна кількості чеків × базовий ср. чек",
       "props": {},
@@ -15158,15 +15158,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:446"
+      "evidence": "web/app/page.tsx:447"
     },
     {
-      "id": "web/app/page.tsx:18226",
+      "id": "web/app/page.tsx:18352",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 453,
+      "line": 454,
       "kind": "div",
       "displayed_kpi_definition": "Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -15177,15 +15177,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:453"
+      "evidence": "web/app/page.tsx:454"
     },
     {
-      "id": "web/app/page.tsx:18706",
+      "id": "web/app/page.tsx:18832",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 463,
+      "line": 464,
       "kind": "article",
       "displayed_kpi_definition": "CONTRIBUTION TO GROWTH Хто дав зміну",
       "props": {},
@@ -15199,15 +15199,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:463"
+      "evidence": "web/app/page.tsx:464"
     },
     {
-      "id": "web/app/page.tsx:18959",
+      "id": "web/app/page.tsx:19085",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 471,
+      "line": 472,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -15221,15 +15221,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:471"
+      "evidence": "web/app/page.tsx:472"
     },
     {
-      "id": "web/app/page.tsx:20043",
+      "id": "web/app/page.tsx:20169",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 495,
+      "line": 496,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -15243,27 +15243,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:495"
+      "evidence": "web/app/page.tsx:496"
     },
     {
-      "id": "web/app/page.tsx:21134",
-      "paths": [
-        "/"
-      ],
-      "component": "web/app/page.tsx",
-      "line": 520,
-      "kind": "div",
-      "displayed_kpi_definition": "Місяць Оборот YoY Чеки YoY Ср. чек Націнка % Заклад % Агр. % Доставка %",
-      "props": {},
-      "bindings": [
-        "ready.snapshot.monthlyTable.map((row) => ( <Link key={row.month} href={queryHref(filters, { month: row.month, period: \"month\" })} className=\"management-row\" > <b>{row.label}{row.is"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:520"
-    },
-    {
-      "id": "web/app/page.tsx:21188",
+      "id": "web/app/page.tsx:21260",
       "paths": [
         "/"
       ],
@@ -15280,12 +15263,29 @@
       "evidence": "web/app/page.tsx:521"
     },
     {
-      "id": "web/app/page.tsx:21772",
+      "id": "web/app/page.tsx:21314",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 536,
+      "line": 522,
+      "kind": "div",
+      "displayed_kpi_definition": "Місяць Оборот YoY Чеки YoY Ср. чек Націнка % Заклад % Агр. % Доставка %",
+      "props": {},
+      "bindings": [
+        "ready.snapshot.monthlyTable.map((row) => ( <Link key={row.month} href={queryHref(filters, { month: row.month, period: \"month\" })} className=\"management-row\" > <b>{row.label}{row.is"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:522"
+    },
+    {
+      "id": "web/app/page.tsx:21898",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 537,
       "kind": "Link",
       "displayed_kpi_definition": "% % % %",
       "props": {
@@ -15301,30 +15301,30 @@
       ],
       "repeat_template": "ready.snapshot.monthlyTable",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:536"
+      "evidence": "web/app/page.tsx:537"
     },
     {
-      "id": "web/app/page.tsx:22992",
+      "id": "web/app/page.tsx:23118",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 559,
+      "line": 560,
       "kind": "small",
       "displayed_kpi_definition": "* неповний місяць — порівняння вирівняне по тому самому cutoff.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:559"
+      "evidence": "web/app/page.tsx:560"
     },
     {
-      "id": "web/app/page.tsx:23186",
+      "id": "web/app/page.tsx:23312",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 564,
+      "line": 565,
       "kind": "article",
       "displayed_kpi_definition": "LOCATIONS · Внесок точок TOP Локація Оборот Δ Частка",
       "props": {},
@@ -15336,15 +15336,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:564"
+      "evidence": "web/app/page.tsx:565"
     },
     {
-      "id": "web/app/page.tsx:23490",
+      "id": "web/app/page.tsx:23616",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 571,
+      "line": 572,
       "kind": "Link",
       "displayed_kpi_definition": "Всі локації →",
       "props": {
@@ -15356,27 +15356,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:571"
+      "evidence": "web/app/page.tsx:572"
     },
     {
-      "id": "web/app/page.tsx:23752",
-      "paths": [
-        "/"
-      ],
-      "component": "web/app/page.tsx",
-      "line": 577,
-      "kind": "div",
-      "displayed_kpi_definition": "Локація Оборот Δ Частка",
-      "props": {},
-      "bindings": [
-        "ready.snapshot.locations.map((location) => ( <Link className=\"table-row\" key={location.name} href={queryHref(filters, { location: filters.location === location.name ? undefined : l"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:577"
-    },
-    {
-      "id": "web/app/page.tsx:23799",
+      "id": "web/app/page.tsx:23878",
       "paths": [
         "/"
       ],
@@ -15385,18 +15368,35 @@
       "kind": "div",
       "displayed_kpi_definition": "Локація Оборот Δ Частка",
       "props": {},
-      "bindings": [],
+      "bindings": [
+        "ready.snapshot.locations.map((location) => ( <Link className=\"table-row\" key={location.name} href={queryHref(filters, { location: filters.location === location.name ? undefined : l"
+      ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
       "evidence": "web/app/page.tsx:578"
     },
     {
-      "id": "web/app/page.tsx:24024",
+      "id": "web/app/page.tsx:23925",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 582,
+      "line": 579,
+      "kind": "div",
+      "displayed_kpi_definition": "Локація Оборот Δ Частка",
+      "props": {},
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:579"
+    },
+    {
+      "id": "web/app/page.tsx:24150",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 583,
       "kind": "Link",
       "displayed_kpi_definition": "%",
       "props": {
@@ -15412,15 +15412,15 @@
       ],
       "repeat_template": "ready.snapshot.locations",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:582"
+      "evidence": "web/app/page.tsx:583"
     },
     {
-      "id": "web/app/page.tsx:24732",
+      "id": "web/app/page.tsx:24858",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 600,
+      "line": 601,
       "kind": "article",
       "displayed_kpi_definition": "Що потребує уваги 1",
       "props": {},
@@ -15431,7 +15431,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:600"
+      "evidence": "web/app/page.tsx:601"
     },
     {
       "id": "web/components/ChannelMixChart.tsx:294",
