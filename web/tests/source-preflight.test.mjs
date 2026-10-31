@@ -56,3 +56,23 @@ test("small history variation is allowed; unknown baseline is not guessed", () =
   assert.equal(assertSalesCsvPreflight(source(96), {previousRowCount:100}).rawRows,96);
   assert.equal(assertSalesCsvPreflight(source(1)).rawRows,1);
 });
+
+test("sub-cent UAH amounts fail before aggregation can round them away", () => {
+  const rows = source();
+  rows[1][11] = "0.004";
+  rejects(rows, /SOURCE_PREFLIGHT_SUB_CENT row=2 column=11/);
+  rows[1][11] = "-0.004";
+  rejects(rows, /SOURCE_PREFLIGHT_SUB_CENT row=2 column=11/);
+  rows[1][11] = "1 234,501";
+  rejects(rows, /SOURCE_PREFLIGHT_SUB_CENT row=2 column=11/);
+  rows[1][11] = "1.2300";
+  rows[1][13] = "-12,4501";
+  rejects(rows, /SOURCE_PREFLIGHT_SUB_CENT row=2 column=13/);
+  rows[1][13] = "-12,4500";
+  assert.equal(assertSalesCsvPreflight(rows).rawRows, 1);
+});
+test("unsafe large integer checks fail instead of losing integer precision", () => {
+  const rows = source();
+  rows[1][12] = "9007199254740993";
+  rejects(rows, /SOURCE_PREFLIGHT_INVALID_CHECKS/);
+});
