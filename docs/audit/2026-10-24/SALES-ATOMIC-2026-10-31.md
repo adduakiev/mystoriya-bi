@@ -12,7 +12,9 @@ production, migration, permission or scheduler action was approved or performed.
 `import_runs`/`fact_sales_daily` column contracts. Legacy batch RPC writes facts directly;
 finalize deletes every fact with a different run ID. Separate calls are not atomic.
 Refresh currently includes `bi_sales_flat_mv`, `agg_sales_monthly`, `agg_sales_weekly`.
-Tests include all three, not merely totals in a mock table. No production function invoked.
+Tests include all three with repository-backed aggregate shapes and the inspected refresh
+chain, not merely totals in a mock table. Exact deployed view-definition parity is not
+claimed. No production function invoked.
 
 The candidate is `docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql`, outside migrations.
 It ends with ROLLBACK. Only the disposable fixture commits its own copy.
@@ -89,10 +91,24 @@ concurrent promotion with an uncommitted reader observation, expiry, cutoff regr
 backend cancellation, two-batch promotion, historical shrink, and 47000 synthetic rows
 across 24 batches with reconciliation against all three materialized views.
 
-The first PostgreSQL 17.11 run passed 10/10 before cancellation/scale extensions.
-Final exact-SHA test counts, full-check comparison, checksums and build evidence are
-recorded in the PR handoff comment. Earlier full-check baseline had seven audit-artifact
-failures and two unrelated PostgreSQL skips; do not hide them or claim a green release gate.
+At implementation/test SHA `f728a9f6ec49f97625d40899ecd45af90a3ce002`, full `npm run check`
+executed 405 tests: **396 PASS / 7 FAIL / 2 SKIP**. All **13 atomic-suite tests passed**,
+including 47000-row promotion (13.329 seconds locally), exact fact/flat/monthly/weekly
+reconciliation, rollback after status failure, cancellation and concurrency. This is a local
+synthetic timing, not a hosted SLA. The temporary server was stopped after testing.
+The source tree was clean and `git diff --check` passed. The earlier exact Git archive
+contains identical SQL design; the subsequent test-only change raises Windows initdb's
+timeout from 60 to 180 seconds. Initial 60-second initdb and parent-test timeouts are failed
+attempts, not successes; the final run has zero cancellations.
+
+Prior verified baseline: 392 tests / 383 PASS / same seven FAIL / same two SKIP. The
+13 added tests all pass with no new functional failure. Existing failures are stale
+lineage/inventory/QA artifacts, two historical receipt-link assertions and two prepared-SQL
+static assertions. Neither those tests nor artifacts were changed. Other PostgreSQL tests
+still skip on their separate Linux-specific prerequisites. Combined check remains NOT PASS.
+`npm ci --prefix web` completed from unchanged lockfile (existing one high/one critical
+dependency advisory). Final remote SHA, separate TypeScript/build and log checksums are
+recorded in the PR handoff comment. Do not claim a green release gate.
 
 ## Next gates / owner action
 
