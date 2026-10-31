@@ -162,3 +162,38 @@ test('Overview SQL connectivity does not certify source freshness', async () => 
   assert.equal(h.legacyCalls,0);
   h.assertUnchanged();
 });
+
+
+test('Overview URL-driven YTD → MTD → LFL/segment links remount uncontrolled filter form', async () => {
+  const h = harness();
+  const find = (tree, predicate) => {
+    const pending = [tree];
+    while (pending.length) {
+      const node = pending.shift();
+      if (Array.isArray(node)) { pending.push(...node); continue; }
+      if (!node || typeof node !== 'object') continue;
+      if (predicate(node)) return node;
+      if (node.props?.children) pending.push(node.props.children);
+    }
+    return null;
+  };
+  const formAt = async params => {
+    const tree = await h.load('app/page.tsx').default({searchParams: Promise.resolve(params)});
+    const form = find(tree, node => node.type === 'form' && node.props?.className === 'filter-form');
+    assert.ok(form, 'actual Overview filter form is present');
+    return form;
+  };
+  const ytd = await formAt({year:'2025'});
+  const mtd = await formAt({year:'2025',month:'10'});
+  const lfl = await formAt({year:'2025',month:'10',lfl:'1'});
+  const brand = await formAt({year:'2025',month:'10',lfl:'1',brand:'Marmoo'});
+  const month = form => find(form, node => node.type === 'select' && node.props?.name === 'month');
+  assert.equal(month(ytd)?.props.defaultValue, '');
+  assert.equal(month(mtd)?.props.defaultValue, '10');
+  assert.equal(month(lfl)?.props.defaultValue, '10');
+  assert.ok([ytd,mtd,lfl,brand].every(form => typeof form.key === 'string'));
+  assert.notEqual(ytd.key, mtd.key, 'MTD link must not reuse the stale YTD select DOM');
+  assert.notEqual(mtd.key, lfl.key, 'LFL link must not reuse the previous form DOM');
+  assert.notEqual(lfl.key, brand.key, 'brand link must not reuse the previous form DOM');
+  assert.equal(find(lfl, node => node.type === 'input' && node.props?.name === 'lfl')?.props.value, '1');
+});
