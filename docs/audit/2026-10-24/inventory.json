@@ -14386,12 +14386,12 @@
         "action": "\"/\""
       },
       "bindings": [
+        "JSON.stringify(filters)",
         "lfl && <input type=\"hidden\" name=\"lfl\" value=\"1\" />",
         "String(selectedYear)",
         "years.map((year) => <option key={year} value={year}>{year}</option>)",
         "year",
-        "selectedMonth ? String(selectedMonth) : \"\"",
-        "availableMonthNumbers.map((month) => ( <option key={month} value={month}>{MONTHS[month - 1]}</option> ))"
+        "selectedMonth ? String(selectedMonth) : \"\""
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
