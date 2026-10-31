@@ -133,6 +133,7 @@ begin
   -- Prevent mapping/lifecycle changes between canonical duplicate validation and merge.
   lock table public.map_location_source, public.location_lifecycle_registry in share mode;
   -- Coordinates even non-cooperating fact writers; legacy RPC access is revoked at cutover.
+  -- Historical-key reads and the eventual upsert/delete share this transactional lock.
   lock table public.fact_sales_daily in share row exclusive mode;
   if exists(
     select from jsonb_to_recordset(v_payload) x(accounting_date date,location_raw text,brand text,ownership text,channel_group text,order_type text)
@@ -140,6 +141,31 @@ begin
     group by x.accounting_date,coalesce(m.canonical_name,btrim(x.location_raw)),btrim(x.brand),btrim(x.ownership),btrim(x.channel_group),btrim(x.order_type)
     having count(*)>1
   ) then raise exception 'DUPLICATE_CANONICAL_KEY'; end if;
+
+  -- Full historical-key identity guard: a count/totals match cannot authorize a
+  -- replacement of an already-published date/location/brand/ownership/channel/type.
+  -- Preserve the exact channel ID contract (group AND name), not totals alone.
+  -- Lock the dimensions before fact replacement so mapping/labels cannot race.
+  lock table public.dim_location, public.dim_brand, public.dim_ownership,
+    public.dim_channel, public.dim_order_type in share mode;
+  if exists (
+    select f.date_id,l.canonical_name,b.name,o.name,c.channel_group,c.channel_name,ot.name
+      from public.fact_sales_daily f
+      join public.dim_location l on l.id=f.location_id
+      join public.dim_brand b on b.id=f.brand_id
+      join public.dim_ownership o on o.id=f.ownership_id
+      join public.dim_channel c on c.id=f.channel_id
+      join public.dim_order_type ot on ot.id=f.order_type_id
+    except
+    select x.accounting_date,coalesce(m.canonical_name,btrim(x.location_raw)),
+      btrim(x.brand),btrim(x.ownership),btrim(x.channel_group),
+      btrim(x.channel_group),btrim(x.order_type)
+      from jsonb_to_recordset(v_payload) x(
+        accounting_date date,location_raw text,brand text,ownership text,
+        channel_group text,order_type text
+      )
+      left join public.map_location_source m on m.source_name=btrim(x.location_raw)
+  ) then raise exception 'HISTORICAL_KEY_REGRESSION'; end if;
   -- One complete input preserves cross-batch normalization and dimension ordering.
   v_loaded := public.sync_sales_batch(v_payload,p_run_id);
   if v_loaded <> v_run.expected_rows then raise exception 'LOADED_COUNT_MISMATCH'; end if;
