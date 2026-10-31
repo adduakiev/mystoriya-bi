@@ -5,7 +5,7 @@ import {moduleLoader, rpcFixture, React, renderToStaticMarkup} from './support/b
 const query = {year:2025, location:'Черкаси', period:'ytd', compare:'ly', metric:'revenue', grain:'month', lfl:false};
 const metrics = {revenue:987654321, checks:67891, averageCheck:14547, markup:34567890, markupRate:35};
 
-function harness(overrides = {}) {
+function harness(overrides = {}, multiYearData) {
   let legacyCalls = 0;
   const calls = [], charts = [];
   let payload, before;
@@ -23,7 +23,7 @@ function harness(overrides = {}) {
           channels:[{name:'LEAKED CHANNEL',revenue:metrics.revenue,share:99}],
           locations:[{name:'LEAKED LOCATION',revenue:metrics.revenue,growth:99}],
           monthlyTable:[{month:7,label:'LEAKED MONTH',revenue:metrics.revenue}],
-          multiYearData:[{label:'LEAKED CHART',2026:metrics.revenue}],
+          multiYearData:multiYearData ?? [{label:'LEAKED CHART',2026:metrics.revenue}],
           channelMixData:[{label:'LEAKED MIX',venue:99}],
           growthDrivers:{totalDelta:metrics.revenue,checksEffect:metrics.revenue,averageCheckEffect:metrics.revenue,
             channelDrivers:[{name:'LEAKED DRIVER',delta:metrics.revenue}],locationDrivers:[{name:'LEAKED DRIVER',delta:metrics.revenue}]}};
@@ -196,4 +196,38 @@ test('Overview URL-driven YTD → MTD → LFL/segment links remount uncontrolled
   assert.notEqual(mtd.key, lfl.key, 'LFL link must not reuse the previous form DOM');
   assert.notEqual(lfl.key, brand.key, 'brand link must not reuse the previous form DOM');
   assert.equal(find(lfl, node => node.type === 'input' && node.props?.name === 'lfl')?.props.value, '1');
+});
+
+for (const scenario of [
+  {name:'complete October 2025 vs 26-day comparison', year:2025, month:10, cutoff:'2025-10-31', plotted:26, missingFrom:27, missingTo:31},
+  {name:'leap-day February 2024 vs 28-day comparison', year:2024, month:2, cutoff:'2024-02-29', plotted:28, missingFrom:29, missingTo:29}
+]) {
+  test(`Overview actual SSR discloses historical month/chart horizon: ${scenario.name}`, async t => {
+    t.mock.method(globalThis,'fetch',()=>assert.fail('Synthetic period QA must not reach network'));
+    const series = Array.from({length:scenario.plotted}, (_, i) => ({label:String(i + 1),2024:100,2025:200,2026:300}));
+    const h = harness({selectedYear:scenario.year,currentYear:scenario.year,selectedMonth:scenario.month,
+      cutoffDate:scenario.cutoff,latestSourceDate:'2026-10-26'}, series);
+    const html = await h.render({year:scenario.year,month:scenario.month,period:'month'});
+    assert.match(html, /data-testid="multi-year-horizon-note"/);
+    assert.ok(html.includes(`графік показує 1–${scenario.plotted} числа`));
+    assert.ok(html.includes(`Дні ${scenario.missingFrom}–${scenario.missingTo} на графіку відсутні`));
+    assert.ok(html.includes(`дати до ${scenario.cutoff}`));
+    assert.match(html,/Відсутність днів на графіку не означає нульові продажі/);
+    const chart = h.charts.find(c=>c.name==='MultiYearMetricChart');
+    assert.equal(chart.data.length,scenario.plotted,'Only the original source chart data may be passed through');
+    assert.equal(h.calls[0].args.p_focus_month,scenario.month);
+    assert.equal(h.legacyCalls,0);
+    h.assertUnchanged();
+  });
+}
+
+test('Overview actual SSR does not claim historical horizon mismatch for matching current cutoff', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('Synthetic period QA must not reach network'));
+  const series = Array.from({length:26}, (_, i) => ({label:String(i + 1),2025:200,2026:300}));
+  const h = harness({selectedYear:2026,currentYear:2026,selectedMonth:10,
+    cutoffDate:'2026-10-26',latestSourceDate:'2026-10-26'},series);
+  const html = await h.render({year:2026,month:10,period:'month'});
+  assert.doesNotMatch(html,/multi-year-horizon-note|Періоди на графіку й у KPI різняться/);
+  assert.equal(h.charts.find(c=>c.name==='MultiYearMetricChart').data.length,26);
+  h.assertUnchanged();
 });

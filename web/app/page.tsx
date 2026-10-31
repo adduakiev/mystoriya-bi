@@ -137,6 +137,19 @@ export default async function Home({
   const latestMonth = Number(latestSourceDate.slice(5, 7));
   const latestSourceYear = Number(latestSourceDate.slice(0, 4));
 
+  const lastPlottedDay = selectedMonth && ready?.multiYearData.length
+    ? Number(ready.multiYearData[ready.multiYearData.length - 1]?.label)
+    : NaN;
+  const selectedKpiCutoffDay = selectedMonth && ready
+    ? Number(ready.snapshot.cutoffDate.slice(8, 10))
+    : NaN;
+  // Installed SQL can align the daily chart to the latest source day
+  // while a historical selected-month KPI includes the complete calendar month.
+  const chartHasShorterHorizon = Boolean(
+    selectedMonth && Number.isInteger(lastPlottedDay) && lastPlottedDay > 0
+    && Number.isInteger(selectedKpiCutoffDay) && lastPlottedDay < selectedKpiCutoffDay
+  );
+
   return (
     <main className="shell">
       <DashboardSidebar
@@ -389,6 +402,15 @@ export default async function Home({
               years={years}
               metric={metric}
             />
+            {chartHasShorterHorizon && (
+              <p className="table-note" role="note" data-testid="multi-year-horizon-note">
+                Періоди на графіку й у KPI різняться: графік показує 1–{lastPlottedDay} числа кожного року,
+                а KPI вибраного місяця охоплює дати до {ready.snapshot.cutoffDate}.
+                Дні {lastPlottedDay + 1}–{selectedKpiCutoffDay} на графіку відсутні,
+                хоча місячний KPI охоплює також ці дати. Остання дата джерела: {latestSourceDate || "UNKNOWN"}.
+                Відсутність днів на графіку не означає нульові продажі.
+              </p>
+            )}
           </article>
 
           <article className="panel">
