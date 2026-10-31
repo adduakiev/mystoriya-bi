@@ -28,7 +28,8 @@ test('atomic sales snapshot on disposable PostgreSQL',{
   const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>!/^PG/i.test(k)));
   env.PGCLIENTENCODING='UTF8';
   const run=(name,args,input)=>{
-    const r=spawnSync(path.join(pgBin,name+ext),args,{input,encoding:'utf8',env,windowsHide:true,timeout:60000,maxBuffer:8*1024*1024});
+    const r=spawnSync(path.join(pgBin,name+ext),args,{input,encoding:'utf8',env,windowsHide:true,
+      timeout:name==='initdb'?180000:60000,maxBuffer:8*1024*1024});
     if(r.status!==0)throw Error(`${name}: ${r.error??''}\n${r.stderr}\n${r.stdout}`);
     return r.stdout.trim();
   };
