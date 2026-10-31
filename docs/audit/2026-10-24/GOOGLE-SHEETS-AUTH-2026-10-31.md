@@ -95,7 +95,25 @@ Initial focused command: `node --test web/tests/google-sheet-reader.test.mjs web
 RSA key exists in process memory. Tests cover signature/claims, fixed destinations,
 bad credentials, token/schema/transport failures, header-only scope, missing versus zero,
 preflight compatibility and disconnection from the legacy writer.
-Final full-check and committed-SHA results are recorded in the PR evidence comment.
+Independent source verification used `git archive` of implementation commit
+`ca71fd5ff00b642011896c125d69b1003f421f82` into a separate directory: 24/24 focused
+tests passed again. The working checkout was clean; `git diff HEAD^ HEAD --check` passed.
+
+`npm ci --prefix web` completed (69 packages; existing lockfile reports one high and
+one critical advisory; no dependency upgrades in this auth-only change).
+Full `npm run check` is **NOT PASS**: 392 tests, 383 passed, 7 failed, 2 skipped.
+The same seven failures were reproduced independently from baseline archive
+`3081ae2fbe08578abaed7f980b7258e6bc024fb1`: 382 tests, 373 passed, 7 failed, 2 skipped.
+Thus the ten added tests pass and no additional failure was observed in this environment.
+Failures concern stale RPC lineage, inventory, QA matrix, two historical receipt links,
+and two prepared-SQL static assertions. The two PostgreSQL prerequisites remain skipped.
+These existing failures are not suppressed, regenerated or relabeled as passing.
+The first restricted run also encountered Windows fixture permissions; the counts above
+come from the subsequent unrestricted, exact-archive runs. CRLF conversion was investigated
+but does not explain away failures, which persist in Git archives.
+
+TypeScript `tsc --noEmit` passed independently after the test runner stopped the combined
+check. Separate optimized build and final remote-SHA results are recorded in the PR comment.
 No live OAuth exchange, private-source read with this account, Deno deployment,
 production import or atomicity proof is claimed by these Node tests.
 
