@@ -132,6 +132,10 @@ begin
     (v_previous.rows_read >=100 and v_run.raw_rows < floor(v_previous.rows_read*0.95))) then raise exception 'SOURCE_REGRESSION'; end if;
   -- Prevent mapping/lifecycle changes between canonical duplicate validation and merge.
   lock table public.map_location_source, public.location_lifecycle_registry in share mode;
+  -- Freeze all dimension names before the fact lock; match the legacy writer's
+  -- dimension-before-fact acquisition order to avoid an avoidable deadlock.
+  lock table public.dim_location, public.dim_brand, public.dim_ownership,
+    public.dim_channel, public.dim_order_type in share mode;
   -- Coordinates even non-cooperating fact writers; legacy RPC access is revoked at cutover.
   -- Historical-key reads and the eventual upsert/delete share this transactional lock.
   lock table public.fact_sales_daily in share row exclusive mode;
@@ -145,9 +149,7 @@ begin
   -- Full historical-key identity guard: a count/totals match cannot authorize a
   -- replacement of an already-published date/location/brand/ownership/channel/type.
   -- Preserve the exact channel ID contract (group AND name), not totals alone.
-  -- Lock the dimensions before fact replacement so mapping/labels cannot race.
-  lock table public.dim_location, public.dim_brand, public.dim_ownership,
-    public.dim_channel, public.dim_order_type in share mode;
+  -- Mapping, dimensions and fact identities remain locked for this comparison.
   if exists (
     select f.date_id,l.canonical_name,b.name,o.name,c.channel_group,c.channel_name,ot.name
       from public.fact_sales_daily f
