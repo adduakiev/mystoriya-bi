@@ -28,14 +28,34 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
-function parseGrain(value: string | undefined): GrainMode {
-  return value === "week" ? "week" : "month";
+function parseGrain(_value: string | undefined): GrainMode {
+  // P1 safety: installed bi_delivery_payload groups calendar YEAR with ISO WEEK.
+  // Fail closed until the weekly SQL is corrected under a separate owner-approved gate.
+  return "month";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function deliveryPeriodMatches(
+  requestedYear: number | undefined,
+  requestedMonth: number | undefined,
+  data: Awaited<ReturnType<typeof loadDeliveryData>>
+): boolean {
+  const expectedYear = requestedYear ?? data.selectedYear;
+  const cutoff = data.snapshot.cutoffDate;
+  if (typeof cutoff !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) return false;
+  const date = new Date(`${cutoff}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
+  return data.selectedYear === expectedYear
+    && data.selectedMonth === requestedMonth
+    && data.snapshot.currentYear === expectedYear
+    && data.snapshot.period === (requestedMonth === undefined ? "ytd" : "month")
+    && date.getUTCFullYear() === expectedYear
+    && (requestedMonth === undefined || (requestedMonth <= 12 && date.getUTCMonth() + 1 === requestedMonth));
 }
 
 function pctLabel(value: number | null): string {
@@ -109,6 +129,40 @@ export default async function DeliveryPage({
     lfl
   });
 
+  // The deployed Delivery RPC falls back to the latest date across all years
+  // when a requested year/month has no rows. Never render that other period
+  // as LIVE (or turn missing sales into a measured zero).
+  if (!deliveryPeriodMatches(requestedYear, selectedMonth, data)) {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/delivery"
+          lfl={lfl}
+          statusTitle="NO DATA / UNKNOWN"
+          statusDetail="Обраний період не підтверджено"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">OWN DELIVERY · UNKNOWN</span>
+              <h1>Доставка</h1>
+            </div>
+          </header>
+          <section className="panel" role="status">
+            <h2>Немає підтверджених даних за обраний період</h2>
+            <p>
+              {requestedYear ?? data.selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1] ?? "невідомий місяць"}` : " · YTD"}
+              {location ? ` · ${location}` : ""}.
+              SQL не підтвердив дату обраного періоду. Відсутність даних не означає нуль;
+              показники, порівняння та графіки приховано.
+            </p>
+            <Link className="clear-filter" href="/delivery">Повернутися до доступних даних</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
   const {
     rowCount,
     years,
@@ -144,14 +198,16 @@ export default async function DeliveryPage({
       <DashboardSidebar
         activeHref="/delivery"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${rowCount.toLocaleString("uk-UA")} delivery rows`}
+        statusTitle={data.source === "supabase-sql" ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}
+        statusDetail={data.source === "supabase-sql"
+          ? `${rowCount.toLocaleString("uk-UA")} delivery rows · cutoff ${snapshot.cutoffDate || "UNKNOWN"} · freshness UNKNOWN`
+          : "Альтернативне джерело · повнота UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">OWN DELIVERY · LIVE</span>
+            <span className="eyebrow">OWN DELIVERY · {data.source === "supabase-sql" ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Доставка</h1>
           </div>
 <div className="quick-context">
@@ -211,7 +267,7 @@ export default async function DeliveryPage({
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
                 <option value="month">Місяці</option>
-                <option value="week">Тижні</option>
+                <option value="week" disabled>Тижні (тимчасово недоступні)</option>
               </select>
             </label>
 
@@ -271,7 +327,7 @@ export default async function DeliveryPage({
           </div>
           <div className="trend-summary-card">
             <span>Доставка / Агрегатори</span>
-            <strong>{ownVsAggregatorRatio.toFixed(1)}%</strong>
+            <strong>{ownVsAggregatorRatio === null ? "—" : `${ownVsAggregatorRatio.toFixed(1)}%`}</strong>
             <small>співвідношення обороту</small>
           </div>
         </section>
@@ -302,18 +358,14 @@ export default async function DeliveryPage({
               <div className="chart-controls">
                 {!selectedMonth && (
                   <div className="metric-switcher grain-switcher">
-                    {([
-                      ["month", "Місяці"],
-                      ["week", "Тижні"]
-                    ] as const).map(([value, label]) => (
-                      <Link
-                        key={value}
-                        className={grain === value ? "metric-pill active" : "metric-pill"}
-                        href={buildHref(state, { grain: value })}
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    <Link className="metric-pill active" href={buildHref(state, { grain: "month" })}>Місяці</Link>
+                    <span
+                      className="metric-pill"
+                      aria-disabled="true"
+                      title="Тижневу доставку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
+                    >
+                      Тижні (тимчасово недоступні)
+                    </span>
                   </div>
                 )}
                 <div className="metric-switcher">
@@ -412,7 +464,7 @@ export default async function DeliveryPage({
                   <span>{row.markupRate.toFixed(1)}%</span>
                   <span>{row.deliveryShare.toFixed(1)}%</span>
                   <span>{formatUah(row.aggregatorRevenue)}</span>
-                  <span>{row.versusAggregator.toFixed(1)}%</span>
+                  <span>{row.versusAggregator === null ? "—" : `${row.versusAggregator.toFixed(1)}%`}</span>
                 </Link>
               ))}
             </div>

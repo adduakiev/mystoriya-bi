@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { assertSalesCsvPreflight } from "./source-safety.mjs";
 
 const SPREADSHEET_ID = "1g8NbVYEunt55lB-0E1OLQmNkeEQbF9y73n9kH3d3xbA";
 const SHEET_NAME = "Данние короткі";
@@ -298,6 +299,18 @@ Deno.serve(async (req: Request) => {
     const matrix = parseCsv(await response.text());
     const rawRows = Math.max(0, matrix.length - 1);
 
+    const { data: previousSuccess, error: previousError } = await supabase
+      .from("import_runs")
+      .select("rows_read,source_cutoff_date")
+      .eq("source_name", "google_sheets:Данние короткі")
+      .eq("status", "success")
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (previousError) throw new Error(`Cannot verify last accepted source: ${previousError.message}`);
+    assertSalesCsvPreflight(matrix, { previousRowCount: previousSuccess?.rows_read });
+
     const { data: locationMappings, error: mappingError } = await supabase
       .from("map_location_source")
       .select("source_name,canonical_name");
@@ -311,6 +324,16 @@ Deno.serve(async (req: Request) => {
     );
 
     const { rows, rejected } = aggregateRows(matrix, locationMap);
+    if (rejected > 0 || rows.length === 0) {
+      throw new Error(`SOURCE_PREFLIGHT_REJECTED_OR_ZERO_ROWS rejected=${rejected} aggregate=${rows.length}`);
+    }
+    const cutoffDate = rows.reduce(
+      (max, row) => (row.accounting_date > max ? row.accounting_date : max),
+      rows[0].accounting_date
+    );
+    if (previousSuccess?.source_cutoff_date && cutoffDate < previousSuccess.source_cutoff_date) {
+      throw new Error(`SOURCE_PREFLIGHT_CUTOFF_REGRESSION current=${cutoffDate} previous=${previousSuccess.source_cutoff_date}`);
+    }
 
     const sourceTotals = rows.reduce(
       (acc, row) => {
@@ -338,11 +361,6 @@ Deno.serve(async (req: Request) => {
       if (error) throw new Error(`Batch ${offset / BATCH_SIZE + 1}: ${error.message}`);
       loaded += Number(data ?? batch.length);
     }
-
-    const cutoffDate = rows.reduce(
-      (max, row) => (row.accounting_date > max ? row.accounting_date : max),
-      rows[0]?.accounting_date ?? null
-    );
 
     const { data: finalized, error: finalizeError } = await supabase.rpc(
       "finalize_sales_snapshot",

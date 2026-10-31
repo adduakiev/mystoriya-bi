@@ -1,0 +1,96 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "scope": "D25 SELECTED_PERIOD_FALLBACK_LEAKAGE PREVIEW_CODE_ONLY",
+  "run_url": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40387333537",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6425393944",
+  "restored_pr_head": "de9f9f0245e72889b2abbb2bb7cd3093dac70887",
+  "initial_checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "checkout_branch": "astra/issue-43-40387333537",
+  "new_candidate_sha": null,
+  "candidate_commit_push_owner": "TRUSTED_ACTIONS_WORKFLOW",
+  "remote_working": "NOT_POSTED_NO_GH_TOKEN; ASSIGNED_NOT_ACKNOWLEDGED",
+  "code_review_readiness": "CODE_READY_FOR_REVIEW; REMOTE_STATUS_AND_SHA_PENDING_TRUSTED_RUNNER",
+  "overlay_verification": {
+    "tracked_file_blobs": 270,
+    "before_edit_mismatches": 0,
+    "executable_mode_mismatches": 0,
+    "removed_paths": 0,
+    "tar_readonly_agents_errors": "CONTENT_VERIFIED_ALREADY_MATCHED"
+  },
+  "checks": {
+    "npm_ci_web": {
+      "status": "PASS",
+      "installed_packages": 71
+    },
+    "overview_period": {
+      "status": "PASS",
+      "tests": 53,
+      "command": "node --experimental-strip-types web/tests/overview-period.test.mjs"
+    },
+    "overview_baseline": {
+      "status": "PASS",
+      "tests": 27,
+      "command": "node --experimental-strip-types web/tests/overview-baseline.test.mjs"
+    },
+    "original_head_ssr": {
+      "status": "EXPECTED_FAIL",
+      "selected_tests": 5,
+      "failures": 5,
+      "cases": [
+        "Cherkasy 2024",
+        "October 2026",
+        "September 2025",
+        "missing cutoff",
+        "invalid cutoff"
+      ]
+    },
+    "workspace_full_check": {
+      "status": "FAIL_ENVIRONMENT",
+      "passed_test_files": 24,
+      "failed_test_files": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs"
+      ],
+      "reason": "Cannot create .agents/runtime in read-only mount; TypeScript/build not reached"
+    },
+    "workspace_typescript": {
+      "status": "PASS",
+      "command": "node web/node_modules/typescript/bin/tsc --noEmit --project web/tsconfig.json"
+    },
+    "writable_copy_full_check": {
+      "status": "PASS",
+      "directory": "/tmp/issue43-period-check-w235bfw2",
+      "passed_test_files": 27,
+      "typescript": "PASS",
+      "optimized_next_build": "PASS",
+      "source_files_verified_before_check": 271,
+      "final_executable_source_matches": true,
+      "final_report_docs_added_after_full_check": true
+    },
+    "generated_artifacts": "PASS_INVENTORY_CONTRACTS_QA_PLAN",
+    "git_diff_check": "PASS",
+    "changed_new_text_whitespace": "PASS"
+  },
+  "source_sha256": {
+    "web/lib/data/overview.ts": "2029f2864e0d640ab39529135d9fdfd9998b307bc8865438839a9fa5b6856f32",
+    "web/app/page.tsx": "ba4926c8955f9b09f29fdb43a4fae0dca19c6bbdc048a5e3a338f8c7aee579bf",
+    "web/tests/overview-period.test.mjs": "b2a320a65a6cd5c9683fadc80848da08d5536940789aa3e6c7994f646901275c",
+    "web/tests/overview-baseline.test.mjs": "e94d3473189702ba4f9d5acfa4b42ed29f3be8f12628862a45de8deb2a1a8143"
+  },
+  "evidence_class": "SYNTHETIC_ADAPTER_AND_ACTUAL_PAGE_SSR; NO_PRODUCTION_PARITY",
+  "installed_sql_catalog_and_select": "RELAYED_TRUSTED_TRIGGER_ONLY; NOT_RERUN",
+  "production_selects_executed": 0,
+  "installed_rpc_invocations": 0,
+  "sql_files_changed": 0,
+  "future_sql_fix": "NOT_APPLIED; SEPARATE_REVIEW_AND_DATABASE_EXECUTION_GATE",
+  "authenticated_browser": {
+    "executed": 0,
+    "not_executed": 66
+  },
+  "broader_audit": "INCOMPLETE",
+  "owner_action": "NONE_FOR_PREVIEW_CODE",
+  "preserved": "Baseline signal, PageSpeed UNKNOWN, D05 source windows, D22/D23 money/ROAS, Meta and evidence/domain/run safeguards",
+  "residual_risk": "Installed SQL fallback remains. Period metadata match cannot prove field completeness or recover SQL-erased missingness. No deployment/release verification."
+}

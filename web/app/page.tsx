@@ -39,8 +39,11 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
-function parseGrain(value: string | undefined): GrainMode {
-  return value === "week" ? "week" : "month";
+function parseGrain(_value: string | undefined): GrainMode {
+  // P1 safety gate: installed bi_overview_payload mixes calendar YEAR with ISO WEEK.
+  // Until the SQL contract is corrected at an approved migration gate, never request
+  // or render a weekly multi-year series as verified live data.
+  return "month";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -93,12 +96,12 @@ export default async function Home({
     ownerships,
     locations,
     orderTypes,
-    latestSourceDate,
-    snapshot,
-    multiYearData,
-    channelMixData,
-    growthDrivers
+    latestSourceDate
   } = overview;
+
+  const ready = overview.status === "ready" ? overview : null;
+  const sqlVerified = ready?.source === "supabase-sql";
+  const fallbackReady = ready?.source === "legacy";
 
   const filters: DashboardFilters = {
     channel: first(params.channel),
@@ -139,14 +142,14 @@ export default async function Home({
       <DashboardSidebar
         activeHref="/"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows`}
+        statusTitle={sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : fallbackReady ? "FALLBACK / UNVERIFIED" : "NO DATA / UNKNOWN"}
+        statusDetail={sqlVerified ? `${filteredRowCount.toLocaleString("uk-UA")} / ${sourceRowCount.toLocaleString("uk-UA")} rows · остання дата джерела: ${latestSourceDate || "UNKNOWN"}` : fallbackReady ? "SQL RPC недоступний · альтернативне джерело, повнота UNKNOWN" : "Обраний період не підтверджено"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">BUSINESS PERFORMANCE · LIVE</span>
+            <span className="eyebrow">BUSINESS PERFORMANCE · {sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : fallbackReady ? "FALLBACK / UNVERIFIED" : "UNKNOWN"}</span>
             <h1>Огляд</h1>
           </div>
 
@@ -193,7 +196,8 @@ export default async function Home({
             </span>
           </summary>
 
-          <form className="filter-form" method="get" action="/">
+          {/* Re-key uncontrolled selectors after URL-driven navigation (MTD/LFL/segments). */}
+          <form key={JSON.stringify(filters)} className="filter-form" method="get" action="/">
             {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Рік</span>
@@ -226,7 +230,7 @@ export default async function Home({
               <span>Деталізація каналу</span>
               <select name="orderType" defaultValue={filters.orderType ?? ""}>
                 <option value="">Вся деталізація</option>
-                {orderTypes.map((name) => <option key={name} value={name}>{name}</option>)}
+                {[...new Set([...orderTypes, ...(filters.orderType ? [filters.orderType] : [])])].map((name) => <option key={name} value={name}>{name}</option>)}
               </select>
             </label>
 
@@ -234,7 +238,7 @@ export default async function Home({
               <span>Бренд</span>
               <select name="brand" defaultValue={filters.brand ?? ""}>
                 <option value="">Всі бренди</option>
-                {brands.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
+                {[...new Set([...brands, ...(filters.brand ? [filters.brand] : [])])].map((brand) => <option key={brand} value={brand}>{brand}</option>)}
               </select>
             </label>
 
@@ -242,7 +246,7 @@ export default async function Home({
               <span>Власність</span>
               <select name="ownership" defaultValue={filters.ownership ?? ""}>
                 <option value="">Вся власність</option>
-                {ownerships.map((ownership) => <option key={ownership} value={ownership}>{ownership}</option>)}
+                {[...new Set([...ownerships, ...(filters.ownership ? [filters.ownership] : [])])].map((ownership) => <option key={ownership} value={ownership}>{ownership}</option>)}
               </select>
             </label>
 
@@ -250,7 +254,7 @@ export default async function Home({
               <span>Локація</span>
               <select name="location" defaultValue={filters.location ?? ""}>
                 <option value="">Всі локації</option>
-                {locations.map((location) => <option key={location} value={location}>{location}</option>)}
+                {[...new Set([...locations, ...(filters.location ? [filters.location] : [])])].map((location) => <option key={location} value={location}>{location}</option>)}
               </select>
             </label>
 
@@ -269,14 +273,21 @@ export default async function Home({
           </form>
         </details>
 
-        <div className="context-line">
-          <b>{snapshot.periodLabel}</b>
-          <span>cutoff {prettyDate(snapshot.cutoffDate)}</span>
-          <span>vs {snapshot.comparisonLabel}</span>
+        {fallbackReady && (
+          <section className="panel" role="status">
+            <span className="eyebrow">FALLBACK / UNVERIFIED</span>
+            <p>SQL RPC недоступний або повернув помилку. Показано альтернативний розрахунок; свіжість, повнота й відповідність основному SQL-контракту не підтверджені. Не використовуйте цей зріз як перевірений LIVE-звіт.</p>
+          </section>
+        )}
+
+        {ready && <div className="context-line">
+          <b>{ready.snapshot.periodLabel}</b>
+          <span>cutoff {prettyDate(ready.snapshot.cutoffDate)}</span>
+          <span>vs {ready.snapshot.comparisonLabel}</span>
           {filters.channel && <span>{filters.channel}</span>}
           {filters.orderType && <span>{filters.orderType}</span>}
           {lfl && <span className="lfl-context">LFL · активна мережа</span>}
-        </div>
+        </div>}
 
         {activeDimensionFilters > 0 && (
           <div className="active-filters">
@@ -302,13 +313,20 @@ export default async function Home({
           </div>
         )}
 
+        {!ready ? (
+          <section className="panel" role="status">
+            <span className="eyebrow">NO DATA / UNKNOWN</span>
+            <h2>Немає підтверджених даних за обраний період</h2>
+            <p>{selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : ""}: період джерела не відповідає обраному або cutoff відсутній чи некоректний. Показники, графіки та порівняння недоступні; відсутність даних не означає нуль.</p>
+          </section>
+        ) : <>
         <section className="kpi-grid">
-          {snapshot.kpis.map((item) => <KpiCard key={item.label} kpi={item} />)}
+          {ready.snapshot.kpis.map((item) => <KpiCard key={item.label} kpi={item} />)}
         </section>
 
         <section className="share-strip">
           {["Заклад", "Агрегатор", "Доставка"].map((name) => {
-            const item = snapshot.channels.find((channel) => channel.name === name);
+            const item = ready.snapshot.channels.find((channel) => channel.name === name);
             return (
               <Link
                 key={name}
@@ -336,18 +354,16 @@ export default async function Home({
               <div className="chart-controls">
                 {!selectedMonth && (
                   <div className="metric-switcher grain-switcher">
-                    {([
-                      ["month", "Місяці"],
-                      ["week", "Тижні"]
-                    ] as const).map(([value, label]) => (
-                      <Link
-                        key={value}
-                        className={grain === value ? "metric-pill active" : "metric-pill"}
-                        href={queryHref(filters, { grain: value })}
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    <Link className="metric-pill active" href={queryHref(filters, { grain: "month" })}>
+                      Місяці
+                    </Link>
+                    <span
+                      className="metric-pill"
+                      aria-disabled="true"
+                      title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
+                    >
+                      Тижні (тимчасово недоступні)
+                    </span>
                   </div>
                 )}
                 <div className="metric-switcher">
@@ -369,7 +385,7 @@ export default async function Home({
               </div>
             </div>
             <MultiYearMetricChart
-              data={multiYearData}
+              data={ready.multiYearData}
               years={years}
               metric={metric}
             />
@@ -383,7 +399,7 @@ export default async function Home({
               </div>
             </div>
             <div className="channel-list">
-              {snapshot.channels.map((channel) => (
+              {ready.snapshot.channels.map((channel) => (
                 <Link
                   className="channel-row"
                   key={channel.name}
@@ -412,7 +428,7 @@ export default async function Home({
             </div>
             <span className="text-button">100% · Заклад / Агрегатор / Доставка</span>
           </div>
-          <ChannelMixChart data={channelMixData} />
+          <ChannelMixChart data={ready.channelMixData} />
         </section>
 
         <section className="content-grid growth-grid">
@@ -423,22 +439,22 @@ export default async function Home({
                 <h2>Що зробило зміну обороту</h2>
               </div>
               <span className="text-button">
-                Δ {growthDrivers.totalDelta >= 0 ? "+" : ""}{formatUah(growthDrivers.totalDelta)}
+                Δ {ready.growthDrivers.totalDelta >= 0 ? "+" : ""}{formatUah(ready.growthDrivers.totalDelta)}
               </span>
             </div>
 
             <div className="growth-driver-cards">
               <div className="growth-driver-card">
                 <span>Ефект чеків</span>
-                <strong className={growthDrivers.checksEffect >= 0 ? "positive" : "negative"}>
-                  {growthDrivers.checksEffect >= 0 ? "+" : ""}{formatUah(growthDrivers.checksEffect)}
+                <strong className={ready.growthDrivers.checksEffect >= 0 ? "positive" : "negative"}>
+                  {ready.growthDrivers.checksEffect >= 0 ? "+" : ""}{formatUah(ready.growthDrivers.checksEffect)}
                 </strong>
                 <small>зміна кількості чеків × базовий ср. чек</small>
               </div>
               <div className="growth-driver-card">
                 <span>Ефект середнього чека</span>
-                <strong className={growthDrivers.averageCheckEffect >= 0 ? "positive" : "negative"}>
-                  {growthDrivers.averageCheckEffect >= 0 ? "+" : ""}{formatUah(growthDrivers.averageCheckEffect)}
+                <strong className={ready.growthDrivers.averageCheckEffect >= 0 ? "positive" : "negative"}>
+                  {ready.growthDrivers.averageCheckEffect >= 0 ? "+" : ""}{formatUah(ready.growthDrivers.averageCheckEffect)}
                 </strong>
                 <small>поточні чеки × зміна ср. чека</small>
               </div>
@@ -454,7 +470,7 @@ export default async function Home({
             </div>
 
             <div className="growth-contribution-list">
-              {growthDrivers.channelDrivers.map((driver) => (
+              {ready.growthDrivers.channelDrivers.map((driver) => (
                 <div className="growth-contribution-row" key={driver.name}>
                   <b>{driver.name}</b>
                   <span className={driver.delta >= 0 ? "positive" : "negative"}>
@@ -475,10 +491,10 @@ export default async function Home({
               <span className="eyebrow">LOCATION CONTRIBUTION</span>
               <h2>Точки, що найбільше змінили оборот</h2>
             </div>
-            <span className="text-button">TOP {growthDrivers.locationDrivers.length}</span>
+            <span className="text-button">TOP {ready.growthDrivers.locationDrivers.length}</span>
           </div>
           <div className="growth-location-list">
-            {growthDrivers.locationDrivers.map((driver) => (
+            {ready.growthDrivers.locationDrivers.map((driver) => (
               <div className="growth-location-row" key={driver.name}>
                 <b>{driver.name}</b>
                 <span className={driver.delta >= 0 ? "positive" : "negative"}>
@@ -517,7 +533,7 @@ export default async function Home({
                   <span>Доставка %</span>
                 </div>
 
-                {snapshot.monthlyTable.map((row) => (
+                {ready.snapshot.monthlyTable.map((row) => (
                   <Link
                     key={row.month}
                     href={queryHref(filters, { month: row.month, period: "month" })}
@@ -549,13 +565,13 @@ export default async function Home({
           <article className="panel">
             <div className="panel-head">
               <div>
-                <span className="eyebrow">LOCATIONS · {snapshot.periodLabel.toUpperCase()}</span>
+                <span className="eyebrow">LOCATIONS · {ready.snapshot.periodLabel.toUpperCase()}</span>
                 <h2>Внесок точок</h2>
               </div>
               {filters.location ? (
                 <Link className="text-button" href={queryHref(filters, { location: undefined })}>Всі локації →</Link>
               ) : (
-                <span className="text-button">TOP {snapshot.locations.length}</span>
+                <span className="text-button">TOP {ready.snapshot.locations.length}</span>
               )}
             </div>
 
@@ -563,7 +579,7 @@ export default async function Home({
               <div className="table-row table-head">
                 <span>Локація</span><span>Оборот</span><span>Δ</span><span>Частка</span>
               </div>
-              {snapshot.locations.map((location) => (
+              {ready.snapshot.locations.map((location) => (
                 <Link
                   className="table-row"
                   key={location.name}
@@ -583,17 +599,18 @@ export default async function Home({
           </article>
 
           <article className="panel insight-panel">
-            <span className="eyebrow">LIVE SIGNAL</span>
+            <span className="eyebrow">{sqlVerified ? "SQL SIGNAL · FRESHNESS UNVERIFIED" : "FALLBACK SIGNAL · UNVERIFIED"}</span>
             <h2>Що потребує уваги</h2>
             <div className="signal">
               <span className="signal-badge">1</span>
               <div>
-                <b>{snapshot.signal.title}</b>
-                <p>{snapshot.signal.body}</p>
+                <b>{ready.snapshot.signal.title}</b>
+                <p>{ready.snapshot.signal.body}</p>
               </div>
             </div>
           </article>
         </section>
+        </>}
       </section>
     </main>
   );

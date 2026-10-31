@@ -22,8 +22,10 @@ function parseMetric(value: string | undefined): MetricMode {
     : "revenue";
 }
 
-function parseGrain(value: string | undefined): GrainMode {
-  return value === "week" ? "week" : "month";
+function parseGrain(_value: string | undefined): GrainMode {
+  // P1 safety gate: installed bi_dynamics_payload mixes calendar YEAR with ISO WEEK.
+  // Disable weekly SQL data until an independently verified, owner-approved migration.
+  return "month";
 }
 
 function buildHref(
@@ -107,6 +109,32 @@ export default async function DynamicsPage({
     lfl
   });
 
+  if (result.source === "unavailable") {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/dynamics"
+          lfl={lfl}
+          statusTitle="Дані не підтверджені"
+          statusDetail="SQL RPC повернув порожню або некоректну відповідь"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">TREND ANALYSIS · UNAVAILABLE</span>
+              <h1>Динаміка</h1>
+            </div>
+          </header>
+          <section className="panel dynamics-main-panel" role="status">
+            <h2>Немає підтверджених даних для вибраних фільтрів</h2>
+            <p>SQL RPC не повернув перевіреного набору показників. Відсутні дані не є нульовими, а резервне джерело не підставляється.</p>
+            <Link href="/dynamics">Скинути фільтри</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
   const {
     rowCount,
     years,
@@ -129,8 +157,10 @@ export default async function DynamicsPage({
       <DashboardSidebar
         activeHref="/dynamics"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${rowCount.toLocaleString("uk-UA")} рядків у зрізі`}
+        statusTitle={result.source === "legacy" ? "Резервне джерело · не звірено" : "SQL CONNECTED · FRESHNESS UNVERIFIED"}
+        statusDetail={result.source === "supabase-sql"
+          ? `${rowCount.toLocaleString("uk-UA")} рядків у зрізі · остання дата джерела: ${result.latestSourceDate || "UNKNOWN"} · freshness UNKNOWN`
+          : `${rowCount.toLocaleString("uk-UA")} рядків у зрізі · резервне джерело, freshness UNKNOWN`}
       />
 
       <section className="workspace">
@@ -166,7 +196,7 @@ export default async function DynamicsPage({
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
                 <option value="month">Місяці</option>
-                <option value="week">Тижні</option>
+                <option value="week" disabled>Тижні (тимчасово недоступні)</option>
               </select>
             </label>
 
@@ -255,18 +285,14 @@ export default async function DynamicsPage({
 
             <div className="chart-controls">
               <div className="metric-switcher grain-switcher">
-                {([
-                  ["month", "Місяці"],
-                  ["week", "Тижні"]
-                ] as const).map(([value, label]) => (
-                  <Link
-                    key={value}
-                    className={grain === value ? "metric-pill active" : "metric-pill"}
-                    href={buildHref(state, { grain: value })}
-                  >
-                    {label}
-                  </Link>
-                ))}
+                <Link className="metric-pill active" href={buildHref(state, { grain: "month" })}>Місяці</Link>
+                <span
+                  className="metric-pill"
+                  aria-disabled="true"
+                  title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
+                >
+                  Тижні (тимчасово недоступні)
+                </span>
               </div>
               <div className="metric-switcher">
                 {METRICS.map(([value, label]) => (

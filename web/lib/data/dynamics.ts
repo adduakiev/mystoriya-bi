@@ -19,7 +19,7 @@ export type DynamicsQuery = {
 };
 
 export type DynamicsData = {
-  source: "supabase-sql" | "legacy";
+  source: "supabase-sql" | "legacy" | "unavailable";
   rowCount: number;
   years: number[];
   series: Array<Record<string, string | number>>;
@@ -196,6 +196,33 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       ["bi-dynamics-sql-v1", key],
       { revalidate: 180, tags: ["sales-data", "dynamics-data"] }
     )();
+
+    // The installed SQL RPC returns JSON null when a valid filter combination has
+    // no matching sales: year_totals is empty, so its grouped totals CTE has no row.
+    // Do not mistake an absent contract for measured zero or silently substitute
+    // the Google Sheets legacy path.
+    if (
+      !payload || typeof payload !== "object" || Array.isArray(payload) ||
+      !payload.meta || !Array.isArray(payload.meta.years) ||
+      !Array.isArray(payload.series) || !payload.summary
+    ) {
+      return {
+        source: "unavailable",
+        rowCount: 0,
+        years: [],
+        series: [],
+        channels: [],
+        orderTypes: [],
+        locations: [],
+        brands: [],
+        ownerships: [],
+        latestYear: 0,
+        latestSourceDate: "",
+        latestYearTotal: 0,
+        previousYearTotal: 0,
+        totalGrowth: null
+      };
+    }
 
     const meta = payload.meta ?? {};
     const previousYearRaw = meta.previousYear;
