@@ -6,6 +6,7 @@ const query = {metric:'revenue', grain:'month', location:'Теремки', brand
 
 function harness(payload, {rpcError=false, legacyRows}={}) {
   let fallbackCalls = 0;
+  const chartCalls = [];
   const load = moduleLoader({
     'next/cache': {unstable_cache: fn => fn},
     'next/link': {default: ({prefetch, children, ...props}) => React.createElement('a',props,children)},
@@ -13,7 +14,7 @@ function harness(payload, {rpcError=false, legacyRows}={}) {
     '@/components/DashboardSidebar': {
       DashboardSidebar: ({statusTitle,statusDetail}) => React.createElement('aside',null,statusTitle,' ',statusDetail)
     },
-    '@/components/MultiYearMetricChart': {MultiYearMetricChart: () => null},
+    '@/components/MultiYearMetricChart': {MultiYearMetricChart: props => {chartCalls.push(props); return null;}},
     '@/lib/data/source': {
       callBiRpc: async (name,args) => {
         assert.equal(name,'bi_dynamics_payload');
@@ -29,7 +30,7 @@ function harness(payload, {rpcError=false, legacyRows}={}) {
       }
     }
   });
-  return {load, getFallbackCalls:()=>fallbackCalls};
+  return {load, chartCalls, getFallbackCalls:()=>fallbackCalls};
 }
 
 for (const [name,payload] of [
@@ -77,4 +78,34 @@ test('Dynamics genuine transport error remains explicitly unverified legacy',asy
   assert.match(html,/Резервне джерело · не звірено/);
   assert.doesNotMatch(html,/Live data connected/);
   assert.equal(h.getFallbackCalls(),1);
+});
+
+test('Dynamics monthly SQL zeros after source cutoff render UNKNOWN, while real zero and prior year stay measured', async () => {
+  const labels=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const series=labels.map((label,i)=>({label, '2025':i===10?110:i===11?120:22,
+    '2026':i<10?(i===0?0:50):0}));
+  series[6]['2025']=null;
+  series[7]['2025']='not-a-number';
+  series[8]['2025']='';
+  const payload={meta:{rowCount:851,years:[2025,2026],latestYear:2026,previousYear:2025,
+    latestSourceDate:'2026-10-26',channels:[],orderTypes:[],locations:[],brands:[],ownerships:[]},
+    series,summary:{latestYearTotal:500,previousYearTotal:250,growth:100}};
+  const h=harness(payload);
+  const data=await h.load('lib/data/dynamics.ts').loadDynamicsData(query);
+  assert.equal(data.source,'supabase-sql');
+  assert.equal(data.series[0]['2026'],0, 'observed zero survives');
+  assert.equal(data.series[9]['2026'],50, 'latest partial month stays observed, not zeroed');
+  assert.equal(data.series[10]['2026'],null, 'November beyond 26 October is unknown');
+  assert.equal(data.series[11]['2026'],null, 'December beyond 26 October is unknown');
+  assert.equal(data.series[10]['2025'],110, 'prior November is observed');
+  for(const i of [6,7,8]) assert.equal(data.series[i]['2025'],null, 'missing/invalid is not zero');
+  const html=renderToStaticMarkup(await h.load('app/dynamics/page.tsx').default({
+    searchParams:Promise.resolve({location:'Теремки',brand:'МитБАР'})}));
+  const november=html.slice(html.indexOf('Лис</a>'),html.indexOf('Гру</a>'));
+  assert.ok(november.startsWith('Лис</a>'), 'expected actual November row in SSR');
+  assert.match(november, /₴110/);
+  assert.match(november, /<span>—<\\/span>/, 'unknown current month shown as dash');
+  assert.doesNotMatch(november, /₴0|-100\\.0%/, 'no false zero or false -100% YoY');
+  assert.equal(h.chartCalls[0].data[10]['2026'],null, 'chart receives a gap, not fabricated zero');
+  assert.equal(h.getFallbackCalls(),0);
 });

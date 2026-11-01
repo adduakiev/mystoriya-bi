@@ -64,8 +64,12 @@ function buildHref(
   return query ? `/dynamics?${query}` : "/dynamics";
 }
 
-function pct(current: number, previous: number): number | null {
-  if (previous === 0) return null;
+function pointNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function pct(current: number | null, previous: number | null): number | null {
+  if (current === null || previous === null || previous === 0) return null;
   return ((current / previous) - 1) * 100;
 }
 
@@ -74,7 +78,8 @@ function formatDelta(value: number | null): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
 }
 
-function formatMetric(value: number, metric: MetricMode): string {
+function formatMetric(value: number | null, metric: MetricMode): string {
+  if (value === null || !Number.isFinite(value)) return "—";
   if (metric === "markupRate") return `${value.toFixed(1)}%`;
   if (metric === "checks") return Math.round(value).toLocaleString("uk-UA");
   if (metric === "averageCheck") return `₴${Math.round(value).toLocaleString("uk-UA")}`;
@@ -360,8 +365,8 @@ export default async function DynamicsPage({
                   </b>
 
                   {years.map((year, index) => {
-                    const value = Number(point[String(year)] ?? 0);
-                    const previous = index > 0 ? Number(point[String(years[index - 1])] ?? 0) : 0;
+                    const value = pointNumber(point[String(year)]);
+                    const previous = index > 0 ? pointNumber(point[String(years[index - 1])]) : null;
                     const growth = index > 0 ? pct(value, previous) : null;
 
                     return (

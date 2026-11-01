@@ -22,7 +22,7 @@ export type DynamicsData = {
   source: "supabase-sql" | "legacy" | "unavailable";
   rowCount: number;
   years: number[];
-  series: Array<Record<string, string | number>>;
+  series: Array<Record<string, string | number | null>>;
   channels: string[];
   orderTypes: string[];
   locations: string[];
@@ -49,7 +49,7 @@ type RpcPayload = {
     brands?: string[];
     ownerships?: string[];
   };
-  series?: Array<Record<string, string | number>>;
+  series?: Array<Record<string, string | number | null>>;
   summary?: {
     latestYearTotal?: number | string;
     previousYearTotal?: number | string;
@@ -68,13 +68,34 @@ const nullableNum = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+// SQL currently emits 0 for every unobserved calendar-month grid cell.
+// Future months *after the filtered source's latest observed date* are known to be
+// missing, not measured zero. Other historical holes still require SQL provenance.
 function normalizeSeries(
-  input: Array<Record<string, string | number>> | undefined
-): Array<Record<string, string | number>> {
-  return (input ?? []).map((point) => {
-    const next: Record<string, string | number> = {};
+  input: Array<Record<string, string | number | null>> | undefined,
+  { grain, latestYear, latestSourceDate }: {
+    grain: GrainMode; latestYear: number; latestSourceDate: string;
+  }
+): Array<Record<string, string | number | null>> {
+  const validCutoff = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/.test(latestSourceDate);
+  const cutoffYear = Number(latestSourceDate.slice(0, 4));
+  const cutoffMonth = Number(latestSourceDate.slice(5, 7));
+  const orderedMonths = grain === "month" && input?.length === 12;
+  const pointValue = (value: unknown): number | null => {
+    if (value === null || value === undefined ||
+      (typeof value === "string" && value.trim() === "")) return null;
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  return (input ?? []).map((point, index) => {
+    const next: Record<string, string | number | null> = {};
+    const futureUnobservedMonth = orderedMonths && validCutoff &&
+      latestYear === cutoffYear && index + 1 > cutoffMonth;
     for (const [key, value] of Object.entries(point)) {
-      next[key] = key === "label" ? String(value) : num(value);
+      next[key] = key === "label" ? String(value)
+        : futureUnobservedMonth && key === String(latestYear) ? null
+        : pointValue(value);
     }
     return next;
   });
@@ -154,7 +175,7 @@ async function legacy(query: DynamicsQuery): Promise<DynamicsData> {
     source: "legacy",
     rowCount: rows.length,
     years,
-    series,
+    series: normalizeSeries(series, { grain: query.grain, latestYear, latestSourceDate }),
     channels,
     orderTypes,
     locations,
@@ -231,7 +252,11 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       source: "supabase-sql",
       rowCount: num(meta.rowCount),
       years: (meta.years ?? []).map(num),
-      series: normalizeSeries(payload.series),
+      series: normalizeSeries(payload.series, {
+        grain: query.grain,
+        latestYear: num(meta.latestYear),
+        latestSourceDate: meta.latestSourceDate ?? ""
+      }),
       channels: meta.channels ?? [],
       orderTypes: meta.orderTypes ?? [],
       locations: meta.locations ?? [],

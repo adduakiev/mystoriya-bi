@@ -18,7 +18,7 @@ export function MultiYearMetricChart({
   years,
   metric
 }: {
-  data: Array<Record<string, string | number>>;
+  data: Array<Record<string, string | number | null>>;
   years: number[];
   metric: "revenue" | "checks" | "averageCheck" | "markupRate";
 }) {
@@ -52,7 +52,11 @@ export function MultiYearMetricChart({
             tickFormatter={tick}
           />
           <Tooltip
-            formatter={(value, name) => [formatValue(Number(value)), String(name)]}
+            formatter={(value, name) => {
+              const numeric = typeof value === "number" ? value
+                : typeof value === "string" && value.trim() ? Number(value) : NaN;
+              return [Number.isFinite(numeric) ? formatValue(numeric) : "—", String(name)];
+            }}
             contentStyle={{ background: "#111720", border: "1px solid #29313d", borderRadius: 12 }}
           />
           <Legend />
@@ -65,6 +69,7 @@ export function MultiYearMetricChart({
               stroke={PALETTE[index % PALETTE.length]}
               strokeWidth={year === years[years.length - 1] ? 3 : 2}
               dot={false}
+              connectNulls={false}
               activeDot={{ r: 4 }}
             />
           ))}
