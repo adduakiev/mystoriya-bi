@@ -2186,7 +2186,7 @@
       "evidence": "web/components/DashboardSidebar.tsx:68"
     },
     {
-      "id": "web/components/DataSyncControl.tsx:3243",
+      "id": "web/components/DataSyncControl.tsx:398",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2211,28 +2211,21 @@
         "/pnl"
       ],
       "component": "web/components/DataSyncControl.tsx",
-      "line": 117,
+      "line": 8,
       "kind": "button",
-      "displayed_kpi_definition": "{title}",
+      "displayed_kpi_definition": "\"Оновлення тимчасово недоступне: готуємо безпечний імпорт\"",
       "props": {
         "type": "\"button\"",
-        "title": "{title}",
-        "aria-label": "\"Оновити дані з Google Sheets\""
+        "title": "\"Оновлення тимчасово недоступне: готуємо безпечний імпорт\"",
+        "aria-label": "\"Оновити дані з Google Sheets — тимчасово недоступно\""
       },
-      "bindings": [
-        "`data-sync-button ${phase}`",
-        "refreshData",
-        "busy",
-        "title",
-        "phase === \"success\" ? ( <Check size={13} /> ) : phase === \"error\" ? ( <TriangleAlert size={13} /> ) : ( <RefreshCw size={13} className={busy ? \"sync-spin\" : undefined} /> )",
-        "{`data-sync-button ${phase}`}"
-      ],
+      "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/DataSyncControl.tsx:117"
+      "evidence": "web/components/DataSyncControl.tsx:8"
     },
     {
-      "id": "web/components/DataSyncControl.tsx:3498",
+      "id": "web/components/DataSyncControl.tsx:650",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2257,45 +2250,7 @@
         "/pnl"
       ],
       "component": "web/components/DataSyncControl.tsx",
-      "line": 126,
-      "kind": "Check",
-      "displayed_kpi_definition": "Check",
-      "props": {},
-      "bindings": [
-        "13",
-        "{13}"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/DataSyncControl.tsx:126"
-    },
-    {
-      "id": "web/components/DataSyncControl.tsx:3562",
-      "paths": [
-        "/aggregators",
-        "/delivery",
-        "/digital/ads",
-        "/digital/app",
-        "/digital/audience",
-        "/digital/channels",
-        "/digital/commerce",
-        "/digital/funnel",
-        "/digital/local",
-        "/digital",
-        "/digital/seo",
-        "/digital/site",
-        "/digital/social",
-        "/digital/tracking",
-        "/dynamics",
-        "/explorer",
-        "/insights",
-        "/locations",
-        "/operating",
-        "/",
-        "/pnl"
-      ],
-      "component": "web/components/DataSyncControl.tsx",
-      "line": 128,
+      "line": 15,
       "kind": "TriangleAlert",
       "displayed_kpi_definition": "TriangleAlert",
       "props": {},
@@ -2305,47 +2260,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/DataSyncControl.tsx:128"
-    },
-    {
-      "id": "web/components/DataSyncControl.tsx:3614",
-      "paths": [
-        "/aggregators",
-        "/delivery",
-        "/digital/ads",
-        "/digital/app",
-        "/digital/audience",
-        "/digital/channels",
-        "/digital/commerce",
-        "/digital/funnel",
-        "/digital/local",
-        "/digital",
-        "/digital/seo",
-        "/digital/site",
-        "/digital/social",
-        "/digital/tracking",
-        "/dynamics",
-        "/explorer",
-        "/insights",
-        "/locations",
-        "/operating",
-        "/",
-        "/pnl"
-      ],
-      "component": "web/components/DataSyncControl.tsx",
-      "line": 130,
-      "kind": "RefreshCw",
-      "displayed_kpi_definition": "RefreshCw",
-      "props": {},
-      "bindings": [
-        "13",
-        "busy ? \"sync-spin\" : undefined",
-        "{13}",
-        "{busy ? \"sync-spin\" : undefined}"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/DataSyncControl.tsx:130"
+      "evidence": "web/components/DataSyncControl.tsx:15"
     },
     {
       "id": "web/components/KpiCard.tsx:246",

@@ -207,6 +207,14 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // The installed batch/finalize RPCs mutate live facts before reconciliation.
+  // Fail before credentials, run creation, source reads or any database call.
+  // No runtime flag may bypass this gate; activation needs reviewed atomic SQL.
+  return new Response(JSON.stringify({ ok: false, code: "SALES_IMPORT_SAFETY_GATE" }), {
+    status: 503,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" }
+  });
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
