@@ -36,6 +36,11 @@ export type DynamicsData = {
   totalGrowth: number | null;
 };
 
+type RpcObservationPoint = {
+  month?: number | string;
+  counts?: Record<string, number | string | null>;
+};
+
 type RpcPayload = {
   meta?: {
     rowCount?: number | string;
@@ -50,6 +55,7 @@ type RpcPayload = {
     ownerships?: string[];
   };
   series?: Array<Record<string, string | number | null>>;
+  seriesObservationCounts?: RpcObservationPoint[];
   summary?: {
     latestYearTotal?: number | string;
     previousYearTotal?: number | string;
@@ -68,13 +74,47 @@ const nullableNum = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+// Observation-count metadata is optional until an approved SQL migration is deployed.
+// If present it must align exactly with the chart or the RPC is unavailable.
+function validObservationCounts(
+  input: RpcObservationPoint[] | undefined,
+  years: Array<number | string> | undefined,
+  series: Array<Record<string, string | number | null>> | undefined,
+  grain: GrainMode
+): boolean {
+  if (grain !== "month" || !Array.isArray(input) || input.length !== 12 ||
+      !Array.isArray(series) || series.length !== 12 || !Array.isArray(years) || !years.length) return false;
+  const keys = years.map(String);
+  if (new Set(keys).size !== keys.length || keys.some((key) => !/^\d{4}$/.test(key))) return false;
+  for (let index = 0; index < 12; index += 1) {
+    const point = input[index];
+    const plotted = series[index];
+    const month = index + 1;
+    if (!point || !plotted || (point.month !== month && point.month !== String(month)) ||
+        !point.counts || Array.isArray(point.counts) ||
+        typeof plotted.label !== "string") return false;
+    const countKeys = Object.keys(point.counts);
+    const seriesKeys = Object.keys(plotted).filter((key) => key !== "label");
+    if (countKeys.length !== keys.length || seriesKeys.length !== keys.length ||
+        keys.some((key) => !Object.hasOwn(point.counts!, key) || !Object.hasOwn(plotted, key))) return false;
+    for (const key of keys) {
+      const count = point.counts[key];
+      if (typeof count === "number" ? !Number.isSafeInteger(count) || count < 0 :
+          typeof count !== "string" || !/^(0|[1-9]\d*)$/.test(count) ||
+          !Number.isSafeInteger(Number(count))) return false;
+    }
+  }
+  return true;
+}
+
 // SQL currently emits 0 for every unobserved calendar-month grid cell.
 // Future months *after the filtered source's latest observed date* are known to be
 // missing, not measured zero. Other historical holes still require SQL provenance.
 function normalizeSeries(
   input: Array<Record<string, string | number | null>> | undefined,
-  { grain, latestYear, latestSourceDate }: {
+  { grain, latestYear, latestSourceDate, observationCounts }: {
     grain: GrainMode; latestYear: number; latestSourceDate: string;
+    observationCounts?: RpcObservationPoint[];
   }
 ): Array<Record<string, string | number | null>> {
   const validCutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate);
@@ -94,7 +134,8 @@ function normalizeSeries(
       latestYear === cutoffYear && index + 1 > cutoffMonth;
     for (const [key, value] of Object.entries(point)) {
       next[key] = key === "label" ? String(value)
-        : futureUnobservedMonth && key === String(latestYear) ? null
+        : (observationCounts && Number(observationCounts[index].counts?.[key]) === 0) ||
+          (futureUnobservedMonth && key === String(latestYear)) ? null
         : pointValue(value);
     }
     return next;
@@ -225,7 +266,9 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
     if (
       !payload || typeof payload !== "object" || Array.isArray(payload) ||
       !payload.meta || !Array.isArray(payload.meta.years) ||
-      !Array.isArray(payload.series) || !payload.summary
+      !Array.isArray(payload.series) || !payload.summary ||
+      (payload.seriesObservationCounts !== undefined &&
+        !validObservationCounts(payload.seriesObservationCounts, payload.meta.years, payload.series, query.grain))
     ) {
       return {
         source: "unavailable",
@@ -255,7 +298,8 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       series: normalizeSeries(payload.series, {
         grain: query.grain,
         latestYear: num(meta.latestYear),
-        latestSourceDate: meta.latestSourceDate ?? ""
+        latestSourceDate: meta.latestSourceDate ?? "",
+        observationCounts: payload.seriesObservationCounts
       }),
       channels: meta.channels ?? [],
       orderTypes: meta.orderTypes ?? [],
