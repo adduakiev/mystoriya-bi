@@ -51,7 +51,7 @@ type OverviewContext = {
 
 export type OverviewData = OverviewContext & ({
   status: "unavailable";
-  reason: "SELECTED_PERIOD_CONTRACT_MISMATCH";
+  reason: "SELECTED_PERIOD_CONTRACT_MISMATCH" | "MONTHLY_OBSERVATION_CONTRACT_MISMATCH";
 } | {
   status: "ready";
   snapshot: DashboardSnapshot;
@@ -106,16 +106,19 @@ type RpcLocation = {
 type RpcMonthlyRow = {
   month?: number | string;
   label?: string;
-  revenue?: number | string;
+  revenue?: number | string | null;
   revenueGrowth?: number | string | null;
-  checks?: number | string;
+  checks?: number | string | null;
   checksGrowth?: number | string | null;
-  averageCheck?: number | string;
-  markupRate?: number | string;
-  venueShare?: number | string;
-  aggregatorShare?: number | string;
-  deliveryShare?: number | string;
+  averageCheck?: number | string | null;
+  markupRate?: number | string | null;
+  venueShare?: number | string | null;
+  aggregatorShare?: number | string | null;
+  deliveryShare?: number | string | null;
   isPartial?: boolean;
+  // Optional until the corresponding owner-approved SQL contract is installed.
+  currentObservationCount?: number | null;
+  previousObservationCount?: number | null;
 };
 
 type RpcDriver = {
@@ -176,6 +179,25 @@ function nullableNum(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+// Metadata must cover the same twelve ordered month cells on both comparison
+// sides. Partial/malformed metadata fails closed instead of fabricating zeros.
+function hasMonthlyObservationCounts(rows: RpcMonthlyRow[]): boolean {
+  return rows.some((row) =>
+    Object.hasOwn(row, "currentObservationCount") || Object.hasOwn(row, "previousObservationCount"));
+}
+
+function validMonthlyObservationCounts(rows: RpcMonthlyRow[]): boolean {
+  if (!hasMonthlyObservationCounts(rows)) return true; // installed SQL: old schema
+  return rows.length === 12 && rows.every((row, index) =>
+    Number(row.month) === index + 1
+    && typeof row.currentObservationCount === "number"
+    && Number.isSafeInteger(row.currentObservationCount)
+    && row.currentObservationCount >= 0
+    && typeof row.previousObservationCount === "number"
+    && Number.isSafeInteger(row.previousObservationCount)
+    && row.previousObservationCount >= 0);
 }
 
 function pctDelta(current: number, previous: number): number | null {
@@ -335,20 +357,33 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
       growth: nullableNum(item.growth),
       share: num(item.share)
     })),
-    monthlyTable: (payload.monthlyTable ?? []).map((item) => ({
-      month: num(item.month),
-      label: item.label ?? "",
-      revenue: num(item.revenue),
-      revenueGrowth: nullableNum(item.revenueGrowth),
-      checks: num(item.checks),
-      checksGrowth: nullableNum(item.checksGrowth),
-      averageCheck: num(item.averageCheck),
-      markupRate: num(item.markupRate),
-      venueShare: num(item.venueShare),
-      aggregatorShare: num(item.aggregatorShare),
-      deliveryShare: num(item.deliveryShare),
-      isPartial: Boolean(item.isPartial)
-    })),
+    monthlyTable: (payload.monthlyTable ?? []).map((item) => {
+      const currentCount = item.currentObservationCount;
+      const previousCount = item.previousObservationCount;
+      const currentObserved = currentCount === undefined || currentCount > 0;
+      const previousObserved = previousCount === undefined || previousCount > 0;
+      const revenue = currentObserved ? nullableNum(item.revenue) : null;
+      const checks = currentObserved ? nullableNum(item.checks) : null;
+      const averageCheck = checks === null || checks === 0 ? null : nullableNum(item.averageCheck);
+      const markupRate = revenue === null || revenue === 0 ? null : nullableNum(item.markupRate);
+      const share = (value: unknown) => revenue === null || revenue === 0 ? null : nullableNum(value);
+      return {
+        month: num(item.month),
+        label: item.label ?? "",
+        revenue,
+        revenueGrowth: currentObserved && previousObserved ? nullableNum(item.revenueGrowth) : null,
+        checks,
+        checksGrowth: currentObserved && previousObserved ? nullableNum(item.checksGrowth) : null,
+        averageCheck,
+        markupRate,
+        venueShare: share(item.venueShare),
+        aggregatorShare: share(item.aggregatorShare),
+        deliveryShare: share(item.deliveryShare),
+        currentObservationCount: currentCount,
+        previousObservationCount: previousCount,
+        isPartial: Boolean(item.isPartial)
+      };
+    }),
     signal: buildOverviewSignal(payload.current, payload.previous, comparisonLabel)
   };
 }
@@ -480,6 +515,9 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
   // mismatch must never enter the exception-driven legacy fallback.
   if (!matchesSelectedPeriod(meta, query)) {
     return {...context, status: "unavailable", reason: "SELECTED_PERIOD_CONTRACT_MISMATCH"};
+  }
+  if (!validMonthlyObservationCounts(payload.monthlyTable ?? [])) {
+    return {...context, status: "unavailable", reason: "MONTHLY_OBSERVATION_CONTRACT_MISMATCH"};
   }
 
   return {

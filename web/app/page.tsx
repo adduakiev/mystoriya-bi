@@ -52,6 +52,18 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+function formatNullableUah(value: number | null): string {
+  return value === null ? "—" : formatUah(value);
+}
+
+function formatNullableChecks(value: number | null): string {
+  return value === null ? "—" : Math.round(value).toLocaleString("uk-UA");
+}
+
+function formatSharePct(value: number | null): string {
+  return value === null ? "—" : `${value.toFixed(1)}%`;
+}
+
 function formatPct(value: number | null): string {
   if (value === null) return "—";
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
@@ -562,19 +574,19 @@ export default async function Home({
                     className="management-row"
                   >
                     <b>{row.label}{row.isPartial ? " *" : ""}</b>
-                    <span>{formatUah(row.revenue)}</span>
+                    <span>{formatNullableUah(row.revenue)}</span>
                     <span className={row.revenueGrowth === null ? "" : row.revenueGrowth >= 0 ? "positive" : "negative"}>
                       {formatPct(row.revenueGrowth)}
                     </span>
-                    <span>{Math.round(row.checks).toLocaleString("uk-UA")}</span>
+                    <span>{formatNullableChecks(row.checks)}</span>
                     <span className={row.checksGrowth === null ? "" : row.checksGrowth >= 0 ? "positive" : "negative"}>
                       {formatPct(row.checksGrowth)}
                     </span>
-                    <span>{formatUah(row.averageCheck)}</span>
-                    <span>{row.markupRate.toFixed(1)}%</span>
-                    <span>{row.venueShare.toFixed(1)}%</span>
-                    <span>{row.aggregatorShare.toFixed(1)}%</span>
-                    <span>{row.deliveryShare.toFixed(1)}%</span>
+                    <span>{formatNullableUah(row.averageCheck)}</span>
+                    <span>{formatSharePct(row.markupRate)}</span>
+                    <span>{formatSharePct(row.venueShare)}</span>
+                    <span>{formatSharePct(row.aggregatorShare)}</span>
+                    <span>{formatSharePct(row.deliveryShare)}</span>
                   </Link>
                 ))}
               </div>
