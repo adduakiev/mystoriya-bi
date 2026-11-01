@@ -4,7 +4,7 @@ import { TriangleAlert } from "lucide-react";
 // their release gates. The API independently rejects direct POST requests.
 export function DataSyncControl({ initialCutoff }: { initialCutoff: string | null }) {
   return (
-    <div className="data-sync-control" data-warehouse-cutoff={initialCutoff ?? undefined}>
+    <div className="data-sync-control safety-gated" data-warehouse-cutoff={initialCutoff ?? undefined}>
       <button
         type="button"
         className="data-sync-button error"
