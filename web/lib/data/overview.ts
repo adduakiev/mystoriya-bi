@@ -360,8 +360,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
     monthlyTable: (payload.monthlyTable ?? []).map((item) => {
       const currentCount = item.currentObservationCount;
       const previousCount = item.previousObservationCount;
-      const currentObserved = currentCount === undefined || currentCount > 0;
-      const previousObserved = previousCount === undefined || previousCount > 0;
+      const currentObserved = currentCount == null || currentCount > 0;
+      const previousObserved = previousCount == null || previousCount > 0;
       const revenue = currentObserved ? nullableNum(item.revenue) : null;
       const checks = currentObserved ? nullableNum(item.checks) : null;
       const averageCheck = checks === null || checks === 0 ? null : nullableNum(item.averageCheck);
