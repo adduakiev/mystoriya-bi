@@ -104,8 +104,8 @@ test('Dynamics monthly SQL zeros after source cutoff render UNKNOWN, while real 
   const november=html.slice(html.indexOf('Лис</a>'),html.indexOf('Гру</a>'));
   assert.ok(november.startsWith('Лис</a>'), 'expected actual November row in SSR');
   assert.match(november, /₴110/);
-  assert.match(november, /<span>—<\\/span>/, 'unknown current month shown as dash');
-  assert.doesNotMatch(november, /₴0|-100\\.0%/, 'no false zero or false -100% YoY');
+  assert.match(november, /<span>—<\/span>/, 'unknown current month shown as dash');
+  assert.doesNotMatch(november, /₴0|-100\.0%/, 'no false zero or false -100% YoY');
   assert.equal(h.chartCalls[0].data[10]['2026'],null, 'chart receives a gap, not fabricated zero');
   assert.equal(h.getFallbackCalls(),0);
 });

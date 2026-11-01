@@ -77,7 +77,7 @@ function normalizeSeries(
     grain: GrainMode; latestYear: number; latestSourceDate: string;
   }
 ): Array<Record<string, string | number | null>> {
-  const validCutoff = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/.test(latestSourceDate);
+  const validCutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate);
   const cutoffYear = Number(latestSourceDate.slice(0, 4));
   const cutoffMonth = Number(latestSourceDate.slice(5, 7));
   const orderedMonths = grain === "month" && input?.length === 12;
