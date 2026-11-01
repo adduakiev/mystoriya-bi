@@ -358,8 +358,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
 // observed date are provably unknown; do not rewrite historical zeroes.
 function normalizeSeries(
   input: Array<Record<string, string | number | null>> | undefined,
-  { grain, selectedMonth, latestSourceDate }: {
-    grain: GrainMode; selectedMonth?: number; latestSourceDate: string;
+  { grain, selectedMonth, latestSourceDate, scopedCutoffDate }: {
+    grain: GrainMode; selectedMonth?: number; latestSourceDate: string; scopedCutoffDate: string;
   }
 ): Array<Record<string, string | number | null>> {
   const cutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate)
@@ -368,6 +368,14 @@ function normalizeSeries(
     && cutoff.toISOString().slice(0, 10) === latestSourceDate;
   const cutoffYear = validCutoff ? latestSourceDate.slice(0, 4) : "";
   const cutoffMonth = validCutoff ? Number(latestSourceDate.slice(5, 7)) : 0;
+  // SQL meta.latestSourceDate is global, whereas meta.cutoffDate follows
+  // the selected filter/year. Do not plot false zeroes after that cutoff.
+  const scopeDate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(scopedCutoffDate)
+    ? new Date(`${scopedCutoffDate}T00:00:00Z`) : null;
+  const validScope = scopeDate !== null && Number.isFinite(scopeDate.getTime())
+    && scopeDate.toISOString().slice(0, 10) === scopedCutoffDate;
+  const effectiveCutoffMonth = validCutoff && validScope && scopedCutoffDate.slice(0, 4) === cutoffYear
+    ? Math.min(cutoffMonth, Number(scopedCutoffDate.slice(5, 7))) : cutoffMonth;
   const monthlyGrid = grain === "month" && selectedMonth === undefined && input?.length === 12;
 
   return (input ?? []).map((point, index) => {
@@ -375,7 +383,7 @@ function normalizeSeries(
     for (const [key, value] of Object.entries(point)) {
       if (key === "label") {
         next[key] = String(value);
-      } else if (monthlyGrid && key === cutoffYear && index + 1 > cutoffMonth) {
+      } else if (monthlyGrid && key === cutoffYear && index + 1 > effectiveCutoffMonth) {
         next[key] = null;
       } else {
         next[key] = typeof value === "string" && value.trim() === "" ? null
@@ -478,7 +486,7 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
     ...context,
     status: "ready",
     snapshot: buildSnapshot(payload),
-    multiYearData: normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "" }),
+    multiYearData: normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "", scopedCutoffDate: meta.cutoffDate ?? "" }),
     channelMixData: (payload.channelMixData ?? []).map((item) => ({
       label: item.label ?? "",
       venue: num(item.venue),
