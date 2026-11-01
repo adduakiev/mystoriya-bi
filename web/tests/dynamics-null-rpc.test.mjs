@@ -109,3 +109,55 @@ test('Dynamics monthly SQL zeros after source cutoff render UNKNOWN, while real 
   assert.equal(h.chartCalls[0].data[10]['2026'],null, 'chart receives a gap, not fabricated zero');
   assert.equal(h.getFallbackCalls(),0);
 });
+
+
+test('Dynamics observation counts distinguish interior UNKNOWN from measured zero through SSR and chart',async()=>{
+  const labels=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const series=labels.map((label,i)=>({label,'2025':i===2?34790.8:i===7?0:25,
+    '2026':i===2?0:i===7?30:50}));
+  const counts=labels.map((_,i)=>({month:i+1,counts:{'2025':i===5?0:i===7?2:1,
+    '2026':i===2||i>=10?0:1}}));
+  const payload={meta:{rowCount:337,years:[2025,2026],latestYear:2026,previousYear:2025,
+    latestSourceDate:'2026-10-26',channels:[],orderTypes:[],locations:[],brands:[],ownerships:[]},
+    series,seriesObservationCounts:counts,
+    summary:{latestYearTotal:500,previousYearTotal:250,growth:100}};
+  const h=harness(payload);
+  const data=await h.load('lib/data/dynamics.ts').loadDynamicsData(query);
+  assert.equal(data.source,'supabase-sql');
+  assert.equal(data.series[2]['2026'],null,'interior March SQL 0 has no observations');
+  assert.equal(data.series[5]['2025'],null,'historical June missing is not measured zero');
+  assert.equal(data.series[7]['2025'],0,'August measured zero with two observations survives');
+  assert.equal(data.series[2]['2025'],34790.8);
+  assert.equal(data.series[7]['2026'],30);
+  const html=renderToStaticMarkup(await h.load('app/dynamics/page.tsx').default({
+    searchParams:Promise.resolve({location:'Теремки',brand:'МитБАР'})}));
+  const march=html.slice(html.indexOf('Бер</a>'),html.indexOf('Кві</a>'));
+  assert.ok(march.startsWith('Бер</a>'),'expected real March SSR row');
+  assert.ok(march.includes('₴34'),'prior-year positive sale preserved');
+  assert.match(march,/<span>—<\/span>/,'unobserved month rendered UNKNOWN');
+  assert.doesNotMatch(march,/₴0|-100\.0%/,'no fabricated zero or false -100% YoY');
+  assert.equal(h.chartCalls[0].data[2]['2026'],null,'chart receives an actual gap');
+  assert.equal(h.getFallbackCalls(),0);
+});
+
+for (const [name,mutate] of [
+  ['missing month',c=>{delete c[0].month;}],
+  ['duplicate month',c=>{c[1].month=1;}],
+  ['missing year',c=>{delete c[2].counts['2026'];}],
+  ['extra year',c=>{c[2].counts['2024']=1;}],
+  ['negative count',c=>{c[2].counts['2026']=-1;}],
+  ['fractional count',c=>{c[2].counts['2026']=1.5;}],
+  ['nonnumeric count',c=>{c[2].counts['2026']='unknown';}]
+]) {
+  test('Dynamics malformed observation metadata ('+name+') fails closed without fallback',async()=>{
+    const labels=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+    const counts=labels.map((_,i)=>({month:i+1,counts:{'2025':1,'2026':1}}));
+    mutate(counts);
+    const payload={meta:{rowCount:1,years:[2025,2026],latestYear:2026,latestSourceDate:'2026-10-26'},
+      series:labels.map(label=>({label,'2025':10,'2026':20})),seriesObservationCounts:counts,
+      summary:{latestYearTotal:200,previousYearTotal:100,growth:100}};
+    const h=harness(payload);
+    assert.equal((await h.load('lib/data/dynamics.ts').loadDynamicsData(query)).source,'unavailable');
+    assert.equal(h.getFallbackCalls(),0);
+  });
+}
