@@ -274,3 +274,53 @@ test('Overview month-selected day grid must not be masked as a 12-month grid', a
   assert.equal(h.legacyCalls,0);
   h.assertUnchanged();
 });
+
+
+test('Overview filtered 2026 cutoff preserves UNKNOWN months instead of global-date false zeroes', async t => {
+  t.mock.method(globalThis, 'fetch', () => assert.fail('No network in scoped cutoff contract test'));
+  const series = Array.from({length:12}, (_,i) => ({
+    label:`M${i+1}`, '2025':45, '2026':i===0?0:i<7?12:0
+  }));
+  const h = harness({
+    selectedYear:2026, currentYear:2026, selectedMonth:null,
+    years:[2025,2026], cutoffDate:'2026-07-14',
+    latestSourceDate:'2026-10-26'
+  }, series);
+  const data = await h.data({year:2026});
+  assert.equal(data.status,'ready');
+  assert.equal(data.multiYearData[0]['2026'],0,'genuine observed zero survives');
+  assert.equal(data.multiYearData[6]['2026'],12,'observed July remains');
+  for (const month of [8,9,10,11,12]) {
+    assert.equal(data.multiYearData[month-1]['2026'],null,`2026 month ${month} is missing, not zero`);
+    assert.equal(data.multiYearData[month-1]['2025'],45,'historical observed data remains');
+  }
+  const html = await h.render({year:2026});
+  assert.match(html,/SQL CONNECTED · FRESHNESS UNVERIFIED/);
+  const chart = h.charts.find(c => c.name==='MultiYearMetricChart');
+  assert.ok(chart,'actual SSR passes a chart');
+  for (const month of [8,9,10,11,12]) {
+    assert.equal(chart.data[month-1]['2026'],null,'SSR chart prop keeps missing month');
+  }
+  assert.equal(h.legacyCalls,0);
+  h.assertUnchanged();
+});
+
+test('Overview source-current unfiltered cutoff preserves October and historical observations', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('No external requests'));
+  const rows = Array.from({length:12},(_,i)=>({
+    label:`M${i+1}`,'2025':10,'2026':i<10?i===0?0:80:0
+  }));
+  const h=harness({
+    selectedYear:2026,currentYear:2026,selectedMonth:null,
+    cutoffDate:'2026-10-26',latestSourceDate:'2026-10-26',
+    years:[2025,2026]
+  },rows);
+  const d=await h.data({year:2026});
+  assert.equal(d.status,'ready');
+  assert.equal(d.multiYearData[0]['2026'],0);
+  assert.equal(d.multiYearData[9]['2026'],80);
+  assert.equal(d.multiYearData[10]['2026'],null);
+  assert.equal(d.multiYearData[11]['2026'],null);
+  assert.equal(d.multiYearData[11]['2025'],10);
+  h.assertUnchanged();
+});
