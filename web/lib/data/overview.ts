@@ -55,7 +55,7 @@ export type OverviewData = OverviewContext & ({
 } | {
   status: "ready";
   snapshot: DashboardSnapshot;
-  multiYearData: Array<Record<string, string | number>>;
+  multiYearData: Array<Record<string, string | number | null>>;
   channelMixData: Array<{
     label: string;
     venue: number;
@@ -151,7 +151,7 @@ type RpcOverviewPayload = {
   channels?: RpcChannel[];
   locations?: RpcLocation[];
   monthlyTable?: RpcMonthlyRow[];
-  multiYearData?: Array<Record<string, string | number>>;
+  multiYearData?: Array<Record<string, string | number | null>>;
   channelMixData?: Array<{
     label?: string;
     venue?: number | string;
@@ -353,14 +353,35 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
   };
 }
 
+// Installed monthly SQL pads unobserved grid cells with zero. Without
+// observation counts, only future months beyond this filtered source's latest
+// observed date are provably unknown; do not rewrite historical zeroes.
 function normalizeSeries(
-  input: Array<Record<string, string | number>> | undefined
-): Array<Record<string, string | number>> {
-  return (input ?? []).map((point) => {
-    const next: Record<string, string | number> = {};
-    Object.entries(point).forEach(([key, value]) => {
-      next[key] = key === "label" ? String(value) : num(value);
-    });
+  input: Array<Record<string, string | number | null>> | undefined,
+  { grain, selectedMonth, latestSourceDate }: {
+    grain: GrainMode; selectedMonth?: number; latestSourceDate: string;
+  }
+): Array<Record<string, string | number | null>> {
+  const cutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate)
+    ? new Date(`${latestSourceDate}T00:00:00Z`) : null;
+  const validCutoff = cutoff !== null && Number.isFinite(cutoff.getTime())
+    && cutoff.toISOString().slice(0, 10) === latestSourceDate;
+  const cutoffYear = validCutoff ? latestSourceDate.slice(0, 4) : "";
+  const cutoffMonth = validCutoff ? Number(latestSourceDate.slice(5, 7)) : 0;
+  const monthlyGrid = grain === "month" && selectedMonth === undefined && input?.length === 12;
+
+  return (input ?? []).map((point, index) => {
+    const next: Record<string, string | number | null> = {};
+    for (const [key, value] of Object.entries(point)) {
+      if (key === "label") {
+        next[key] = String(value);
+      } else if (monthlyGrid && key === cutoffYear && index + 1 > cutoffMonth) {
+        next[key] = null;
+      } else {
+        next[key] = typeof value === "string" && value.trim() === "" ? null
+          : typeof value === "string" || typeof value === "number" ? nullableNum(value) : null;
+      }
+    }
     return next;
   });
 }
@@ -457,7 +478,7 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
     ...context,
     status: "ready",
     snapshot: buildSnapshot(payload),
-    multiYearData: normalizeSeries(payload.multiYearData),
+    multiYearData: normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "" }),
     channelMixData: (payload.channelMixData ?? []).map((item) => ({
       label: item.label ?? "",
       venue: num(item.venue),

@@ -231,3 +231,46 @@ test('Overview actual SSR does not claim historical horizon mismatch for matchin
   assert.equal(h.charts.find(c=>c.name==='MultiYearMetricChart').data.length,26);
   h.assertUnchanged();
 });
+
+
+test('Overview monthly SQL future months remain UNKNOWN all the way to chart props', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('No external network in synthetic RPC/SSR test'));
+  const series = Array.from({length:12}, (_,i) => ({
+    label: 'M'+(i+1), '2025':i===10?110:20, '2026':i===0?0:i<10?50:0
+  }));
+  series[5]['2025']=null;
+  series[6]['2025']='';
+  series[7]['2025']='invalid-number';
+  const h = harness({selectedYear:2026,currentYear:2026,selectedMonth:null,
+    years:[2025,2026],cutoffDate:'2026-10-26',latestSourceDate:'2026-10-26'},series);
+  const data = await h.data({year:2026});
+  assert.equal(data.status,'ready');
+  assert.equal(data.multiYearData.length,12);
+  assert.equal(data.multiYearData[0]['2026'],0,'observed zero is retained');
+  assert.equal(data.multiYearData[9]['2026'],50,'observed partial October retained');
+  assert.equal(data.multiYearData[10]['2026'],null,'future November is not a measured zero');
+  assert.equal(data.multiYearData[11]['2026'],null,'future December is not a measured zero');
+  assert.equal(data.multiYearData[10]['2025'],110,'historical November unchanged');
+  for(const index of [5,6,7]) assert.equal(data.multiYearData[index]['2025'],null);
+  const html = await h.render({year:2026});
+  assert.match(html,/MULTI-YEAR DYNAMICS/);
+  const charts=h.charts.filter(c=>c.name==='MultiYearMetricChart');
+  assert.ok(charts.length>0);
+  assert.equal(charts.at(-1).data[10]['2026'],null,'SSR chart receives null gap');
+  assert.equal(charts.at(-1).data[0]['2026'],0);
+  assert.equal(h.legacyCalls,0);
+  h.assertUnchanged();
+});
+
+test('Overview month-selected day grid must not be masked as a 12-month grid', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('No external network in synthetic RPC test'));
+  const series=Array.from({length:12},(_,i)=>({label:String(i+1),'2025':22,'2026':50}));
+  const h=harness({selectedYear:2026,currentYear:2026,selectedMonth:10,years:[2025,2026],
+    cutoffDate:'2026-10-26',latestSourceDate:'2026-10-26'},series);
+  const data=await h.data({year:2026,month:10,period:'month'});
+  assert.equal(data.status,'ready');
+  assert.equal(data.multiYearData[10]['2026'],50);
+  assert.equal(data.multiYearData[11]['2026'],50);
+  assert.equal(h.legacyCalls,0);
+  h.assertUnchanged();
+});
