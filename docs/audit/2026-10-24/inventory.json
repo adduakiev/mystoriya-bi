@@ -4032,7 +4032,7 @@
       "evidence": "web/components/DeliveryVsAggregatorChart.tsx:43"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1240",
+      "id": "web/components/MultiYearMetricChart.tsx:1247",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4049,7 +4049,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:42"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1275",
+      "id": "web/components/MultiYearMetricChart.tsx:1282",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4069,7 +4069,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:43"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1331",
+      "id": "web/components/MultiYearMetricChart.tsx:1338",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4090,7 +4090,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:44"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1365",
+      "id": "web/components/MultiYearMetricChart.tsx:1372",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4110,7 +4110,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:45"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1427",
+      "id": "web/components/MultiYearMetricChart.tsx:1434",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4130,7 +4130,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:46"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1514",
+      "id": "web/components/MultiYearMetricChart.tsx:1521",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4154,7 +4154,7 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:47"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1687",
+      "id": "web/components/MultiYearMetricChart.tsx:1694",
       "paths": [
         "/delivery",
         "/dynamics",
@@ -4166,9 +4166,9 @@
       "displayed_kpi_definition": "Tooltip",
       "props": {},
       "bindings": [
-        "(value, name) => [formatValue(Number(value)), String(name)]",
+        "(value, name) => { const numeric = typeof value === \"number\" ? value : typeof value === \"string\" && value.trim() ? Number(value) : NaN; return [Number.isFinite(numeric) ? formatVal",
         "{ background: \"#111720\", border: \"1px solid #29313d\", borderRadius: 12 }",
-        "{(value, name) => [formatValue(Number(value)), String(name)]}",
+        "{(value, name) => { const numeric = typeof value === \"number\" ? value : typeof value === \"string\" && value.trim() ? Number(value) : NaN; return [Number.isFinite(numeric) ? formatVa",
         "{{ background: \"#111720\", border: \"1px solid #29313d\", borderRadius: 12 }}"
       ],
       "repeat_template": null,
@@ -4176,31 +4176,31 @@
       "evidence": "web/components/MultiYearMetricChart.tsx:54"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1903",
+      "id": "web/components/MultiYearMetricChart.tsx:2122",
       "paths": [
         "/delivery",
         "/dynamics",
         "/"
       ],
       "component": "web/components/MultiYearMetricChart.tsx",
-      "line": 58,
+      "line": 62,
       "kind": "Legend",
       "displayed_kpi_definition": "Legend",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/MultiYearMetricChart.tsx:58"
+      "evidence": "web/components/MultiYearMetricChart.tsx:62"
     },
     {
-      "id": "web/components/MultiYearMetricChart.tsx:1966",
+      "id": "web/components/MultiYearMetricChart.tsx:2185",
       "paths": [
         "/delivery",
         "/dynamics",
         "/"
       ],
       "component": "web/components/MultiYearMetricChart.tsx",
-      "line": 60,
+      "line": 64,
       "kind": "Line",
       "displayed_kpi_definition": "Line",
       "props": {
@@ -4217,7 +4217,7 @@
       ],
       "repeat_template": "years",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/MultiYearMetricChart.tsx:60"
+      "evidence": "web/components/MultiYearMetricChart.tsx:64"
     },
     {
       "id": "web/app/digital/ads/page.tsx:1527",
@@ -10537,12 +10537,12 @@
       "evidence": "web/app/digital/tracking/page.tsx:67"
     },
     {
-      "id": "web/app/dynamics/page.tsx:3643",
+      "id": "web/app/dynamics/page.tsx:3900",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 115,
+      "line": 120,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -10552,15 +10552,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:115"
+      "evidence": "web/app/dynamics/page.tsx:120"
     },
     {
-      "id": "web/app/dynamics/page.tsx:4380",
+      "id": "web/app/dynamics/page.tsx:4637",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 131,
+      "line": 136,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути фільтри",
       "props": {
@@ -10569,15 +10569,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:131"
+      "evidence": "web/app/dynamics/page.tsx:136"
     },
     {
-      "id": "web/app/dynamics/page.tsx:4857",
+      "id": "web/app/dynamics/page.tsx:5114",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 157,
+      "line": 162,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -10591,30 +10591,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:157"
+      "evidence": "web/app/dynamics/page.tsx:162"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5576",
+      "id": "web/app/dynamics/page.tsx:5833",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 172,
+      "line": 177,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:172"
+      "evidence": "web/app/dynamics/page.tsx:177"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5620",
+      "id": "web/app/dynamics/page.tsx:5877",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 173,
+      "line": 178,
       "kind": "Link",
       "displayed_kpi_definition": "← Огляд",
       "props": {
@@ -10626,15 +10626,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:173"
+      "evidence": "web/app/dynamics/page.tsx:178"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5705",
+      "id": "web/app/dynamics/page.tsx:5962",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 174,
+      "line": 179,
       "kind": "Link",
       "displayed_kpi_definition": "LFL · активні",
       "props": {
@@ -10648,15 +10648,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:174"
+      "evidence": "web/app/dynamics/page.tsx:179"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5980",
+      "id": "web/app/dynamics/page.tsx:6237",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 183,
+      "line": 188,
       "kind": "details",
       "displayed_kpi_definition": "Фільтри динаміки ·",
       "props": {},
@@ -10669,15 +10669,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:183"
+      "evidence": "web/app/dynamics/page.tsx:188"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6059",
+      "id": "web/app/dynamics/page.tsx:6316",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 185,
+      "line": 190,
       "kind": "Filter",
       "displayed_kpi_definition": "Filter",
       "props": {},
@@ -10687,15 +10687,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:185"
+      "evidence": "web/app/dynamics/page.tsx:190"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6116",
+      "id": "web/app/dynamics/page.tsx:6373",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 186,
+      "line": 191,
       "kind": "span",
       "displayed_kpi_definition": "·",
       "props": {},
@@ -10708,15 +10708,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:186"
+      "evidence": "web/app/dynamics/page.tsx:191"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6389",
+      "id": "web/app/dynamics/page.tsx:6646",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 193,
+      "line": 198,
       "kind": "form",
       "displayed_kpi_definition": "Гранулярність Місяці Тижні (тимчасово недоступні) Показник Канал Всі канали Деталізація каналу Вся деталізація Бренд Всі бренди Власність Вся власність Заклад Всі заклади Застосува",
       "props": {
@@ -10733,15 +10733,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:193"
+      "evidence": "web/app/dynamics/page.tsx:198"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6472",
+      "id": "web/app/dynamics/page.tsx:6729",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 194,
+      "line": 199,
       "kind": "input",
       "displayed_kpi_definition": "input",
       "props": {
@@ -10752,15 +10752,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:194"
+      "evidence": "web/app/dynamics/page.tsx:199"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6593",
+      "id": "web/app/dynamics/page.tsx:6850",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 197,
+      "line": 202,
       "kind": "select",
       "displayed_kpi_definition": "Місяці Тижні (тимчасово недоступні)",
       "props": {
@@ -10772,15 +10772,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:197"
+      "evidence": "web/app/dynamics/page.tsx:202"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6890",
+      "id": "web/app/dynamics/page.tsx:7147",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 205,
+      "line": 210,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -10795,15 +10795,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:205"
+      "evidence": "web/app/dynamics/page.tsx:210"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7188",
+      "id": "web/app/dynamics/page.tsx:7445",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 214,
+      "line": 219,
       "kind": "select",
       "displayed_kpi_definition": "Всі канали",
       "props": {
@@ -10817,15 +10817,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:214"
+      "evidence": "web/app/dynamics/page.tsx:219"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7510",
+      "id": "web/app/dynamics/page.tsx:7767",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 222,
+      "line": 227,
       "kind": "select",
       "displayed_kpi_definition": "Вся деталізація",
       "props": {
@@ -10839,15 +10839,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:222"
+      "evidence": "web/app/dynamics/page.tsx:227"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7830",
+      "id": "web/app/dynamics/page.tsx:8087",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 230,
+      "line": 235,
       "kind": "select",
       "displayed_kpi_definition": "Всі бренди",
       "props": {
@@ -10861,15 +10861,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:230"
+      "evidence": "web/app/dynamics/page.tsx:235"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8137",
+      "id": "web/app/dynamics/page.tsx:8394",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 238,
+      "line": 243,
       "kind": "select",
       "displayed_kpi_definition": "Вся власність",
       "props": {
@@ -10883,15 +10883,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:238"
+      "evidence": "web/app/dynamics/page.tsx:243"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8400",
+      "id": "web/app/dynamics/page.tsx:8657",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 244,
+      "line": 249,
       "kind": "label",
       "displayed_kpi_definition": "Заклад Всі заклади",
       "props": {},
@@ -10902,15 +10902,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:244"
+      "evidence": "web/app/dynamics/page.tsx:249"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8480",
+      "id": "web/app/dynamics/page.tsx:8737",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 246,
+      "line": 251,
       "kind": "select",
       "displayed_kpi_definition": "Всі заклади",
       "props": {
@@ -10924,30 +10924,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:246"
+      "evidence": "web/app/dynamics/page.tsx:251"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8738",
+      "id": "web/app/dynamics/page.tsx:8995",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 252,
+      "line": 257,
       "kind": "div",
       "displayed_kpi_definition": "Застосувати",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:252"
+      "evidence": "web/app/dynamics/page.tsx:257"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8785",
+      "id": "web/app/dynamics/page.tsx:9042",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 253,
+      "line": 258,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -10956,15 +10956,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:253"
+      "evidence": "web/app/dynamics/page.tsx:258"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8867",
+      "id": "web/app/dynamics/page.tsx:9124",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 254,
+      "line": 259,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути",
       "props": {
@@ -10973,15 +10973,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:254"
+      "evidence": "web/app/dynamics/page.tsx:259"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9047",
+      "id": "web/app/dynamics/page.tsx:9304",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 260,
+      "line": 265,
       "kind": "div",
       "displayed_kpi_definition": "Поточний зріз",
       "props": {},
@@ -10991,15 +10991,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:260"
+      "evidence": "web/app/dynamics/page.tsx:265"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9268",
+      "id": "web/app/dynamics/page.tsx:9525",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 265,
+      "line": 270,
       "kind": "div",
       "displayed_kpi_definition": "сума/агрегація видимих періодів",
       "props": {},
@@ -11009,15 +11009,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:265"
+      "evidence": "web/app/dynamics/page.tsx:270"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9498",
+      "id": "web/app/dynamics/page.tsx:9755",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 270,
+      "line": 275,
       "kind": "div",
       "displayed_kpi_definition": "YoY по однаковій кількості періодів",
       "props": {},
@@ -11028,15 +11028,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:270"
+      "evidence": "web/app/dynamics/page.tsx:275"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10206",
+      "id": "web/app/dynamics/page.tsx:10463",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 286,
+      "line": 291,
       "kind": "div",
       "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
       "props": {},
@@ -11045,15 +11045,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:286"
+      "evidence": "web/app/dynamics/page.tsx:291"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10318",
+      "id": "web/app/dynamics/page.tsx:10575",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 288,
+      "line": 293,
       "kind": "Link",
       "displayed_kpi_definition": "Місяці",
       "props": {
@@ -11065,15 +11065,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:288"
+      "evidence": "web/app/dynamics/page.tsx:293"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10856",
+      "id": "web/app/dynamics/page.tsx:11113",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 299,
+      "line": 304,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -11089,30 +11089,30 @@
       ],
       "repeat_template": "METRICS",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:299"
+      "evidence": "web/app/dynamics/page.tsx:304"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11215",
+      "id": "web/app/dynamics/page.tsx:11472",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 311,
+      "line": 316,
       "kind": "div",
       "displayed_kpi_definition": "LFL · закриті точки виключено з усієї динаміки",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:311"
+      "evidence": "web/app/dynamics/page.tsx:316"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11307",
+      "id": "web/app/dynamics/page.tsx:11564",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 312,
+      "line": 317,
       "kind": "MultiYearMetricChart",
       "displayed_kpi_definition": "MultiYearMetricChart",
       "props": {
@@ -11128,15 +11128,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:312"
+      "evidence": "web/app/dynamics/page.tsx:317"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11402",
+      "id": "web/app/dynamics/page.tsx:11659",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 315,
+      "line": 320,
       "kind": "section",
       "displayed_kpi_definition": "PIVOT-LIKE VIEW Таблиця динаміки × роки × YoY",
       "props": {},
@@ -11150,59 +11150,59 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:315"
+      "evidence": "web/app/dynamics/page.tsx:320"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11790",
-      "paths": [
-        "/dynamics"
-      ],
-      "component": "web/app/dynamics/page.tsx",
-      "line": 326,
-      "kind": "div",
-      "displayed_kpi_definition": "div",
-      "props": {},
-      "bindings": [
-        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
-        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
-        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
-        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
-        "year",
-        "index === 0 ? \"—\" : \"YoY\""
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:326"
-    },
-    {
-      "id": "web/app/dynamics/page.tsx:11840",
-      "paths": [
-        "/dynamics"
-      ],
-      "component": "web/app/dynamics/page.tsx",
-      "line": 327,
-      "kind": "div",
-      "displayed_kpi_definition": "div",
-      "props": {},
-      "bindings": [
-        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
-        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
-        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
-        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
-        "year",
-        "index === 0 ? \"—\" : \"YoY\""
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:327"
-    },
-    {
-      "id": "web/app/dynamics/page.tsx:11997",
+      "id": "web/app/dynamics/page.tsx:12047",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
       "line": 331,
+      "kind": "div",
+      "displayed_kpi_definition": "div",
+      "props": {},
+      "bindings": [
+        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
+        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
+        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
+        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
+        "year",
+        "index === 0 ? \"—\" : \"YoY\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:331"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:12097",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 332,
+      "kind": "div",
+      "displayed_kpi_definition": "div",
+      "props": {},
+      "bindings": [
+        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
+        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
+        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
+        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
+        "year",
+        "index === 0 ? \"—\" : \"YoY\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:332"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:12254",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 336,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -11216,15 +11216,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:331"
+      "evidence": "web/app/dynamics/page.tsx:336"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12592",
+      "id": "web/app/dynamics/page.tsx:12849",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 345,
+      "line": 350,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -11232,21 +11232,21 @@
         "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
         "String(point.label)",
         "grain === \"month\" ? ( <Link href={`/?year=${latestYear}&month=${rowIndex + 1}${channel ? `&channel=${encodeURIComponent(channel)}` : \"\"}${location ? `&location=${encodeURIComponent",
-        "years.map((year, index) => { const value = Number(point[String(year)] ?? 0); const previous = index > 0 ? Number(point[String(years[index - 1])] ?? 0) : 0; const growth = index > 0",
+        "years.map((year, index) => { const value = pointNumber(point[String(year)]); const previous = index > 0 ? pointNumber(point[String(years[index - 1])]) : null; const growth = index ",
         "year",
         "formatMetric(value, metric)"
       ],
       "repeat_template": "data",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:345"
+      "evidence": "web/app/dynamics/page.tsx:350"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12890",
+      "id": "web/app/dynamics/page.tsx:13147",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 352,
+      "line": 357,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -11259,15 +11259,15 @@
       ],
       "repeat_template": "data",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:352"
+      "evidence": "web/app/dynamics/page.tsx:357"
     },
     {
-      "id": "web/app/dynamics/page.tsx:14266",
+      "id": "web/app/dynamics/page.tsx:14526",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 384,
+      "line": 389,
       "kind": "Link",
       "displayed_kpi_definition": "Швидкий зріз",
       "props": {
@@ -11283,7 +11283,7 @@
       ],
       "repeat_template": "[\"Заклад\", \"Агрегатор\", \"Доставка\"]",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:384"
+      "evidence": "web/app/dynamics/page.tsx:389"
     },
     {
       "id": "web/app/explorer/page.tsx:6055",
