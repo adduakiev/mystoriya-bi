@@ -2650,7 +2650,7 @@
       "evidence": "web/components/RevenueChart.tsx:50"
     },
     {
-      "id": "web/components/SidebarBrand.tsx:1632",
+      "id": "web/components/SidebarBrand.tsx:1781",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2675,7 +2675,7 @@
         "/pnl"
       ],
       "component": "web/components/SidebarBrand.tsx",
-      "line": 51,
+      "line": 53,
       "kind": "DataSyncControl",
       "displayed_kpi_definition": "DataSyncControl",
       "props": {},
@@ -2685,10 +2685,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:51"
+      "evidence": "web/components/SidebarBrand.tsx:53"
     },
     {
-      "id": "web/components/SidebarBrand.tsx:2041",
+      "id": "web/components/SidebarBrand.tsx:2190",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2713,7 +2713,7 @@
         "/pnl"
       ],
       "component": "web/components/SidebarBrand.tsx",
-      "line": 68,
+      "line": 70,
       "kind": "Suspense",
       "displayed_kpi_definition": "Suspense",
       "props": {},
@@ -2723,10 +2723,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:68"
+      "evidence": "web/components/SidebarBrand.tsx:70"
     },
     {
-      "id": "web/components/SidebarBrand.tsx:2061",
+      "id": "web/components/SidebarBrand.tsx:2210",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2751,17 +2751,17 @@
         "/pnl"
       ],
       "component": "web/components/SidebarBrand.tsx",
-      "line": 68,
+      "line": 70,
       "kind": "SidebarStatusPending",
       "displayed_kpi_definition": "SidebarStatusPending",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:68"
+      "evidence": "web/components/SidebarBrand.tsx:70"
     },
     {
-      "id": "web/components/SidebarBrand.tsx:2096",
+      "id": "web/components/SidebarBrand.tsx:2245",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2786,93 +2786,17 @@
         "/pnl"
       ],
       "component": "web/components/SidebarBrand.tsx",
-      "line": 69,
+      "line": 71,
       "kind": "SidebarSalesStatus",
       "displayed_kpi_definition": "SidebarSalesStatus",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:69"
+      "evidence": "web/components/SidebarBrand.tsx:71"
     },
     {
-      "id": "web/components/SidebarBrand.tsx:2144",
-      "paths": [
-        "/aggregators",
-        "/delivery",
-        "/digital/ads",
-        "/digital/app",
-        "/digital/audience",
-        "/digital/channels",
-        "/digital/commerce",
-        "/digital/funnel",
-        "/digital/local",
-        "/digital",
-        "/digital/seo",
-        "/digital/site",
-        "/digital/social",
-        "/digital/tracking",
-        "/dynamics",
-        "/explorer",
-        "/insights",
-        "/locations",
-        "/operating",
-        "/",
-        "/pnl"
-      ],
-      "component": "web/components/SidebarBrand.tsx",
-      "line": 72,
-      "kind": "form",
-      "displayed_kpi_definition": "Вийти",
-      "props": {
-        "action": "\"/api/auth/logout\"",
-        "method": "\"post\""
-      },
-      "bindings": [],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:72"
-    },
-    {
-      "id": "web/components/SidebarBrand.tsx:2199",
-      "paths": [
-        "/aggregators",
-        "/delivery",
-        "/digital/ads",
-        "/digital/app",
-        "/digital/audience",
-        "/digital/channels",
-        "/digital/commerce",
-        "/digital/funnel",
-        "/digital/local",
-        "/digital",
-        "/digital/seo",
-        "/digital/site",
-        "/digital/social",
-        "/digital/tracking",
-        "/dynamics",
-        "/explorer",
-        "/insights",
-        "/locations",
-        "/operating",
-        "/",
-        "/pnl"
-      ],
-      "component": "web/components/SidebarBrand.tsx",
-      "line": 73,
-      "kind": "button",
-      "displayed_kpi_definition": "Вийти",
-      "props": {
-        "type": "\"submit\"",
-        "title": "\"Вийти з Control Center\""
-      },
-      "bindings": [],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:73"
-    },
-    {
-      "id": "web/components/SidebarBrand.tsx:2289",
+      "id": "web/components/SidebarBrand.tsx:2293",
       "paths": [
         "/aggregators",
         "/delivery",
@@ -2898,6 +2822,82 @@
       ],
       "component": "web/components/SidebarBrand.tsx",
       "line": 74,
+      "kind": "form",
+      "displayed_kpi_definition": "Вийти",
+      "props": {
+        "action": "\"/api/auth/logout\"",
+        "method": "\"post\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/components/SidebarBrand.tsx:74"
+    },
+    {
+      "id": "web/components/SidebarBrand.tsx:2348",
+      "paths": [
+        "/aggregators",
+        "/delivery",
+        "/digital/ads",
+        "/digital/app",
+        "/digital/audience",
+        "/digital/channels",
+        "/digital/commerce",
+        "/digital/funnel",
+        "/digital/local",
+        "/digital",
+        "/digital/seo",
+        "/digital/site",
+        "/digital/social",
+        "/digital/tracking",
+        "/dynamics",
+        "/explorer",
+        "/insights",
+        "/locations",
+        "/operating",
+        "/",
+        "/pnl"
+      ],
+      "component": "web/components/SidebarBrand.tsx",
+      "line": 75,
+      "kind": "button",
+      "displayed_kpi_definition": "Вийти",
+      "props": {
+        "type": "\"submit\"",
+        "title": "\"Вийти з Control Center\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/components/SidebarBrand.tsx:75"
+    },
+    {
+      "id": "web/components/SidebarBrand.tsx:2438",
+      "paths": [
+        "/aggregators",
+        "/delivery",
+        "/digital/ads",
+        "/digital/app",
+        "/digital/audience",
+        "/digital/channels",
+        "/digital/commerce",
+        "/digital/funnel",
+        "/digital/local",
+        "/digital",
+        "/digital/seo",
+        "/digital/site",
+        "/digital/social",
+        "/digital/tracking",
+        "/dynamics",
+        "/explorer",
+        "/insights",
+        "/locations",
+        "/operating",
+        "/",
+        "/pnl"
+      ],
+      "component": "web/components/SidebarBrand.tsx",
+      "line": 76,
       "kind": "LogOut",
       "displayed_kpi_definition": "LogOut",
       "props": {},
@@ -2907,7 +2907,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/SidebarBrand.tsx:74"
+      "evidence": "web/components/SidebarBrand.tsx:76"
     },
     {
       "id": "web/app/delivery/page.tsx:4883",
