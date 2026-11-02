@@ -66,7 +66,17 @@ test('atomic sales snapshot on disposable PostgreSQL',{
   let started=false;
   try {
     run('initdb',['-D',data,'-A','trust','--no-locale','--encoding=UTF8','--no-sync','-U','atomic_fixture']);
-    run('pg_ctl',['-D',data,'-l',path.join(dir,'server.log'),'-o',`-h 127.0.0.1 -p ${port}`,'-w','start']);started=true;
+    // Ubuntu PostgreSQL packages default to /var/run/postgresql for sockets, which
+    // is not writable by an unprivileged GitHub Actions runner. Keep all sockets
+    // in this disposable fixture directory; clients still connect via loopback.
+    const serverLog=path.join(dir,'server.log');
+    try {
+      run('pg_ctl',['-D',data,'-l',serverLog,'-o',`-h 127.0.0.1 -p ${port} -c unix_socket_directories=${dir}`,'-w','start']);
+    } catch(error) {
+      const log=fs.existsSync(serverLog)?fs.readFileSync(serverLog,'utf8'):'(server log not created)';
+      throw new Error(`Disposable PostgreSQL startup failed: ${error.message}\\nServer log:\\n${log}`,{cause:error});
+    }
+    started=true;
     assert.equal(path.resolve(sql('show data_directory;')),path.resolve(data));
     const schema=fs.readFileSync(new URL('supabase/schema.sql',root),'utf8');
     const runtime=fs.readFileSync(new URL('supabase/migrations/20261008_warehouse_runtime.sql',root),'utf8');
