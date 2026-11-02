@@ -26,13 +26,19 @@ inside Sheets or certify formula/display precision.
 
 The adapter requires a known previous accepted raw row count and warehouse date
 bounds. It rejects any row-count shrink (stricter than legacy 5% tolerance), lost
-date boundaries, empty/partial rows, unknown dimensions, duplicate normalized
-source keys, sub-cent money, fractional/negative checks, invalid dates and today
-or future dates in Europe/Kyiv. The source must reach yesterday in Kyiv; stale
-cutoffs fail closed. There is no initial-load or date-closure override. Duplicate
-source keys are not automatically aggregated: their business meaning needs source
-contract review. Numbered bodies contain at most 2,000 rows/4 MiB, capped at 200,000
-rows, matching the existing NOT APPLIED SQL contract.
+date boundaries, empty/partial rows, unknown dimensions, sub-cent money,
+fractional/negative checks, invalid dates and today or future dates in Europe/Kyiv.
+The source must reach yesterday in Kyiv; stale cutoffs fail closed. There is no
+initial-load or date-closure override. Identical normalized **raw** business
+keys (date/location/brand/ownership/channel/type) are deterministically summed
+with integer kopiykas before staging. The manifest records `raw_rows` separately
+from the aggregated `rows` count; combined sums must also fit SQL row limits.
+This matches the observed seven repeated raw keys in the Oct 27–Nov 1 source
+tail (PR D184). Potential duplicate keys **after location alias mapping** remain
+blocked by the SQL canonical-key guard. This is not proof of the complete actual
+source's aggregation or of business closure. Numbered bodies contain at most
+2,000 rows/4 MiB, capped at 200,000 raw source rows and aggregated rows,
+matching the existing NOT APPLIED SQL contract.
 
 Count/date checks cannot prove every source row is present. The unchanged atomic
 SQL independently locks mapping/lifecycle/dimensions/facts and compares every
@@ -47,6 +53,24 @@ validation, old/new transaction visibility, receipt retries, and both manual gua
 No SQL design, migration, production permission, credential or scheduler changed.
 Returned bodies contain confidential rows and must stay in server memory, never
 logs, committed artifacts, browser responses, analytics or public storage.
+
+## Subsequent reviewer correction — 2026-11-03 (code-only)
+
+The trusted [Actions run 41535590724](https://github.com/adduakiev/mystoriya-bi/actions/runs/41535590724)
+independently ran the full native suite on the checked-out existing PR worktree
+**before** committing the prepared module: **459 tests PASS, 0 FAIL, 0 SKIP**,
+including live disposable PostgreSQL 16 server concurrency, rollback and 47k,
+plus optimized build and TypeScript. The runner then committed and pushed
+`27e6430412891e40b75eef4864000226903ddce3` to the **same** PR #44.
+The Codex handoff appended to the success comment describes *its own earlier*
+restricted sandbox (`EPERM`, 444/445); that is stale relative to the trusted
+runner's later full tests. No PostgreSQL exception is being waived.
+
+A later code-only correction on the same PR aggregates exact duplicate raw
+source keys without losing the raw-row count; it has dedicated positive/overflow
+unit tests. **This correction is NOT yet covered by the prior 459-test receipt**.
+Require a fresh full-suite, generator, build and exact final HEAD check before
+accepting the updated candidate. No Production actions are implied.
 
 ## Verification receipt and limitations
 
