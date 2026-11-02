@@ -46,7 +46,14 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
     const matrix = [header, ...Array.from({ length: 47000 }, (_, i) => ['', '', '', '', '',
       new Date(Date.UTC(2026, 9, 31) - Math.floor(i / 40) * 86400000).toISOString().slice(0, 10),
       `Synthetic-${i % 40}`, 'Fixture', 'Owned', 'Заклад', 'Sale', i === 0 ? '90071992547409.91' : '0.10', '1', '-0.03'])];
+    // One genuine repeated raw key must collapse into a single staged fact,
+    // with exact cents/checks and the original raw-row count retained.
+    matrix.push([...matrix[41].slice(0, 11), '0.20', '2', '0.03']);
     const prepared = prepareSalesRecovery(matrix, { previous: { rawRows: 1, minDate: '2026-10-31', maxDate: '2026-10-31' }, now: new Date('2026-11-01T00:00:00Z') });
+    const manifest = JSON.parse(prepared.manifestJson);
+    assert.equal(manifest.rows, 47000);
+    assert.equal(manifest.raw_rows, 47001);
+    assert.equal(prepared.batches.length, 24);
     const literal = s => `'${s.replaceAll("'", "''")}'::jsonb`;
     const digest = `select md5(jsonb_build_object(
       'facts',(select jsonb_agg(to_jsonb(f) order by id) from public.fact_sales_daily f),
@@ -93,7 +100,7 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
         raise notice 'FIXTURE_PHASE_PROMOTED';
         foreach rel in array array['fact_sales_daily','bi_sales_flat_mv','agg_sales_monthly','agg_sales_weekly'] loop
           execute format('select sum(revenue),sum(markup),sum(checks) from public.%I',rel) into v_total,v_markup,v_checks;
-          if v_total<>90071992552109.81 or v_markup<>-1410.00 or v_checks<>47000 then raise exception 'EXACT_TOTAL_MISMATCH';end if;
+          if v_total<>90071992552110.01 or v_markup<>-1409.97 or v_checks<>47002 then raise exception 'EXACT_TOTAL_MISMATCH';end if;
         end loop;
         if (select count(*) from public.fact_sales_daily)<>47000 then raise exception 'ROW_COUNT_MISMATCH';end if;
         v_before:=(${digest});
