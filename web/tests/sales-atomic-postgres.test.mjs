@@ -51,7 +51,9 @@ test('atomic sales snapshot on disposable PostgreSQL',{
   const begin=rows=>sql(`set role service_role; select public.begin_sales_snapshot_v2(${literal(manifest(rows))});`);
   const stage=(id,rows,n=0)=>sql(`set role service_role; select public.stage_sales_batch_v2('${id}',${n},${literal(rows)});`);
   const commit=id=>sql(`set role service_role; select public.commit_sales_snapshot_v2('${id}');`);
-  const snapshot=()=>sql(`select jsonb_build_object(
+  // Compare every row/dimension/view with a stable digest; returning the entire
+  // 47k-row snapshot would overflow spawnSync's 8 MB output buffer (ENOBUFS).
+  const snapshot=()=>sql(`select md5(jsonb_build_object(
     'facts',(select jsonb_agg(to_jsonb(f) order by id) from public.fact_sales_daily f),
     'locations',(select jsonb_agg(to_jsonb(l) order by id) from public.dim_location l),
     'brands',(select jsonb_agg(to_jsonb(l) order by id) from public.dim_brand l),
@@ -62,7 +64,7 @@ test('atomic sales snapshot on disposable PostgreSQL',{
     'flat',(select jsonb_agg(to_jsonb(m) order by date,location) from public.bi_sales_flat_mv m),
     'monthly',(select jsonb_agg(to_jsonb(m) order by location_id) from public.agg_sales_monthly m),
     'weekly',(select jsonb_agg(to_jsonb(m) order by location_id) from public.agg_sales_weekly m),
-    'generation',(select version from bi_import_private.generation));`);
+    'generation',(select version from bi_import_private.generation))::text);`);
   let started=false;
   try {
     run('initdb',['-D',data,'-A','trust','--no-locale','--encoding=UTF8','--no-sync','-U','atomic_fixture']);
