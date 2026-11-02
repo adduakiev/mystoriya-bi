@@ -32,14 +32,17 @@ function baseline(previous, now) {
 /** Build immutable request bodies for later reviewed atomic integration; never send them.
  * previous MUST come from the last accepted source/warehouse, never caller guesses.
  * No initial-load bypass. SQL independently checks every historical canonical key.
- * Duplicate source keys fail closed; aggregation requires separate source-contract review.
+ * Identical normalized raw business keys aggregate in exact integer kopiykas.
+ * Canonical alias collisions (after location mapping) still fail closed in SQL.
  */
 export function prepareSalesRecovery(matrix, { previous, now = new Date() } = {}) {
   const today = baseline(previous, now);
   assertSalesCsvPreflight(matrix, { previousRowCount: previous.rawRows });
-  const count = matrix.length - 1;
-  if (count < previous.rawRows || count > 200000) fail('SOURCE_ROW_REGRESSION_OR_LIMIT');
-  const keys = new Set(), rows = [];
+  const rawCount = matrix.length - 1;
+  if (rawCount < previous.rawRows || rawCount > 200000) fail('SOURCE_ROW_REGRESSION_OR_LIMIT');
+  // Raw source legitimately repeats identical business keys. Keep rawRows separately.
+  // Location-alias collisions still fail closed under the SQL canonical-key gate.
+  const groups = new Map();
   let revenue = 0n, checks = 0n, markup = 0n, minDate = '9999-12-31', maxDate = '0000-01-01';
   for (const cells of matrix.slice(1)) {
     if (cells.length !== 14) fail('INVALID_WIDTH');
@@ -55,16 +58,26 @@ export function prepareSalesRecovery(matrix, { previous, now = new Date() } = {}
       return result;
     });
     const key = JSON.stringify([accounting_date, ...dimensions]);
-    if (keys.has(key)) fail('DUPLICATE_SOURCE_KEY');
-    keys.add(key);
     const r = decimal(cells[11]), c = decimal(cells[12], true), m = decimal(cells[13]);
     revenue += r; checks += c; markup += m;
     if (accounting_date < minDate) minDate = accounting_date;
     if (accounting_date > maxDate) maxDate = accounting_date;
-    const [location_raw, brand, ownership, channel_group, order_type] = dimensions;
-    const identity = JSON.stringify({ accounting_date, location_raw, brand, ownership, channel_group, order_type });
-    rows.push(`${identity.slice(0, -1)},"revenue":${money(r)},"checks":${c / 100n},"markup":${money(m)}}`);
+    const prior = groups.get(key);
+    if (prior) {
+      prior.r += r; prior.c += c; prior.m += m;
+    } else {
+      const [location_raw, brand, ownership, channel_group, order_type] = dimensions;
+      groups.set(key, { accounting_date, location_raw, brand, ownership, channel_group, order_type, r, c, m });
+    }
   }
+  const rows = [];
+  for (const { r, c, m, ...identity } of groups.values()) {
+    if ([r, m, c].some(amount => amount <= -10000000000000000n || amount >= 10000000000000000n) || c < 0n) fail('INVALID_AGGREGATE_PRECISION');
+    const prefix = JSON.stringify(identity);
+    rows.push(`${prefix.slice(0, -1)},"revenue":${money(r)},"checks":${c / 100n},"markup":${money(m)}}`);
+  }
+  const count = rows.length;
+  if (!count) fail('EMPTY_AGGREGATE');
   if (minDate > previous.minDate || maxDate < previous.maxDate) fail('SOURCE_DATE_REGRESSION');
   const lastCompleted = new Date(Date.parse(`${today}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
   if (maxDate !== lastCompleted) fail('STALE_OR_PARTIAL_CUTOFF');
@@ -74,7 +87,7 @@ export function prepareSalesRecovery(matrix, { previous, now = new Date() } = {}
     if (new TextEncoder().encode(json).byteLength > 4 * 1024 * 1024) fail('BATCH_BYTE_LIMIT');
     batches.push(Object.freeze({ batchNo: batches.length, json }));
   }
-  const manifestJson = `{"rows":${count},"raw_rows":${count},"batches":${batches.length},"revenue":${money(revenue)},"checks":${checks / 100n},"markup":${money(markup)},"min_date":"${minDate}","max_date":"${maxDate}"}`;
+  const manifestJson = `{"rows":${count},"raw_rows":${rawCount},"batches":${batches.length},"revenue":${money(revenue)},"checks":${checks / 100n},"markup":${money(markup)},"min_date":"${minDate}","max_date":"${maxDate}"}`;
   return Object.freeze({ manifestJson, batches: Object.freeze(batches) });
 }
 
