@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { assertSalesCsvPreflight } from "./source-safety.mjs";
+import { assertSalesCsvPreflight, parseSourceDate } from "./source-safety.mjs";
 
 const SPREADSHEET_ID = "1g8NbVYEunt55lB-0E1OLQmNkeEQbF9y73n9kH3d3xbA";
 const SHEET_NAME = "Данние короткі";
@@ -83,49 +83,6 @@ function parseNumber(value: string): number {
 
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function excelSerialToIso(serial: number): string {
-  const excelEpoch = Date.UTC(1899, 11, 30);
-  return new Date(excelEpoch + serial * 86_400_000).toISOString().slice(0, 10);
-}
-
-function strictIso(year: number, month: number, day: number): string | null {
-  if (year < 2000 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
-    return null;
-  }
-
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) {
-    return null;
-  }
-
-  return date.toISOString().slice(0, 10);
-}
-
-function parseSourceDate(value: string): string | null {
-  const clean = value.trim();
-  if (!clean) return null;
-
-  const numeric = Number(clean);
-  if (Number.isFinite(numeric) && numeric > 30_000 && numeric < 80_000) {
-    return excelSerialToIso(numeric);
-  }
-
-  const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\D|$)/);
-  if (iso) return strictIso(Number(iso[1]), Number(iso[2]), Number(iso[3]));
-
-  const mdy = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\D|$)/);
-  if (mdy) return strictIso(Number(mdy[3]), Number(mdy[1]), Number(mdy[2]));
-
-  const dmy = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\D|$)/);
-  if (dmy) return strictIso(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]));
-
-  return null;
 }
 
 function normalizeText(value: string): string {
