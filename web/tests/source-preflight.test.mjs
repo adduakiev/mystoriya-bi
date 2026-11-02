@@ -76,3 +76,19 @@ test("unsafe large integer checks fail instead of losing integer precision", () 
   rows[1][12] = "9007199254740993";
   rejects(rows, /SOURCE_PREFLIGHT_INVALID_CHECKS/);
 });
+
+// A non-empty date is not necessarily a valid accounting day. The legacy
+// aggregateRows parser would otherwise silently reject it while other rows load.
+test("invalid dates fail closed before any source row can be dropped", () => {
+  for (const date of ["2026-02-30", "2026-13-99", "not-a-date", "80001", "2026/10/26"]) {
+    const rows = source(); rows[1][5] = date;
+    rejects(rows, /SOURCE_PREFLIGHT_INVALID_DATE row=2 column=5/);
+  }
+});
+
+test("date preflight accepts the same valid forms as the importer", () => {
+  for (const date of ["2026-10-26", "46321", "10/26/2026", "26.10.2026", "2026-10-26T12:00:00Z"]) {
+    const rows = source(); rows[1][5] = date;
+    assert.equal(assertSalesCsvPreflight(rows).rawRows, 1);
+  }
+});
