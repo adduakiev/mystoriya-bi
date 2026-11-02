@@ -24,13 +24,13 @@ jobs:
     env:
       ISSUE_NUMBER: ${{ github.event.issue.number }}
       ISSUE_TITLE: ${{ github.event.issue.title }}
-      ASTRA_BRANCH: astra/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+      ASTRA_BRANCH: ${{ github.event.issue.number == 43 && 'astra/issue-43-40107435112' || format('astra/issue-{0}-{1}', github.event.issue.number, github.run_id) }}
 
     steps:
-      - name: Check out main without persistent GitHub credentials
+      - name: Check out existing issue 43 PR branch (otherwise main)
         uses: actions/checkout@v5
         with:
-          ref: main
+          ref: ${{ github.event.issue.number == 43 && 'astra/issue-43-40107435112' || 'main' }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -57,7 +57,23 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" \
             --body "WORKING — automated Astra runner started. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-      - name: Create isolated work branch
+      - name: Verify issue 43 targets ONLY existing open PR #44
+        if: github.event.issue.number == 43
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$ASTRA_BRANCH" = 'astra/issue-43-40107435112'
+          PR_STATE=$(gh pr view 44 --repo "${{ github.repository }}" --json state --jq '.state')
+          PR_HEAD=$(gh pr view 44 --repo "${{ github.repository }}" --json headRefName --jq '.headRefName')
+          PR_SHA=$(gh pr view 44 --repo "${{ github.repository }}" --json headRefOid --jq '.headRefOid')
+          test "$PR_STATE" = 'OPEN'
+          test "$PR_HEAD" = "$ASTRA_BRANCH"
+          test "$PR_SHA" = "$(git rev-parse HEAD)"
+          echo "Verified existing PR #44, branch $ASTRA_BRANCH, SHA $PR_SHA"
+
+      - name: Create isolated work branch for other issues
+        if: github.event.issue.number != 43
         run: git switch -c "$ASTRA_BRANCH"
 
       - name: Install deterministic project dependencies
@@ -89,6 +105,11 @@ jobs:
             ----
             ${{ github.event.comment.body }}
             ----
+
+            For issue #43 ONLY: continue existing PR #44 on branch astra/issue-43-40107435112.
+            Prioritize private Google Sheets server-only auth and safe atomic Sales recovery, not Digital/cosmetic audits.
+            Do not run old batch writes/finalize, trigger imports, deploy, migrate, or change credentials/schedulers.
+            Do not create another PR. Keep production paths fail-closed until owner-gated acceptance.
 
             Read the relevant source, docs, tests, and prior implementation patterns. Implement the issue end-to-end within its stated scope. Keep all owner-gated or unfinished production paths fail-closed.
 
@@ -122,8 +143,8 @@ jobs:
           git push "https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}.git" \
             "HEAD:refs/heads/$ASTRA_BRANCH"
 
-      - name: Open pull request
-        if: steps.changes.outputs.changed == 'true'
+      - name: Open pull request for other issues only
+        if: steps.changes.outputs.changed == 'true' && github.event.issue.number != 43
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
@@ -158,7 +179,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_URL: ${{ steps.pr.outputs.url }}
+          PR_URL: ${{ github.event.issue.number == 43 && 'https://github.com/adduakiev/mystoriya-bi/pull/44' || steps.pr.outputs.url }}
           CODEX_FINAL: ${{ steps.codex.outputs.final-message }}
         run: |
           {
@@ -183,7 +204,7 @@ jobs:
           CODEX_FINAL: ${{ steps.codex.outputs.final-message }}
         run: |
           {
-            echo "READY FOR REVIEW"
+            echo "NO CHANGE — review Astra handoff; no new commit or PR."
             echo
             echo "Automated Astra runner completed with no repository changes."
             echo 'Checks: `npm run check` PASS; `git diff --check` PASS.'
