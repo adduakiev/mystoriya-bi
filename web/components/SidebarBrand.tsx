@@ -39,7 +39,9 @@ export function SidebarStatusPending() {
 export async function SidebarSalesStatus() {
   const status = await loadSalesDataStatus();
   const cutoff = formatCutoff(status.cutoffDate);
-  // Installed bi_sync_status returns the literal "success" even when the latest\n  // sales import failed. A snapshot date alone is not sync/freshness evidence.\n  const hasWarehouseSnapshot = status.source === "supabase" && status.status === "success" && cutoff !== "—";
+  // Installed bi_sync_status returns the literal "success" even when the latest
+  // sales import failed. A snapshot date alone is not sync/freshness evidence.
+  const hasWarehouseSnapshot = status.source === "supabase" && status.status === "success" && cutoff !== "—";
 
   return (
     <div className="data-health" role="status">
