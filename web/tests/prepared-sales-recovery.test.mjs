@@ -27,7 +27,7 @@ test('47000 prepared rows have 24 complete immutable batches and exact decimal t
 });
 
 test('empty, partial, missing/unknown, duplicate and unsafe precision inputs fail closed', () => {
-  for (const matrix of [[], [header], [header, row().slice(0, 13)], [header, row(), row()]]) assert.throws(() => prepare(matrix));
+  for (const matrix of [[], [header], [header, row().slice(0, 13)]]) assert.throws(() => prepare(matrix));
   for (const [column, value] of [[6, 'unknown'], [7, 'null'], [11, ''], [11, '0.004'], [11, '100000000000000'], [12, '-1'], [12, '1.5'], [13, '#N/A']]) {
     const changed = row(); changed[column] = value;
     assert.throws(() => prepare([header, changed]));
@@ -35,6 +35,27 @@ test('empty, partial, missing/unknown, duplicate and unsafe precision inputs fai
   // Structured identities avoid the legacy delimiter-key collision.
   const a = row('A|B'); a[7] = 'C'; const b = row('A'); b[7] = 'B|C';
   assert.equal(JSON.parse(prepare([header, a, b]).manifestJson).rows, 2);
+});
+
+test('same normalized raw Sales keys aggregate exact cents without losing raw-row provenance', () => {
+  const second = row(' Synthetic  ', '0.20', '0.01');
+  second[12] = '2';
+  const prepared = prepare([header, row('Synthetic', '0.10', '-0.03'), second]);
+  const manifest = JSON.parse(prepared.manifestJson);
+  assert.equal(manifest.rows, 1);
+  assert.equal(manifest.raw_rows, 2);
+  assert.equal(manifest.batches, 1);
+  assert.equal(manifest.revenue, 0.3);
+  assert.equal(manifest.checks, 3);
+  assert.equal(manifest.markup, -0.02);
+  const staged = JSON.parse(prepared.batches[0].json);
+  assert.equal(staged.length, 1);
+  assert.deepEqual(staged.map(x => [x.location_raw, x.revenue, x.checks, x.markup]), [['Synthetic', 0.3, 3, -0.02]]);
+  assert.match(prepared.batches[0].json, /"revenue":0\.30,"checks":3,"markup":-0\.02/);
+});
+
+test('aggregate totals cannot overflow the SQL numeric row limit', () => {
+  assert.throws(() => prepare([header, row('Overflow', '90000000000000.00'), row('Overflow', '20000000000000.00')]), /INVALID_AGGREGATE_PRECISION/);
 });
 
 test('unknown baseline, even small truncation and date-coverage regression fail closed', async () => {
