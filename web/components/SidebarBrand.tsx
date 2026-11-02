@@ -39,14 +39,14 @@ export function SidebarStatusPending() {
 export async function SidebarSalesStatus() {
   const status = await loadSalesDataStatus();
   const cutoff = formatCutoff(status.cutoffDate);
-  const isWarehouse = status.source === "supabase" && status.status === "success" && cutoff !== "—";
+  // Installed bi_sync_status returns the literal "success" even when the latest\n  // sales import failed. A snapshot date alone is not sync/freshness evidence.\n  const hasWarehouseSnapshot = status.source === "supabase" && status.status === "success" && cutoff !== "—";
 
   return (
-    <div className={isWarehouse ? "data-health ok" : "data-health"} role="status">
+    <div className="data-health" role="status">
       <span className="data-health-dot" aria-hidden="true" />
       <div className="data-health-content">
         <b>Дані по {cutoff}</b>
-        <span>{isWarehouse ? "Warehouse · статус отримано" : "Статус даних недоступний"}</span>
+        <span>{hasWarehouseSnapshot ? "Warehouse · актуальність UNKNOWN" : "Статус даних недоступний"}</span>
       </div>
       <DataSyncControl initialCutoff={cutoff === "—" ? null : status.cutoffDate} />
     </div>
