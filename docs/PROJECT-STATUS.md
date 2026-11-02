@@ -1,5 +1,13 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-02, issue #43 / existing PR #44: [private Sheets → atomic Sales preparation](audit/2026-10-24/SALES-RECOVERY-PREPARATION-2026-11-02.md)
+adds server-only preparation of exact-decimal request bodies, synthetic regression
+tests and the release/backup/rollback runbook. Production remains disabled in the
+candidate code (manual Next/Edge POST: unconditional 503). This continuation has
+no new production counts, freshness or reconciliation evidence. Full acceptance
+is BLOCKED by sandbox socket EPERM for the PostgreSQL concurrency suite; earlier
+production observations and broader audit status below remain historical.
+
 ## D26 GBP profile identity — 2026-10-27 (preview code)
 
 [Bounded D26 report](audit/2026-10-24/GBP-IDENTITY-REVISION-40444470576.md)

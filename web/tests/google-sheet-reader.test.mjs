@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { readPrivateSalesSheet, SERVICE_ACCOUNT, SPREADSHEET_ID } from "../../supabase/functions/sync-google-sheet/google-sheet-reader.mjs";
 import { assertSalesCsvPreflight } from "../../supabase/functions/sync-google-sheet/source-safety.mjs";
+import { readAndPrepareSalesRecovery } from "../../supabase/functions/sync-google-sheet/prepared-sales-recovery.mjs";
 
 // Ephemeral synthetic key, generated in memory only. Never a Google credential.
 const pair = await crypto.subtle.generateKey({name:"RSASSA-PKCS1-v1_5", modulusLength:2048,
@@ -119,8 +120,26 @@ test("empty, non-row, boolean and object payloads fail closed", async () => {
   }
 });
 
+test("monetary JSON numbers that can collapse adjacent cents fail before conversion", async () => {
+  const changed=[...row];changed[11]=90071992547409.91;
+  await assert.rejects(readPrivateSalesSheet(secret,{fetchImpl:transport(()=>json({majorDimension:'ROWS',values:[header,changed]}))}),
+    {message:'GOOGLE_SHEETS_UNSAFE_MONETARY_NUMBER'});
+  changed[11]='90071992547409.91';
+  const result=await readPrivateSalesSheet(secret,{fetchImpl:transport(()=>json({majorDimension:'ROWS',values:[header,changed]}))});
+  assert.equal(result[1][11],'90071992547409.91');
+});
+
 test("reader remains disconnected from unsafe legacy importer until atomic gate", () => {
   const entry=readFileSync(new URL("../../supabase/functions/sync-google-sheet/index.ts",import.meta.url),"utf8");
   assert.equal(entry.includes("google-sheet-reader"),false);
   assert.equal(entry.includes("GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON"),false);
+});
+
+test('authenticated preparation uses the private reader, returns exact bodies and never falls back on denial', async () => {
+  const options={previous:{rawRows:1,minDate:'2026-10-26',maxDate:'2026-10-26'},now:new Date('2026-10-27T00:00:00Z')};
+  const prepared=await readAndPrepareSalesRecovery(secret,{...options,fetchImpl:transport()});
+  assert.ok(prepared.manifestJson.includes('"revenue":12.50'));
+  assert.ok(prepared.batches[0].json.includes('"markup":0.00'));
+  await assert.rejects(readAndPrepareSalesRecovery(secret,{...options,fetchImpl:transport(()=>new Response('private-canary',{status:403}))}),
+    {message:'GOOGLE_SHEETS_READ_FAILED'});
 });

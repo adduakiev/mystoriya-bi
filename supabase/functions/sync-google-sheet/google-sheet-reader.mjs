@@ -116,6 +116,11 @@ export async function readPrivateSalesSheet(secret, { probe = false, fetchImpl =
       if (typeof value !== "string" && (typeof value !== "number" || !Number.isFinite(value))) {
         fail("GOOGLE_SHEETS_INVALID_VALUES");
       }
+      // Sheets JSON numbers are IEEE doubles. Beyond this conservative range,
+      // adjacent cents can collapse before String() sees them; require exact text.
+      if ((i === 11 || i === 13) && typeof value === "number" && Math.abs(value) >= 2 ** 45) {
+        fail("GOOGLE_SHEETS_UNSAFE_MONETARY_NUMBER");
+      }
       return String(value);
     });
   });

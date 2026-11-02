@@ -5,6 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
 import {spawn,spawnSync} from 'node:child_process';
+import {prepareSalesRecovery} from '../../supabase/functions/sync-google-sheet/prepared-sales-recovery.mjs';
 
 const root=new URL('../../',import.meta.url);
 const design=fs.readFileSync(new URL('docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql',root),'utf8');
@@ -235,6 +236,30 @@ test('atomic sales snapshot on disposable PostgreSQL',{
       assert.equal(sql('select sum(revenue) from public.bi_sales_flat_mv'),rows.reduce((n,r)=>n+r.revenue,0).toFixed(2));
       assert.equal(sql('select sum(checks) from public.agg_sales_monthly'),'47000.00');
       assert.equal(sql('select sum(markup) from public.agg_sales_weekly'),'235000.00');
+      persistedRows=rows;
+    });
+    await t.test('prepared adapter reconciles exact decimals and historical identities at warehouse scale',()=>{
+      const header=['','','','','','Обліковий день','Зі складу','Бренд','Власність','Доставка','Тип замовлення','Сума зі знижкою, грн.','Чеків','Націнка, грн.'];
+      const matrix=[header,...persistedRows.map((r,i)=>['','','','','',r.accounting_date,r.location_raw,r.brand,r.ownership,r.channel_group,r.order_type,
+        i===0?'90071992547409.91':'0.10','1','-0.03'])];
+      const prepared=prepareSalesRecovery(matrix,{previous:{rawRows:47000,minDate:matrix.map(r=>r[5]).slice(1).sort()[0],maxDate:'2026-10-31'},now:new Date('2026-11-01T00:00:00Z')});
+      const jsonLiteral=s=>`'${s.replaceAll("'","''")}'::jsonb`;
+      const id=sql(`set role service_role;select public.begin_sales_snapshot_v2(${jsonLiteral(prepared.manifestJson)});`);
+      for(const batch of prepared.batches)sql(`set role service_role;select public.stage_sales_batch_v2('${id}',${batch.batchNo},${jsonLiteral(batch.json)});`);
+      const before=snapshot();
+      sql(`create function public.fixture_adapter_failure() returns trigger language plpgsql as $$begin raise exception 'ADAPTER_ROLLBACK';end$$;
+        create trigger fixture_adapter_fail before update on public.import_runs for each row when(new.status='success') execute function public.fixture_adapter_failure();`);
+      assert.throws(()=>commit(id),/ADAPTER_ROLLBACK/);
+      assert.equal(snapshot(),before);
+      sql('drop trigger fixture_adapter_fail on public.import_runs;drop function public.fixture_adapter_failure();');
+      commit(id);
+      for(const relation of ['fact_sales_daily','bi_sales_flat_mv','agg_sales_monthly','agg_sales_weekly']){
+        assert.equal(sql(`select sum(revenue) from public.${relation}`),'90071992552109.81');
+        assert.equal(sql(`select sum(markup) from public.${relation}`),'-1410.00');
+        assert.equal(sql(`select sum(checks) from public.${relation}`),'47000.00');
+      }
+      assert.equal(sql('select count(*) from public.fact_sales_daily'),'47000');
+      const accepted=snapshot();commit(id);assert.equal(snapshot(),accepted);
     });
   } finally {
     if(started)run('pg_ctl',['-D',data,'-m','immediate','-w','stop']);
