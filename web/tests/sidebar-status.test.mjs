@@ -140,8 +140,19 @@ test("unknown status never claims a Google Sheets fallback; valid status display
   assert.match(renderToStaticMarkup(await unavailable.SidebarSalesStatus()), /Статус даних недоступний/);
   const available = brand(async () => ({...unknown, source: "supabase", status: "success", cutoffDate: "2026-10-22"}));
   const html = renderToStaticMarkup(await available.SidebarSalesStatus());
-  assert.match(html, /data-health ok/);
+  assert.doesNotMatch(html, /data-health ok/, "RPC success is not a source freshness/last-run guarantee");
   assert.match(html, /22\.10\.2026/);
-  assert.match(html, /Warehouse · статус отримано/);
+  assert.match(html, /Warehouse · актуальність UNKNOWN/);
   assert.doesNotMatch(html, /Sync OK|Google Sheets/);
+});
+
+// Installed bi_sync_status hardcodes status=success and selects the last historic
+// successful import. It is not evidence that the latest scheduled import passed.
+test("false-green regression: a stale snapshot with RPC success remains unverified", async () => {
+  const loaded = brand(async () => ({...unknown, source:"supabase", status:"success",
+    cutoffDate:"2026-10-26", lastSuccessfulSync:"2026-10-30T04:15:23Z", warehouseRows:46286}));
+  const html = renderToStaticMarkup(await loaded.SidebarSalesStatus());
+  assert.match(html, /26\.10\.2026/);
+  assert.match(html, /Warehouse · актуальність UNKNOWN/);
+  assert.doesNotMatch(html, /data-health ok|Sync OK|синхронізовано успішно/);
 });
