@@ -1,5 +1,16 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-03, issue #43 / same PR #44: [bounded Sales role/grant retry](audit/2026-10-24/SALES-ROLE-HARDENING-RETRY-2026-11-03.md).
+Pinned clean HEAD `3ea0d0154282d6365e5cea81041ef2ee0378d2a4` verified locally.
+Prepared separate rollback-default hardening and read-only catalog preflight;
+recreated focused native ACL tests with valid non-identity DML, SQLSTATE 42501,
+independent effective grants and zero row/sequence mutation checks. Inherited,
+default-grant and ownership hazards STOP rather than widening permission changes.
+Trigger-reported prior trusted 528/530 PASS was a FAILED candidate, not approval;
+local native socket EPERM is a distinct execution blocker. Verification details
+and limitations are in the linked report. SQL NOT APPLIED, runtime 503 and
+all-evidence rejection guards unchanged. NOT READY FOR GATE; audit INCOMPLETE.
+
 2026-11-03, issue #43 / same PR #44: [synthetic restore and rollback readiness](audit/2026-10-24/SALES-RESTORE-READINESS-2026-11-03.md).
 Exact clean starting HEAD `b265cb32e7715461a26eb92db04c13658b811800`
 verified locally. Added a fail-closed native two-cluster pg_dump/pg_restore test
