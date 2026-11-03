@@ -129,3 +129,28 @@ a real protected backup with proven restore; and coordinated SQL/grant/cutover,
 merge/deployment/first-import approvals. An access PASS or green offline/native
 suite opens none of those gates. No credential or owner approval is requested
 for this completed offline preparation.
+
+## Independent trusted-runner handoff (2026-11-03; addendum)
+
+The Codex sandbox verdict above is local evidence, **not** the final trusted
+GitHub Actions verdict. Independent inspection of the completed outer Actions
+run [41614832378](https://github.com/adduakiev/mystoriya-bi/actions/runs/41614832378),
+job `125845553816`, confirms the native verification of the prepared tree:
+**555 tests / 555 pass / 0 fail / 0 skip**, including actual disposable
+PostgreSQL 16.15, 47k Sales atomic/import tests, SQLSTATE 42501 ACL tests,
+synthetic pg_dump/pg_restore, TypeScript, optimized Next build and diff checks.
+The runner committed and pushed exactly `2a3611de23d3b39d04eb5801c4b31eecb4586a98`
+into the existing PR #44 after that successful pre-commit verification. GitHub
+independent compare to `8a9c82aed2cbc6dca5e8a728be9772ede978a836`
+shows 1 ahead / 0 behind and four scoped review-only files. Vercel Preview on
+`2a3611d` is READY. The earlier sandbox report describing files as uncommitted
+is superseded **only** by this independently verified outer-runner handoff.
+
+Important remaining distinction: the native suite above ran on the candidate
+workspace before commit. A separate post-commit exact-SHA native workflow did
+**not** start automatically on `2a3611d` (the workflow push used the runner's
+GitHub token); therefore that SHA was NOT independently certified by a later
+native run. This documentation-only addendum is committed separately to
+request a fresh, exact-SHA native push check. Do not infer any production
+approval, credential access, source provenance or runtime cutover from a green
+Preview or candidate suite. All production gates remain CLOSED.
