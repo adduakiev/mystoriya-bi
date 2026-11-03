@@ -137,3 +137,38 @@ SYRVE/Ads write, deployment, commit/push/merge or GitHub mutation was performed.
 Both runtime 503 guards and rejection-only SQL remain intact. Trigger-reported
 production 46,286 facts through October 26 and ACTIVE v9 unsafe CSV handler are
 not new observations here. **No Sales recovery or broad audit completion claim.**
+
+## Independent trusted outer-runner reconciliation — 2026-11-03 19:10 UTC
+
+This appendix is a **subsequent external verification**, not a rewrite of the
+restricted inner sandbox's truthful failed checks reported above. Independently
+inspected GitHub [Astra Actions 41698505943](https://github.com/adduakiev/mystoriya-bi/actions/runs/41698505943),
+outer trusted job `126135278833`, after Codex handoff:
+
+- Outer runner's actual native PostgreSQL 16.15 `npm run check`:
+  **564 tests / 564 PASS / 0 FAIL / 0 SKIP**. The new synthetic attestor
+  multi-LOGIN/concurrency, FK `0A000`, immutable `42501`, negative bypass,
+  rollback and source-stop `pg_dump/pg_restore` ran and passed. Existing 47k
+  atomic, role-hardening/42501, backup/restore tests also passed; TypeScript,
+  Next build and `git diff --check` passed.
+- Outer trusted runner committed/pushed the candidate code and evidence to the
+  **same** open/unmerged PR #44, commit
+  `306bb3084224d39bf1d5708ef0b26b7c87a2ad60`. Independent GitHub
+  compare to `47c274cf02a9bcbe63ca4eb25c8911a128720c1b`: one commit
+  ahead, zero behind, exactly six scoped SQL/test/audit files.
+- The original inner handoff saying "no commit" reflects its narrower sandbox
+  context, and the original "blocked on outer tests" is now superseded **only
+  for this isolated candidate** by the trusted runner evidence above.
+- GitHub's automatic token push did not yield a separately verified post-push
+  exact-SHA native Actions run on `306bb308...`. This documentation-only
+  reconciliation commit is intended to trigger that independent check. Until
+  it completes, **no exact-new-SHA CI pass is claimed**.
+
+**PREPARE ONLY; NOT READY FOR PRODUCTION GATE / NOT RELEASED.** This validates
+only the rollback-default **synthetic** attestor trust boundary. No
+historical independently authenticated accepted-source root, approved live
+reviewer policy, live server-only Google Sheets credentials/probe,
+production backup+restore, SQL/Edge coordinated cutover, Sales import or
+source→warehouse→RPC→authenticated UI parity has been accepted. SQL remains
+NOT APPLIED; no production mutation, new PR, merge, credential or scheduling
+change.
