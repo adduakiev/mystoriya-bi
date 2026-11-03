@@ -1,5 +1,14 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-03 bounded P0 continuation, same PR #44: [synthetic restore and rollback readiness](audit/2026-10-24/SALES-RESTORE-READINESS-2026-11-03.md).
+Prepared one fail-closed native two-cluster backup/restore test with bounded
+schema/data/sequence/historical-identity/exact-cent parity and failure/cancellation
+checks. Added a repository-grounded writer/grant inventory and ordered owner-only
+cutover/rollback prerequisites. Local socket EPERM prevents restore execution;
+trusted runner proof is pending. Production backup/restore NOT PERFORMED, no new
+source/grant observations, SQL still NOT APPLIED, both runtime 503 guards intact.
+NOT READY FOR GATE; no broad audit completion is claimed.
+
 2026-11-03 bounded P0 continuation, same PR #44: [accepted-source transactional gate](audit/2026-10-24/SALES-ACCEPTED-SOURCE-GATE-2026-11-03.md).
 Original prepared SQL cannot emit the next accepted-source baseline. Without an
 approved DB-authenticated attestor/root, a separate NOT APPLIED overlay rejects

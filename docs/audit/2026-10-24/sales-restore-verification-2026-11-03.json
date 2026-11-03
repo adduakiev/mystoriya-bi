@@ -1,0 +1,56 @@
+{
+  "issue": 43,
+  "pr": 44,
+  "branch": "astra/issue-43-40107435112",
+  "starting_head": "b265cb32e7715461a26eb92db04c13658b811800",
+  "resulting_pr_sha": null,
+  "resulting_pr_sha_reason": "No commit/push authorized in Codex; trusted runner records exact resulting SHA after checks.",
+  "status": "BLOCKED_LOCAL_NATIVE_VERIFICATION_NOT_READY_FOR_GATE",
+  "production_backup_restore": "NOT_PERFORMED",
+  "synthetic_backup_restore": "NOT_EXECUTED_SOCKET_BIND_EPERM",
+  "single_user_sql_validation": {
+    "result": "PASS",
+    "scope": "Synthetic setup, guards, parity queries and exact totals only; NOT backup/restore",
+    "postgresql": "16.15",
+    "relations_and_sequences": 23
+  },
+  "checks": {
+    "npm_ci_web": "PASS (workspace and isolated candidate, 71 packages)",
+    "npm_run_check": "FAIL in final isolated candidate: 45 native test files PASS / 2 FAIL / 0 SKIP; existing atomic and new restore server tests fail on socket restrictions; TS/build stages not reached",
+    "typescript_no_emit": "PASS independently, isolated candidate",
+    "next_optimized_build": "PASS independently, isolated candidate",
+    "inventory_check": "PASS: 22 pages, 7 API routes, 758 templates; production parity UNKNOWN",
+    "git_diff_check": "PASS",
+    "focused_native_restore": "FAIL before restore: PostgreSQL Unix socket bind Operation not permitted",
+    "existing_native_atomic": "FAIL before startup: listen EPERM 127.0.0.1; one static test PASS; no skips",
+    "workspace_npm_run_check": "FAIL: 42 test files PASS / 5 FAIL / 0 SKIP; three protected runtime-dir failures plus two native socket failures"
+  },
+  "evidence": [
+    {
+      "path": "web/tests/sales-backup-restore-postgres.test.mjs",
+      "sha256": "4bd777e266d462eabfef6485574bb8c9b67c9edd5ebc59243fd37939f0bcfdfa",
+      "unchanged_from_starting_head": null
+    },
+    {
+      "path": "web/app/api/data-sync/route.ts",
+      "sha256": "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1",
+      "unchanged_from_starting_head": true
+    },
+    {
+      "path": "supabase/functions/sync-google-sheet/index.ts",
+      "sha256": "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3",
+      "unchanged_from_starting_head": true
+    },
+    {
+      "path": "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql",
+      "sha256": "30138b03f6851fd8b5aac2b2d810bfd80d639953008e42ec1053ced19a0f1c58",
+      "unchanged_from_starting_head": true
+    },
+    {
+      "path": "docs/sql/issue-43-sales-accepted-source-gate-NOT-APPLIED.sql",
+      "sha256": "9ec0c1337e728a939c16fcfc7b460e1f69298edb2c01f509bae2c9e1211e591b",
+      "unchanged_from_starting_head": true
+    }
+  ],
+  "owner_gates": "Closed; no production read/write/backup/restore, migration, grants, credentials, attestor/root, runtime integration, scheduler, commit, push, PR or deployment performed."
+}

@@ -1,5 +1,16 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-03, issue #43 / same PR #44: [synthetic restore and rollback readiness](audit/2026-10-24/SALES-RESTORE-READINESS-2026-11-03.md).
+Exact clean starting HEAD `b265cb32e7715461a26eb92db04c13658b811800`
+verified locally. Added a fail-closed native two-cluster pg_dump/pg_restore test
+and a source-grounded Sales cutover/rollback dependency checklist. Local server
+startup is blocked by sandbox socket EPERM; no restore PASS is claimed. Trigger
+reports prior trusted base 517/517 PASS; the new candidate needs independent
+outer-runner verification and its resulting SHA. No new production observation,
+backup/restore, SQL/grant installation, attestor/root or handler integration.
+Both runtime 503 guards and historical source gate remain closed. NOT READY FOR
+GATE; broader audit INCOMPLETE. Earlier dated entries below are historical.
+
 2026-11-03, issue #43 / same PR #44: [transactional accepted-source gate](audit/2026-10-24/SALES-ACCEPTED-SOURCE-GATE-2026-11-03.md).
 Exact clean base `7004a19a65f3e033433fa183628dfd6b6c8fc8d4` verified locally.
 No approved DB-authenticated attestor/root exists in the reviewed contract; a new
