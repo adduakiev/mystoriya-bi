@@ -1,0 +1,58 @@
+name: Sales PR 44 exact-SHA native acceptance
+
+# PREPARE ONLY: execute mandatory native Sales/PostgreSQL acceptance on
+# the exact pushed head of the existing, unmerged PR #44. This workflow
+# never deploys, migrates, imports, or accesses production credentials.
+on:
+  push:
+    branches:
+      - astra/issue-43-40107435112
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sales-native-pr44-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  exact-sha-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Assert immutable input SHA
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "Sales PR #44 native acceptance SHA: $GITHUB_SHA"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Require local PostgreSQL 16 for native tests
+        run: |
+          test -x /usr/lib/postgresql/16/bin/initdb || {
+            echo 'BLOCKED: native PostgreSQL 16 initdb missing; no reduced-test fallback.'
+            exit 1
+          }
+          /usr/lib/postgresql/16/bin/pg_config --version
+
+      - name: Install deterministic dependencies
+        run: npm ci --prefix web
+
+      - name: Full native verification including disposable PostgreSQL
+        env:
+          GITHUB_ACTIONS: 'true'
+          SALES_TEST_PG_BIN: /usr/lib/postgresql/16/bin
+        run: |
+          npm run check
+          git diff --check
