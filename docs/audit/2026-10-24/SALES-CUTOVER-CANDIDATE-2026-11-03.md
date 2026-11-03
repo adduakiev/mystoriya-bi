@@ -74,6 +74,13 @@ browser correctness or completion of the broader issue #43 audit.
 
 ## Independently safe read-only probe design (not installed or executed)
 
+**2026-11-03 bounded continuation:** the standalone header-only module and its
+synthetic offline suite are now prepared separately. See
+[private header probe evidence](PRIVATE-SALES-HEADER-PROBE-2026-11-03.md) for the
+exact base SHA, boundary, checks and outstanding outer-runner/remote verification.
+It is disconnected from this composition and every deployed entrypoint; no live
+probe or access approval is implied. The design below and all STOP gates remain.
+
 Do not use the composed recovery review or manual refresh as an access probe.
 A separately reviewed standalone process must have **no Supabase credential,
 DB adapter, RPC client, scheduler or import dependency**. It receives an existing
