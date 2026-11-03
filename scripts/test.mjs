@@ -16,6 +16,16 @@ function collect(dir) {
   }
 }
 for (const dir of [".agents", "web/tests"]) collect(path.join(root, dir));
+// Vercel build environments do not provide a disposable PostgreSQL server.
+// Keep native PostgreSQL acceptance mandatory in GitHub Actions; only the
+// Vercel preview build excludes these DB integration tests from prebuild.
+const vercelPreview = process.env.VERCEL === "1" && process.env.GITHUB_ACTIONS !== "true";
+if (vercelPreview) {
+  const pgTests = tests.filter(file => /-postgres\.test\.mjs$/.test(path.basename(file)));
+  if (pgTests.length === 0) throw Error("Expected PostgreSQL integration tests missing; refusing preview-only filter");
+  for (const file of pgTests) tests.splice(tests.indexOf(file), 1);
+  console.log(`Vercel prebuild: ${pgTests.length} native PostgreSQL integration test files deferred to mandatory GitHub Actions full check`);
+}
 const result = spawnSync(process.execPath, ["--experimental-strip-types", "--test", ...tests],
   { cwd: root, stdio: "inherit", windowsHide: true });
 process.exitCode = result.status ?? 1;
