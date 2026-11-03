@@ -1,12 +1,14 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
-2026-11-02, issue #43 / existing PR #44: [private Sheets → atomic Sales preparation](audit/2026-10-24/SALES-RECOVERY-PREPARATION-2026-11-02.md)
-adds server-only preparation of exact-decimal request bodies, synthetic regression
-tests and the release/backup/rollback runbook. Production remains disabled in the
-candidate code (manual Next/Edge POST: unconditional 503). This continuation has
-no new production counts, freshness or reconciliation evidence. Full acceptance
-is BLOCKED by sandbox socket EPERM for the PostgreSQL concurrency suite; earlier
-production observations and broader audit status below remain historical.
+2026-11-03, issue #43 / existing PR #44: [atomic transport and authoritative baseline preparation](audit/2026-10-24/SALES-TRANSPORT-PREPARATION-2026-11-03.md).
+An opt-in, unreferenced server module preserves exact decimal RPC bodies and
+fails closed without accepted-source provenance. Current importers do not emit
+that provenance; no production baseline is certified. Both manual Next/Edge
+paths retain their exact unconditional 503 guards; SQL remains NOT APPLIED.
+The issue trigger records trusted Actions 41546061091 PASS (461 tests, zero
+skips) on base `9c91c116a92ad619874b9995fdc0ea6b652bdd69`; historical sandbox
+failures below do not negate that base receipt. New candidate verification and
+all release/data-write gates remain separate. No new production observations.
 
 ## D26 GBP profile identity — 2026-10-27 (preview code)
 

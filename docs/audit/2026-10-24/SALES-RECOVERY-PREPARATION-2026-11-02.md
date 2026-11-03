@@ -1,5 +1,11 @@
 # Private Sheets → atomic Sales recovery preparation
 
+2026-11-03 continuation: see [prepared transport/baseline contract](SALES-TRANSPORT-PREPARATION-2026-11-03.md).
+The unreferenced sender is now prepared; current source-provenance evidence is
+missing and blocks staging. Earlier no-sender/local-verification claims below
+are historical. The trigger supplies trusted Actions 41546061091 PASS on exact
+base `9c91c116a92ad619874b9995fdc0ea6b652bdd69`; a fresh candidate receipt is required.
+
 Issue #43, existing PR #44, branch `astra/issue-43-40107435112` only.
 Reviewed base: `74e85661d4ff9231238b73cd4268c851017fca0f`.
 PREPARED ONLY / acceptance BLOCKED pending server/concurrency verification.

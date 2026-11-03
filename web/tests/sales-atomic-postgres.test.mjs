@@ -6,6 +6,8 @@ import os from 'node:os';
 import net from 'node:net';
 import {spawn,spawnSync} from 'node:child_process';
 import {prepareSalesRecovery} from '../../supabase/functions/sync-google-sheet/prepared-sales-recovery.mjs';
+import {createPreparedSalesTransport} from '../../supabase/functions/sync-google-sheet/prepared-sales-transport.mjs';
+import {SPREADSHEET_ID} from '../../supabase/functions/sync-google-sheet/google-sheet-reader.mjs';
 
 const root=new URL('../../',import.meta.url);
 const design=fs.readFileSync(new URL('docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql',root),'utf8');
@@ -260,6 +262,55 @@ test('atomic sales snapshot on disposable PostgreSQL',{
       }
       assert.equal(sql('select count(*) from public.fact_sales_daily'),'47000');
       const accepted=snapshot();commit(id);assert.equal(snapshot(),accepted);
+    });
+    await t.test('unwired transport delivers exact 47001 raw to 47000 facts; SQL deduplicates lost batch acknowledgement',async()=>{
+      const id=sql('select import_run_id from public.fact_sales_daily limit 1;');
+      const minDate=sql('select min(date_id) from public.fact_sales_daily;');
+      // Synthetic accepted-source provenance only. No production metadata is filled
+      // or inferred this way. Current importers do NOT emit this evidence contract.
+      const evidence={run_id:id,spreadsheet_id:SPREADSHEET_ID,range:"'Данние короткі'!A:N",
+        raw_rows:47000,min_date:minDate,max_date:'2026-10-31',observed_at:'2026-11-01T00:00:00Z',sha256:'a'.repeat(64)};
+      sql(`update public.import_runs set finished_at='2026-10-31T00:00:00Z' where status='success' and id<>'${id}';
+        update public.import_runs set started_at='2026-11-01T00:00:00Z',finished_at='2026-11-01T00:01:00Z',
+        details=details || jsonb_build_object('accepted_source_v1',${literal(evidence)}) where id='${id}';`);
+      const header=['','','','','','Обліковий день','Зі складу','Бренд','Власність','Доставка','Тип замовлення','Сума зі знижкою, грн.','Чеків','Націнка, грн.'];
+      const matrix=[header,...persistedRows.map((r,i)=>['','','','','',r.accounting_date,r.location_raw,r.brand,r.ownership,r.channel_group,r.order_type,
+        i===0?'90071992547409.91':'0.10','1','-0.03'])];
+      matrix.push([...matrix[41].slice(0,11),'0.20','2','0.03']);
+      const key=['eyJhbGciOiJIUzI1NiJ9',Buffer.from(JSON.stringify({role:'service_role',ref:'rxewpevxqtfmksybykvo',exp:4102444800})).toString('base64url'),'synthetic'].join('.');
+      const json=(raw,range)=>new Response(raw,{headers:{'content-type':'application/json',...(range?{'content-range':range}:{})}});
+      const jsonLiteral=s=>`'${s.replaceAll("'","''")}'::jsonb`;
+      let delivered=false,firstBody,deliveries=0;
+      const sender=createPreparedSalesTransport({enabled:true,baseUrl:'https://rxewpevxqtfmksybykvo.supabase.co',serviceRoleKey:key,
+        readSourceImpl:async()=>matrix,fetchImpl:async(url,init)=>{
+          const u=new URL(url);const name=u.pathname.split('/').at(-1);
+          if(name==='import_runs')return json(sql(`select json_agg(r) from (select * from public.import_runs where source_name='google_sheets:Данние короткі' and status='success' order by finished_at desc nulls last,started_at desc,id desc limit 1) r;`),'0-0/1');
+          if(name==='fact_sales_daily'){
+            const offset=Number(u.searchParams.get('offset'));assert.ok(Number.isSafeInteger(offset));
+            return json(sql(`select json_agg(r) from (select id,date_id,import_run_id from public.fact_sales_daily order by id limit 1000 offset ${offset}) r;`),`${offset}-${Math.min(offset+999,46999)}/47000`);
+          }
+          assert.equal(init.method,'POST');
+          const body=jsonLiteral(init.body);let result;
+          if(name==='begin_sales_snapshot_v2')result=sql(`set role service_role;select to_json(public.begin_sales_snapshot_v2(${body}->'p_manifest'));`);
+          else if(name==='stage_sales_batch_v2'){
+            result=sql(`set role service_role;select public.stage_sales_batch_v2((${body}->>'p_run_id')::uuid,(${body}->>'p_batch_no')::integer,${body}->'p_rows');`);
+            if(!delivered){delivered=true;firstBody=init.body;throw Error('synthetic lost acknowledgement after real SQL delivery');}
+            if(deliveries++===0)assert.equal(init.body,firstBody);
+          }else if(name==='commit_sales_snapshot_v2')result=sql(`set role service_role;select public.commit_sales_snapshot_v2((${body}->>'p_run_id')::uuid);`);
+          else assert.fail('unexpected RPC');
+          return json(result);
+        }});
+      const result=await sender.recover({now:new Date('2026-11-01T12:00:00Z')});
+      assert.equal(result.rows,47000);assert.equal(result.rawRows,47001);assert.equal(deliveries,24);
+      for(const relation of ['fact_sales_daily','bi_sales_flat_mv','agg_sales_monthly','agg_sales_weekly']){
+        assert.equal(sql(`select sum(revenue) from public.${relation}`),'90071992552110.01');
+        assert.equal(sql(`select sum(markup) from public.${relation}`),'-1409.97');
+        assert.equal(sql(`select sum(checks) from public.${relation}`),'47002.00');
+      }
+      assert.equal(sql(`select rows_read from public.import_runs where id='${result.runId}'`),'47001');
+      const before=snapshot();commit(result.runId);assert.equal(snapshot(),before);
+      // Unchanged SQL deliberately does not invent prior-source provenance.
+      await assert.rejects(sender.readBaseline({now:new Date('2100-01-01T00:00:00Z')}),/AUTHORITATIVE_SOURCE_EVIDENCE_REQUIRED/);
     });
   } finally {
     if(started)run('pg_ctl',['-D',data,'-m','immediate','-w','stop']);

@@ -27,9 +27,12 @@ function credentials(secret) {
   }
 }
 
-async function jsonRequest(fetchImpl, url, init, maxBytes, code) {
+async function jsonRequest(fetchImpl, url, init, maxBytes, code, signal) {
   // Include body consumption in the deadline; never include upstream text in errors.
+  if (signal?.aborted) fail(code);
   const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener("abort", abort, { once: true });
   const timer = setTimeout(() => controller.abort(), 30000);
   try {
     const response = await fetchImpl(url, { ...init, redirect: "error", signal: controller.signal });
@@ -59,10 +62,11 @@ async function jsonRequest(fetchImpl, url, init, maxBytes, code) {
     fail(code);
   } finally {
     clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
   }
 }
 
-async function accessToken(secret, fetchImpl) {
+async function accessToken(secret, fetchImpl, signal) {
   const account = credentials(secret);
   let assertion;
   try {
@@ -83,7 +87,7 @@ async function accessToken(secret, fetchImpl) {
   const token = await jsonRequest(fetchImpl, TOKEN_URL, {
     method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion })
-  }, 16384, "GOOGLE_AUTH_TOKEN_FAILED");
+  }, 16384, "GOOGLE_AUTH_TOKEN_FAILED", signal);
   if (typeof token?.access_token !== "string" || !/^[A-Za-z0-9._~+/-]+=*$/.test(token.access_token) ||
       token.access_token.length > 8192 || typeof token.token_type !== "string" || token.token_type.toLowerCase() !== "bearer" ||
       !Number.isInteger(token.expires_in) || token.expires_in < 60 || token.expires_in > 3600) {
@@ -97,15 +101,15 @@ async function accessToken(secret, fetchImpl) {
  * probe=true reads only the header for a future separately authorized no-write check.
  * The returned matrix must still pass source preflight and atomic-import validation.
  */
-export async function readPrivateSalesSheet(secret, { probe = false, fetchImpl = fetch } = {}) {
-  const token = await accessToken(secret, fetchImpl);
+export async function readPrivateSalesSheet(secret, { probe = false, fetchImpl = fetch, signal } = {}) {
+  const token = await accessToken(secret, fetchImpl, signal);
   const range = `'${SHEET}'!${probe ? "A1:N1" : "A:N"}`;
   const url = new URL(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}`);
   url.search = new URLSearchParams({ majorDimension: "ROWS", valueRenderOption: "UNFORMATTED_VALUE",
     dateTimeRenderOption: "SERIAL_NUMBER" }).toString();
   const result = await jsonRequest(fetchImpl, url.toString(), {
     method: "GET", headers: { Authorization: `Bearer ${token}` }
-  }, probe ? 32768 : 32 * 1024 * 1024, "GOOGLE_SHEETS_READ_FAILED");
+  }, probe ? 32768 : 32 * 1024 * 1024, "GOOGLE_SHEETS_READ_FAILED", signal);
   if (result?.majorDimension !== "ROWS" || !Array.isArray(result.values) || !result.values.length ||
       (probe && result.values.length !== 1)) fail("GOOGLE_SHEETS_INVALID_VALUES");
   return result.values.map(row => {

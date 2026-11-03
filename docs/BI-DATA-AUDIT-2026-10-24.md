@@ -1,10 +1,12 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
-2026-11-02 bounded P0 continuation: [private Sheets → atomic Sales preparation](audit/2026-10-24/SALES-RECOVERY-PREPARATION-2026-11-02.md).
-Exact-decimal request bodies and synthetic regression evidence only; production
-manual paths retain unconditional 503. Server/concurrency verification is BLOCKED
-by sandbox socket EPERM, not skipped. No new production/source parity is claimed.
-The full audit remains INCOMPLETE; the release/backup/rollback gates remain closed.
+2026-11-03 bounded P0 continuation: [atomic transport/baseline preparation](audit/2026-10-24/SALES-TRANSPORT-PREPARATION-2026-11-03.md).
+Exact-body server transport is opt-in and unreferenced; accepted-source minDate
+provenance is absent from current writer contracts and fails closed. Original
+manual 503 gates and NOT APPLIED SQL remain intact. The trigger's trusted green
+base receipt supersedes earlier sandbox-only failures for that base; candidate
+checks are separate. No new live reads or source/warehouse/UI parity is claimed.
+The full audit remains INCOMPLETE; release/backup/rollback gates remain closed.
 
 D26 bounded follow-up (2026-10-27): GBP duplicate profile titles now use
 ID-derived labels with accessible full IDs in preview code. Verified address

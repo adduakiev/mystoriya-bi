@@ -143,3 +143,19 @@ test('authenticated preparation uses the private reader, returns exact bodies an
   await assert.rejects(readAndPrepareSalesRecovery(secret,{...options,fetchImpl:transport(()=>new Response('private-canary',{status:403}))}),
     {message:'GOOGLE_SHEETS_READ_FAILED'});
 });
+
+
+test("external abort is forwarded to private OAuth and Sheets reads without exposing upstream failures", async () => {
+  const cancelled = new AbortController(); cancelled.abort();
+  await assert.rejects(readPrivateSalesSheet(secret, { signal: cancelled.signal,
+    fetchImpl: () => assert.fail("pre-aborted request must not fetch") }), /GOOGLE_AUTH_TOKEN_FAILED/);
+  for (const phase of [1, 2]) {
+    const controller = new AbortController(); let calls = 0;
+    await assert.rejects(readPrivateSalesSheet(secret, { signal: controller.signal, fetchImpl: async (_, init) => {
+      if (++calls !== phase) return token();
+      setTimeout(() => controller.abort(), 1);
+      return new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(Error('private-canary')), { once: true }));
+    } }), phase === 1 ? /GOOGLE_AUTH_TOKEN_FAILED/ : /GOOGLE_SHEETS_READ_FAILED/);
+    assert.equal(calls, phase);
+  }
+});
