@@ -1,5 +1,19 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-03, issue #43 / same PR #44: [synthetic attestor TRUNCATE retry](audit/2026-10-24/SALES-ATTESTOR-TRUNCATE-RETRY-2026-11-03.md).
+Clean pinned HEAD `47c274cf02a9bcbe63ca4eb25c8911a128720c1b` verified locally.
+Reconstructed the absent uncommitted review-only private receipt draft; the native
+regression distinguishes FK `0A000` from independent immutable-trigger `42501`,
+checks exact hashes/counts/FK-linked rows after each, and detects an actual
+rollback-only CASCADE bypass. Independent LOGINs, replay/concurrency, rollback,
+pre-draft catalog preservation and source-stop native restore remain mandatory.
+Trigger-reported outer 563 total / 561 PASS / 2 FAIL / 0 SKIP is FAILED historical
+evidence, not this candidate's result. Local native startup is blocked by socket
+EPERM; supplemental single-user SQL checks, independent TS/build and inventory
+pass but do not clear that gate. SQL NOT APPLIED; production/runtime guards
+unchanged. BLOCKED pending trusted outer verification; no recovery claim,
+commit/push or broader audit completion. Earlier entries below are historical.
+
 2026-11-03, issue #43 / same PR #44: [composed private Sales review and blocked cutover](audit/2026-10-24/SALES-CUTOVER-CANDIDATE-2026-11-03.md).
 Verified starting HEAD `c7e94f4d641563eb115f007e471b23c046811de8`.
 Typed private OAuth capture, exact-cent preparation and provenance derivation now
