@@ -42,6 +42,8 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
     const schema = fs.readFileSync(new URL('supabase/schema.sql', root), 'utf8');
     const runtime = fs.readFileSync(new URL('supabase/migrations/20261008_warehouse_runtime.sql', root), 'utf8');
     const design = fs.readFileSync(new URL('docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql', root), 'utf8');
+    const gate = fs.readFileSync(new URL('docs/sql/issue-43-sales-accepted-source-gate-NOT-APPLIED.sql', root), 'utf8');
+    const gateRegression = fs.readFileSync(new URL('web/tests/fixtures/sales-accepted-source-gate-regression.sql', root), 'utf8');
     const header = ['', '', '', '', '', 'Обліковий день', 'Зі складу', 'Бренд', 'Власність', 'Доставка', 'Тип замовлення', 'Сума зі знижкою, грн.', 'Чеків', 'Націнка, грн.'];
     const matrix = [header, ...Array.from({ length: 47000 }, (_, i) => ['', '', '', '', '',
       new Date(Date.UTC(2026, 9, 31) - Math.floor(i / 40) * 86400000).toISOString().slice(0, 10),
@@ -108,10 +110,24 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
         v_after:=(${digest});if v_before is distinct from v_after then raise exception 'RETRY_CHANGED_SNAPSHOT';end if;
       end $fixture$;
       select 'prepared_sales_47000_exact_rollback_passed';`;
+    // Finish the original happy-path session before exercising a file whose
+    // default ROLLBACK must not undo the fixture's previously accepted baseline.
+    const gateInput = `${gate}
+      do $$begin
+        if to_regprocedure('public.commit_sales_snapshot_with_evidence_v1(uuid,jsonb)') is not null or
+          position('SALES_ACCEPTED_SOURCE_ATTESTOR_UNAVAILABLE' in pg_get_functiondef('public.commit_sales_snapshot_v2(uuid)'::regprocedure))>0 then
+          raise exception 'ROLLBACK_DEFAULT_LEAKED_GATE_CHANGES';
+        end if;
+      end$$;
+      ${gate.replace('rollback; -- Review-safe default. Only the disposable fixture explicitly commits its copy.', 'commit;')}
+      ${gateRegression}`;
     // -j consumes the controlled SQL as a whole, including multiline function bodies.
     const input = setup.replace(/--[^\n]*/g, '').replace(/\n/g, ' ') + '\n\n';
     const output = run('postgres', ['--single', '-D', data, '-j', 'postgres'], input);
     assert.match(output, /prepared_sales_47000_exact_rollback_passed/);
+    const gateOutput = run('postgres', ['--single', '-D', data, '-j', 'postgres'],
+      gateInput.replace(/--[^\n]*/g, '').replace(/\n/g, ' ') + '\n\n');
+    assert.match(gateOutput, /accepted_source_gate_no_partial_effects_passed/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true }); // exact mkdtemp path; synthetic only
   }

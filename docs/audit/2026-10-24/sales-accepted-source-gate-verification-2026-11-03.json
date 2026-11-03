@@ -1,0 +1,107 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "branch": "astra/issue-43-40107435112",
+  "base_head": "7004a19a65f3e033433fa183628dfd6b6c8fc8d4",
+  "candidate_commit": null,
+  "candidate_commit_reason": "Uncommitted by contract; trusted runner must record resulting exact SHA.",
+  "status": "PREPARED_ONLY; INNER_SANDBOX_FULL_VERIFICATION_BLOCKED; NOT_READY_FOR_RELEASE",
+  "base_evidence": {
+    "authority": "Latest user trigger D191, not remotely reread",
+    "actions_run": 41569479186,
+    "job": 125698796930,
+    "reported_tests": {
+      "pass": 516,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "checks": {
+    "npm_ci": {
+      "command": "npm ci --prefix web",
+      "result": "PASS",
+      "lockfile_changed": false
+    },
+    "initial_focused": {
+      "command": "node --test --test-isolation=none web/tests/prepared-sales-recovery-postgres.test.mjs web/tests/prepared-sales-provenance.test.mjs web/tests/prepared-sales-transport.test.mjs",
+      "pass": 32,
+      "fail": 0,
+      "skip": 0,
+      "scope": "Before rollback-default assertion; final harness reverified below"
+    },
+    "final_single_user_postgres": {
+      "command": "node --test --test-isolation=none web/tests/prepared-sales-recovery-postgres.test.mjs",
+      "result": "PASS",
+      "pass": 1,
+      "fail": 0,
+      "skip": 0,
+      "version": "16.15",
+      "scope": "Synthetic 47001 raw / 47000 facts; exact totals/rollback/idempotence; gate rollback default; all evidence rejections and no partial effects"
+    },
+    "final_full": {
+      "command": "npm run check",
+      "workdir_basis": "Isolated archive of exact base plus byte-identical changed SQL/tests",
+      "result": "FAIL",
+      "pass_files": 45,
+      "fail_files": 1,
+      "skip": 0,
+      "failure": "web/tests/sales-atomic-postgres.test.mjs; focused reproduction: listen EPERM 127.0.0.1 before server startup",
+      "ts_build_stage_reached": false
+    },
+    "focused_server": {
+      "command": "node --test --test-isolation=none web/tests/sales-atomic-postgres.test.mjs",
+      "result": "FAIL",
+      "reason": "listen EPERM 127.0.0.1",
+      "pass": 1,
+      "fail": 1,
+      "skip": 0,
+      "new_nested_gate_test": "NOT_EXECUTED; same SQL fixture passed in real single-user PostgreSQL"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "PASS",
+      "scope": "Independent isolated-candidate check"
+    },
+    "next_build": {
+      "command": "node node_modules/next/dist/bin/next build",
+      "result": "PASS",
+      "scope": "Independent isolated-candidate optimized build"
+    },
+    "inventory": {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "templates": 758
+    },
+    "diff": {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  },
+  "tests_require_authenticated_channel_not_implemented": [
+    "DB-verifiable pinned attestation and authentic first-run root",
+    "Authenticated atomic accepted_source_v1 persistence",
+    "Immutable private receipt and mutation denial",
+    "Single authenticated generation increment and consistent complete wrapper/readback",
+    "Evidence-bound successful concurrency/cancellation"
+  ],
+  "release_blocker": "Owner-approved independent attestor channel/policy and authentic historical root/artifact are absent. No provisioning or synthetic bootstrap performed.",
+  "trusted_runner_required": "Full checks with actual disposable server PostgreSQL and zero failures/skips on new exact SHA; same PR #44 only.",
+  "production_actions": "NONE; no live source/DB/GitHub read, migration, credentials, imports, grants, scheduler, deployment, commit or push",
+  "tested_sql_and_test_sha256": {
+    "docs/sql/issue-43-sales-accepted-source-gate-NOT-APPLIED.sql": "9ec0c1337e728a939c16fcfc7b460e1f69298edb2c01f509bae2c9e1211e591b",
+    "web/tests/fixtures/sales-accepted-source-gate-regression.sql": "2b3c76d453750f3e0dcb34c8c5b7465d61f59b97cdcd5011fe70804038c574ab",
+    "web/tests/prepared-sales-recovery-postgres.test.mjs": "f92531600b3744cd079442ca91cc64428c2a444fa3de998bfbafbba596e54089",
+    "web/tests/sales-atomic-postgres.test.mjs": "b69fa418d8080733068a4328e65fb749bd9c29728dca4ab9f254416490f27f32"
+  },
+  "unchanged_from_base_sha256": {
+    "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql": "30138b03f6851fd8b5aac2b2d810bfd80d639953008e42ec1053ced19a0f1c58",
+    "supabase/functions/sync-google-sheet/index.ts": "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3",
+    "web/app/api/data-sync/route.ts": "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1",
+    "supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs": "5ffc13c1ee788ec226fe303ee6a80898164c97629e5173093e9e0fc8ed069be0",
+    "supabase/functions/sync-google-sheet/prepared-sales-transport.mjs": "aba3f184294d7b136c91993db94ca43c47f0cb831e2ac8c677b5d09925c62a63",
+    "AGENTS.md": "3de90758bc3a19cae04fe23213b2add7121af99d079379f734d4fa7cf42eee97",
+    ".github/workflows/astra-runner.yml": "5e788efd7050f8dcc3d46c47dd4ad99aff77e88697debcc1ecba7dfb973bcec4"
+  }
+}

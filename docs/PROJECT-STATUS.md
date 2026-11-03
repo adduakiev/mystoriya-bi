@@ -1,5 +1,15 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-03, issue #43 / same PR #44: [transactional accepted-source gate](audit/2026-10-24/SALES-ACCEPTED-SOURCE-GATE-2026-11-03.md).
+Exact clean base `7004a19a65f3e033433fa183628dfd6b6c8fc8d4` verified locally.
+No approved DB-authenticated attestor/root exists in the reviewed contract; a new
+NOT APPLIED rollback-default SQL overlay rejects every evidence submission and
+closes the old commit route in disposable tests. Authenticated persistence and
+success/readback remain explicitly unimplemented pending that release gate.
+Original atomic happy-path fixture preserved; production and both 503 handlers
+untouched. Trigger-supplied D191 trusted 516/516 PASS is base evidence only.
+Broader audit INCOMPLETE; no new production observation or release approval.
+
 2026-11-03, issue #43 / existing PR #44: [typed private Sheets capture preparation](audit/2026-10-24/SALES-SHEET-CAPTURE-PREPARATION-2026-11-03.md).
 An isolated server-only adapter retains typed cells, in-memory original JSON
 body bytes/fingerprint and fixed request metadata before reader coercion.

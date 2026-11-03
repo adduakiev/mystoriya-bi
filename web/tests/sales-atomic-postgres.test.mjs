@@ -312,6 +312,16 @@ test('atomic sales snapshot on disposable PostgreSQL',{
       // Unchanged SQL deliberately does not invent prior-source provenance.
       await assert.rejects(sender.readBaseline({now:new Date('2100-01-01T00:00:00Z')}),/AUTHORITATIVE_SOURCE_EVIDENCE_REQUIRED/);
     });
+    await t.test('accepted-source overlay rejects forged evidence and closes the ungated candidate with no partial effects',()=>{
+      const gate=fs.readFileSync(new URL('docs/sql/issue-43-sales-accepted-source-gate-NOT-APPLIED.sql',root),'utf8');
+      const regression=fs.readFileSync(new URL('web/tests/fixtures/sales-accepted-source-gate-regression.sql',root),'utf8');
+      const before=sql("select pg_get_functiondef('public.commit_sales_snapshot_v2(uuid)'::regprocedure);");
+      sql(gate); // Execute the unmodified rollback-default file first.
+      assert.equal(sql("select pg_get_functiondef('public.commit_sales_snapshot_v2(uuid)'::regprocedure);"),before);
+      assert.equal(sql("select to_regprocedure('public.commit_sales_snapshot_with_evidence_v1(uuid,jsonb)') is null;"),'t');
+      sql(gate.replace('rollback; -- Review-safe default. Only the disposable fixture explicitly commits its copy.','commit;'));
+      assert.match(sql(regression),/accepted_source_gate_no_partial_effects_passed/);
+    });
   } finally {
     if(started)run('pg_ctl',['-D',data,'-m','immediate','-w','stop']);
     // Preserve synthetic logs for review, never delete a computed directory.

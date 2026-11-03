@@ -1,5 +1,13 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-03 bounded P0 continuation, same PR #44: [accepted-source transactional gate](audit/2026-10-24/SALES-ACCEPTED-SOURCE-GATE-2026-11-03.md).
+Original prepared SQL cannot emit the next accepted-source baseline. Without an
+approved DB-authenticated attestor/root, a separate NOT APPLIED overlay rejects
+all evidence and closes the old commit route in disposable tests. Persistence,
+immutable receipts and authenticated success/readback remain a precise release
+gate, not a completed implementation. Original atomic happy-path tests retained;
+production/503 guards untouched. No live reads or historical metadata backfill.
+
 2026-11-03, issue #43 / existing PR #44: [typed private Sheets capture preparation](audit/2026-10-24/SALES-SHEET-CAPTURE-PREPARATION-2026-11-03.md).
 An isolated server-only adapter retains typed cells, in-memory original JSON
 body bytes/fingerprint and fixed request metadata before reader coercion.
