@@ -96,6 +96,10 @@ async function accessToken(secret, fetchImpl, signal) {
   return token.access_token;
 }
 
+// Trusted server dependency for the isolated prepared capture adapter. Same fixed
+// service-account/scope validation; never expose as an HTTP token endpoint.
+export { accessToken as privateSalesReadonlyAccessToken };
+
 /** Read the fixed private source, never arbitrary caller-selected URLs or sheets.
  * Production integration (not activated): pass Deno.env.get("GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON").
  * probe=true reads only the header for a future separately authorized no-write check.

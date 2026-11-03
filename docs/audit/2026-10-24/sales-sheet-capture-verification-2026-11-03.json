@@ -1,0 +1,146 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "status": "PREPARED_ONLY; NOT_READY_FOR_GATE; TRUSTED_CANDIDATE_ACCEPTANCE_BLOCKED_IN_INNER_SANDBOX",
+  "branch": "astra/issue-43-40107435112",
+  "starting_and_final_local_head": "c0dcc6b98d5f33074d76c090074480c46adf007b",
+  "starting_worktree": "clean",
+  "candidate_commit_sha": null,
+  "codex_commit_push_pr_or_github_comment": false,
+  "working_acknowledgement": "Codex transcript only; no remote GitHub status asserted",
+  "trusted_base_receipt": {
+    "url": "https://github.com/adduakiev/mystoriya-bi/actions/runs/41562042936",
+    "native_tests_passed": 494,
+    "failed": 0,
+    "skipped": 0,
+    "source": "Issue trigger; independently passing base evidence, not candidate verification"
+  },
+  "changes": [
+    "Isolated, server-only, explicit private OAuth capture entrypoint; existing token helper exported without behavior changes",
+    "Fixed spreadsheet/range/render parameters; no caller headers/URLs/token bypass or public fallback",
+    "Frozen exact typed cells, defensive in-memory original decoded JSON bytes, response metadata and separate HTTP-body/canonical SHA-256",
+    "Bounded HTTP/JSON/numeric/Unicode/range/schema validation, timeout/abort, error redaction and zero retries",
+    "Synthetic-only digest and exact-cent provenance/preparation regression coverage"
+  ],
+  "new_capture_tests": 22,
+  "verification": {
+    "npm_ci_prefix_web": {
+      "result": "PASS",
+      "lockfile_changed": false
+    },
+    "final_focused": {
+      "command": "node --test --test-isolation=none web/tests/prepared-sales-sheet-capture.test.mjs web/tests/prepared-sales-provenance.test.mjs web/tests/prepared-sales-recovery.test.mjs web/tests/prepared-sales-transport.test.mjs web/tests/google-sheet-reader.test.mjs web/tests/source-preflight.test.mjs web/tests/data-sync-safety-gate.test.mjs",
+      "passed": 94,
+      "failed": 0,
+      "skipped": 0
+    },
+    "workspace_npm_run_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "reported_units": "test file wrappers",
+      "passed_files": 42,
+      "failed_files": 4,
+      "skipped": 0,
+      "failures": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs",
+        "web/tests/sales-atomic-postgres.test.mjs"
+      ],
+      "runtime_error": "ENOENT mkdir .agents/runtime in restricted workspace; all three runtime files pass in writable archive",
+      "pipeline_stopped_before_typescript_and_build": true
+    },
+    "final_isolated_npm_run_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "method": "git archive of exact HEAD, modified/new code/test byte-verified against final workspace; writable /tmp, dependency symlink; no skip or permission alterations",
+      "reported_units": "test file wrappers",
+      "passed_files": 45,
+      "failed_files": 1,
+      "skipped": 0,
+      "failure": "web/tests/sales-atomic-postgres.test.mjs",
+      "actual_error": "listen EPERM: operation not permitted 127.0.0.1",
+      "pipeline_stopped_before_typescript_and_build": true
+    },
+    "postgres_independent_reproduction": {
+      "command": "node --test --test-isolation=none web/tests/sales-atomic-postgres.test.mjs",
+      "passed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "error": "listen EPERM: operation not permitted 127.0.0.1",
+      "nested_server_fixtures": "NOT EXECUTED; must pass independently in trusted outer runner"
+    },
+    "postgres_single_user_existing_fixture": {
+      "result": "PASS in workspace and final isolated check",
+      "evidence": "web/tests/prepared-sales-recovery-postgres.test.mjs",
+      "scope": "Synthetic 47k preparation/precision/rollback only, not server concurrency/cancellation"
+    },
+    "typescript_independent": {
+      "command": "node web/node_modules/typescript/bin/tsc --noEmit --project web/tsconfig.json",
+      "result": "PASS"
+    },
+    "optimized_next_build_independent": {
+      "cwd": "web",
+      "command": "node node_modules/next/dist/bin/next build",
+      "result": "PASS"
+    },
+    "inventory": {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "static_templates": 758,
+      "production_parity": "UNKNOWN"
+    },
+    "diff": {
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    "reader_behavior_comparison": "PASS: byte-identical to HEAD after removing only the new export/comment",
+    "final_isolated_native_suite": {
+      "command": "node --experimental-strip-types --test --test-isolation=none <all 46 recursively collected .agents/web test files, excluding runtime/node_modules>",
+      "result": "FAIL_INNER_SANDBOX",
+      "passed": 500,
+      "failed": 1,
+      "skipped": 0,
+      "actual_error": "listen EPERM: operation not permitted 127.0.0.1",
+      "nested_server_fixtures": "NOT EXECUTED; not waived and not included as passing tests"
+    }
+  },
+  "final_content_sha256": {
+    "supabase/functions/sync-google-sheet/google-sheet-reader.mjs": "6972046ca56241398531bf499a0b7e028bcf6737b06e25d0fa5c112e599f0b36",
+    "supabase/functions/sync-google-sheet/prepared-sales-sheet-capture.mjs": "140c0b40b0d55cc8b41ecf1c17a654eca00201facbea0172450f1f0c20e2eae8",
+    "web/tests/prepared-sales-sheet-capture.test.mjs": "9a02a0e0e68c8c18f6ef94f894620c4c0bc51ba68201161170c0101e9df8b859",
+    "docs/audit/2026-10-24/SALES-SHEET-CAPTURE-PREPARATION-2026-11-03.md": "1ecedf75e836842edecd5f13de60dafa41708657eacc70e20c8f656e4a95e0a3",
+    "docs/BI-DATA-AUDIT-2026-10-24.md": "fa672cdde2486cd28ec5101354aa4ee3d081e5274338e694ae7e7056c4d20854",
+    "docs/PROJECT-STATUS.md": "ff857671ad1c99bc14f9a33c9cfe9a49d8c887729ba9b11e5913af97ef9762e1"
+  },
+  "preserved_unchanged_sha256": {
+    "supabase/functions/sync-google-sheet/index.ts": "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3",
+    "web/app/api/data-sync/route.ts": "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1",
+    "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql": "30138b03f6851fd8b5aac2b2d810bfd80d639953008e42ec1053ced19a0f1c58",
+    "AGENTS.md": "3de90758bc3a19cae04fe23213b2add7121af99d079379f734d4fa7cf42eee97",
+    ".github/workflows/astra-runner.yml": "5e788efd7050f8dcc3d46c47dd4ad99aff77e88697debcc1ecba7dfb973bcec4"
+  },
+  "not_implemented_or_executed": [
+    "Live Google/Sheets, Supabase or other business requests, including header probes",
+    "Confidential source/financial rows or real credentials in logs/storage/PR; no real credentials created or supplied",
+    "Authentic legacy 2026-10-30 source SHA, accepted_source_v1 bootstrap, trust root, signatures or evidence store",
+    "Migration changes/execution, production SQL/Edge/Next wiring, imports/buttons/triggers/cron, grants or new permissions",
+    "Production or durable business writes, scheduler, providers, advertising, SYRVE, deployment or release",
+    "Broader tab/source/RPC/UI reconciliation or authenticated browser QA"
+  ],
+  "limitations": [
+    "Retained bytes are exactly Response.body decoded JSON bytes; transparent compression is not original wire/TLS evidence",
+    "Only validated response header allowlist retained; no arbitrary headers/cookies/Authorization",
+    "One call is one observation; caller must separately establish authorization, independence, observed timestamp and authenticity",
+    "Existing OAuth helper may remain internally pending with an injected dependency ignoring abort; outer adapter return remains bounded",
+    "Original broad audit and live source completeness remain unproven"
+  ],
+  "single_next_gate": "Trusted outer runner independently verifies its new exact candidate SHA with zero skips and real PostgreSQL concurrency/cancellation/47k plus all other checks, then publishes only to existing PR #44. No automatic next task.",
+  "owner_gates_held": [
+    "Credentials and read access",
+    "Private evidence retention and authentic historical source closure/prior chain",
+    "Backup and restore rehearsal",
+    "SQL/grants/writer quiescence and coordinated release",
+    "First import, UI reconciliation and later scheduling"
+  ]
+}

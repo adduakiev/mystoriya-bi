@@ -1,5 +1,14 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-03, issue #43 / existing PR #44: [typed private Sheets capture preparation](audit/2026-10-24/SALES-SHEET-CAPTURE-PREPARATION-2026-11-03.md).
+An isolated server-only adapter retains typed cells, in-memory original JSON
+body bytes/fingerprint and fixed request metadata before reader coercion.
+Synthetic evidence only; no live observations or legacy authenticity claims.
+Dispatch reports trusted base `c0dcc6b98d5f33074d76c090074480c46adf007b`,
+Actions 41562042936 PASS (494 native tests, zero skips); new candidate checks
+remain separate. Both unconditional 503 guards and NOT APPLIED SQL are intact.
+**NOT READY FOR GATE**; broad audit incomplete and all owner gates remain held.
+
 2026-11-03 bounded P0 continuation: [atomic transport/baseline preparation](audit/2026-10-24/SALES-TRANSPORT-PREPARATION-2026-11-03.md).
 Exact-body server transport is opt-in and unreferenced; accepted-source minDate
 provenance is absent from current writer contracts and fails closed. Original
