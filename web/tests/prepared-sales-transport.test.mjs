@@ -21,9 +21,8 @@ const run = () => ({ id: priorId, source_name: 'google_sheets:Данние ко�
     accepted_source_v1: { run_id: priorId, spreadsheet_id: SPREADSHEET_ID, range: "'Данние короткі'!A:N",
       raw_rows: 1, min_date: '2026-10-31', max_date: '2026-10-31', observed_at: '2026-11-01T00:00:30Z', sha256: 'a'.repeat(64) } } });
 const fact = (id = 1) => ({ id, date_id: '2026-10-31', import_run_id: priorId });
-const receipt = () => ({ warehouse_rows: 1, deleted_stale_rows: 0, min_date: '2026-10-31', max_date: '2026-10-31', confidential: 'upstream-canary' });
 const json = (value, range) => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', ...(range ? { 'content-range': range } : {}) } });
-function fixture({ readRun = run, readFacts = () => json([fact()], '0-0/1'), source = matrix, post, ...options } = {}) {
+function fixture({ readRun = run, readFacts = () => json([fact()], '0-0/1'), source = matrix, ...options } = {}) {
   const calls = [];
   const fetchImpl = async (url, init) => {
     calls.push({ url, ...init });
@@ -31,10 +30,6 @@ function fixture({ readRun = run, readFacts = () => json([fact()], '0-0/1'), sou
     assert.equal(parsed.origin, origin);
     if (parsed.pathname.endsWith('/import_runs')) return json([readRun()], '0-0/1');
     if (parsed.pathname.endsWith('/fact_sales_daily')) return readFacts(parsed);
-    if (post) return post(parsed.pathname.split('/').at(-1), init, calls);
-    if (parsed.pathname.endsWith('/begin_sales_snapshot_v2')) return json(nextId);
-    if (parsed.pathname.endsWith('/stage_sales_batch_v2')) return json(1);
-    if (parsed.pathname.endsWith('/commit_sales_snapshot_v2')) return json(receipt());
     assert.fail('unexpected endpoint');
   };
   const transport = createPreparedSalesTransport({ enabled: true, baseUrl: origin, serviceRoleKey: jwt(), fetchImpl,
@@ -52,25 +47,24 @@ test('disabled by default; exact origin and explicit service-role auth boundary'
   }
 });
 
-test('only fixed RPC POST bodies preserve literal exact decimals and bind ID/count; output strips upstream extras', async () => {
+test('private preparation preserves exact decimal bodies without issuing RPCs', async () => {
   const f = fixture();
-  assert.deepEqual(await f.transport.recover({ now }), { runId: nextId, rows: 1, rawRows: 1 });
+  const result = await f.transport.prepare({ now });
   const expected = prepareSalesRecovery(matrix(), { previous: { rawRows: 1, minDate: '2026-10-31', maxDate: '2026-10-31' }, now });
-  const [begin, stage, commit] = f.writes();
-  assert.equal(begin.body, `{"p_manifest":${expected.manifestJson}}`);
-  assert.equal(stage.body, `{"p_run_id":"${nextId}","p_batch_no":0,"p_rows":${expected.batches[0].json}}`);
-  assert.match(stage.body, /"revenue":90071992547409\.91/);
-  assert.match(stage.body, /"markup":-0\.03/);
-  assert.equal(commit.body, `{"p_run_id":"${nextId}"}`);
+  assert.deepEqual(result.prepared, expected);
+  assert.deepEqual(result.baseline, { runId: priorId, rawRows: 1, minDate: '2026-10-31', maxDate: '2026-10-31' });
+  assert.match(result.prepared.batches[0].json, /"revenue":90071992547409\.91/);
+  assert.match(result.prepared.batches[0].json, /"markup":-0\.03/);
+  assert.ok(Object.isFrozen(result));
+  assert.equal(f.writes().length, 0);
   for (const call of f.calls) {
+    assert.equal(call.method, 'GET'); assert.equal(call.body, undefined);
     assert.equal(call.redirect, 'error'); assert.equal(call.credentials, 'omit'); assert.equal(call.cache, 'no-store');
     assert.equal(call.headers.apikey, jwt()); assert.equal(call.headers.Authorization, `Bearer ${jwt()}`);
     assert.equal(call.headers['Accept-Profile'], 'public');
-    if (call.method === 'POST') assert.equal(call.headers['Content-Profile'], 'public');
     assert.ok(call.signal instanceof AbortSignal);
     assert.equal(new URL(call.url).searchParams.has('apikey'), false);
   }
-  assert.deepEqual(f.writes().map(c => new URL(c.url).pathname), ['/rest/v1/rpc/begin_sales_snapshot_v2', '/rest/v1/rpc/stage_sales_batch_v2', '/rest/v1/rpc/commit_sales_snapshot_v2']);
 });
 
 test('missing source provenance in current import_runs fails closed even when warehouse snapshot exists', async () => {
@@ -82,7 +76,7 @@ test('missing source provenance in current import_runs fails closed even when wa
     r => { r.status = 'running'; }, r => { r.source_name = 'other'; }, r => { r.details.snapshot.min_date = '2024-01-01'; }]) {
     let sourceReads = 0;
     const f = fixture({ readRun: () => { const r = run(); change(r); return r; }, source: () => { sourceReads++; return matrix(); } });
-    await assert.rejects(f.transport.recover({ now, previous: { rawRows: 1, minDate: '2026-10-31', maxDate: '2026-10-31' } }), /SALES_TRANSPORT_/);
+    await assert.rejects(f.transport.prepare({ now, previous: { rawRows: 1, minDate: '2026-10-31', maxDate: '2026-10-31' } }), /SALES_TRANSPORT_/);
     assert.equal(sourceReads, 0); assert.equal(f.writes().length, 0);
   }
 });
@@ -94,7 +88,7 @@ test('missing, wrong content type, redirect, oversized, malformed and partial ba
     () => new Response('{broken', { headers: { 'content-type': 'application/json' } }),
     () => { throw Error('upstream-canary'); }]) {
     const f = fixture({ fetchImpl: response });
-    await assert.rejects(f.transport.recover({ now }), e => /^SALES_TRANSPORT_[A-Z_]+$/.test(e.message));
+    await assert.rejects(f.transport.prepare({ now }), e => /^SALES_TRANSPORT_[A-Z_]+$/.test(e.message));
     assert.equal(f.writes().length, 0);
   }
 });
@@ -112,7 +106,7 @@ test('full warehouse pagination requires exact counts, ordered unique IDs, accep
     () => json([{ ...fact(), import_run_id: nextId }], '0-0/1'), () => json([{ ...fact(), date_id: '2026-10-30' }], '0-0/1'),
     () => json([{ ...fact(), id: 9007199254740992 }], '0-0/1')]) {
     const bad = fixture({ readFacts: response });
-    await assert.rejects(bad.transport.recover({ now }), /SALES_TRANSPORT_/); assert.equal(bad.writes().length, 0);
+    await assert.rejects(bad.transport.prepare({ now }), /SALES_TRANSPORT_/); assert.equal(bad.writes().length, 0);
   }
   const duplicate = fixture({ readRun: () => r, readFacts: () => json(Array.from({ length: 1000 }, () => fact()), '0-999/1001') });
   await assert.rejects(duplicate.transport.readBaseline({ now }), /WAREHOUSE_IDENTITY/);
@@ -122,67 +116,37 @@ test('baseline changes during read or source preparation prevent all staged writ
   for (const changeAt of [2, 3]) {
     let reads = 0;
     const f = fixture({ readRun: () => { const r = run(); if (++reads >= changeAt) r.finished_at = '2026-11-01T00:02:00Z'; return r; } });
-    await assert.rejects(f.transport.recover({ now }), /BASELINE_CHANGED/); assert.equal(f.writes().length, 0);
+    await assert.rejects(f.transport.prepare({ now }), /BASELINE_CHANGED/); assert.equal(f.writes().length, 0);
   }
 });
 
 test('source errors, partial source and aborted requests never begin staging', async () => {
   for (const source of [() => { throw Error('source-canary'); }, () => [header], () => { const r = row(); r[11] = ''; return [header, r]; }]) {
-    const f = fixture({ source }); await assert.rejects(f.transport.recover({ now })); assert.equal(f.writes().length, 0);
+    const f = fixture({ source }); await assert.rejects(f.transport.prepare({ now })); assert.equal(f.writes().length, 0);
   }
   const controller = new AbortController(); controller.abort();
-  const f = fixture(); await assert.rejects(f.transport.recover({ now, signal: controller.signal }), /ABORTED/); assert.equal(f.calls.length, 0);
+  const f = fixture(); await assert.rejects(f.transport.prepare({ now, signal: controller.signal }), /ABORTED/); assert.equal(f.calls.length, 0);
   const during = new AbortController();
   const g = fixture({ source: () => { during.abort(); return matrix(); } });
-  await assert.rejects(g.transport.recover({ now, signal: during.signal }), /ABORTED/); assert.equal(g.writes().length, 0);
+  await assert.rejects(g.transport.prepare({ now, signal: during.signal }), /ABORTED/); assert.equal(g.writes().length, 0);
 });
 
 test('deadline covers ignored fetch/body/source abort and external abort stops an in-flight read', async () => {
   for (const fetchImpl of [() => new Promise(() => {}), () => new Response(new ReadableStream({ start() {} }), { headers: { 'content-type': 'application/json' } })]) {
     const f = fixture({ fetchImpl, timeoutMs: 10 });
-    await assert.rejects(f.transport.recover({ now }), /REQUEST_FAILED|RESPONSE_REJECTED/);
+    await assert.rejects(f.transport.prepare({ now }), /REQUEST_FAILED|RESPONSE_REJECTED/);
   }
   const f = fixture({ readSourceImpl: () => new Promise(() => {}), timeoutMs: 10 });
-  await assert.rejects(f.transport.recover({ now }), /SOURCE_READ_FAILED/); assert.equal(f.writes().length, 0);
+  await assert.rejects(f.transport.prepare({ now }), /SOURCE_READ_FAILED/); assert.equal(f.writes().length, 0);
   const controller = new AbortController();
   const g = fixture({ fetchImpl: () => { setTimeout(() => controller.abort(), 5); return new Promise(() => {}); } });
   await assert.rejects(g.transport.readBaseline({ now, signal: controller.signal }), /ABORTED/);
 });
 
-test('lost stage response retries byte-identical payload once; begin and commit are never automatically replayed', async () => {
-  const attempts = [];
-  const f = fixture({ post: (rpc, init) => {
-    if (rpc.startsWith('begin')) return json(nextId);
-    if (rpc.startsWith('stage')) { attempts.push(init.body); if (attempts.length === 1) throw Error('lost-after-delivery'); return json(1); }
-    return json(receipt());
-  } });
-  await f.transport.recover({ now }); assert.equal(attempts.length, 2); assert.equal(attempts[0], attempts[1]);
-  for (const phase of ['begin', 'commit']) {
-    const g = fixture({ post: rpc => { if (rpc.startsWith(phase)) throw Error('lost-after-delivery'); return rpc.startsWith('begin') ? json(nextId) : json(1); } });
-    await assert.rejects(g.transport.recover({ now }), phase === 'commit' ? /COMMIT_OUTCOME_UNKNOWN/ : /REQUEST_FAILED/);
-    assert.equal(g.writes().filter(c => c.url.includes(`/${phase}_`)).length, 1);
-  }
-});
-
-test('invalid IDs/counts, stale generation and SQL delivery conflicts stop safely without leaking error text', async () => {
-  for (const phase of ['begin', 'stage', 'commit']) {
-    const f = fixture({ post: rpc => {
-      if (rpc.startsWith(phase)) return phase === 'commit' ? new Response('STALE_GENERATION upstream-canary', { status: 400 }) : json(phase === 'begin' ? 'bad-id' : 2);
-      return rpc.startsWith('begin') ? json(nextId) : json(1);
-    } });
-    await assert.rejects(f.transport.recover({ now }), /^Error: SALES_TRANSPORT_/);
-    assert.equal(f.writes().filter(c => c.url.includes(`/${phase}_`)).length, 1);
-    if (phase !== 'commit') assert.equal(f.writes().some(c => c.url.includes('/commit_')), false);
-  }
-  const f = fixture({ post: rpc => rpc.startsWith('begin') ? json(nextId) : new Response('BATCH_REPLAY_CONFLICT canary', { status: 400 }) });
-  await assert.rejects(f.transport.recover({ now }), /RESPONSE_REJECTED/);
-  assert.equal(f.writes().length, 2);
-});
-
 test('unreferenced from all active runtime code; original unconditional safety gates are byte-identical to trusted base', () => {
   const root = new URL('../../', import.meta.url);
   function walk(dir) { return fs.readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e => e.isDirectory() && !['node_modules', '.next'].includes(e.name) ? walk(`${dir}/${e.name}`) : e.isFile() ? [`${dir}/${e.name}`] : []); }
-  for (const file of [...walk('web/app'), ...walk('web/lib'), ...walk('web/components'), ...walk('supabase/functions')].filter(f => /\.[cm]?[jt]sx?$/.test(f) && !f.endsWith('/prepared-sales-transport.mjs'))) {
+  for (const file of [...walk('web/app'), ...walk('web/lib'), ...walk('web/components'), ...walk('supabase/functions')].filter(f => /\.[cm]?[jt]sx?$/.test(f) && !['prepared-sales-transport.mjs', 'prepared-sales-cutover.mjs'].some(name => f.endsWith('/' + name)))) {
     assert.doesNotMatch(fs.readFileSync(new URL(file, root), 'utf8'), /prepared-sales-transport|createPreparedSalesTransport/);
   }
   for (const file of ['web/app/api/data-sync/route.ts', 'supabase/functions/sync-google-sheet/index.ts']) {
@@ -192,31 +156,19 @@ test('unreferenced from all active runtime code; original unconditional safety g
     assert.equal(createHash('sha256').update(content).digest('hex'), trusted);
   }
   const content = fs.readFileSync(new URL('supabase/functions/sync-google-sheet/prepared-sales-transport.mjs', root), 'utf8');
-  assert.doesNotMatch(content, /process\.env|Deno\.env|console\.|sync_sales_batch|finalize_sales_snapshot/);
+  assert.doesNotMatch(content, /process\.env|Deno\.env|console\.|sync_sales_batch|finalize_sales_snapshot|rpc\//);
 });
 
 
-test('one factory permits only one begin attempt, including ambiguous acknowledgement or concurrent invocation', async () => {
-  const f = fixture();
-  const results = await Promise.allSettled([f.transport.recover({ now }), f.transport.recover({ now })]);
-  assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
-  assert.match(results.find(r => r.status === 'rejected').reason.message, /NEW_REVIEW_REQUIRED/);
-  assert.equal(f.writes().filter(c => c.url.endsWith('/begin_sales_snapshot_v2')).length, 1);
-  await assert.rejects(f.transport.recover({ now }), /NEW_REVIEW_REQUIRED/);
-  const lost = fixture({ post: () => { throw Error('lost begin acknowledgement'); } });
-  await assert.rejects(lost.transport.recover({ now }), /REQUEST_FAILED/);
-  await assert.rejects(lost.transport.recover({ now }), /NEW_REVIEW_REQUIRED/);
-  assert.equal(lost.writes().length, 1);
-});
-
-test('stage transient retry budget is bounded, HTTP validation never retries and invalid commit receipts are ambiguous', async () => {
-  const f = fixture({ post: rpc => rpc.startsWith('begin') ? json(nextId) : new Response('private-canary', { status: 503 }) });
-  await assert.rejects(f.transport.recover({ now }), /REQUEST_FAILED/); assert.equal(f.writes().length, 3);
-  for (const changes of [{ warehouse_rows: 2 }, { min_date: '2020-01-01' }, { max_date: '2026-10-30' }, { deleted_stale_rows: -1 }]) {
-    const g = fixture({ post: rpc => rpc.startsWith('begin') ? json(nextId) : rpc.startsWith('stage') ? json(1) : json({ ...receipt(), ...changes }) });
-    await assert.rejects(g.transport.recover({ now }), /COMMIT_RECEIPT_INVALID/);
-    assert.equal(g.writes().filter(c => c.url.endsWith('/commit_sales_snapshot_v2')).length, 1);
+test('recovery rejects service-role-forged metadata, caller attestations and concurrent attempts before any I/O', async () => {
+  const f = fixture({ source: () => assert.fail('source must not be read') });
+  for (const input of [undefined, { now }, { enabled: true, verified: true, accepted_source_v1: run().details.accepted_source_v1 },
+    { serviceRoleKey: jwt(), trustedContext: {}, evidence: { observations: [{ signatureHex: 'a'.repeat(128) }] } }]) {
+    await assert.rejects(f.transport.recover(input), { message: 'SALES_TRANSPORT_ATTESTOR_UNAVAILABLE' });
   }
+  const results = await Promise.allSettled([f.transport.recover(), f.transport.recover()]);
+  assert.ok(results.every(r => r.status === 'rejected' && r.reason.message === 'SALES_TRANSPORT_ATTESTOR_UNAVAILABLE'));
+  assert.equal(f.calls.length, 0);
 });
 
 test('accepted record recheck detects decimal metadata drift below JavaScript number precision', async () => {

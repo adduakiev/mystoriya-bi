@@ -1,5 +1,18 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-03, issue #43 / same PR #44: [composed private Sales review and blocked cutover](audit/2026-10-24/SALES-CUTOVER-CANDIDATE-2026-11-03.md).
+Verified starting HEAD `c7e94f4d641563eb115f007e471b23c046811de8`.
+Typed private OAuth capture, exact-cent preparation and provenance derivation now
+compose into a confidential BLOCKED review. Structural `accepted_source_v1`
+metadata is not authentication: prepared transport recovery now rejects before
+I/O and all DB POST paths are removed. No approved prior root/DB attestor exists;
+full authenticated cutover remains unimplemented. Both runtime 503 guards, SQL
+NOT APPLIED and production UI remain unchanged. Trigger-reported trusted base
+Actions 41595108624: 524/524 PASS, zero failures/skips; new candidate verification
+is separate. Explicit owner credential/probe, attestor, backup and release gates
+are in the report. No new production observations; wider audit INCOMPLETE.
+
+
 2026-11-03, issue #43 / same PR #44: [bounded Sales role/grant retry](audit/2026-10-24/SALES-ROLE-HARDENING-RETRY-2026-11-03.md).
 Pinned clean HEAD `3ea0d0154282d6365e5cea81041ef2ee0378d2a4` verified locally.
 Prepared separate rollback-default hardening and read-only catalog preflight;

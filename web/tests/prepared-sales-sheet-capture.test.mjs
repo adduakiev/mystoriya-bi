@@ -301,11 +301,11 @@ test('late OAuth success after timeout cannot start a Sheets request', async () 
   assert.equal(m.calls.length, 1);
 });
 
-test('prepared capture stays disconnected from runtime, recovery transport, SQL and both 503 guards', () => {
+test('prepared capture is used only by the closed review composition, never active runtime or SQL', () => {
   const root = new URL('../../', import.meta.url);
   const walk = dir => readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]);
   for (const file of [...walk('web/app'), ...walk('web/lib'), ...walk('web/components'), ...walk('supabase/functions')]
-    .filter(f => /\.[cm]?[jt]sx?$/.test(f) && !f.endsWith('/prepared-sales-sheet-capture.mjs'))) {
+    .filter(f => /\.[cm]?[jt]sx?$/.test(f) && !['prepared-sales-sheet-capture.mjs', 'prepared-sales-cutover.mjs'].some(name => f.endsWith('/' + name)))) {
     assert.doesNotMatch(readFileSync(new URL(file, root), 'utf8'), /prepared-sales-sheet-capture|capturePreparedPrivateSalesSheet/);
   }
   for (const file of ['supabase/functions/sync-google-sheet/index.ts', 'web/app/api/data-sync/route.ts']) {

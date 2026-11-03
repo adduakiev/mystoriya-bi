@@ -13,11 +13,12 @@ const integer = (n, max = 200000) => Number.isSafeInteger(n) && n > 0 && n <= ma
 const date = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && parseSourceDate(s) === s;
 const stamp = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(s) &&
   date(s.slice(0, 10)) && Number.isFinite(Date.parse(s));
-const bytes = s => new TextEncoder().encode(s).byteLength;
 
 /** Future accepted-source evidence contract, NOT currently emitted by importers.
  * A warehouse min_date is not proof of the prior SOURCE minDate. Missing provenance
  * must close the gate, including for otherwise successful atomic/legacy records.
+ * Structural consistency ONLY: service_role can forge this metadata. Never use
+ * its result as authorization or a cryptographically authenticated prior receipt.
  */
 function accepted(run, now) {
   const e = run?.details?.accepted_source_v1;
@@ -46,11 +47,10 @@ function accepted(run, now) {
  * JWTs are supported here; no anonymous key, sb_secret adaptation or hidden fallback.
  */
 export function createPreparedSalesTransport({ enabled = false, baseUrl, serviceRoleKey,
-  fetchImpl, readSourceImpl = readPrivateSalesSheet, timeoutMs = 30000, stageRetries = 1 } = {}) {
+  fetchImpl, readSourceImpl = readPrivateSalesSheet, timeoutMs = 30000 } = {}) {
   if (enabled !== true || typeof window !== 'undefined') fail('DISABLED');
   if (baseUrl !== ORIGIN || typeof fetchImpl !== 'function' || typeof readSourceImpl !== 'function' ||
-      !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 60000 ||
-      !Number.isInteger(stageRetries) || stageRetries < 0 || stageRetries > 2) fail('INVALID_CONFIG');
+      !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 60000) fail('INVALID_CONFIG');
   try {
     if (typeof serviceRoleKey !== 'string' || serviceRoleKey.length > 8192 ||
         !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(serviceRoleKey)) fail();
@@ -60,7 +60,7 @@ export function createPreparedSalesTransport({ enabled = false, baseUrl, service
   } catch { fail('INVALID_AUTH'); }
 
   // Fixed paths only; no caller-selected URLs, redirects, headers or request init.
-  async function request(path, { body, signal, maxBytes = 65536, range = false } = {}) {
+  async function request(path, { signal, maxBytes = 65536, range = false } = {}) {
     if (signal?.aborted) fail('ABORTED');
     const controller = new AbortController();
     let deadline, retryable = true;
@@ -75,11 +75,10 @@ export function createPreparedSalesTransport({ enabled = false, baseUrl, service
         }),
         (async () => {
           const response = await fetchImpl(`${ORIGIN}/rest/v1/${path}`, {
-            method: body === undefined ? 'GET' : 'POST', redirect: 'error', cache: 'no-store',
+            method: 'GET', redirect: 'error', cache: 'no-store',
             credentials: 'omit', signal: controller.signal,
             headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}`,
-              Accept: 'application/json', 'Accept-Profile': 'public', ...(body === undefined ? { Prefer: 'count=exact' } : { 'Content-Type': 'application/json', 'Content-Profile': 'public' }) },
-            ...(body === undefined ? {} : { body })
+              Accept: 'application/json', 'Accept-Profile': 'public', Prefer: 'count=exact' }
           });
           retryable = [502, 503, 504].includes(response.status);
           if (!response.ok || (response.status !== 200 && response.status !== 206) ||
@@ -128,6 +127,7 @@ export function createPreparedSalesTransport({ enabled = false, baseUrl, service
   const baselineEvidence = new WeakMap();
   async function readBaseline({ now = new Date(), signal } = {}) {
     if (!(now instanceof Date) || !Number.isFinite(now.getTime())) fail('INVALID_CLOCK');
+    now = new Date(now.getTime());
     const { run, previous, evidence } = await latest(now, signal);
     let total, min = '9999-12-31', max = '0000-01-01', lastId = 0n;
     for (let offset = 0; offset < run.rows_loaded; offset += 1000) {
@@ -156,9 +156,11 @@ export function createPreparedSalesTransport({ enabled = false, baseUrl, service
     return result;
   }
 
-  let beginAttempted = false;
-  async function recover({ sheetSecret, now = new Date(), signal } = {}) {
-    if (beginAttempted) fail('NEW_REVIEW_REQUIRED');
+  // Confidential preparation only. Returned baseline is untrusted read evidence,
+  // and returned exact-decimal bodies cannot be submitted by this adapter.
+  async function prepare({ sheetSecret, now = new Date(), signal } = {}) {
+    if (!(now instanceof Date) || !Number.isFinite(now.getTime())) fail('INVALID_CLOCK');
+    now = new Date(now.getTime());
     const baseline = await readBaseline({ now, signal });
     if (signal?.aborted) fail('ABORTED');
     let matrix;
@@ -181,41 +183,12 @@ export function createPreparedSalesTransport({ enabled = false, baseUrl, service
     const prepared = prepareSalesRecovery(matrix, { previous: baseline, now });
     const current = await readBaseline({ now, signal });
     if (baselineEvidence.get(current) !== baselineEvidence.get(baseline)) fail('BASELINE_CHANGED');
-    // No parse/serialize of manifest/batch JSON: exact decimal numeric text survives.
-    const counts = /^\{"rows":(\d+),"raw_rows":(\d+),"batches":(\d+),/.exec(prepared.manifestJson);
-    const dates = /"min_date":"([^"]+)","max_date":"([^"]+)"\}$/.exec(prepared.manifestJson);
-    if (!counts || !dates) fail('INVALID_PREPARATION');
-    if (beginAttempted) fail('NEW_REVIEW_REQUIRED'); // concurrent invocation
-    beginAttempted = true; // includes an ambiguous begin acknowledgement
-    const id = await request('rpc/begin_sales_snapshot_v2', { signal, maxBytes: 128, body: `{"p_manifest":${prepared.manifestJson}}` });
-    if (typeof id !== 'string' || !UUID.test(id)) fail('INVALID_RUN_ID');
-    // Counts are known from validated source, without parsing monetary bodies.
-    let staged = 0;
-    for (const batch of prepared.batches) {
-      const body = `{"p_run_id":${JSON.stringify(id)},"p_batch_no":${batch.batchNo},"p_rows":${batch.json}}`;
-      if (bytes(batch.json) > 4 * 1024 * 1024) fail('BATCH_LIMIT');
-      let count;
-      for (let attempt = 0; ; attempt++) {
-        try { count = await request('rpc/stage_sales_batch_v2', { body, signal, maxBytes: 128 }); break; }
-        catch (error) {
-          // SQL makes identical (run,batch,payload) delivery idempotent. Never retry
-          // begin (allocates a run), validation errors, external abort, or commit.
-          if (signal?.aborted || error.message !== 'SALES_TRANSPORT_REQUEST_FAILED' || attempt >= stageRetries) throw error;
-        }
-      }
-      if (count !== Math.min(2000, Number(counts[1]) - batch.batchNo * 2000)) fail('INVALID_STAGE_COUNT');
-      staged += count;
-    }
-    if (staged !== Number(counts[1])) fail('INVALID_STAGE_COUNT');
-    // Single attempt only. A lost/invalid receipt is ambiguous, not a failed commit.
-    // No resumable run or automatic whole-flow retry is exposed by this contract.
-    let receipt;
-    try { receipt = await request('rpc/commit_sales_snapshot_v2', { signal, body: `{"p_run_id":${JSON.stringify(id)}}`, maxBytes: 4096 }); }
-    catch { fail('COMMIT_OUTCOME_UNKNOWN'); }
-    if (!receipt || receipt.warehouse_rows !== staged || !Number.isSafeInteger(receipt.deleted_stale_rows) ||
-        receipt.deleted_stale_rows < 0 || receipt.min_date !== dates[1] || receipt.max_date !== dates[2]) fail('COMMIT_RECEIPT_INVALID');
-    // Do not return upstream totals/errors/extra fields, source rows or credentials.
-    return Object.freeze({ runId: id, rows: staged, rawRows: Number(counts[2]) });
+    return Object.freeze({ baseline, prepared });
   }
-  return Object.freeze({ readBaseline, recover });
+
+  // There is no approved prior root, pinned signing policy or DB-authenticated
+  // attestor channel. No input/flag/JWT/signature can open this in-memory gate.
+  // Stop before source/auth/network/staging, even if SQL overlay is absent.
+  async function recover() { fail('ATTESTOR_UNAVAILABLE'); }
+  return Object.freeze({ readBaseline, prepare, recover });
 }

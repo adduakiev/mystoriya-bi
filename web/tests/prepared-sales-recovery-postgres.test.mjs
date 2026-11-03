@@ -120,7 +120,44 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
         end if;
       end$$;
       ${gate.replace('rollback; -- Review-safe default. Only the disposable fixture explicitly commits its copy.', 'commit;')}
-      ${gateRegression}`;
+      ${gateRegression}
+      ${fs.readFileSync(new URL('supabase/migrations/20261012_dashboard_manual_sync.sql', root), 'utf8').split('create or replace function public.bi_sync_progress')[0]}
+      alter role service_role bypassrls;
+      grant select,update(details),insert(source_name,details) on public.import_runs to service_role;
+      do $positive$ declare n integer;begin
+        set local role service_role;
+        update public.import_runs set details=details where status='success';
+        get diagnostics n=row_count;if n<1 then raise exception 'METADATA_POSITIVE_UPDATE';end if;
+        insert into public.import_runs(source_name,details) values('Synthetic ACL positive','{"accepted_source_v1":{"verified":true}}');
+      end $positive$;
+      reset role;
+      ${fs.readFileSync(new URL('docs/sql/issue-43-sales-role-hardening-NOT-APPLIED.sql', root), 'utf8').replace('rollback; -- Review-safe default. Only the disposable fixture explicitly commits its copy.', 'commit;')}
+      do $negative$ declare r text;n integer:=0;v_before text;v_imports_before text;begin
+        v_before:=(${digest});
+        select md5(jsonb_agg(to_jsonb(x) order by id)::text) into v_imports_before from public.import_runs x;
+        foreach r in array array['anon','authenticated','service_role'] loop
+          begin
+            execute format('set local role %I',r);
+            update public.import_runs set details='{"accepted_source_v1":{"verified":true}}';
+            raise exception 'METADATA_UPDATE_NOT_DENIED';
+          exception when insufficient_privilege then
+            if sqlstate<>'42501' then raise;end if;n:=n+1;
+          end;
+          begin
+            execute format('set local role %I',r);
+            insert into public.import_runs(source_name,details) values('Synthetic forged','{"accepted_source_v1":{"verified":true}}');
+            raise exception 'METADATA_INSERT_NOT_DENIED';
+          exception when insufficient_privilege then
+            if sqlstate<>'42501' then raise;end if;n:=n+1;
+          end;
+        end loop;
+        if n<>6 or (${digest}) is distinct from v_before or
+          (select md5(jsonb_agg(to_jsonb(x) order by id)::text) from public.import_runs x) is distinct from v_imports_before or
+          exists(select from public.import_runs where source_name='Synthetic forged') then
+          raise exception 'METADATA_ACL_PARITY';end if;
+      end $negative$;
+      select 'sales_metadata_acl_42501_single_user_passed';`;
+
     // -j consumes the controlled SQL as a whole, including multiline function bodies.
     const input = setup.replace(/--[^\n]*/g, '').replace(/\n/g, ' ') + '\n\n';
     const output = run('postgres', ['--single', '-D', data, '-j', 'postgres'], input);
@@ -128,6 +165,7 @@ test('prepared exact-decimal 47k bodies reconcile and roll back on disposable si
     const gateOutput = run('postgres', ['--single', '-D', data, '-j', 'postgres'],
       gateInput.replace(/--[^\n]*/g, '').replace(/\n/g, ' ') + '\n\n');
     assert.match(gateOutput, /accepted_source_gate_no_partial_effects_passed/);
+    assert.match(gateOutput, /sales_metadata_acl_42501_single_user_passed/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true }); // exact mkdtemp path; synthetic only
   }

@@ -221,6 +221,15 @@ test('Sales role hardening on disposable native PostgreSQL', { timeout: 240000 }
       assert.equal(snapshot(), baseline);
     });
 
+    await t.test('service_role cannot forge accepted-source evidence by valid metadata INSERT or UPDATE', () => {
+      const forged = '{"accepted_source_v1":{"verified":true,"sha256":"' + 'a'.repeat(64) + '"}}';
+      for (const role of ['anon', 'authenticated', 'service_role']) {
+        denied(`set role ${role}; update public.import_runs set details='${forged}'::jsonb where id=${uuid(7)};`);
+        denied(`set role ${role}; insert into public.import_runs(source_name,details) values('forged-source','${forged}'::jsonb);`);
+      }
+      assert.equal(snapshot(), baseline);
+    });
+
     await t.test('owner SECURITY DEFINER reservation/staging retained without promotion or forged acceptance', () => {
       const manifest = '{"rows":1,"raw_rows":1,"batches":1,"revenue":1,"checks":1,"markup":1,"min_date":"2026-01-01","max_date":"2026-01-01"}';
       const row = '[{"accounting_date":"2026-01-01","location_raw":"Synthetic","brand":"Synthetic","ownership":"Owned","channel_group":"Store","order_type":"Sale","revenue":1,"checks":1,"markup":1}]';
