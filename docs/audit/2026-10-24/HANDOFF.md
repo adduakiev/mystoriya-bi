@@ -1,5 +1,18 @@
 # Issue #43 / existing PR #44 — QA handoff
 
+Current bounded task (D188, 2026-11-03): **PREPARED ONLY provenance contract
+and synthetic fail-closed verifier** on existing branch
+`astra/issue-43-40107435112`, verified starting HEAD
+`2d64ce8232e4b762e7e09fbbf1b1226a3182dbea`.
+[Contract, historical closure and future transaction protocol](SALES-PROVENANCE-CONTRACT-2026-11-03.md)
+and [candidate verification receipt](sales-provenance-verification-2026-11-03.json).
+Legacy first-run source attestation remains CLOSED. No production request, SQL
+change/application, runtime wiring, credential provisioning or import occurred.
+The trusted workflow must attach its actual candidate SHA/checks to same PR #44;
+Codex has not committed, pushed or created a PR. WORKING is in the local transcript;
+remote acknowledgement is not asserted. No READY FOR GATE or RELEASED claim.
+All handoffs below are historical and retain their original branch/check context.
+
 Current bounded task: **D26 GBP duplicate location identity — code prepared;
 runner publication pending**. Exact restored PR #44 source:
 `7fd3233ab5d83885de38eef7316097b59d0370d0`.
