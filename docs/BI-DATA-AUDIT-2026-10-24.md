@@ -1,5 +1,16 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-04, issue #43 / same PR #44: [coordinated Sales release checklist](audit/2026-10-24/SALES-RECOVERY-RELEASE-CHECKLIST-2026-11-04.md).
+Repository contract audit identifies incompatible SQL alternatives and the missing
+production success/attestor API. A separately signed, owner-approved transition
+may retain the October-26 warehouse as **legacy unverified**; it cannot authenticate
+unknown historical source bytes. One-shot readonly header-probe code is prepared. A proposed workflow-dispatch
+change was rejected by GitHub workflow permissions and NOT published; exact-SHA
+PG16/PG17 acceptance must use the existing authorized CI mechanism. No real secret,
+source probe, production backup, SQL installation, release or live correctness
+is verified. Keep the 503s/manual control closed; precise owner and code blockers
+are consolidated in the checklist. Earlier entries below remain dated evidence.
+
 2026-11-03, issue #43 / same PR #44: [synthetic attestor TRUNCATE retry](audit/2026-10-24/SALES-ATTESTOR-TRUNCATE-RETRY-2026-11-03.md).
 Clean pinned HEAD `47c274cf02a9bcbe63ca4eb25c8911a128720c1b` verified locally.
 Reconstructed the absent uncommitted review-only private receipt draft; the native

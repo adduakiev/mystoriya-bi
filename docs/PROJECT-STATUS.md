@@ -1,5 +1,16 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-04, issue #43 / same PR #44: [coordinated Sales release checklist](audit/2026-10-24/SALES-RECOVERY-RELEASE-CHECKLIST-2026-11-04.md).
+Code audit confirms the prepared SQL alternatives are not a deployable bundle:
+hardening requires the old rejection bodies; prewrite replaces them; production
+evidence-bound success remains missing. A distinct signed owner transition can
+accept a backed-up **legacy unverified** October-26 warehouse without inventing
+historical source authentication. Existing-secret readonly probe adapter is
+prepared but NOT run with real credentials. Workflow-dispatch changes were
+rejected by GitHub permissions and deliberately EXCLUDED from recovery. Production counts/source access/installed state are
+not remeasured; 503s and disabled refresh remain. See the checklist for exact
+owner prerequisites, missing implementation, rollback limits and verification.
+
 2026-11-03, issue #43 / same PR #44: [synthetic attestor TRUNCATE retry](audit/2026-10-24/SALES-ATTESTOR-TRUNCATE-RETRY-2026-11-03.md).
 Clean pinned HEAD `47c274cf02a9bcbe63ca4eb25c8911a128720c1b` verified locally.
 Reconstructed the absent uncommitted review-only private receipt draft; the native
