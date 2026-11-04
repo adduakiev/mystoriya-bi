@@ -1,4 +1,4 @@
--- D234 RECONSTRUCTION / PREPARE ONLY / NOT APPLIED / NOT READY FOR GATE.
+-- D240 BOUNDED RECONSTRUCTION / PREPARE ONLY / NOT APPLIED / NOT READY FOR GATE.
 -- Versioned disposable transaction model. NEVER a production root/bootstrap.
 -- Empty protected authority: no historical evidence, signatures, policy or keys
 -- are invented here. Runtime entrypoints remain 503. No public RPC changes.
@@ -40,6 +40,13 @@ create table sales_release_v234_private.authorities (
   payload jsonb not null check(jsonb_typeof(payload)='array'),
   binding_sha256 text not null check(binding_sha256 ~ '^[a-f0-9]{64}$')
 );
+-- Protected allocation witness. Updated in the SAME transaction as facts/MVs/history.
+-- Never infer a reusable ID merely from max(id) after a historical high ID disappears.
+create table sales_release_v234_private.identity_high_water (
+  singleton boolean primary key default true check(singleton),
+  high_water bigint not null check(high_water>=0)
+);
+insert into sales_release_v234_private.identity_high_water values(true,0);
 create table sales_release_v234_private.staged (
   run_id uuid primary key references public.import_runs(id), payload jsonb not null
 );
@@ -58,7 +65,7 @@ begin
     execute format('create trigger immutable before update or delete or truncate on sales_release_v234_private.%I for each statement execute function sales_attestor_private.reject_mutation()',n);
     execute format('alter table sales_release_v234_private.%I enable always trigger immutable',n);
   end loop;
-  foreach n in array array['roots','authorities','history','staged'] loop
+  foreach n in array array['roots','authorities','history','staged','identity_high_water'] loop
     execute format('alter table sales_release_v234_private.%I enable row level security',n);
   end loop;
 end $protect$;
@@ -92,6 +99,8 @@ declare
   t sales_attestor_private.targets%rowtype;
   ar sales_attestor_private.accepted_reviews%rowtype;
   v_version bigint; v_payload jsonb; v_rows jsonb; v_aliases jsonb; v_manifest jsonb;
+  v_sequence regclass; v_identity text; v_last bigint; v_called boolean;
+  v_high numeric; v_new_rows bigint; v_restart bigint;
   v_binding jsonb; v_current jsonb; v_result jsonb; v_digest text; x jsonb; k text; n numeric;
 begin
   -- Authentication before reservation, staging, sequences or any other mutation.
@@ -159,6 +168,11 @@ begin
       or (x->>'accounting_date')::date<date '2000-01-01'
       or (x->>'accounting_date')::date>=(clock_timestamp() at time zone 'Europe/Kyiv')::date then
       raise exception using errcode='55000',message='SALES_RELEASE_V234_DATE';end if;
+    -- Existing calendar-year/ISO-week contracts need separate owner-reviewed repair.
+    -- Reject boundary dates before any mutation instead of silently publishing ambiguity.
+    if extract(isoyear from (x->>'accounting_date')::date)
+      <>extract(year from (x->>'accounting_date')::date) then
+      raise exception using errcode='55000',message='SALES_RELEASE_V234_ISO_YEAR_BOUNDARY';end if;
     foreach k in array array['revenue','checks','markup'] loop
       if jsonb_typeof(x->k) is distinct from 'number' then
         raise exception using errcode='55000',message='SALES_RELEASE_V234_METRIC';end if;
@@ -216,6 +230,44 @@ begin
       (new_row.value-9-8-7)=(old_row.value-9-8-7))) then
     raise exception using errcode='55000',message='SALES_RELEASE_V234_HISTORICAL_IDENTITY';
   end if;
+  -- Authenticate the allocation contract under the fact-table writer lock.
+  -- Cast internal "char" explicitly; PL/pgSQL text comparison must not guess.
+  select id_column.attidentity::text into v_identity from pg_attribute id_column
+    where id_column.attrelid='public.fact_sales_daily'::regclass and id_column.attname='id' and not id_column.attisdropped;
+  v_sequence:=pg_get_serial_sequence('public.fact_sales_daily','id')::regclass;
+  if v_identity is distinct from 'a' or v_sequence is null
+    or not exists(select from pg_sequence s where s.seqrelid=v_sequence
+      and s.seqtypid='bigint'::regtype and s.seqincrement=1 and s.seqmin=1
+      and s.seqmax=9223372036854775807 and s.seqcache=1 and not s.seqcycle)
+    or not exists(select from pg_class c where c.oid='public.fact_sales_daily'::regclass and c.relrowsecurity)
+    or exists(select from pg_roles r where r.rolname<>current_user and (r.rolcanlogin or r.rolname !~ '^pg_') and (
+      has_table_privilege(r.oid,'public.fact_sales_daily','INSERT,UPDATE,DELETE,TRUNCATE')
+      or exists(select from pg_attribute id_column where id_column.attrelid='public.fact_sales_daily'::regclass
+        and id_column.attnum>0 and not id_column.attisdropped
+        and has_column_privilege(r.oid,id_column.attrelid,id_column.attnum,'INSERT,UPDATE'))
+      or has_sequence_privilege(r.oid,v_sequence,'USAGE,UPDATE')))
+    or exists(select from pg_roles r where r.rolname<>current_user and (r.rolcanlogin or r.rolname !~ '^pg_') and (
+      has_table_privilege(r.oid,'sales_release_v234_private.identity_high_water','INSERT,UPDATE,DELETE,TRUNCATE')
+      or exists(select from pg_attribute id_column where id_column.attrelid='sales_release_v234_private.identity_high_water'::regclass
+        and id_column.attnum>0 and not id_column.attisdropped
+        and has_column_privilege(r.oid,id_column.attrelid,id_column.attnum,'INSERT,UPDATE')))) then
+    raise exception using errcode='55000',message='SALES_RELEASE_V234_IDENTITY_WRITER_CONTRACT';end if;
+  execute format('select last_value,is_called from %s',v_sequence) into v_last,v_called;
+  select greatest(high_water::numeric,coalesce((select max(id) from public.fact_sales_daily),0)::numeric,
+    v_last::numeric-case when v_called then 0 else 1 end) into v_high
+    from sales_release_v234_private.identity_high_water where singleton for update;
+  if v_high is null then
+    raise exception using errcode='55000',message='SALES_RELEASE_V234_IDENTITY_WRITER_CONTRACT';end if;
+  select count(*) into v_new_rows from jsonb_array_elements(v_rows) e
+    where not exists(select from public.fact_sales_daily f join public.dim_location l on l.id=f.location_id
+      join public.dim_brand b on b.id=f.brand_id join public.dim_ownership o on o.id=f.ownership_id
+      join public.dim_channel c on c.id=f.channel_id join public.dim_order_type ot on ot.id=f.order_type_id
+      where f.date_id=(e.value->>0)::date and l.canonical_name=e.value->>1 and b.name=e.value->>2
+        and o.name=e.value->>3 and c.channel_group=e.value->>4 and c.channel_name=e.value->>5
+        and ot.name=e.value->>6);
+  if v_high+v_new_rows>=9223372036854775807::numeric then
+    raise exception using errcode='55000',message='SALES_RELEASE_V234_IDENTITY_OVERFLOW';end if;
+  v_restart:=(v_high+v_new_rows+1)::bigint;
   insert into public.import_runs(id,source_name,status,details)
     values(p_run_id,'google_sheets:Данние короткі','running','{"preview_v234":true}');
   insert into sales_release_v234_private.staged values(p_run_id,v_payload);
@@ -245,7 +297,7 @@ begin
       and f.date_id=(e.value->>0)::date and f.location_id=l.id and f.brand_id=b.id
       and f.ownership_id=o.id and f.channel_id=c.id and f.order_type_id=ot.id;
   insert into public.fact_sales_daily(id,date_id,location_id,brand_id,ownership_id,channel_id,order_type_id,revenue,checks,markup,import_run_id) overriding system value
-    select (select coalesce(max(id),0) from public.fact_sales_daily)+row_number() over(order by e.value::text collate "C"),(e.value->>0)::date,l.id,b.id,o.id,c.id,ot.id,(e.value->>7)::numeric/100,
+    select (v_high+row_number() over(order by e.value::text collate "C"))::bigint,(e.value->>0)::date,l.id,b.id,o.id,c.id,ot.id,(e.value->>7)::numeric/100,
       (e.value->>8)::numeric,(e.value->>9)::numeric/100,p_run_id
     from jsonb_array_elements(v_rows) e join public.dim_location l on l.canonical_name=e.value->>1
       join public.dim_brand b on b.name=e.value->>2 join public.dim_ownership o on o.name=e.value->>3
@@ -253,6 +305,10 @@ begin
       join public.dim_order_type ot on ot.name=e.value->>6
     where not exists(select from public.fact_sales_daily f where f.date_id=(e.value->>0)::date
       and f.location_id=l.id and f.brand_id=b.id and f.ownership_id=o.id and f.channel_id=c.id and f.order_type_id=ot.id);
+  -- ALTER SEQUENCE RESTART is transactional; nextval/setval are not.
+  -- Default future inserts start strictly above both explicit IDs and prior sequence state.
+  execute format('alter sequence %s restart with %s',v_sequence,v_restart);
+  update sales_release_v234_private.identity_high_water set high_water=(v_high+v_new_rows)::bigint where singleton;
   refresh materialized view public.bi_sales_flat_mv;
   refresh materialized view public.agg_sales_monthly;
   refresh materialized view public.agg_sales_weekly;
@@ -273,7 +329,7 @@ begin
   delete from sales_release_v234_private.staged where run_id=p_run_id;
   return v_result;
   -- No exception handler: all table/MV/history changes roll back together.
-  -- Explicit fact IDs above avoid nontransactional identity nextval on failures.
+  -- Explicit IDs plus transactional RESTART preserve sequence state on failures.
 end $$;
 revoke all on all tables in schema sales_release_v234_private from PUBLIC,anon,authenticated,service_role,sales_release_v234_caller;
 revoke all on all functions in schema sales_release_v234_private from PUBLIC,anon,authenticated,service_role,sales_release_v234_caller;

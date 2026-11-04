@@ -45,6 +45,7 @@ test('v234 draft remains rollback-default, private and disconnected', () => {
   assert.ok(draft.endsWith(`${rollback}\n`));
   assert.doesNotMatch(draft, /create\s+(?:or replace\s+)?function\s+public\.|\b(?:create|alter)\s+role\b/i);
   assert.doesNotMatch(draft, /perform\s+public\.(?:sync_sales_batch|finalize_sales_snapshot)|delete from public\.fact_sales_daily/i);
+  assert.doesNotMatch(draft, /set\s+generated\s+by\s+default/i);
   for (const file of ['supabase/functions/sync-google-sheet/index.ts','web/app/api/data-sync/route.ts',
     '.github/workflows/astra-runner.yml']) assert.doesNotMatch(read(file), /sales.release.v234/i);
   assert.throws(() => parseError({status:0,stderr:''},'42501'),assert.AssertionError);
@@ -205,7 +206,7 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       denied(c,'set role release_v234_fixture;',role);
       denied(c,'set role sales_restore_operator;',role);
       denied(c,'set session authorization release_v234_fixture;',role);
-      for (const table of ['roots','authorities','history','staged']) {
+      for (const table of ['roots','authorities','history','staged','identity_high_water']) {
         denied(c,`insert into sales_release_v234_private.${table} select * from sales_release_v234_private.${table};`,role);
         denied(c,`truncate sales_release_v234_private.${table} cascade;`,role);
       }
@@ -278,7 +279,10 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       const before=exact(source);
       assert.deepEqual(JSON.parse(sql(source,commit(accepted.run),caller)),result);
       assert.deepEqual(exact(source),before,'Identical retry mutated warehouse');
-      assert.deepEqual(rows(source).filter(row=>row.kind==='S'),seq,'Identity sequences must never allocate in this draft');
+      assert.deepEqual(rows(source).filter(row=>row.kind==='S' && row.name!=='public.fact_sales_daily_id_seq'),
+        seq.filter(row=>row.name!=='public.fact_sales_daily_id_seq'),'Unrelated sequences must not change');
+      assert.equal(sql(source,"select last_value::text||'|'||is_called from public.fact_sales_daily_id_seq;"),'3|false');
+      assert.equal(sql(source,'select high_water from sales_release_v234_private.identity_high_water;'),'2');
       for(const table of ['roots','authorities','history']) {
         denied(source,`truncate sales_release_v234_private.${table} cascade;`,undefined,'42501','SALES_ATTESTOR_IMMUTABLE');
         assert.deepEqual(exact(source),before);
@@ -322,6 +326,123 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       const before=exact(source);
       denied(source,`begin;update public.map_location_source set canonical_name='Changed';
         set session authorization ${caller};${commit(a.run)}`,undefined,'55000','SALES_RELEASE_V234_CANONICAL_MISMATCH');
+      assert.deepEqual(exact(source),before);
+    });
+    const sequence = 'public.fact_sales_daily_id_seq';
+    const identityGuard = `do $$begin
+      if (select a.attidentity::text from pg_attribute a where a.attrelid='public.fact_sales_daily'::regclass
+          and a.attname='id') is distinct from 'a'
+        or not (select relrowsecurity from pg_class where oid='public.fact_sales_daily'::regclass)
+        or exists(select from pg_roles r where r.rolname in ('anon','authenticated','service_role',
+          'sales_release_v234_caller','sales_reviewer_a','sales_reviewer_b') and (
+          has_table_privilege(r.oid,'public.fact_sales_daily','INSERT,UPDATE,DELETE,TRUNCATE')
+          or has_sequence_privilege(r.oid,'${sequence}','USAGE,UPDATE')
+          or exists(select from pg_attribute a where a.attrelid='public.fact_sales_daily'::regclass
+            and a.attnum>0 and not a.attisdropped and has_column_privilege(r.oid,a.attrelid,a.attnum,'INSERT,UPDATE'))))
+        or not exists(select from pg_sequence where seqrelid='${sequence}'::regclass and seqincrement=1
+          and seqmin=1 and seqmax=9223372036854775807 and seqcache=1 and not seqcycle) then
+        raise exception 'FIXTURE_IDENTITY_RLS_ACL_SEQUENCE_NOT_PINNED';end if;
+    end$$;`;
+    const withNewIdentity = source => {
+      const row=[...source.values[2]];row[7]='New identity witness';row[11]='0.01';source.values.push(row);
+    };
+    const defaultInsert = `insert into public.dim_order_type(name) values('Default identity witness');
+      insert into public.fact_sales_daily(date_id,location_id,brand_id,ownership_id,channel_id,order_type_id,revenue,checks,markup)
+        select date_id,location_id,brand_id,ownership_id,channel_id,
+          (select id from public.dim_order_type where name='Default identity witness'),0,0,0
+        from public.fact_sales_daily order by id limit 1 returning id;`;
+    await t.test('negative explicit/default collision controls and transactional high-water/overflow checks preserve storage',async()=>{
+      const a=await candidate(source,()=>{},false,withNewIdentity);both(source,a);
+      const before=exact(source);
+      // Both controls must really reach the PK, with structurally valid natural keys.
+      denied(source,`begin;alter sequence ${sequence} restart with 1;${defaultInsert}`,undefined,'23505',
+        'duplicate key value violates unique constraint "fact_sales_daily_pkey"');
+      assert.deepEqual(exact(source),before);
+      denied(source,`begin;${defaultInsert.replace('fact_sales_daily(date_id','fact_sales_daily(id,date_id')
+        .replace('select date_id','overriding system value select 1,date_id')}`,undefined,'23505',
+        'duplicate key value violates unique constraint "fact_sales_daily_pkey"');
+      assert.deepEqual(exact(source),before);
+      // D240: fixture-only UPDATE cannot assign a GENERATED ALWAYS identity.
+      // Restore ALWAYS immediately, before assertions/session authorization/promotion.
+      const historicalId = id => `alter table public.fact_sales_daily alter column id set generated by default;
+        update public.fact_sales_daily set id=${id} where id=1;
+        alter table public.fact_sales_daily alter column id set generated always;${identityGuard}
+        do $$begin
+          if not exists(select from ${sequence} where last_value=3 and not is_called)
+            or (select high_water from sales_release_v234_private.identity_high_water)<>2
+            or (select count(*) from public.fact_sales_daily where id=${id})<>1 then
+            raise exception 'FIXTURE_HISTORICAL_ID_OR_SEQUENCE_NOT_PINNED';end if;end$$;`;
+      const high=invoke('psql',args(source),`begin;${historicalId('700')}
+        set session authorization ${caller};${commit(a.run)}reset session authorization;
+        do $$begin
+          if (select max(id) from public.fact_sales_daily)<>701
+            or (select high_water from sales_release_v234_private.identity_high_water)<>701
+            or not exists(select from ${sequence} where last_value=702 and not is_called) then
+            raise exception 'HIGH_WATER_BRANCH_NOT_EXECUTED';end if;end$$;
+        rollback;`);
+      assert.equal(high.status,0,high.stderr);assert.match(high.stdout,/OFFLINE_SYNTHETIC_ONLY/);
+      assert.deepEqual(exact(source),before,'High historical ID fixture leaked after rollback');
+      denied(source,`begin;${historicalId('9223372036854775807')}
+        set session authorization ${caller};${commit(a.run)}`,undefined,'55000','SALES_RELEASE_V234_IDENTITY_OVERFLOW');
+      assert.deepEqual(exact(source),before,'Overflow fixture leaked identity/catalog/RLS/ACL/sequence/rows');
+    });
+    await t.test('transactional restart permits a future default ID above explicit promotion IDs',async()=>{
+      const a=await candidate(source,()=>{},false,withNewIdentity);both(source,a);
+      const before=exact(source);
+      const result=sql(source,`begin;${identityGuard}set session authorization ${caller};${commit(a.run)}
+        reset session authorization;${defaultInsert}${identityGuard}
+        do $$begin if (select max(id) from public.fact_sales_daily)<>4 then
+          raise exception 'DEFAULT_ID_NOT_ABOVE_PROMOTION';end if;end$$;rollback;`);
+      assert.match(result,/OFFLINE_SYNTHETIC_ONLY/);assert.match(result,/\n4$/);
+      assert.deepEqual(exact(source),before,'Successful default writer control must roll back completely');
+    });
+    await t.test('sequence-ahead and protected historical high-water never move allocation backwards',async()=>{
+      const a=await candidate(source,()=>{},false,withNewIdentity);both(source,a);
+      for(const setup of [`alter sequence ${sequence} restart with 800;`,
+        'update sales_release_v234_private.identity_high_water set high_water=799;']) {
+        const before=exact(source);
+        sql(source,`begin;${setup}${identityGuard}set session authorization ${caller};${commit(a.run)}
+          reset session authorization;do $$begin
+          if (select max(id) from public.fact_sales_daily)<>800
+            or (select high_water from sales_release_v234_private.identity_high_water)<>800
+            or not exists(select from ${sequence} where last_value=801 and not is_called) then
+            raise exception 'SEQUENCE_HIGH_WATER_REGRESSED';end if;end$$;rollback;`);
+        assert.deepEqual(exact(source),before);
+      }
+    });
+    await t.test('identity mode, sequence configuration and effective writer grants reject before first write',async()=>{
+      const a=await candidate(source,()=>{},false,withNewIdentity);both(source,a);
+      for(const setup of [
+        'alter table public.fact_sales_daily alter column id set generated by default;',
+        `alter sequence ${sequence} increment by 2;`,
+        `grant insert on public.fact_sales_daily to ${caller};`,
+        `grant update(id) on public.fact_sales_daily to ${caller};`,
+        `grant usage on sequence ${sequence} to ${caller};`,
+        `grant update(high_water) on sales_release_v234_private.identity_high_water to ${caller};`,
+        'alter table public.fact_sales_daily disable row level security;'
+      ]) {
+        const before=exact(source);
+        denied(source,`begin;${setup}set session authorization ${caller};${commit(a.run)}`,undefined,'55000',
+          'SALES_RELEASE_V234_IDENTITY_WRITER_CONTRACT');
+        assert.deepEqual(exact(source),before);
+      }
+    });
+    await t.test('both ISO-year boundaries reject before any dimension, fact, sequence or receipt write',async()=>{
+      for(const date of ['2025-12-29','2021-01-01']) {
+        const a=await candidate(source,()=>{},false,source=>{
+          const row=[...source.values[2]];row[5]=date;source.values.push(row);
+        });both(source,a);
+        deny(source,a,'SALES_RELEASE_V234_ISO_YEAR_BOUNDARY');
+      }
+    });
+    await t.test('a successful update-only promotion keeps future sequence allocation and retry immutable',async()=>{
+      const a=await candidate(source);both(source,a);
+      const before=exact(source);
+      sql(source,`begin;${identityGuard}set session authorization ${caller};${commit(a.run)}${commit(a.run)}
+        reset session authorization;do $$begin
+        if not exists(select from ${sequence} where last_value=3 and not is_called)
+          or (select high_water from sales_release_v234_private.identity_high_water)<>2 then
+          raise exception 'UPDATE_ONLY_SEQUENCE_REGRESSION';end if;end$$;rollback;`);
       assert.deepEqual(exact(source),before);
     });
     await t.test('injected refresh error, final-step failure and timeout roll back new IDs, dimensions, MVs and history',async()=>{
