@@ -187,3 +187,32 @@ Unchanged draft SHA-256:
 **BLOCKED — native verification in the restricted inner sandbox; NOT READY FOR
 GATE / NOT RELEASED.** No production security remediation, writer quiescence,
 source recovery, private-auth activation or release has been implemented.
+
+## Independent trusted-outer/post-push verification addendum — 2026-11-04
+
+This addendum records evidence obtained **after** the restricted implementation
+sandbox produced the historical handoff above; it does not reinterpret that
+sandbox's socket/loopback failures as test passes. The trusted outer [Astra
+run 41762712487](https://github.com/adduakiev/mystoriya-bi/actions/runs/41762712487),
+job 126353862063, independently ran the candidate on native PostgreSQL 16.15:
+**577/577 PASS, 0 FAIL, 0 SKIP**, TypeScript and Next.js optimized build PASS.
+It fast-forwarded one commit, `38dc079fb3ea5d6efac768721d95b39ab036aee0`,
+into the same open/unmerged PR #44; exactly this memo and the disposable-only
+role fixture changed. No Production access or mitigation is established by that.
+
+At independent follow-up, GitHub's Actions run inventory contained **no
+post-push run for that exact commit**; therefore the mandatory immutable-head
+PG16→PG17 acceptance remained **UNVERIFIED**, regardless of the outer candidate
+pass or green Vercel status. This documentation-only append is intended to
+cause the existing unchanged push workflow to execute on its **new exact SHA**.
+It is a trigger, **not** proof that the run started or passed: a reviewer must
+independently identify the resulting workflow run, verify checkout equals its
+`GITHUB_SHA`, PostgreSQL 16 and 17 native executions each have **0 FAIL / 0 SKIP**,
+then check that the PR still points to that same SHA. No second Astra job is
+requested. Any absence or failure stays a STOP.
+
+**Production gate remains CLOSED.** In particular, live default ACLs still
+raise `SALES_ROLE_STOP_DEFAULT_GRANTS`; no default-grant exception, permission
+migration, writer quiescence, server credential provisioning, backup/restore,
+Edge cutover, import, source attestation, or UI parity has been authorized or
+performed as part of this addendum.
