@@ -58,6 +58,7 @@ jobs:
             --body "WORKING — automated Astra runner started. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Verify issue 43 targets ONLY existing open PR #44
+        id: verified_pr
         if: github.event.issue.number == 43
         env:
           GH_TOKEN: ${{ github.token }}
@@ -70,6 +71,8 @@ jobs:
           test "$PR_STATE" = 'OPEN'
           test "$PR_HEAD" = "$ASTRA_BRANCH"
           test "$PR_SHA" = "$(git rev-parse HEAD)"
+          test -z "$(git status --porcelain)"
+          echo "verified_sha=$PR_SHA" >> "$GITHUB_OUTPUT"
           echo "Verified existing PR #44, branch $ASTRA_BRANCH, SHA $PR_SHA"
 
       - name: Create isolated work branch for other issues
@@ -107,6 +110,16 @@ jobs:
             ----
 
             For issue #43 ONLY: continue existing PR #44 on branch astra/issue-43-40107435112.
+            TRUSTED OUTER RUNNER GATE: the preceding GitHub Actions step verified PR #44 OPEN,
+            expected branch, clean checkout and exact remote HEAD SHA
+            `${{ steps.verified_pr.outputs.verified_sha }}` using GH_TOKEN outside Codex.
+            This verified result is authoritative for your initial baseline. Confirm local
+            `git rev-parse HEAD` equals that SHA and worktree starts clean; STOP if not.
+            The inner Codex sandbox has no GH_TOKEN and may lack DNS; do NOT require
+            another inner `gh pr view` or `git ls-remote` when the trusted outer gate
+            has already PASSED. NEVER interpret inner DNS/auth failure as drift.
+            All subsequent remote drift checks and commit/push belong to the trusted
+            outer runner. Do not create credentials or retry untrusted network checks.
             Prioritize private Google Sheets server-only auth and safe atomic Sales recovery, not Digital/cosmetic audits.
             Do not run old batch writes/finalize, trigger imports, deploy, migrate, or change credentials/schedulers.
             Do not create another PR. Keep production paths fail-closed until owner-gated acceptance.
@@ -135,7 +148,19 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          VERIFIED_SHA: ${{ steps.verified_pr.outputs.verified_sha }}
         run: |
+          if [ "$ISSUE_NUMBER" = "43" ]; then
+            set -euo pipefail
+            test -n "$VERIFIED_SHA"
+            test "$(git rev-parse HEAD)" = "$VERIFIED_SHA"
+            LIVE_STATE=$(gh pr view 44 --repo "${{ github.repository }}" --json state --jq '.state')
+            LIVE_BRANCH=$(gh pr view 44 --repo "${{ github.repository }}" --json headRefName --jq '.headRefName')
+            LIVE_SHA=$(gh pr view 44 --repo "${{ github.repository }}" --json headRefOid --jq '.headRefOid')
+            test "$LIVE_STATE" = "OPEN"
+            test "$LIVE_BRANCH" = "$ASTRA_BRANCH"
+            test "$LIVE_SHA" = "$VERIFIED_SHA"
+          fi
           git config user.name "astra-control-room"
           git config user.email "astra-control-room@users.noreply.github.com"
           git add -A
