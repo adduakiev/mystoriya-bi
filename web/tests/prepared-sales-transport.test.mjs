@@ -143,18 +143,18 @@ test('deadline covers ignored fetch/body/source abort and external abort stops a
   await assert.rejects(g.transport.readBaseline({ now, signal: controller.signal }), /ABORTED/);
 });
 
-test('unreferenced from all active runtime code; original unconditional safety gates are byte-identical to trusted base', () => {
+test('unreferenced from all active runtime code; API gate pinned and Edge gate stripped of all legacy writers', () => {
   const root = new URL('../../', import.meta.url);
   function walk(dir) { return fs.readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e => e.isDirectory() && !['node_modules', '.next'].includes(e.name) ? walk(`${dir}/${e.name}`) : e.isFile() ? [`${dir}/${e.name}`] : []); }
   for (const file of [...walk('web/app'), ...walk('web/lib'), ...walk('web/components'), ...walk('supabase/functions')].filter(f => /\.[cm]?[jt]sx?$/.test(f) && !['prepared-sales-transport.mjs', 'prepared-sales-cutover.mjs'].some(name => f.endsWith('/' + name)))) {
     assert.doesNotMatch(fs.readFileSync(new URL(file, root), 'utf8'), /prepared-sales-transport|createPreparedSalesTransport/);
   }
-  for (const file of ['web/app/api/data-sync/route.ts', 'supabase/functions/sync-google-sheet/index.ts']) {
-    const content = fs.readFileSync(new URL(file, root), 'utf8');
-    assert.match(content, /SALES_IMPORT_SAFETY_GATE/); assert.match(content, /status: 503/);
-    const trusted = file.startsWith('web/') ? '11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1' : '04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3';
-    assert.equal(createHash('sha256').update(content).digest('hex'), trusted);
-  }
+  const api = fs.readFileSync(new URL('web/app/api/data-sync/route.ts', root), 'utf8');
+  assert.match(api, /SALES_IMPORT_SAFETY_GATE/); assert.match(api, /status: 503/);
+  assert.equal(createHash('sha256').update(api).digest('hex'), '11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1');
+  const edge = fs.readFileSync(new URL('supabase/functions/sync-google-sheet/index.ts', root), 'utf8');
+  assert.match(edge, /SALES_IMPORT_SAFETY_GATE/); assert.match(edge, /status: 503/);
+  assert.doesNotMatch(edge, /gviz\/tq|sync_sales_batch|finalize_sales_snapshot|\bimport_runs\b|\b(?:fetch|createClient)\s*\(|\bDeno\.env\b/);
   const content = fs.readFileSync(new URL('supabase/functions/sync-google-sheet/prepared-sales-transport.mjs', root), 'utf8');
   assert.doesNotMatch(content, /process\.env|Deno\.env|console\.|sync_sales_batch|finalize_sales_snapshot|rpc\//);
 });

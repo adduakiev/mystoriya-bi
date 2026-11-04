@@ -57,3 +57,13 @@ test('actual refresh control is disabled and explains the gate without asserting
     assert.doesNotMatch(html, /Sync OK|Готово|401/);
   }
 });
+
+test('Edge entrypoint has no dormant public CSV, mutation RPC, secret or bypass path', () => {
+  const entry = readFileSync(new URL('../../supabase/functions/sync-google-sheet/index.ts', import.meta.url), 'utf8');
+  assert.equal((entry.match(/\bDeno\.serve\s*\(/g) ?? []).length, 1);
+  assert.equal((entry.match(/^\s*import\b/gm) ?? []).length, 1);
+  assert.match(entry, /SALES_IMPORT_SAFETY_GATE/);
+  assert.match(entry, /status:\s*503/);
+  assert.match(entry, /status:\s*405/);
+  assert.doesNotMatch(entry, /gviz\/tq|sync_sales_batch|finalize_sales_snapshot|\bimport_runs\b|\b(?:fetch|createClient)\s*\(|\b(?:Deno\.env|process\.env)\b/);
+});

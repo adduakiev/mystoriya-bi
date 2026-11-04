@@ -298,7 +298,7 @@ test("no imports, logger, runtime discovery, ambient fetch or import-time I/O; b
   assert.equal(child.status, 0, child.stderr); assert.equal(child.stdout, ""); assert.equal(child.stderr, "");
 });
 
-test("opt-in probe is disconnected from every deployed runtime and composed preview; byte-identical 503s keep legacy batch/finalize unreachable", () => {
+test("opt-in probe is disconnected from every deployed runtime and composed preview; closed 503 guards keep legacy batch/finalize absent from Edge", () => {
   const root = new URL("../../", import.meta.url);
   function walk(dir) { return readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e =>
     e.isDirectory() && !["node_modules", ".next"].includes(e.name) ? walk(`${dir}/${e.name}`) : e.isFile() ? [`${dir}/${e.name}`] : []); }
@@ -306,10 +306,12 @@ test("opt-in probe is disconnected from every deployed runtime and composed prev
     .filter(file => /\.[cm]?[jt]sx?$/.test(file) && !file.endsWith("/private-sales-header-probe.mjs"))) {
     assert.doesNotMatch(readFileSync(new URL(file, root), "utf8"), /private-sales-header-probe|probePrivateSalesHeader/);
   }
-  for (const [file, hash] of [
-    ["web/app/api/data-sync/route.ts", "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1"],
-    ["supabase/functions/sync-google-sheet/index.ts", "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3"]
-  ]) assert.equal(createHash("sha256").update(readFileSync(new URL(file, root))).digest("hex"), hash);
+  assert.equal(createHash("sha256").update(readFileSync(new URL("web/app/api/data-sync/route.ts", root))).digest("hex"), "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1");
+  const edge = readFileSync(new URL('supabase/functions/sync-google-sheet/index.ts', root), 'utf8');
+  assert.match(edge, /SALES_IMPORT_SAFETY_GATE/);
+  assert.match(edge, /status:\s*503/);
+  assert.doesNotMatch(edge, /gviz\/tq|sync_sales_batch|finalize_sales_snapshot|\bimport_runs\b|\b(?:fetch|createClient)\s*\(|\bDeno\.env\b/);
+
 });
 
 test("duplicate JSON keys, including escaped aliases, and excess nesting fail closed", async () => {

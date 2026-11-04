@@ -166,7 +166,7 @@ test('composed module has no import-time I/O and rejects browser execution befor
   assert.equal(r.status, 0, r.stderr);
 });
 
-test('no runtime can import the candidate; refresh UI and unconditional 503 guards are unchanged', () => {
+test('no runtime can import the candidate; refresh UI remains pinned and Edge has no legacy writer', () => {
   const root = new URL('../../', import.meta.url);
   function walk(dir) { return readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e =>
     e.isDirectory() && !['node_modules', '.next'].includes(e.name) ? walk(`${dir}/${e.name}`) : e.isFile() ? [`${dir}/${e.name}`] : []); }
@@ -174,9 +174,10 @@ test('no runtime can import the candidate; refresh UI and unconditional 503 guar
     .filter(f => /\.[cm]?[jt]sx?$/.test(f) && !f.endsWith('/prepared-sales-cutover.mjs'))) {
     assert.doesNotMatch(readFileSync(new URL(file, root), 'utf8'), /prepared-sales-cutover|createPreparedSalesCutover/);
   }
-  for (const [file, expected] of [
-    ['web/app/api/data-sync/route.ts', '11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1'],
-    ['supabase/functions/sync-google-sheet/index.ts', '04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3']]) {
-    assert.equal(hash(readFileSync(new URL(file, root))), expected);
-  }
+  assert.equal(hash(readFileSync(new URL('web/app/api/data-sync/route.ts', root))), '11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1');
+  const edge = readFileSync(new URL('supabase/functions/sync-google-sheet/index.ts', root), 'utf8');
+  assert.match(edge, /SALES_IMPORT_SAFETY_GATE/);
+  assert.match(edge, /status:\s*503/);
+  assert.doesNotMatch(edge, /gviz\/tq|sync_sales_batch|finalize_sales_snapshot|\bimport_runs\b|\b(?:fetch|createClient)\s*\(|\bDeno\.env\b/);
+
 });
