@@ -46,6 +46,7 @@ test('Sales ACL review stays rollback-default and separate from deployment', () 
   assert.ok(draft.endsWith(`${rollback}\n`));
   assert.notEqual(draft, committed);
   assert.match(draft, /NOT APPLIED/);
+  assert.match(draft, /message='SALES_ROLE_STOP_DEFAULT_GRANTS'/);
   assert.match(preflight, /begin read only;/);
   assert.doesNotMatch(preflight, /pg_get_functiondef|cron\.job|value_hash|select\s+\*|\b(?:insert|update|delete|grant|revoke|alter|create)\s+(?:into|table|role|function|schema)\b/i);
   for (const [name, col] of cases) assert.notEqual(col, 'id', `${name} cannot test ACLs by updating identity`);
@@ -245,6 +246,143 @@ test('Sales role hardening on disposable native PostgreSQL', { timeout: 240000 }
       sql(`delete from bi_import_private.sales_batches where run_id='${id}';
         delete from bi_import_private.sales_runs where id='${id}'; delete from public.import_runs where id='${id}';`);
       assert.equal(snapshot(), baseline);
+    });
+
+    await t.test('ordinary API roles can TRUNCATE a fresh FK-free RLS table only while granted', () => {
+      // No FK, trigger, policy, identity or BYPASSRLS can mask this boundary.
+      // This is a database-privilege control, NOT an HTTP/PostgREST exploit test.
+      sql(`create table public.sales_acl_probe(id integer primary key, amount numeric not null);
+        insert into public.sales_acl_probe values(1,12.34),(2,56.78);
+        alter table public.sales_acl_probe enable row level security;
+        grant select,truncate on public.sales_acl_probe to anon,authenticated;`);
+      const probeSnapshot = () => sql(`select jsonb_agg(to_jsonb(p) order by id)::text from public.sales_acl_probe p;`);
+      const rows = probeSnapshot();
+      assert.equal(sql(`select relrowsecurity and not relforcerowsecurity
+        and not exists(select from pg_policy where polrelid=c.oid)
+        and not exists(select from pg_constraint where contype='f' and (conrelid=c.oid or confrelid=c.oid))
+        and not exists(select from pg_trigger where tgrelid=c.oid)
+        from pg_class c where oid='public.sales_acl_probe'::regclass;`), 't');
+      assert.equal(sql("select bool_or(rolsuper or rolbypassrls) from pg_roles where rolname in ('anon','authenticated');"), 'f');
+      for (const role of ['anon', 'authenticated']) {
+        assert.equal(sql(`select has_table_privilege('${role}','public.sales_acl_probe','TRUNCATE');`), 't');
+        assert.equal(sql(`set role ${role}; select count(*) from public.sales_acl_probe;`), '0', 'RLS must hide all rows');
+        assert.equal(sql(`begin; set local role ${role}; truncate public.sales_acl_probe;
+          reset role; select count(*) from public.sales_acl_probe; rollback;`), '0', 'TRUNCATE must actually empty the table');
+        assert.equal(probeSnapshot(), rows, 'Positive control rollback must restore exact rows');
+        assert.equal(snapshot(), baseline, 'Positive control must not touch Sales');
+      }
+      sql('revoke truncate on public.sales_acl_probe from anon,authenticated;');
+      for (const role of ['anon', 'authenticated']) {
+        assert.equal(sql(`select has_table_privilege('${role}','public.sales_acl_probe','TRUNCATE');`), 'f');
+        denied(`set role ${role}; truncate public.sales_acl_probe;`, '42501', 'permission denied for table sales_acl_probe');
+        assert.equal(probeSnapshot(), rows, 'Denied TRUNCATE must preserve exact rows');
+        assert.equal(snapshot(), baseline, 'Denied TRUNCATE must preserve Sales row/sequence parity');
+      }
+      sql('drop table public.sales_acl_probe;');
+    });
+
+    await t.test('direct table REVOKE leaves inherited TRUNCATE and column UPDATE effective', () => {
+      sql(`create role probe_writer;
+        grant probe_writer to authenticated;
+        create table public.sales_boundary_probe(id integer primary key, amount numeric not null);
+        insert into public.sales_boundary_probe values(1,12.34);
+        alter table public.sales_boundary_probe enable row level security;
+        create policy probe_read on public.sales_boundary_probe for select using(true);
+        create policy probe_update on public.sales_boundary_probe for update using(true) with check(true);
+        grant select on public.sales_boundary_probe to authenticated;
+        grant truncate on public.sales_boundary_probe to probe_writer;
+        grant update(amount) on public.sales_boundary_probe to probe_writer;
+        revoke update,truncate on public.sales_boundary_probe from authenticated;`);
+      const rows = sql('select row_to_json(p)::text from public.sales_boundary_probe p;');
+      assert.equal(sql("select has_table_privilege('authenticated','public.sales_boundary_probe','TRUNCATE');"), 't');
+      assert.equal(sql(`begin; set local role authenticated; truncate public.sales_boundary_probe;
+        reset role; select count(*) from public.sales_boundary_probe; rollback;`), '0');
+      assert.equal(sql("select has_table_privilege('authenticated','public.sales_boundary_probe','UPDATE');"), 'f');
+      assert.equal(sql("select has_column_privilege('authenticated','public.sales_boundary_probe','amount','UPDATE');"), 't');
+      assert.equal(sql(`begin; set local role authenticated;
+        update public.sales_boundary_probe set amount=99 where id=1 returning amount; rollback;`), '99');
+      assert.equal(sql('select row_to_json(p)::text from public.sales_boundary_probe p;'), rows);
+      sql(`revoke truncate on public.sales_boundary_probe from probe_writer;
+        revoke update(amount) on public.sales_boundary_probe from probe_writer;`);
+      assert.equal(sql(`select has_table_privilege('authenticated','public.sales_boundary_probe','TRUNCATE')
+        or has_any_column_privilege('authenticated','public.sales_boundary_probe','UPDATE');`), 'f');
+      for (const command of ['truncate public.sales_boundary_probe', 'update public.sales_boundary_probe set amount=99 where id=1']) {
+        denied(`set role authenticated; ${command};`, '42501', 'permission denied for table sales_boundary_probe');
+        assert.equal(sql('select row_to_json(p)::text from public.sales_boundary_probe p;'), rows);
+        assert.equal(snapshot(), baseline);
+      }
+      sql('drop table public.sales_boundary_probe; revoke probe_writer from authenticated; drop role probe_writer;');
+    });
+
+    await t.test('creator-specific global and public defaults propagate to future objects and preserve strict STOP', () => {
+      // Synthetic owners only; no installed postgres/supabase_admin ACL is read
+      // or modified. Each owner is relevant to the unchanged draft's target set.
+      const defaults = () => sql(`select coalesce(jsonb_agg(to_jsonb(d) order by oid),'[]'::jsonb)::text from pg_default_acl d;`);
+      const originalDefaults = defaults();
+      const originalAcl = aclSnapshot();
+      sql(`create role default_owner;
+        grant usage,create on schema public to default_owner;`);
+      const controls = [
+        ['tables', 'insert,update,delete,truncate', 'table',
+          'create table public.sales_default_probe(id integer, amount numeric)',
+          role => `has_table_privilege('${role}','public.sales_default_probe','INSERT')
+            and has_table_privilege('${role}','public.sales_default_probe','UPDATE')
+            and has_table_privilege('${role}','public.sales_default_probe','DELETE')
+            and has_table_privilege('${role}','public.sales_default_probe','TRUNCATE')`],
+        ['sequences', 'update', 'sequence', 'create sequence public.sales_default_probe',
+          role => `has_sequence_privilege('${role}','public.sales_default_probe','UPDATE')`],
+        ['functions', 'execute', 'function', "create function public.sales_default_probe() returns integer language sql as 'select 1'",
+          role => `has_function_privilege('${role}','public.sales_default_probe()','EXECUTE')`]
+      ];
+      for (const owner of ['role_fixture', 'default_owner']) {
+        sql(`alter table public.dim_brand owner to ${owner};`);
+        for (const scope of ['', 'in schema public']) for (const role of ['anon', 'authenticated']) {
+          for (const [kind, privileges, object, create, effective] of controls) {
+            const label = `${owner}/${scope || 'global'}/${role}/${kind}`;
+            const before = defaults();
+            sql(`alter default privileges for role ${owner} ${scope} grant ${privileges} on ${kind} to ${role};
+              set role ${owner}; ${create}; reset role;`);
+            assert.equal(sql(`select ${effective(role)};`), 't', `Default propagation: ${label}`);
+            assert.equal(sql(`select has_table_privilege('${role}','public.fact_sales_daily','TRUNCATE');`), 'f',
+              `Defaults must not retroactively grant existing Sales table access: ${label}`);
+            // REVOKE an existing object's ACL: defaults still endanger future
+            // objects, so a scoped revoke must NOT clear the draft's STOP.
+            sql(`revoke ${privileges} on ${object} public.sales_default_probe${object === 'function' ? '()' : ''} from ${role};`);
+            // Functions have built-in PUBLIC EXECUTE; remove it on this local
+            // object too, to isolate explicit future-object defaults.
+            if (object === 'function') sql('revoke execute on function public.sales_default_probe() from PUBLIC;');
+            assert.equal(sql(`select ${effective(role)};`), 'f', `Existing-object revoke: ${label}`);
+            const acl = aclSnapshot();
+            const defaultAcl = defaults();
+            denied(committed, '55000', 'SALES_ROLE_STOP_DEFAULT_GRANTS');
+            assert.equal(aclSnapshot(), acl, `STOP must leave table/column/function/schema ACLs intact: ${label}`);
+            assert.equal(defaults(), defaultAcl, `STOP must leave default ACLs intact: ${label}`);
+            assert.equal(snapshot(), baseline, `STOP must preserve Sales row/sequence parity: ${label}`);
+            sql(`drop ${object} public.sales_default_probe${object === 'function' ? '()' : ''};
+              alter default privileges for role ${owner} ${scope} revoke ${privileges} on ${kind} from ${role};`);
+            assert.equal(defaults(), before, `Fixture must restore exact default ACLs: ${label}`);
+          }
+        }
+      }
+      sql(`alter default privileges for role role_fixture grant truncate on tables to anon;
+        alter default privileges for role role_fixture in schema public revoke truncate on tables from anon;
+        create table public.sales_default_probe(id integer);`);
+      assert.equal(sql("select has_table_privilege('anon','public.sales_default_probe','TRUNCATE');"), 't',
+        'Per-schema REVOKE cannot subtract a global default GRANT');
+      const acl = aclSnapshot();
+      const defaultAcl = defaults();
+      denied(committed, '55000', 'SALES_ROLE_STOP_DEFAULT_GRANTS');
+      assert.equal(aclSnapshot(), acl);
+      assert.equal(defaults(), defaultAcl);
+      sql(`drop table public.sales_default_probe;
+        alter default privileges for role role_fixture revoke truncate on tables from anon;`);
+      sql(`alter table public.dim_brand owner to role_fixture;
+        revoke usage,create on schema public from default_owner; drop role default_owner;`);
+      assert.equal(defaults(), originalDefaults);
+      assert.equal(aclSnapshot(), originalAcl);
+      assert.equal(snapshot(), baseline);
+      sql(committed);
+      assertAcls();
     });
 
     await t.test('inherited/table/column/RPC/sequence/default/ownership hazards STOP and roll back all revokes', () => {
