@@ -378,3 +378,7 @@ checks. **PREPARE ONLY / NOT READY FOR GATE** remains the release disposition
 even if repository verification passes. No original issue-wide completeness,
 live correctness, independent attestation, production remediation or release
 approval is claimed.
+
+## D222 — independent post-handoff exact-SHA verification (2026-11-04)
+
+After Astra completed, a separate trusted GitHub read confirmed PR #44 remains OPEN and unmerged. The pushed head `f85e81467fabc4b841ed78a3c3d19cea8925e585` is exactly one fast-forward commit after previously verified `01f902ba5bbe40b845b432af03dc63a0a0c7d25a`; the only change is this 380-line memo. GitHub Actions 41806529335 succeeded, but Astra's restricted-inner full check had eight environment failures and the outer verification ran *before* publication. A `GITHUB_TOKEN`-authenticated push does not trigger another push workflow. The existing `sales-pr44-native.yml` independent PG16→PG17 exact-SHA workflow had not run on the new head at this checkpoint. This documentation-only independent review commit is intended to trigger it. No code, SQL, production, credential, schedule, import or UI change is authorized by this note. Gate G1 remains STOP until the exact final SHA has 0 FAIL/0 SKIP on both PostgreSQL majors; G2–G10 stay STOP.
