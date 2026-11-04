@@ -171,7 +171,10 @@ test('no runtime can import the candidate; refresh UI remains pinned and Edge ha
   function walk(dir) { return readdirSync(new URL(dir, root), { withFileTypes: true }).flatMap(e =>
     e.isDirectory() && !['node_modules', '.next'].includes(e.name) ? walk(`${dir}/${e.name}`) : e.isFile() ? [`${dir}/${e.name}`] : []); }
   for (const file of [...walk('web/app'), ...walk('web/lib'), ...walk('web/components'), ...walk('supabase/functions')]
-    .filter(f => /\.[cm]?[jt]sx?$/.test(f) && !f.endsWith('/prepared-sales-cutover.mjs'))) {
+    // The versioned private adapter composes this reader; its own regression
+    // test prohibits imports from every active runtime and other source module.
+    .filter(f => /\.[cm]?[jt]sx?$/.test(f) && !['prepared-sales-cutover.mjs', 'prepared-sales-release-v234.mjs']
+      .some(name => f.endsWith(`/${name}`)))) {
     assert.doesNotMatch(readFileSync(new URL(file, root), 'utf8'), /prepared-sales-cutover|createPreparedSalesCutover/);
   }
   assert.equal(hash(readFileSync(new URL('web/app/api/data-sync/route.ts', root))), '11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1');
