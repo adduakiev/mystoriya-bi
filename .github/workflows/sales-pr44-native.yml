@@ -89,7 +89,7 @@ jobs:
             -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
           gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
             | grep -q '^fpr:::::::::B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8:'
-          printf '%s\\n' \
+          printf '%s\n' \
             'Types: deb' \
             'URIs: https://apt.postgresql.org/pub/repos/apt' \
             'Suites: noble-pgdg' \
