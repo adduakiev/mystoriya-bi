@@ -58,10 +58,10 @@ test('offline rehearsal remains rollback-default and disconnected from existing 
 test('offline synthetic capture → SCRAM reviews → staged atomic generation → independent readback and restore', {
   timeout: 300000
 }, async t => {
-  const bin = [process.env.SALES_TEST_PG_BIN, '/usr/lib/postgresql/16/bin']
-    .find(dir => dir && fs.existsSync(path.join(dir, 'initdb')));
-  assert.ok(bin, 'Native PostgreSQL 16.15 required; cannot skip');
-  for (const tool of ['initdb', 'pg_ctl', 'psql', 'pg_dump', 'pg_restore']) assert.ok(fs.existsSync(path.join(bin, tool)), tool);
+  // A configured PG17 runner must never silently fall back to PG16.
+  const bin = process.env.SALES_TEST_PG_BIN || '/usr/lib/postgresql/16/bin';
+  assert.ok(fs.existsSync(path.join(bin, 'initdb')), 'Configured native PostgreSQL 16/17 required; no fallback or skip');
+  for (const tool of ['initdb', 'pg_ctl', 'psql', 'pg_dump', 'pg_restore', 'pg_config']) assert.ok(fs.existsSync(path.join(bin, tool)), tool);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sales-rehearsal-pg-'));
   const clusters = ['source', 'restored'].map(name => ({ data: path.join(dir, name), socket: path.join(dir, `${name}-socket`), started: false }));
   const [source, restored] = clusters;
@@ -77,6 +77,9 @@ test('offline synthetic capture → SCRAM reviews → staged atomic generation �
     assert.equal(result.status, 0, `${tool}: ${result.error?.code ?? result.status}; ${redact(result.stderr).slice(-1800)}`);
     return result.stdout.trim();
   };
+  // Trust only the selected binary's native server, with an allowed PG16/17 major.
+  const testedPgVersion = /^PostgreSQL ((?:16|17)\.\d+)(?:\s|$)/.exec(ok('pg_config', ['--version']))?.[1];
+  assert.ok(testedPgVersion, 'Unsupported native PostgreSQL version; never substitute another major');
   const args = (c, role = 'rehearsal_fixture') => ['-X', '-h', c.socket, '-p', '5432', '-U', role, '-d', db,
     '-v', 'ON_ERROR_STOP=1', '-v', 'VERBOSITY=verbose', '-Atq'];
   const sql = (c, input, role) => ok('psql', args(c, role), input, role);
@@ -147,7 +150,7 @@ test('offline synthetic capture → SCRAM reviews → staged atomic generation �
     ok('psql', ['-X', '-h', c.socket, '-U', 'rehearsal_fixture', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'], `create database ${db};`);
     assert.equal(fs.realpathSync(sql(c, 'show data_directory;')), fs.realpathSync(c.data));
     assert.equal(sql(c, 'show listen_addresses;'), '');
-    assert.match(sql(c, 'show server_version;'), /^16\.15(?:\s|$)/);
+    assert.equal(sql(c, 'show server_version;').split(' ')[0], testedPgVersion, 'server and selected native pg_config version must agree');
     sql(c, `create role anon nologin; create role authenticated nologin; create role service_role nologin;
       create role sales_attestor_owner nologin; create role sales_mv_reader nologin;
       ${[...reviewers, caller].map(role => `create role ${role} login noinherit password ${q(passwords[role])};`).join('\n')}`);

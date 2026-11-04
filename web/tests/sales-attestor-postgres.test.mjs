@@ -102,10 +102,10 @@ test('attestor draft is rollback-default and disconnected from production code a
 // Mandatory native, two separate LOGINs and two fresh clusters. No network,
 // inherited PG variables, production URL, skip, mock, or single-user replacement.
 test('synthetic accepted-source attestor on native PostgreSQL', { timeout: 240000 }, async t => {
-  const bin = [process.env.SALES_TEST_PG_BIN, '/usr/lib/postgresql/16/bin']
-    .find(p => p && fs.existsSync(path.join(p, 'initdb')));
-  assert.ok(bin, 'PostgreSQL 16 required; attestor gate cannot skip');
-  for (const tool of ['initdb', 'pg_ctl', 'psql', 'pg_dump', 'pg_restore']) assert.ok(fs.existsSync(path.join(bin, tool)), tool);
+  // A configured PG17 runner must never silently fall back to PG16.
+  const bin = process.env.SALES_TEST_PG_BIN || '/usr/lib/postgresql/16/bin';
+  assert.ok(fs.existsSync(path.join(bin, 'initdb')), 'Configured native PostgreSQL 16/17 required; no fallback or skip');
+  for (const tool of ['initdb', 'pg_ctl', 'psql', 'pg_dump', 'pg_restore', 'pg_config']) assert.ok(fs.existsSync(path.join(bin, tool)), tool);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sales-attestor-pg-'));
   const clusters = ['source', 'restored'].map(name => ({ data: path.join(dir, name), socket: path.join(dir, `${name}-socket`), started: false }));
   const [source, restored] = clusters;
@@ -116,6 +116,9 @@ test('synthetic accepted-source attestor on native PostgreSQL', { timeout: 24000
     assert.equal(r.status, 0, `${tool}: ${r.error?.code ?? r.status}; ${r.stderr?.slice(-1600)}`);
     return r.stdout.trim();
   };
+  // Trust only the selected binary's native server, with an allowed PG16/17 major.
+  const testedPgVersion = /^PostgreSQL ((?:16|17)\.\d+)(?:\s|$)/.exec(ok('pg_config', ['--version']))?.[1];
+  assert.ok(testedPgVersion, 'Unsupported native PostgreSQL version; never substitute another major');
   const args = (c, role = 'attestor_fixture') => ['-X', '-h', c.socket, '-p', '5432', '-U', role, '-d', 'sales_attestor_synthetic',
     '-v', 'ON_ERROR_STOP=1', '-v', 'VERBOSITY=verbose', '-Atq'];
   const sql = (c, input, role) => ok('psql', args(c, role), input);
@@ -145,7 +148,7 @@ test('synthetic accepted-source attestor on native PostgreSQL', { timeout: 24000
       `create database sales_attestor_synthetic;`);
     assert.equal(fs.realpathSync(sql(c, 'show data_directory;')), fs.realpathSync(c.data));
     assert.equal(sql(c, 'show listen_addresses;'), '');
-    assert.match(sql(c, 'show server_version;'), /^16\./);
+    assert.equal(sql(c, 'show server_version;').split(' ')[0], testedPgVersion, 'server and selected native pg_config version must agree');
     sql(c, `create role anon nologin; create role authenticated nologin; create role service_role nologin;
       create role sales_attestor_owner nologin;
       create role sales_reviewer_a login noinherit; create role sales_reviewer_b login noinherit;
