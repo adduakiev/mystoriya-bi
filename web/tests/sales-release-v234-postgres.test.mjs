@@ -6,6 +6,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { canonicalSalesSourceBytes, verifyPreparedSalesProvenance } from '../../supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs';
+import { createPreparedSalesAttestorHandoff } from '../../supabase/functions/sync-google-sheet/prepared-sales-attestor-handoff.mjs';
 import { syntheticCaptureCustodian } from './fixtures/sales-capture-contract.mjs';
 import { catalogSQL as rehearsalCatalogSQL } from './fixtures/sales-rehearsal-catalog.mjs';
 
@@ -81,6 +82,92 @@ test('hermetic private capture contract uses signed immutable bytes and exact ce
   }
 });
 
+// Independent synthetic signer policy is pinned outside the handoff invocation.
+async function signedHandoff(now, overrides = {}, mutateSource = () => {}) {
+  const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Kyiv',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const cutoff = new Date(Date.parse(`${today}T00:00:00Z`)-86400000).toISOString().slice(0,10);
+  const custodian = await syntheticCaptureCustodian(), data = payload();
+  data.values[2][5]=data.values[3][5]=cutoff;
+  mutateSource(data);
+  const {capture}=await custodian.observe(data);
+  const context=structuredClone({kind:'sales-attestor-handoff/v1/OFFLINE_SYNTHETIC_ONLY',project:'OFFLINE_SYNTHETIC_ONLY',
+    source:capture.spreadsheetId,range:capture.requestedRange,runId:crypto.randomUUID(),
+    priorReceiptSha256:hash('OFFLINE SYNTHETIC GENESIS ONLY'),baseGeneration:'0',generation:'1',
+    cutoff,expiresAt:new Date(now.getTime()+120000).toISOString(),previous,aliases,...overrides});
+  const keys=await Promise.all(reviewers.map(()=>crypto.subtle.generateKey('Ed25519',false,['sign','verify'])));
+  const observers=keys.map((key,i)=>({id:`observer-${i?'b':'a'}`,login:reviewers[i],
+    independenceGroup:`independent-${i?'B':'A'}`,publicKey:key.publicKey}));
+  const roster=await Promise.all(observers.map(async o=>({id:o.id,login:o.login,independenceGroup:o.independenceGroup,
+    fingerprint:hash(Buffer.from(await crypto.subtle.exportKey('spki',o.publicKey)))})));
+  const source=new TextDecoder().decode(canonicalSalesSourceBytes(capture));
+  const observations=await Promise.all(observers.map(async(o,i)=>{
+    const observedAt=new Date(now.getTime()-2000+i*1000).toISOString();
+    const bytes=new TextEncoder().encode(JSON.stringify(['sales-signed-handoff-observation/v1',context,roster,source,o.id,observedAt]));
+    return {id:o.id,observedAt,signatureHex:Buffer.from(await crypto.subtle.sign('Ed25519',keys[i].privateKey,bytes)).toString('hex')};
+  }));
+  return {context,observers,request:{capture,observations,now}};
+}
+
+test('sealed handoff binds one frozen signed capture and rejects substituted policy before any SQL',async()=>{
+  const now=new Date('2026-11-05T12:00:00Z'), f=await signedHandoff(now);
+  const builder=createPreparedSalesAttestorHandoff(f);
+  const packet=await builder.prepare(f.request);
+  assert.equal(packet.status,'BLOCKED');assert.equal(hash(packet.packetJson),packet.packetSha256);
+  assert.equal(JSON.parse(packet.bindingJson).source_sha256,hash(canonicalSalesSourceBytes(f.request.capture)));
+  assert.match(packet.payloadJson,/90071992547409\.91/);
+  assert.equal(builder.release,undefined);
+  assert.throws(()=>createPreparedSalesAttestorHandoff(),/SEALED_OR_INVALID/);
+  assert.throws(()=>createPreparedSalesAttestorHandoff({...f,context:{...f.context,project:'production'}}),/SEALED_OR_INVALID/);
+  globalThis.window={};
+  try{assert.throws(()=>createPreparedSalesAttestorHandoff(f),/SEALED_OR_INVALID/);}finally{delete globalThis.window;}
+  for(const change of [
+    r=>{r.capture.values[1][11]='9.99';},
+    r=>{r.observations[0].signatureHex='a'.repeat(128);},
+    r=>{r.observations[1]=r.observations[0];},
+    r=>{r.observations[0].observedAt=new Date(now.getTime()-1000000).toISOString();},
+    r=>{r.now=new Date(now.getTime()+120001);},
+    r=>{r.capture.requestedRange='other';},
+    r=>{r.capture.values[2][5]='2026-11-03';},
+    r=>{r.capture.values[2][11]='0.001';}
+  ]) {
+    const request=structuredClone(f.request);change(request);
+    await assert.rejects(builder.prepare(request),/SEALED_OR_INVALID/);
+  }
+  for(const change of [
+    c=>{c.priorReceiptSha256=hash('substitution');},c=>{c.generation='2';},
+    c=>{c.source='other';},c=>{c.range='other';},c=>{c.cutoff='2026-11-03';},
+    c=>{c.aliases[0][1]='Changed';},c=>{c.expiresAt=new Date(now.getTime()+60000).toISOString();}
+  ]) {
+    const context=structuredClone(f.context);change(context);
+    await assert.rejects(async()=>createPreparedSalesAttestorHandoff({...f,context}).prepare(f.request),/SEALED_OR_INVALID/);
+  }
+  for(const field of ['login','independenceGroup','publicKey']) {
+    const observers=structuredClone(f.observers);observers[1][field]=observers[0][field];
+    await assert.rejects(createPreparedSalesAttestorHandoff({...f,observers}).prepare(f.request),/SEALED_OR_INVALID/);
+  }
+  // Re-sign defective source snapshots: rejection must come from derivation,
+  // even when both signatures authenticate those exact immutable source bytes.
+  for(const mutate of [
+    p=>{p.values[2][5]=p.values[3][5]='2026-10-25';},
+    p=>{p.values[2][6]='Unmapped';}
+  ]) {
+    const invalid=await signedHandoff(now,{},mutate);
+    await assert.rejects(createPreparedSalesAttestorHandoff(invalid).prepare(invalid.request),/SEALED_OR_INVALID/);
+  }
+  const swapped=structuredClone(f.observers);
+  [swapped[0].login,swapped[1].login]=[swapped[1].login,swapped[0].login];
+  await assert.rejects(createPreparedSalesAttestorHandoff({...f,observers:swapped}).prepare(f.request),/SEALED_OR_INVALID/);
+  const substituted=await signedHandoff(now);
+  await assert.rejects(createPreparedSalesAttestorHandoff({...f,observers:substituted.observers}).prepare(f.request),/SEALED_OR_INVALID/);
+  const controller=new AbortController();controller.abort();
+  await assert.rejects(builder.prepare({...f.request,signal:controller.signal}),/SEALED_OR_INVALID/);
+  const pending=builder.prepare({...f.request,signal:new AbortController().signal});
+  f.request.capture={};f.context.aliases[0][1]='Mutated caller';
+  assert.ok(JSON.stringify(await pending)===JSON.stringify(packet),'No mutable re-read after signature awaits');
+  const cancel=new AbortController(), cancelled=builder.prepare({...substituted.request,signal:cancel.signal});cancel.abort();
+  await assert.rejects(cancelled,/SEALED_OR_INVALID/);
+});
+
 // This is a NEW bounded reconstruction, not recovery of the absent failed files.
 // No native skip, socket substitute, single-user acceptance, inherited PG URL,
 // credential lookup, real HTTP call, or production path is available here.
@@ -90,7 +177,7 @@ test('v234 draft remains rollback-default, private and disconnected', () => {
   assert.doesNotMatch(draft, /perform\s+public\.(?:sync_sales_batch|finalize_sales_snapshot)|delete from public\.fact_sales_daily/i);
   assert.doesNotMatch(draft, /set\s+generated\s+by\s+default/i);
   for (const file of ['supabase/functions/sync-google-sheet/index.ts','web/app/api/data-sync/route.ts',
-    '.github/workflows/astra-runner.yml']) assert.doesNotMatch(read(file), /sales.release.v234/i);
+    '.github/workflows/astra-runner.yml']) assert.doesNotMatch(read(file), /sales.release.v234|prepared-sales-attestor-handoff|createPreparedSalesAttestorHandoff/i);
   assert.throws(() => parseError({status:0,stderr:''},'42501'),assert.AssertionError);
 });
 
@@ -373,6 +460,85 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
         assert.deepEqual(exact(source),before);
       }
       guards(source);
+    });
+    await t.test('sealed signed packet crosses separately authenticated LOGIN reviews with exact bytes; every rejection preserves protected state',async()=>{
+      const gen=sql(source,'select version from bi_import_private.generation;');
+      const prior=sql(source,`select receipt_sha256 from sales_release_v234_private.history where generation=${gen};`);
+      const f=await signedHandoff(new Date(),{baseGeneration:gen,generation:String(BigInt(gen)+1n),priorReceiptSha256:prior});
+      const builder=createPreparedSalesAttestorHandoff(f), packet=await builder.prepare(f.request);
+      const binding=JSON.parse(packet.bindingJson), run=binding.run_id;
+      const unregistered=exact(source);
+      for(const mutate of [
+        r=>{r.capture.values[1][11]='9.99';},r=>{r.observations[0].signatureHex='a'.repeat(128);},
+        r=>{r.observations[1]=r.observations[0];},r=>{r.now=new Date(Date.parse(f.context.expiresAt)+1);},
+        r=>{r.capture.requestedRange='wrong';},r=>{r.capture.values[2][5]='2026-10-25';},
+        r=>{r.capture.values[2][11]='0.001';}
+      ]) {
+        const request=structuredClone(f.request);mutate(request);
+        await assert.rejects(builder.prepare(request),/SEALED_OR_INVALID/);
+        assert.deepEqual(exact(source),unregistered,'Signed handoff rejection reached first SQL write');
+      }
+      for(const mutate of [
+        c=>{c.priorReceiptSha256=hash('root substitution');},c=>{c.project='production';},
+        c=>{c.aliases[0][1]='Changed';},c=>{c.cutoff='2026-10-25';}
+      ]) {
+        const context=structuredClone(f.context);mutate(context);
+        await assert.rejects(async()=>createPreparedSalesAttestorHandoff({...f,context}).prepare(f.request),/SEALED_OR_INVALID/);
+        assert.deepEqual(exact(source),unregistered,'Policy rejection reached authority registration');
+      }
+      const swapped=structuredClone(f.observers);
+      [swapped[0].login,swapped[1].login]=[swapped[1].login,swapped[0].login];
+      await assert.rejects(createPreparedSalesAttestorHandoff({...f,observers:swapped}).prepare(f.request),/SEALED_OR_INVALID/);
+      const earlyCancel=new AbortController(), cancelled=builder.prepare({...f.request,signal:earlyCancel.signal});earlyCancel.abort();
+      await assert.rejects(cancelled,/SEALED_OR_INVALID/);
+      assert.deepEqual(exact(source),unregistered,'Wrong signer/LOGIN mapping or cancelled handoff reached first SQL write');
+      // Fixture-only trusted registration. This is NOT owner-approved genesis or production provisioning.
+      sql(source,`insert into sales_release_v234_private.roots select ${q(prior)},${gen},
+        sales_release_v234_private.warehouse_rows(),3,'2026-10-25',${q(cutoff)},'OFFLINE_SYNTHETIC_ONLY';
+        insert into sales_attestor_private.targets values(${q(run)},${j(binding)},
+          encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'),${q(f.context.expiresAt)});
+        insert into sales_release_v234_private.authorities values(${q(run)},${q(prior)},${q(packet.manifestJson)},
+          ${q(packet.payloadJson)}::jsonb,encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'));`);
+      // The protected SQL target retains identical canonical bytes and digest. SQL
+      // hashes jsonb::text for its *binding* receipt; packet digest hashes raw UTF8.
+      assert.equal(sql(source,`select encode(sha256(convert_to(binding->'handoff'->>'packetJson','UTF8')),'hex')
+        from sales_attestor_private.targets where run_id=${q(run)};`),packet.packetSha256);
+      assert.equal(sql(source,`select (binding->'handoff'->>'packetJson')::jsonb->4 = binding-'handoff'
+        from sales_attestor_private.targets where run_id=${q(run)};`),'t');
+      const before=exact(source);
+      for(const field of ['packetJson','packetSha256','expiresAt']) {
+        const changed=structuredClone(binding);changed.handoff[field]+='tampered';
+        for(const role of reviewers) denied(source,`select sales_attestor_private.review(${q(run)},${j(changed)});`,role,
+          '42501','SALES_ATTESTOR_UNTRUSTED_BINDING');
+      }
+      for(const field of ['prior_receipt_sha256','generation','source_sha256','mapping_sha256','project','max_date']) {
+        const changed=structuredClone(binding);changed[field]='substituted';
+        denied(source,`select sales_attestor_private.review(${q(run)},${j(changed)});`,reviewers[0],
+          '42501','SALES_ATTESTOR_UNTRUSTED_BINDING');
+      }
+      denied(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,caller);
+      const cancel=new AbortController(), pending=builder.prepare({...f.request,signal:cancel.signal});cancel.abort();
+      await assert.rejects(pending,/SEALED_OR_INVALID/);
+      assert.deepEqual(exact(source),before,'Rejected handoff wrote receipt, stage, facts, dimensions, MVs, ACL/RLS or sequence');
+      for(const role of reviewers) {
+        const receipt=JSON.parse(sql(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,role));
+        assert.equal(receipt.reviewer,role);
+        assert.equal(receipt.independence_group,JSON.parse(packet.packetJson)[2].find(o=>o.login===role).independenceGroup);
+        assert.ok(JSON.stringify(receipt.binding)===JSON.stringify(JSON.parse(sql(source,`select binding from sales_attestor_private.targets where run_id=${q(run)};`))),'SQL receipt binding differs');
+        assert.equal(receipt.binding_sha256,sql(source,`select binding_sha256 from sales_attestor_private.targets where run_id=${q(run)};`));
+      }
+      const reviewed=exact(source);
+      for(const role of reviewers) sql(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,role);
+      assert.deepEqual(exact(source),reviewed,'Exact immutable receipt retry must never duplicate writes');
+      const result=sql(source,`begin;${commit(run)}rollback;`,caller);
+      assert.match(result,/OFFLINE_SYNTHETIC_ONLY/);assert.deepEqual(exact(source),reviewed);
+      const concurrent=await lockedRace(source,[`begin;${commit(run)}rollback;`,`begin;${commit(run)}rollback;`]);
+      assert.deepEqual(concurrent.map(r=>r.status),[0,0]);
+      assert.equal(concurrent[0].stdout,concurrent[1].stdout);
+      assert.deepEqual(exact(source),reviewed,'Concurrent rolled-back handoffs changed protected storage');
+      // Explicitly prove the unresolved boundary: SQL accepts no independent signature proof.
+      assert.equal(sql(source,`select count(*) from sales_attestor_private.receipts where run_id=${q(run)}
+        and binding->'handoff'->>'packetSha256'=${q(packet.packetSha256)};`),'2');
     });
     await t.test('signed prepared manifest differs from DB authority and delayed reviewed replay both reject before first write',async()=>{
       const mismatch=await candidate(source,a=>{a.manifest=a.manifest.replace('90071992547410.11','90071992547410.12');});

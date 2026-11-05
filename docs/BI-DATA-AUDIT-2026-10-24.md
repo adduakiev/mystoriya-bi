@@ -569,3 +569,75 @@ SQL/Edge cutover, source→warehouse→RPC→UI and authenticated desktop/mobile
 future gates. Prepared `release()`/`refresh()` still throw, active Edge/Next POST
 remain 503 and refresh UI remains disabled. SQL stays rollback-default NOT APPLIED;
 no real source fetch, database migration, backup, import or business write occurred.
+
+## D246 — signed capture → sealed attestor handoff (PREPARE ONLY)
+
+Initial local HEAD matched trusted outer baseline
+`429db79b60f9c5c52098643381580f60ef837196`; worktree was clean. The outer
+PR/open/unmerged/expected-SHA gate is authoritative; no inner remote check,
+commit, push, new job, migration or deployment was attempted.
+
+Changed paths: private `prepared-sales-attestor-handoff.mjs`, existing native
+`web/tests/sales-release-v234-postgres.test.mjs`, and this note. No SQL draft,
+workflow, active Edge/Next route, UI or production configuration changed.
+The new pure server-only builder has only `prepare()`, accepts independently
+pinned synthetic policy, and always returns **BLOCKED**. It embeds no keys or
+credentials and has no network, environment, database, signing or release path.
+
+Signature contract: UTF-8 JSON tuple `sales-signed-handoff-observation/v1`, ordered
+pinned context, ordered observer roster, canonical typed source text, observer ID,
+and observation time. Context binds version/project/source/range, run, prior root,
+generations, cutoff, immutable expiry, previous baseline and aliases. Each roster
+entry binds observer ID, separately authenticated proposed PostgreSQL LOGIN,
+independence group and SHA-256 of public SPKI bytes. Two distinct keys/groups/IDs/
+LOGINs and fresh ordered signatures must verify against ONE captured snapshot.
+The private packet includes that context/roster/source, derived v234 binding,
+exact manifest/payload TEXT, payload SHA-256 and signed observations. Monetary SQL
+text is never parsed into JS floating point. Source/manifest/mapping/warehouse
+hashes use existing contracts. Packet digest hashes exact UTF-8 packet text;
+SQL binding digest separately hashes PostgreSQL `jsonb::text`. These are distinct
+contracts, explicitly checked by the new disposable test. Packets contain private
+values/signatures: never log, persist as artifacts, or serve through UI/API.
+
+Regression coverage adds tampered/substituted signatures, keys, reviewer mapping,
+duplicate/nonindependent/stale observers, project/source/range/root/generation/
+expiry/alias/cents/cutoff changes, correctly signed stale/unmapped source, mutable
+caller substitution and cancellation. The native addition compares complete
+catalog/rows/sequences before any authority registration after preparation
+rejections, then requires actual ephemeral SCRAM LOGIN receipts over identical
+protected packet/binding bytes, rejects changed SQL packets/bindings and the
+unauthorized caller, checks immutable receipt retry, and rehearses v234 promotion
+and concurrent requests under rollback. Existing native late cancellation,
+expiry, stale-generation, ACL/RLS, dimensions/facts/three-MV/history/sequence/default
+ID and restore regressions remain mandatory. Native assertions are **NOT locally
+proven**; see acceptance blocker below.
+
+**Exact missing owner-only policy:** an approved historical genesis/receipt format
+and transition from JS `sales-prior-receipt/v1` to SQL
+`sales-release-receipt/v234`; independently provisioned public-key fingerprints →
+authenticated reviewer LOGINs/independence groups; and an authenticated attestor
+that verifies this signed packet and pins its bytes, root, generation and absolute
+expiry before registering any SQL authority/receipt. Existing SQL authenticates
+LOGINs and protected binding equality, but does not verify Ed25519 or enforce the
+proposed fingerprint→LOGIN mapping. This patch deliberately does not install that
+missing service/policy or reinterpret a synthetic receipt as accepted real prior.
+A synthetic packet plus fixture owner registration is NOT a production trust bridge.
+`release()`/`refresh()` still throw; Edge/Next POST stay 503 and manual refresh stays
+disabled. All SQL remains rollback-default NOT APPLIED.
+
+Local verification (2026-11-05): `npm ci --prefix web` PASS; focused hermetic
+capture/handoff/rollback tests 3/3 PASS, zero fail/skip; existing prepared capture,
+provenance, cutover and release regressions 51/51 PASS, zero fail/skip; TypeScript
+PASS. Full `npm run check` FAILED in sandbox (native socket/runtime capabilities).
+Direct native PG16.15 test reproduces `could not bind Unix address ... Operation
+not permitted` / `FATAL: could not create any Unix-domain sockets`, before the new
+SQL assertions run. Full-suite runtime tests also cannot create protected
+`.agents/runtime`. No bypass, substitute DB or skip was added. Optimized Next.js production build
+PASS; `git diff --check` PASS. These separate checks do not replace full native
+outer acceptance.
+
+**BLOCKED for native acceptance/publication; PREPARE ONLY / NOT READY FOR GATE /
+NOT RELEASED.** Trusted outer runner must run the final changed files through full
+native PG16 verification with zero fail/skip and independent review before its
+same-PR expected-SHA handoff. No new published SHA/job/test receipt is claimed here;
+exact-published-SHA PG17 and Vercel are subsequent independent gates.
