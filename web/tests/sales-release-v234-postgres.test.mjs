@@ -5,9 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { deriveSalesProvenance } from '../../supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs';
-import { prepareSalesRecovery } from '../../supabase/functions/sync-google-sheet/prepared-sales-recovery.mjs';
-import { SPREADSHEET_ID } from '../../supabase/functions/sync-google-sheet/google-sheet-reader.mjs';
+import { canonicalSalesSourceBytes, verifyPreparedSalesProvenance } from '../../supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs';
+import { syntheticCaptureCustodian } from './fixtures/sales-capture-contract.mjs';
 import { catalogSQL as rehearsalCatalogSQL } from './fixtures/sales-rehearsal-catalog.mjs';
 
 const catalogSQL = rehearsalCatalogSQL.replaceAll("'sales_rehearsal_private'", "'sales_release_v234_private'");
@@ -32,11 +31,55 @@ const parseError = (result, state, message) => {
 const header = ['', '', '', '', '', 'Обліковий день', 'Зі складу', 'Бренд', 'Власність', 'Доставка', 'Тип замовлення', 'Сума зі знижкою, грн.', 'Чеків', 'Націнка, грн.'];
 const payload = () => ({ range: "'Данние короткі'!A1:N1000", majorDimension: 'ROWS', values: [header,
   ['', '', '', '', '', '2026-10-25', 'Synthetic alias', 'Historical fixture', 'Owned', 'Заклад', 'Sale', '90071992547409.91', '1', '-0.03'],
-  ['', '', '', '', '', '2026-10-26', 'Synthetic alias', 'Rebrand fixture', 'Owned', 'Заклад', 'Sale', '0.10', '2', '0.01'],
+  [null, '', 2026, 'e\u0301', '', '2026-10-26', 'Synthetic alias', 'Rebrand fixture', 'Owned', 'Заклад', 'Sale', 0.10, 2, 0.01],
   ['', '', '', '', '', '2026-10-26', 'Synthetic alias', 'Rebrand fixture', 'Owned', 'Заклад', 'Sale', '0.10', '1', '0.00']
 ] });
 const aliases = [['Synthetic alias', 'Synthetic location']];
 const previous = { rawRows: 1, minDate: '2026-10-25', maxDate: '2026-10-25' };
+const rejectSyntheticPrior = (provenance, receiptSha256, now) => assert.rejects(verifyPreparedSalesProvenance({
+  now, trustedContext: { priorReceiptSha256:receiptSha256, prior: {
+    kind:'atomic-accepted/v1',runId:'11111111-1111-4111-8111-111111111111',generation:'0',
+    sourceSha256:provenance.sourceSha256,warehouseSha256:provenance.warehouseSha256,
+    canonicalRowsJson:provenance.canonicalRowsJson,rawRows:provenance.rawRows,
+    minDate:provenance.minDate,maxDate:provenance.maxDate
+  } }
+}),/SALES_PROVENANCE_PRIOR_RECEIPT/);
+const captureDefects = (today, abortBody = new AbortController()) => [
+  [()=>{},{missingAuth:true},/SALES_CAPTURE_FAILED/],
+  [()=>{},{status:401},/SALES_CAPTURE_FAILED/],
+  [()=>{},{abortBody,signal:abortBody.signal},/SALES_CAPTURE_ABORTED/],
+  [p=>{p.values[2][11]='0.001';},{},/SALES_CAPTURE_FAILED/],
+  [p=>{p.values[2][13]='-0.001';},{},/SALES_CAPTURE_FAILED/],
+  [p=>{p.values[2][12]='1.5';},{},/SALES_CAPTURE_FAILED/],
+  [p=>{p.values[2][11]=null;},{},/SALES_CAPTURE_FAILED/],
+  [p=>{p.values[2][6]='Unmapped alias';},{},/UNRESOLVED_ALIAS/],
+  [p=>{p.values[2][5]=p.values[3][5]='2026-10-25';},{},/STALE_OR_PARTIAL_CUTOFF/],
+  [p=>{p.values.splice(1);},{},/SALES_CAPTURE_FAILED/],
+  [p=>{p.values[2][5]=today;},{},/INCOMPLETE_OR_FUTURE_DATE/],
+  [()=>{},{rawBody:JSON.stringify(payload()).replace('"90071992547409.91"','0.10000000000000001')},/SALES_CAPTURE_FAILED/]
+];
+
+test('hermetic private capture contract uses signed immutable bytes and exact cents before SQL',async()=>{
+  const custodian=await syntheticCaptureCustodian(),now=new Date('2026-10-27T12:00:00Z');
+  const p=payload(),observation=await custodian.observe(p),signature=await custodian.seal(observation);
+  const options={aliases,previous,now};
+  const {provenance,prepared}=await custodian.contract(observation,signature,options);
+  assert.equal(hash(canonicalSalesSourceBytes(observation.capture)),provenance.sourceSha256);
+  assert.equal(hash(prepared.manifestJson),provenance.manifestSha256);
+  assert.match(prepared.manifestJson,/"revenue":90071992547410\.11,"checks":4,"markup":-0\.02/);
+  assert.equal(provenance.maxDate,'2026-10-26');
+  await rejectSyntheticPrior(provenance,hash('OFFLINE SYNTHETIC GENESIS ONLY'),now);
+  p.values[1][11]='1.00';
+  const changed=await custodian.observe(p);
+  await assert.rejects(custodian.contract(changed,signature,options),/CAPTURE_SIGNATURE_MISMATCH/);
+  for(const [mutate,captureOptions,error] of captureDefects('2026-10-27')) {
+    const p=payload();mutate(p);
+    await assert.rejects((async()=>{
+      const o=await custodian.observe(p,captureOptions);
+      return custodian.contract(o,await custodian.seal(o),options);
+    })(),error);
+  }
+});
 
 // This is a NEW bounded reconstruction, not recovery of the absent failed files.
 // No native skip, socket substitute, single-user acceptance, inherited PG URL,
@@ -168,17 +211,23 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
   };
   const both = (c, a) => reviewers.map(role => sql(c,
     `select sales_attestor_private.review('${a.run}',${j(a.binding)});`, role));
-  // No real Google I/O: typed fixture uses the exact same canonical derivation.
+  // One immutable fake-OAuth capture crosses both existing prepared boundaries.
+  // The custodian signature is TEST ONLY, never a production source authority.
+  const custodian = await syntheticCaptureCustodian();
   const clock = new Date();
   const today = new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Kyiv',year:'numeric',month:'2-digit',day:'2-digit' }).format(clock);
   const cutoff = new Date(Date.parse(`${today}T00:00:00Z`)-86400000).toISOString().slice(0,10);
-  const candidate = async (c, change = () => {}, omitAuthority = false, changeSource = () => {}) => {
+  const candidate = async (c, change = () => {}, omitAuthority = false, changeSource = () => {}, captureOptions = {}) => {
+    const { expiresInSeconds = 3600, ...observationOptions } = captureOptions;
     const source = payload(); source.values[2][5]=cutoff; source.values[3][5]=cutoff; changeSource(source);
-    const capture = { spreadsheetId: SPREADSHEET_ID,
-      requestedRange:"'Данние короткі'!A:N",returnedRange:source.range,majorDimension:'ROWS',
-      valueRenderOption:'UNFORMATTED_VALUE',dateTimeRenderOption:'SERIAL_NUMBER',values:source.values };
-    const provenance = await deriveSalesProvenance({capture,aliases,previous,now:clock});
-    const prepared = prepareSalesRecovery(source.values,{previous,now:clock});
+    const observation = await custodian.observe(source, observationOptions);
+    const signature = await custodian.seal(observation);
+    const { provenance, prepared } = await custodian.contract(observation, signature, { aliases, previous, now:clock });
+    assert.equal(hash(observation.copyResponseBodyBytes()), observation.responseBodySha256);
+    assert.equal(hash(canonicalSalesSourceBytes(observation.capture)), provenance.sourceSha256);
+    assert.equal(hash(prepared.manifestJson), provenance.manifestSha256);
+    assert.equal(hash(JSON.stringify(['sales-alias-resolution/v1', aliases])), provenance.mappingSha256);
+    assert.equal(hash(JSON.stringify(['sales-warehouse-cents/v1', JSON.parse(provenance.canonicalRowsJson)])), provenance.warehouseSha256);
     const gen = sql(c,'select version from bi_import_private.generation;');
     const priorHash = sql(c,`select receipt_sha256 from sales_release_v234_private.history where generation=${gen};`) || hash('OFFLINE SYNTHETIC GENESIS ONLY');
     sql(c,`insert into sales_release_v234_private.roots select ${q(priorHash)},${gen},
@@ -191,10 +240,10 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       raw_rows:String(provenance.rawRows),min_date:provenance.minDate,max_date:provenance.maxDate,
       manifest_sha256:provenance.manifestSha256,warehouse_sha256:provenance.warehouseSha256,
       mapping_sha256:provenance.mappingSha256,canonical_rows:JSON.parse(provenance.canonicalRowsJson),aliases};
-    const a = {run,binding,manifest:prepared.manifestJson,payload:prepared.batches[0].json};
+    const a = {run,binding,manifest:prepared.manifestJson,payload:prepared.batches[0].json,observation,signature};
     change(a);
     sql(c,`insert into sales_attestor_private.targets values('${run}',${j(binding)},
-      encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'),clock_timestamp()+interval '1 hour');`);
+      encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'),clock_timestamp()+${Number(expiresInSeconds)}*interval '1 second');`);
     if (!omitAuthority) sql(c,`insert into sales_release_v234_private.authorities values('${run}',${q(priorHash)},${q(a.manifest)},
       ${q(a.payload)}::jsonb,encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'));`);
     return a;
@@ -256,6 +305,31 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       assert.deepEqual(rows(source).filter(row=>!row.name.startsWith('sales_release_v234_private.')),before.rows);
       guards(source);
     });
+    await t.test('OAuth/capture/source defects reject before any SQL authority, staging, dimension or sequence write',async()=>{
+      const noop=()=>{};
+      for(const [mutate,options,error] of captureDefects(today)) {
+        const before=exact(source);
+        await assert.rejects(candidate(source,noop,false,mutate,options),error);
+        assert.deepEqual(exact(source),before,'Rejected capture reached SQL, including authority registration');
+      }
+    });
+    await t.test('signed capture snapshot cannot be replaced, mutated or mixed with a later observation',async()=>{
+      const p=payload();p.values[2][5]=p.values[3][5]=cutoff;
+      const observation=await custodian.observe(p),signature=await custodian.seal(observation);
+      const before=exact(source);
+      assert.throws(()=>{observation.capture.values[1][11]='9.99';},TypeError);
+      const bytes=observation.copyResponseBodyBytes();bytes.fill(0);
+      p.values[1][11]='9.99'; // Original response owner changes after signing.
+      const unchanged=await custodian.contract(observation,signature,{aliases,previous,now:clock});
+      assert.equal(unchanged.provenance.sourceSha256,observation.sourceSha256);
+      const later=await custodian.observe(p);
+      await assert.rejects(custodian.contract(later,signature,{aliases,previous,now:clock}),
+        /OFFLINE_SYNTHETIC_CAPTURE_SIGNATURE_MISMATCH/);
+      const changed=structuredClone(observation.capture);changed.values[1][11]='9.99';
+      await assert.rejects(custodian.contract({...observation,capture:changed},signature,{aliases,previous,now:clock}),
+        /OFFLINE_SYNTHETIC_CAPTURE_SIGNATURE_MISMATCH/);
+      assert.deepEqual(exact(source),before);
+    });
     let accepted;
     await t.test('missing authority and independent reviews stop before import_runs, staging or sequences',async()=>{
       const missing=await candidate(source,()=>{},true);
@@ -268,11 +342,22 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       assert.equal(sql(source,'select count(*) from public.import_runs;'),'0');
       assert.equal(sql(source,'select count(*) from sales_release_v234_private.staged;'),'0');
     });
-    await t.test('single transaction preserves exact cents, all three MVs and immutable idempotent receipt',()=>{
+    await t.test('single transaction preserves exact cents, all three MVs and immutable idempotent receipt',async()=>{
       const seq=rows(source).filter(row=>row.kind==='S');
       const result=JSON.parse(sql(source,commit(accepted.run),caller));
       assert.equal(result.generation,'1');
-      assert.deepEqual(JSON.parse(sql(source,'select sales_release_v234_private.warehouse_rows();')),accepted.binding.canonical_rows);
+      for(const field of ['source_sha256','manifest_sha256','warehouse_sha256','mapping_sha256'])
+        assert.equal(result[field],accepted.binding[field],`SQL receipt changed captured ${field}`);
+      const readback=JSON.parse(sql(source,'select sales_release_v234_private.warehouse_rows();'));
+      assert.deepEqual(readback,accepted.binding.canonical_rows);
+      assert.equal(hash(JSON.stringify(['sales-warehouse-cents/v1',readback])),accepted.binding.warehouse_sha256);
+      assert.equal(sql(source,`select source_cutoff_date from public.import_runs where id='${accepted.run}';`),cutoff);
+      assert.deepEqual(JSON.parse(sql(source,`select details->'preview_v234' from public.import_runs where id='${accepted.run}';`)),result);
+      assert.equal(sql(source,`select h.receipt_sha256=(i.details->>'receipt_sha256') from
+        sales_release_v234_private.history h join public.import_runs i on i.id=h.run_id where h.run_id='${accepted.run}';`),'t');
+      const {provenance}=await custodian.contract(accepted.observation,accepted.signature,{aliases,previous,now:clock});
+      await rejectSyntheticPrior(provenance,sql(source,`select receipt_sha256 from
+        sales_release_v234_private.history where run_id='${accepted.run}';`),clock);
       for(const name of ['fact_sales_daily','bi_sales_flat_mv','agg_sales_monthly','agg_sales_weekly'])
         assert.equal(sql(source,`select sum(revenue)::text||'|'||sum(checks)::text||'|'||sum(markup)::text from public.${name};`),
           '90071992547410.11|4.00|-0.02');
@@ -288,6 +373,20 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
         assert.deepEqual(exact(source),before);
       }
       guards(source);
+    });
+    await t.test('signed prepared manifest differs from DB authority and delayed reviewed replay both reject before first write',async()=>{
+      const mismatch=await candidate(source,a=>{a.manifest=a.manifest.replace('90071992547410.11','90071992547410.12');});
+      both(source,mismatch);deny(source,mismatch,'SALES_RELEASE_V234_MANIFEST');
+      const delayed=await candidate(source,()=>{},false,()=>{},{expiresInSeconds:2});
+      both(source,delayed);
+      sql(source,`select pg_sleep(greatest(0,extract(epoch from (expires_at-clock_timestamp())))+0.01)
+        from sales_attestor_private.targets where run_id='${delayed.run}';`);
+      deny(source,delayed,'SALES_RELEASE_V234_EXPIRED');
+      const identity=await candidate(source);both(source,identity);
+      const before=exact(source);
+      denied(source,commit(identity.run),reviewers[0], '42501');
+      denied(source,commit(identity.run),undefined,'55000','SALES_RELEASE_V234_DISPOSABLE_LOGIN_REQUIRED');
+      assert.deepEqual(exact(source),before);
     });
     await t.test('RLS denies a structurally valid insert and the same valid UPDATE succeeds only under a rolled-back policy',()=>{
       const f=JSON.parse(sql(source,'select to_jsonb(f) from public.fact_sales_daily f order by id limit 1;'));

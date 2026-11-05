@@ -513,3 +513,59 @@ READY FOR REVIEW стосується **preview revision**, після trusted c
 повний production audit acceptance залишається INCOMPLETE без parity/browser proofs.
 Owner action зараз **NONE**; жодного production approval не запитується для підготовки revision. Trusted workflow виконує remote handoff після commit/push і checks;
 preview source changes та limitations не є завершенням production audit.
+
+## D243 — private capture → disposable v234 contract (PREPARE ONLY)
+
+Initial local HEAD independently matched trusted outer baseline
+`8c5ea13c323bd358197198194d3606776496dfe3`; checkout was clean. No inner remote
+authentication/DNS check, nested job, commit, push or PR creation was attempted.
+
+The existing native `sales-release-v234-postgres.test.mjs` now obtains every
+candidate through the prepared typed Values API capture, using a hermetic OAuth
+endpoint that verifies the ephemeral RS256 JWT, pinned account/scope/range and
+returned bearer token. The test-only custodian signs the canonical captured bytes
+with an ephemeral Ed25519 key. Preparation and provenance consume that same frozen
+capture through the existing canonical typed projection, preserving numeric tags,
+Unicode, aliases and exact cents without parsing the monetary SQL payload into JS
+numbers. No production bridge or runtime change was necessary.
+
+The disposable native test asserts source/manifest/mapping/warehouse SHA-256 parity,
+SQL receipt fields, canonical fact readback, source cutoff and receipt/history
+agreement. Existing protected dimensions, all three MV totals, independent SCRAM
+LOGIN reviewers, immutable retry, generation/sequence/default-ID parity, ISO-year
+boundary rejection, transactional rollback and native protected dump/restore checks
+remain mandatory. Capture failures additionally compare the complete SQL catalog,
+rows and sequences before/after, including synthetic authority registration.
+Missing auth, Google 401, deterministic mid-stream abort, numeric precision loss,
+sub-cent amounts, fractional checks, missing metrics, unmapped alias, stale/empty/
+current-day source, signed snapshot replacement, mismatched manifest and delayed
+review replay must fail before promotion writes. Only synthetic fixture authority
+rows are seeded; production prior receipts and historical genesis are never invented.
+
+Local verification on 2026-11-05: `npm ci --prefix web` passed; the selected hermetic
+capture and rollback-default tests passed (2/2, zero fail/skip); TypeScript and the
+optimized Next.js build passed separately. Existing prepared capture/provenance/
+cutover/release tests also passed (51/51, zero fail/skip). Full `npm run check` was attempted and
+failed under sandbox capabilities. The concrete native blocker is PostgreSQL
+16.15 startup: `could not bind Unix address ... Operation not permitted`, followed
+by `FATAL: could not create any Unix-domain sockets`. Other full-suite tests also
+cannot create the sandbox-protected `.agents/runtime` directory. No socket bypass,
+single-user substitute, test skip or weakened assertion was introduced.
+
+**BLOCKED for native acceptance / publication:** the trusted outer runner must run
+the unchanged mandatory full check on native PG16 and inspect these exact changes
+before any branch publication. This note claims no D243 native parity PASS. After
+publication, exact-published-SHA PG17 and Vercel remain independent next gates.
+OAuth signatures here authenticate only synthetic test bytes; they do not grant
+production source-attestor authority. One exact incompatible root binding remains:
+the JS verifier requires the `sales-prior-receipt/v1` tuple digest, whereas SQL
+history uses `sales-release-receipt/v234` with SQL binding/result and a synthetic
+prior. The regression rejects the synthetic genesis (and, in the mandatory native
+phase, the SQL receipt) as `SALES_PROVENANCE_PRIOR_RECEIPT`, even if wrapped in a
+valid-looking `atomic-accepted/v1` record. No translation grants production trust.
+Owner-approved historical genesis, independent
+production attestors, source credentials, real protected backup/rollback, compatible
+SQL/Edge cutover, source→warehouse→RPC→UI and authenticated desktop/mobile QA remain
+future gates. Prepared `release()`/`refresh()` still throw, active Edge/Next POST
+remain 503 and refresh UI remains disabled. SQL stays rollback-default NOT APPLIED;
+no real source fetch, database migration, backup, import or business write occurred.
