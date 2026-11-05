@@ -1,0 +1,17 @@
+# D254 / issue #43 / PR #44 — D253 outer acceptance receipt, exact-SHA gate pending
+
+**PREPARE ONLY. NOT READY FOR GATE / NOT RELEASED.**
+
+Verified on 2026-11-05 independently of the Codex inner sandbox. Existing PR #44 is OPEN and UNMERGED; branch `astra/issue-43-40107435112`. Starting accepted D252 SHA `52125cb25db6f54b3b64b147f1b95176465c0c52`; Astra-published D253 candidate `ff6e387bbed9c2ca282bb709fed3b4f5fb4b3fa2`.
+
+## Trusted D253 outer runner evidence
+- [Astra Actions #42003422128](https://github.com/adduakiev/mystoriya-bi/actions/runs/42003422128), outer job [127164103580](https://github.com/adduakiev/mystoriya-bi/actions/runs/42003422128/job/127164103580), **completed SUCCESS**. Independently inspected the actual external job log, not the inner agent handoff.
+- Real disposable **PostgreSQL 16.15**, full `npm run check`: **622 tests / 622 PASS / 0 FAIL / 0 SKIP**, TypeScript and optimized Next.js build PASS. External `git diff --check` PASS. The inner Codex environment's 10 file-level failures due to blocked PostgreSQL/socket/runtime do **not** override the trusted outer verification.
+- GitHub comparison of D252 → `ff6e387bbed9c2ca282bb709fed3b4f5fb4b3fa2`: exactly **one commit / three added paths**: `supabase/functions/sync-google-sheet/prepared-sales-edge-preflight.mjs`, `web/tests/prepared-sales-edge-preflight.test.mjs` and `docs/audit/2026-10-24/SALES-EDGE-V9-D253-OFFLINE-HANDOFF.md`. Reviewed the actual files; verifier is standalone, unreferenced, immutable metadata only, with no I/O, import edge, credentials or runtime authorization. Runtime Edge, Next POST, UI, SQL migrations and workflows were not changed.
+- Vercel Preview `dpl_Fy7zjoTSjC8PxRTajEc6gQFVZB4i` independently **READY** and pinned to `ff6e387bbed9c2ca282bb709fed3b4f5fb4b3fa2`, non-production.
+- At inspection no independent exact-published-SHA **PG16 + PG17** Actions existed for `ff6e387bbed9c2ca282bb709fed3b4f5fb4b3fa2` (Astra GITHUB_TOKEN push did not trigger the push workflow). This documentation-only receipt is the single intentional expected-HEAD, non-force PR-branch push to trigger the **mandatory** exact-SHA PostgreSQL 16→17 workflow; **do not call the new SHA accepted until both external logs, full counts, and Vercel are independently checked**. This is a required gate, not an additional Astra task.
+
+## Safety and real-source boundary
+Production Edge **installed v9** was previously verified read-only as unsafe: unauthenticated Google gviz and legacy `sync_sales_batch`/`finalize_sales_snapshot`. Repository's different candidate remains 503-sealed; manual update is not a view refresh. The previously observed warehouse held 46,286 facts through 2026-10-26; this receipt does not claim fresh Production measurements. Offline metadata tests and synthetic native SQL do **not** establish real service credentials, owner-approved genesis/attestor-to-authenticated LOGIN, protected Production backup/restore, Edge cutover, or private-source→warehouse→RPC→rendered UI parity and authorized desktop/mobile QA. Every such gate remains closed. No Production migration, Edge deploy, source import/trigger, old batch/finalize, secret creation, PR merge, schedule or unrelated writes were performed.
+
+**Next:** independently accept the documentation-only final exact SHA on both native PostgreSQL majors and Vercel, then select only ONE next reversible Sales Recovery gate. No duplicate Astra workflow while the final-SHA gate is pending.
