@@ -141,3 +141,11 @@ check and whitespace checks, then verify remote drift and publish only to the
 same PR #44 if accepted. It must supply the actual final commit SHA and check
 receipts. Codex leaves the candidate uncommitted at the baseline HEAD above;
 there is no new final commit SHA, live PASS or release evidence to report.
+
+## D263 external handoff update — independent runner evidence (2026-11-06 UTC)
+
+After the Codex sandbox returned its uncommitted candidate, the trusted Astra outer runner committed the three D262 paths to the **same** open PR #44 as `85a2218f59518d4556de4c268f7dbdc34cd66ea5`. Independent comparison with previous `701c77ea9fefaaac5a894737e8369e1816c5301c` confirms one commit and exactly these three additions, with no import, SQL, UI or deployed-function changes.
+
+Verified [outer Astra workflow #42122821249 / job #127579286446](https://github.com/adduakiev/mystoriya-bi/actions/runs/42122821249/job/127579286446) from its actual native log: PostgreSQL **16.15**, `npm run check` **637/637 tests PASS, 0 fail/skip**, web TypeScript and optimized Next build PASS, whitespace check PASS, followed by the commit/push. This OUTER PG16 result is distinct from the inner sandbox's network/socket limitations. Standalone Edge TypeScript/focused 57/57 were confirmed in the inner preparation stage; actual Edge runtime has not been tested. Vercel [Preview](https://vercel.com/adduakiev-9572s-projects/mystoriya-bi/BMo8zBwpzVQ5V7BTzoccNNjmqq94) was independently READY at the tested code SHA, target null, not Production.
+
+**Important remaining gate:** the above PG16 runner tested the candidate worktree before its commit; no fresh **post-commit exact-SHA dual PostgreSQL 16/17** acceptance has been observed for D262. The existing `.github/workflows/sales-pr44-native.yml` provides exact-pushed-SHA PG16 and sequential PG17 native acceptance on pushes to the existing PR branch. A trusted reviewer must require the completed, independently read logs on the actual **final** PR HEAD before reporting offline acceptance. This documentation-only receipt does **not** release or authorize deploying/invoking the isolated Edge canary or importing sales; those need separately authorized gates. Existing Production `sync-google-sheet` v9 remains untouched.
