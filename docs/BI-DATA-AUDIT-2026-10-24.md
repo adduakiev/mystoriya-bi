@@ -641,3 +641,111 @@ NOT RELEASED.** Trusted outer runner must run the final changed files through fu
 native PG16 verification with zero fail/skip and independent review before its
 same-PR expected-SHA handoff. No new published SHA/job/test receipt is claimed here;
 exact-published-SHA PG17 and Vercel are subsequent independent gates.
+
+## D250 — recovered D248 verifier + negative-test correction (OFFLINE PREPARE ONLY)
+
+Initial local HEAD was exactly `c8b59c87bc5104e00d8d5361aa4d0b9591fb1077`
+with a clean worktree on `astra/issue-43-40107435112`, matching the authoritative
+outer PR #44 OPEN/unmerged/branch/SHA gate supplied with D250. No competing Astra
+process was visible in the sandbox; the outer gate owns remote/concurrency checks.
+WORKING was acknowledged before implementation. The supplied eight-hunk D248 diff
+passed `git apply --check` and was applied verbatim with `git apply`. All three
+pre-correction Git blob hashes matched exactly:
+
+- This note: `952521e781279f4ba0775974b9f189521fd4e0b1`.
+- Verifier: `6f1edadf49b38e925b7c4e0eb99af67846f3aa2f`.
+- v234 test: `89d47bf6b36c424de8ae22e8024dfc0e0a75d7f2`.
+
+Only those three paths change. The recovered verifier remains byte-for-byte
+unchanged. The sole mutant correction changes generation to `'3'` when it is
+already `'2'`, otherwise to `'2'`; the focused hermetic verifier fixture now uses
+base generation `'1'` / generation `'2'` to reproduce the reported native case.
+Every negative packet mutation in the verifier defect helpers has explicit
+pre-rejection assertions for byte difference and its named malformed condition,
+including lexical defects and authenticated/re-signed bad captures. Re-signed
+packets are checked again after signing; manual mixed-observation and substituted
+fingerprint packets also assert the intended change. Assertions print only defect
+labels, never packet contents. No other mutant was corrected, skipped or accepted,
+and no verifier check was weakened.
+
+No commit, push, remote check or new workflow was attempted; the trusted outer
+runner owns the same-branch expected-SHA handoff after its required gates.
+
+The new pure verifier does not import the handoff builder. Its separately supplied
+**synthetic-only** policy pins project/source/range, supported versions, run,
+prior root, generations, cutoff, expiry, baseline, aliases, immutable source digest
+and exact observer → public-SPKI fingerprint → independence group → proposed SQL
+LOGIN mapping. It checks raw packet SHA-256 and fatal UTF-8 decoding, strict ordered
+JSON/source roundtrips (including duplicate-key/escape/number/Unicode ambiguity),
+two distinct fresh Ed25519 observations, and independently derives the exact
+manifest, payload and source/mapping/warehouse digests from one copied capture.
+Packet flags, packet roster and transport digest confer no authority. It has no
+network, DB, environment, signing, storage or writer capability and returns only
+**BLOCKED**, including after valid verification. Private packet/signature/source/
+key material must never be logged, served or persisted as CI artifacts.
+
+The authenticated LOGIN input is explicitly a trusted connection read of
+`session_user` and `current_user` before role changes, not client metadata. The
+pure module cannot authenticate that connection itself. Its injected clock must
+likewise come from the independently trusted verifier, never packet/HTTP/client
+metadata. The disposable native regression reads those values over existing
+actual ephemeral SCRAM LOGINs,
+verifies before fixture target/authority registration, and compares SQL receipt
+LOGIN/group/binding/packet digest against independently pinned verifier output.
+It recomputes the SQL receipt digest and requires identical retry receipts.
+Tampered packets, mismatched keys/groups/LOGINs, replay from another run/root,
+stale/expired observations, invalid UTF-8, canonical ambiguities, mutable inputs
+and cancellation reject before first SQL write. Directly re-signed stale,
+unmapped and sub-cent captures test verifier derivation without relying on builder
+rejection. Complete catalog/rows/sequence snapshots cover rejected prewrites and
+existing rollback rehearsals of facts, dimensions, three MVs, history, RLS/ACL
+and IDs. These new native assertions remain unproven locally (blocker below).
+
+Exact current-run retries are intentionally immutable/idempotent, not a new
+authorization. This stateless offline verifier provides no consumed-token store;
+any future service must independently authenticate its connection, reload current
+generation/root/expiry and retain protected SQL replay checks. No service or real
+provisioning is installed here. **Owner-approved historical genesis/receipt format
+and independently provisioned fingerprint-to-LOGIN/independence policy remain
+BLOCKED.** A synthetic SQL target or receipt cannot establish either authority.
+
+D250 local verification on 2026-11-05 (sandbox receipts, not trusted OUTER
+native acceptance):
+
+- `npm ci --prefix web`: PASS (exit 0).
+- `node --test --test-isolation=none --test-reporter=tap --test-name-pattern='hermetic private|independent offline|sealed handoff|v234 draft' web/tests/sales-release-v234-postgres.test.mjs`:
+  **4/4 PASS, zero fail/skip**, including generation `'2'` negative inputs.
+- `npm run check`: **FAIL** (exit 1), 56 file-level results: 46 pass / 10 fail /
+  zero skips; execution stopped before TypeScript/build. Runtime tests include
+  `ENOENT` creating the sandbox-protected `.agents/runtime/`. These counts are
+  not the OUTER native test-count receipt.
+- Direct `node --test --test-isolation=none --test-reporter=tap web/tests/sales-release-v234-postgres.test.mjs`:
+  4 pass / 1 fail / zero skips. Native PG16.15 fails before SQL assertions:
+  `pg_ctl: EPERM`, `could not bind Unix address ... Operation not permitted`,
+  `FATAL: could not create any Unix-domain sockets` at 2026-11-05 07:53:16 UTC.
+  This is a Codex sandbox socket failure, **not an OUTER failure**.
+- Separate `cd web && node node_modules/typescript/bin/tsc --noEmit`: PASS
+  (exit 0); `cd web && node node_modules/next/dist/bin/next build`: PASS (exit 0).
+  These do not replace the failed full check or required OUTER acceptance.
+- `git diff --check`: PASS. Local path/hash/diff review confirms exactly the
+  three permitted paths and unchanged recovered verifier; independent OUTER
+  actual three-path review remains mandatory and is not claimed complete.
+
+Exact failing logs are preserved locally, outside tracked artifacts:
+`/tmp/d250-check.log` (SHA-256
+`ee9143b8c4bb90e254d15721f173ba6d51b5202578db760e138509f999f6ec39`)
+and `/tmp/d250-native-detail.log` (SHA-256
+`600b645e47f54569cccd8719102e021a866483a3e0f1d42b33922f9579101cc5`).
+The D250-provided prior OUTER receipt (615 total / 613 pass / 2 fail) describes
+the uncorrected generation no-op, not this working tree. No socket/permission
+bypass, substitute DB, test skip or weakened gate was added.
+
+**BLOCKED for native acceptance/publication; PREPARE ONLY / NOT READY FOR GATE /
+NOT RELEASED.** Full trusted OUTER native PG16 `npm run check` with zero fail/skip
+and independent actual three-path review must precede any publication to SAME PR
+#44 on the exact starting SHA with lease. Independent exact-published-SHA GitHub
+PG16 + PG17 and Vercel checks are separate mandatory subsequent gates. No new
+published SHA or OUTER success is claimed. Prepared `release()`/`refresh()` still
+throw, Edge/Next POST stay 503, manual refresh stays disabled, SQL remains
+rollback-default NOT APPLIED. No active route, SQL, workflow, UI, credential,
+scheduler, source fetch or production data changed.

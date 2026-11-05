@@ -7,6 +7,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { canonicalSalesSourceBytes, verifyPreparedSalesProvenance } from '../../supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs';
 import { createPreparedSalesAttestorHandoff } from '../../supabase/functions/sync-google-sheet/prepared-sales-attestor-handoff.mjs';
+import { createPreparedSalesAttestorVerifier } from '../../supabase/functions/sync-google-sheet/prepared-sales-attestor-verify.mjs';
 import { syntheticCaptureCustodian } from './fixtures/sales-capture-contract.mjs';
 import { catalogSQL as rehearsalCatalogSQL } from './fixtures/sales-rehearsal-catalog.mjs';
 
@@ -105,8 +106,181 @@ async function signedHandoff(now, overrides = {}, mutateSource = () => {}) {
     const bytes=new TextEncoder().encode(JSON.stringify(['sales-signed-handoff-observation/v1',context,roster,source,o.id,observedAt]));
     return {id:o.id,observedAt,signatureHex:Buffer.from(await crypto.subtle.sign('Ed25519',keys[i].privateKey,bytes)).toString('hex')};
   }));
-  return {context,observers,request:{capture,observations,now}};
+  return {context,observers,request:{capture,observations,now},
+    // Fixture-only signing oracle for independently testing authenticated BAD
+    // packets the builder refuses to produce. Never export/log private keys.
+    async signPacket(p) {
+      for(let i=0;i<2;i++) {
+        const o=p[8][i],bytes=new TextEncoder().encode(JSON.stringify([
+          'sales-signed-handoff-observation/v1',p[1],p[2],p[3],o.id,o.observedAt]));
+        o.signatureHex=Buffer.from(await crypto.subtle.sign('Ed25519',keys[i].privateKey,bytes)).toString('hex');
+      }
+      const packetJson=JSON.stringify(p);
+      return {packetJson,packetSha256:hash(packetJson)};
+    }};
 }
+
+// Pin from the fixture custodian/configuration, NEVER from the packet's roster,
+// binding, verified flag or builder result. No real genesis/provisioning is implied.
+async function verifierPolicy(f) {
+  return {kind:'sales-attestor-verifier/v1/OFFLINE_SYNTHETIC_ONLY',context:structuredClone(f.context),
+    sourceSha256:hash(canonicalSalesSourceBytes(f.request.capture)),
+    actors:await Promise.all(f.observers.map(async a=>({...a,
+      fingerprint:hash(Buffer.from(await crypto.subtle.exportKey('spki',a.publicKey)))})))};
+}
+const login = role => ({sessionUser:role,currentUser:role});
+const verifyInput = (packet, now) => ({packetBytes:new TextEncoder().encode(packet.packetJson),packetSha256:packet.packetSha256,now});
+// Assert before invoking the verifier, without printing private packet contents.
+// Each predicate proves the intended defect independently of verifier rejection.
+function assertNegativePacket(original, text, reason, malformed) {
+  assert.ok(!Buffer.from(text).equals(Buffer.from(original)), `${reason}: no-op negative packet`);
+  assert.ok(malformed, `${reason}: intended defect absent`);
+}
+function verifierDefects(packet) {
+  const original=JSON.parse(packet.packetJson),texts=[];
+  for(const [reason,mutate,malformed] of [
+    ['unsupported version',p=>{p[0]='sales-attestor-packet/v2';},p=>p[0]!=='sales-attestor-packet/v1'],
+    ['extra packet field',p=>{p.push({verified:true});},p=>p.length!==9],
+    ['wrong project',p=>{p[1].project='production';},p=>p[1].project!=='OFFLINE_SYNTHETIC_ONLY'],
+    ['wrong source',p=>{p[1].source+='x';},p=>p[1].source!==original[1].source],
+    ['wrong range',p=>{p[1].range+=' ';},p=>p[1].range!==original[1].range],
+    ['wrong run',p=>{p[1].runId=crypto.randomUUID();},p=>p[1].runId!==original[1].runId],
+    ['wrong prior root',p=>{p[1].priorReceiptSha256='a'.repeat(64);},p=>p[1].priorReceiptSha256!==original[1].priorReceiptSha256],
+    ['wrong generation',p=>{p[1].generation=p[1].generation==='2'?'3':'2';},
+      p=>p[1].generation!==original[1].generation && BigInt(p[1].generation)!==BigInt(p[1].baseGeneration)+1n],
+    ['noncanonical base generation',p=>{p[1].baseGeneration='01';},p=>!/^(0|[1-9]\d*)$/.test(p[1].baseGeneration)],
+    ['wrong cutoff',p=>{p[1].cutoff='2026-10-25';},p=>p[1].cutoff!==original[1].cutoff],
+    ['wrong alias mapping',p=>{p[1].aliases[0][1]+='x';},p=>p[1].aliases[0][1]!==original[1].aliases[0][1]],
+    ['wrong expiry',p=>{p[1].expiresAt='2099-01-01T00:00:00.000Z';},p=>p[1].expiresAt!==original[1].expiresAt],
+    ['unauthorized LOGIN',p=>{p[2][0].login='sales_release_v234_caller';},p=>!reviewers.includes(p[2][0].login)],
+    ['swapped LOGIN mapping',p=>{[p[2][0].login,p[2][1].login]=[p[2][1].login,p[2][0].login];},
+      p=>p[2].every((a,i)=>a.login!==original[2][i].login)],
+    ['case-confusable LOGIN',p=>{p[2][0].login='Sales_reviewer_a';},p=>!reviewers.includes(p[2][0].login)],
+    ['Unicode-confusable observer',p=>{p[2][0].id='observer-\u0430';},p=>!/^observer-[ab]$/.test(p[2][0].id)],
+    ['duplicate fingerprint',p=>{p[2][1].fingerprint=p[2][0].fingerprint;},p=>p[2][1].fingerprint===p[2][0].fingerprint],
+    ['duplicate independence group',p=>{p[2][1].independenceGroup=p[2][0].independenceGroup;},
+      p=>p[2][1].independenceGroup===p[2][0].independenceGroup],
+    ['changed source cents',p=>{p[3]=p[3].replace('90071992547409.91','90071992547409.92');},
+      p=>JSON.parse(p[3])[8][1][11][1]==='90071992547409.92'],
+    ['normalized source Unicode',p=>{p[3]=p[3].replace('e\u0301','é');},p=>JSON.parse(p[3])[8][2][3][1]==='é'],
+    ['wrong source digest',p=>{p[4].source_sha256='a'.repeat(64);},p=>p[4].source_sha256!==hash(p[3])],
+    ['wrong mapping digest',p=>{p[4].mapping_sha256='a'.repeat(64);},p=>p[4].mapping_sha256!==original[4].mapping_sha256],
+    ['wrong warehouse digest',p=>{p[4].warehouse_sha256='a'.repeat(64);},p=>p[4].warehouse_sha256!==original[4].warehouse_sha256],
+    ['wrong canonical cents',p=>{p[4].canonical_rows[0][7]='1';},p=>p[4].canonical_rows[0][7]!==original[4].canonical_rows[0][7]],
+    ['changed manifest bytes',p=>{p[5]+=' ';},p=>p[5]!==original[5] && p[5].endsWith(' ')],
+    ['changed payload with matching transport digest',p=>{p[6]=p[6].replace('90071992547409.91','90071992547409.92');p[7]=hash(p[6]);},
+      p=>p[6]!==original[6] && p[6].includes('90071992547409.92') && p[7]===hash(p[6])],
+    ['wrong payload digest',p=>{p[7]='a'.repeat(64);},p=>p[7]!==hash(p[6])],
+    ['substituted signature',p=>{p[8][0].signatureHex='a'.repeat(128);},p=>p[8][0].signatureHex!==original[8][0].signatureHex],
+    ['duplicate observation',p=>{p[8][1]=p[8][0];},p=>p[8][1].id===p[8][0].id],
+    ['reversed observations',p=>{[p[8][0],p[8][1]]=[p[8][1],p[8][0]];},p=>p[8].every((o,i)=>o.id!==p[2][i].id)],
+    ['stale observation',p=>{p[8][0].observedAt='2026-01-01T00:00:00.000Z';},
+      p=>Date.parse(original[8][0].observedAt)-Date.parse(p[8][0].observedAt)>15*60*1000],
+    ['copied signature',p=>{p[8][1].signatureHex=p[8][0].signatureHex;},p=>p[8][1].signatureHex===p[8][0].signatureHex],
+    ['untrusted verified flag',p=>{p[8][0].verified=true;},p=>Object.hasOwn(p[8][0],'verified')]
+  ]) {
+    const p=JSON.parse(packet.packetJson);mutate(p);
+    const text=JSON.stringify(p);
+    assertNegativePacket(packet.packetJson,text,reason,malformed(p));
+    texts.push(text);
+  }
+  for(const [reason,text,malformed] of [
+    ['trailing newline',packet.packetJson+'\n',t=>t.endsWith('\n') && JSON.stringify(JSON.parse(t))!==t],
+    ['UTF-8 BOM','\ufeff'+packet.packetJson,t=>t.charCodeAt(0)===0xfeff],
+    ['duplicate JSON key',packet.packetJson.replace('"project":','"project":"ignored","project":'),
+      t=>t.includes('"project":"ignored","project":')],
+    ['alternate key escape',packet.packetJson.replace('"project"','"\\u0070roject"'),
+      t=>t.includes('"\\u0070roject"') && JSON.stringify(JSON.parse(t))!==t],
+    ['unpaired surrogate',packet.packetJson.replace('observer-a','observer-\\ud800'),
+      t=>JSON.parse(t)[2][0].id.endsWith('\ud800')]
+  ]) {
+    assertNegativePacket(packet.packetJson,text,reason,malformed(text));
+    texts.push(text);
+  }
+  return texts.map(text=>({packetBytes:new TextEncoder().encode(text),packetSha256:hash(text)}));
+}
+
+async function authenticatedVerifierDefects(f,packet,policy) {
+  const defects=[];
+  for(const [reason,mutate,malformed] of [
+    ['authenticated stale cutoff',p=>{const s=JSON.parse(p[3]);s[8][2][5][1]=s[8][3][5][1]='2026-10-25';p[3]=JSON.stringify(s);},
+      p=>JSON.parse(p[3])[8].slice(1).every(row=>row[5][1]<f.context.cutoff)],
+    ['authenticated unmapped alias',p=>{const s=JSON.parse(p[3]);s[8][2][6][1]='Unmapped';p[3]=JSON.stringify(s);},
+      p=>!policy.context.aliases.some(([alias])=>alias===JSON.parse(p[3])[8][2][6][1])],
+    ['authenticated sub-cent amount',p=>{const s=JSON.parse(p[3]);s[8][2][11]=['string','0.001'];p[3]=JSON.stringify(s);},
+      p=>JSON.parse(p[3])[8][2][11][1]==='0.001'],
+    ['authenticated stale observation',p=>{p[8][0].observedAt=new Date(f.request.now.getTime()-16*60*1000).toISOString();},
+      p=>f.request.now.getTime()-Date.parse(p[8][0].observedAt)>15*60*1000],
+    ['authenticated future observation',p=>{p[8][1].observedAt=new Date(f.request.now.getTime()+1).toISOString();},
+      p=>Date.parse(p[8][1].observedAt)>f.request.now.getTime()],
+    ['authenticated unordered observations',p=>{p[8][1].observedAt=p[8][0].observedAt;},
+      p=>Date.parse(p[8][1].observedAt)<=Date.parse(p[8][0].observedAt)]
+  ]) {
+    const p=JSON.parse(packet.packetJson),pin=structuredClone(policy);mutate(p);
+    assertNegativePacket(packet.packetJson,JSON.stringify(p),reason,malformed(p));
+    // Deliberately pin each known-invalid synthetic capture to reach derivation,
+    // rather than accidentally testing only a digest mismatch or builder failure.
+    pin.sourceSha256=hash(p[3]);
+    const signed=await f.signPacket(p);
+    assertNegativePacket(packet.packetJson,signed.packetJson,reason,malformed(JSON.parse(signed.packetJson)));
+    defects.push({policy:pin,packet:signed});
+  }
+  return defects;
+}
+
+test('independent offline verifier pins keys, LOGINs and immutable bytes without trusting the builder',async()=>{
+  // Match the native fixture's generation 2, which exposed the original no-op.
+  const now=new Date('2026-11-05T12:00:00Z'), f=await signedHandoff(now,{baseGeneration:'1',generation:'2'}),policy=await verifierPolicy(f);
+  const packet=await createPreparedSalesAttestorHandoff(f).prepare(f.request);
+  const verifier=createPreparedSalesAttestorVerifier({policy,authenticatedLogin:login(reviewers[0])});
+  const input=verifyInput(packet,now), result=await verifier.verify(input);
+  assert.equal(result.status,'BLOCKED');assert.equal(result.reviewer,reviewers[0]);
+  assert.ok(result.bindingJson===packet.bindingJson);assert.equal(result.packetSha256,packet.packetSha256);
+  assert.equal(verifier.release,undefined);assert.equal(verifier.review,undefined);
+  for(const bad of verifierDefects(packet)) await assert.rejects(verifier.verify({...bad,now}),/VERIFY_SEALED_OR_INVALID/);
+  for(const bad of await authenticatedVerifierDefects(f,packet,policy))
+    await assert.rejects(createPreparedSalesAttestorVerifier({policy:bad.policy,authenticatedLogin:login(reviewers[0])})
+      .verify(verifyInput(bad.packet,now)),/VERIFY_SEALED_OR_INVALID/);
+  await assert.rejects(verifier.verify({...input,packetSha256:'a'.repeat(64)}),/VERIFY_SEALED_OR_INVALID/);
+  await assert.rejects(verifier.verify({...input,packetBytes:Uint8Array.of(0xc3,0x28)}),/VERIFY_SEALED_OR_INVALID/);
+  for(const clock of [new Date(now.getTime()+120000),new Date(now.getTime()-10000),new Date('invalid')])
+    await assert.rejects(verifier.verify({...input,now:clock}),/VERIFY_SEALED_OR_INVALID/);
+  const old=await signedHandoff(now),replay=await createPreparedSalesAttestorHandoff(old).prepare(old.request);
+  await assert.rejects(verifier.verify(verifyInput(replay,now)),/VERIFY_SEALED_OR_INVALID/);
+  const mixed=JSON.parse(packet.packetJson);mixed[8][1]=JSON.parse(replay.packetJson)[8][1];
+  const mixedText=JSON.stringify(mixed);
+  assertNegativePacket(packet.packetJson,mixedText,'observation from another roster',
+    mixed[8][1].signatureHex!==JSON.parse(packet.packetJson)[8][1].signatureHex);
+  await assert.rejects(verifier.verify({packetBytes:new TextEncoder().encode(mixedText),packetSha256:hash(mixedText),now}),/VERIFY_SEALED_OR_INVALID/);
+  for(const receipt of [login(caller),login('Sales_reviewer_a'),login('sales_reviewer_\u0430'),
+    {sessionUser:reviewers[0],currentUser:reviewers[1]}])
+    assert.throws(()=>createPreparedSalesAttestorVerifier({policy,authenticatedLogin:receipt}),/VERIFY_SEALED_OR_INVALID/);
+  for(const field of ['login','id','independenceGroup','fingerprint']) {
+    const p=structuredClone(policy);p.actors[1][field]=p.actors[0][field];
+    assert.throws(()=>createPreparedSalesAttestorVerifier({policy:p,authenticatedLogin:login(reviewers[0])}),/VERIFY_SEALED_OR_INVALID/);
+  }
+  const numericGroups=structuredClone(policy);numericGroups.actors.forEach((a,i)=>{a.independenceGroup=i+1;});
+  assert.throws(()=>createPreparedSalesAttestorVerifier({policy:numericGroups,authenticatedLogin:login(reviewers[0])}),/VERIFY_SEALED_OR_INVALID/);
+  const other=await verifierPolicy(old),wrong=structuredClone(policy);wrong.actors[0].publicKey=other.actors[0].publicKey;
+  await assert.rejects(createPreparedSalesAttestorVerifier({policy:wrong,authenticatedLogin:login(reviewers[0])}).verify(input),/VERIFY_SEALED_OR_INVALID/);
+  // Key and fingerprint changed together still cannot validate the original signatures.
+  wrong.actors[0]=other.actors[0];
+  const changed=JSON.parse(packet.packetJson);changed[2][0].fingerprint=other.actors[0].fingerprint;
+  const changedText=JSON.stringify(changed);
+  assertNegativePacket(packet.packetJson,changedText,'substituted key fingerprint',
+    changed[2][0].fingerprint!==JSON.parse(packet.packetJson)[2][0].fingerprint);
+  await assert.rejects(createPreparedSalesAttestorVerifier({policy:wrong,authenticatedLogin:login(reviewers[0])})
+    .verify({packetBytes:new TextEncoder().encode(changedText),packetSha256:hash(changedText),now}),/VERIFY_SEALED_OR_INVALID/);
+  const early=new AbortController();early.abort();
+  await assert.rejects(verifier.verify({...input,signal:early.signal}),/VERIFY_SEALED_OR_INVALID/);
+  const late=new AbortController(),pending=verifier.verify({...input,signal:late.signal});late.abort();
+  await assert.rejects(pending,/VERIFY_SEALED_OR_INVALID/);
+  const mutable=verifyInput(packet,now),stable=verifier.verify(mutable);mutable.packetBytes.fill(0);
+  policy.context.project='changed';policy.actors[0].login=caller;
+  assert.ok((await stable).bindingJson===result.bindingJson);
+  globalThis.window={};
+  try{assert.throws(()=>createPreparedSalesAttestorVerifier({policy}),/VERIFY_SEALED_OR_INVALID/);}finally{delete globalThis.window;}
+});
 
 test('sealed handoff binds one frozen signed capture and rejects substituted policy before any SQL',async()=>{
   const now=new Date('2026-11-05T12:00:00Z'), f=await signedHandoff(now);
@@ -177,7 +351,9 @@ test('v234 draft remains rollback-default, private and disconnected', () => {
   assert.doesNotMatch(draft, /perform\s+public\.(?:sync_sales_batch|finalize_sales_snapshot)|delete from public\.fact_sales_daily/i);
   assert.doesNotMatch(draft, /set\s+generated\s+by\s+default/i);
   for (const file of ['supabase/functions/sync-google-sheet/index.ts','web/app/api/data-sync/route.ts',
-    '.github/workflows/astra-runner.yml']) assert.doesNotMatch(read(file), /sales.release.v234|prepared-sales-attestor-handoff|createPreparedSalesAttestorHandoff/i);
+    '.github/workflows/astra-runner.yml']) assert.doesNotMatch(read(file), /sales.release.v234|prepared-sales-attestor-(?:handoff|verify)|createPreparedSalesAttestor(?:Handoff|Verifier)/i);
+  assert.doesNotMatch(read('supabase/functions/sync-google-sheet/prepared-sales-attestor-verify.mjs'),
+    /import.*prepared-sales-attestor-handoff|\bfetch\s*\(|process\.env|Deno\.env/);
   assert.throws(() => parseError({status:0,stderr:''},'42501'),assert.AssertionError);
 });
 
@@ -466,8 +642,34 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       const prior=sql(source,`select receipt_sha256 from sales_release_v234_private.history where generation=${gen};`);
       const f=await signedHandoff(new Date(),{baseGeneration:gen,generation:String(BigInt(gen)+1n),priorReceiptSha256:prior});
       const builder=createPreparedSalesAttestorHandoff(f), packet=await builder.prepare(f.request);
-      const binding=JSON.parse(packet.bindingJson), run=binding.run_id;
       const unregistered=exact(source);
+      const policy=await verifierPolicy(f);
+      // Read session identities over real SCRAM connections; never SET ROLE or
+      // trust a request's reviewer string. Wrong passwords are checked at startup.
+      const authenticated=role=>JSON.parse(sql(source,
+        "select json_build_object('sessionUser',session_user,'currentUser',current_user);",role));
+      const verifiers=reviewers.map(role=>createPreparedSalesAttestorVerifier({policy,authenticatedLogin:authenticated(role)}));
+      assert.throws(()=>createPreparedSalesAttestorVerifier({policy,authenticatedLogin:authenticated(caller)}),/VERIFY_SEALED_OR_INVALID/);
+      const input=verifyInput(packet,f.request.now);
+      for(const bad of verifierDefects(packet)) {
+        for(const verifier of verifiers) await assert.rejects(verifier.verify({...bad,now:f.request.now}),/VERIFY_SEALED_OR_INVALID/);
+        assert.deepEqual(exact(source),unregistered,'Independent verifier rejection reached FIRST authority/target/stage/sequence write');
+      }
+      for(const bad of await authenticatedVerifierDefects(f,packet,policy)) {
+        await assert.rejects(createPreparedSalesAttestorVerifier({policy:bad.policy,authenticatedLogin:authenticated(reviewers[0])})
+          .verify(verifyInput(bad.packet,f.request.now)),/VERIFY_SEALED_OR_INVALID/);
+        assert.deepEqual(exact(source),unregistered,'Cryptographically authenticated bad source reached FIRST SQL write');
+      }
+      const cancelVerify=new AbortController(),verifying=verifiers[0].verify({...input,signal:cancelVerify.signal});cancelVerify.abort();
+      await assert.rejects(verifying,/VERIFY_SEALED_OR_INVALID/);
+      await assert.rejects(verifiers[0].verify({...input,now:new Date(f.context.expiresAt)}),/VERIFY_SEALED_OR_INVALID/);
+      const verified=await Promise.all(verifiers.map(v=>v.verify(input)));
+      for(const v of verified) {
+        assert.equal(v.status,'BLOCKED');assert.equal(v.packetSha256,packet.packetSha256);
+        assert.ok(v.bindingJson===packet.bindingJson && v.manifestJson===packet.manifestJson && v.payloadJson===packet.payloadJson);
+      }
+      assert.deepEqual(exact(source),unregistered,'Even valid offline verification must be read-only');
+      const binding=JSON.parse(verified[0].bindingJson), run=binding.run_id;
       for(const mutate of [
         r=>{r.capture.values[1][11]='9.99';},r=>{r.observations[0].signatureHex='a'.repeat(128);},
         r=>{r.observations[1]=r.observations[0];},r=>{r.now=new Date(Date.parse(f.context.expiresAt)+1);},
@@ -497,8 +699,8 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
         sales_release_v234_private.warehouse_rows(),3,'2026-10-25',${q(cutoff)},'OFFLINE_SYNTHETIC_ONLY';
         insert into sales_attestor_private.targets values(${q(run)},${j(binding)},
           encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'),${q(f.context.expiresAt)});
-        insert into sales_release_v234_private.authorities values(${q(run)},${q(prior)},${q(packet.manifestJson)},
-          ${q(packet.payloadJson)}::jsonb,encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'));`);
+        insert into sales_release_v234_private.authorities values(${q(run)},${q(prior)},${q(verified[0].manifestJson)},
+          ${q(verified[0].payloadJson)}::jsonb,encode(sha256(convert_to((${j(binding)})::text,'UTF8')),'hex'));`);
       // The protected SQL target retains identical canonical bytes and digest. SQL
       // hashes jsonb::text for its *binding* receipt; packet digest hashes raw UTF8.
       assert.equal(sql(source,`select encode(sha256(convert_to(binding->'handoff'->>'packetJson','UTF8')),'hex')
@@ -522,10 +724,17 @@ test('v234 native prewrite, atomic transaction, independent LOGIN and protected 
       assert.deepEqual(exact(source),before,'Rejected handoff wrote receipt, stage, facts, dimensions, MVs, ACL/RLS or sequence');
       for(const role of reviewers) {
         const receipt=JSON.parse(sql(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,role));
-        assert.equal(receipt.reviewer,role);
-        assert.equal(receipt.independence_group,JSON.parse(packet.packetJson)[2].find(o=>o.login===role).independenceGroup);
+        const pinned=verified.find(v=>v.reviewer===role);
+        assert.equal(receipt.reviewer,pinned.reviewer);
+        assert.equal(receipt.independence_group,pinned.independenceGroup);
+        assert.equal(hash(receipt.binding.handoff.packetJson),pinned.packetSha256);
         assert.ok(JSON.stringify(receipt.binding)===JSON.stringify(JSON.parse(sql(source,`select binding from sales_attestor_private.targets where run_id=${q(run)};`))),'SQL receipt binding differs');
         assert.equal(receipt.binding_sha256,sql(source,`select binding_sha256 from sales_attestor_private.targets where run_id=${q(run)};`));
+        assert.equal(sql(source,`select receipt_sha256=encode(sha256(convert_to(jsonb_build_array(
+          'sales-review-receipt/synthetic-v1',run_id,reviewer,independence_group,binding_sha256,observed_at)::text,'UTF8')),'hex')
+          from sales_attestor_private.receipts where run_id=${q(run)} and reviewer=${q(role)};`),'t');
+        const retry=JSON.parse(sql(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,role));
+        assert.ok(JSON.stringify(receipt)===JSON.stringify(retry),'Authenticated retry changed the receipt');
       }
       const reviewed=exact(source);
       for(const role of reviewers) sql(source,`select sales_attestor_private.review(${q(run)},${j(binding)});`,role);
