@@ -31,6 +31,28 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           echo "Sales PR #44 native acceptance SHA: $GITHUB_SHA"
 
+      # D266: standalone Deno evidence only; never invoke a deployed function.
+      # Installation failure blocks this gate; no Node/simulated fallback.
+      - name: Install pinned Deno on disposable trusted runner
+        id: deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: '2.1.4'
+
+      - name: Report Deno installation blocker
+        if: ${{ failure() && steps.deno.outcome == 'failure' }}
+        run: |
+          echo 'BLOCKED: denoland/setup-deno@v2 could not install Deno 2.1.4; see the failed setup step for the exact cause. No synthetic fallback.'
+          exit 1
+
+      - name: Offline real-Deno synthetic handler diagnosis
+        run: |
+          deno --version
+          deno test --no-config --no-lock --no-remote --no-prompt \
+            --allow-read=scripts/deno,supabase/functions/sales-private-header-probe,supabase/functions/sync-google-sheet/google-sheet-reader.mjs \
+            --deny-net --deny-env --deny-run --deny-write --deny-ffi --deny-sys \
+            scripts/deno/sales-header-runtime.test.ts
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
