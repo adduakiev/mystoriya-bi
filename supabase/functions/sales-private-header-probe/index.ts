@@ -51,7 +51,11 @@ export async function handleRequest(request: Request, dependencies: Dependencies
     new Response(JSON.stringify({ code, timestamp }), { status, headers });
   let authenticated = false;
   try {
-    if (typeof window !== "undefined" || typeof document !== "undefined") return result(401);
+    // Supabase edge-runtime v1.77.9 exposes window === globalThis in user
+    // isolates. Require server capabilities and reject a DOM; window alone is
+    // not a browser boundary. Exact built-in-key authentication remains below.
+    if (typeof document !== "undefined" || typeof Deno === "undefined" ||
+        typeof Deno.env?.get !== "function" || typeof Deno.serve !== "function") return result(401);
     authenticated = authorized(request, dependencies.envGet);
     if (!authenticated) return result(401);
     if (request.method !== "POST") return result(405);

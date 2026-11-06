@@ -69,8 +69,72 @@ async function safe(response, status, code = "FAIL") {
   for (const privateValue of [secret, token.access_token, "upstream-private-canary", ...header]) assert.equal(text.includes(privateValue), false);
 }
 
+// Node has no native Deno. Supply callable capabilities that forbid every
+// global env/listener operation; handler dependencies remain synthetic.
+const originalDeno = Object.getOwnPropertyDescriptor(globalThis, "Deno");
+test.before(() => {
+  Object.defineProperty(globalThis, "Deno", { configurable: true, value: {
+    env: { get() { assert.fail("Real environment forbidden"); } },
+    serve() { assert.fail("Listener forbidden"); }
+  } });
+});
+test.after(() => {
+  if (originalDeno) Object.defineProperty(globalThis, "Deno", originalDeno); else delete globalThis.Deno;
+});
 test.beforeEach(t => {
   t.mock.method(globalThis, "fetch", () => assert.fail("Real transport forbidden"));
+});
+
+test("source-matched Supabase v1.77.9 window getter permits only exact-key synthetic server auth", async t => {
+  // Synthetic subset of bootstrap.js at 0dd15ef2281b60ea03413ef5d2a60ebb25b0e21d;
+  // NOT an actual hosted user isolate or successful live authentication.
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "window");
+  Object.defineProperty(globalThis, "window", { configurable: true, enumerable: true, get: () => globalThis });
+  t.after(() => { if (previous) Object.defineProperty(globalThis, "window", previous); else delete globalThis.window; });
+  assert.equal(window, globalThis);
+  assert.equal(typeof document, "undefined");
+  for (const [key, status, reads] of [
+    [service, 503, ["SUPABASE_SERVICE_ROLE_KEY", "GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON"]],
+    [undefined, 401, ["SUPABASE_SERVICE_ROLE_KEY"]],
+    [service.slice(0, -1) + "b", 401, ["SUPABASE_SERVICE_ROLE_KEY"]]
+  ]) {
+    const f = fixture({ service: key, secret: undefined });
+    await safe(await handleRequest(request(), f.dependencies), status);
+    assert.deepEqual(f.events, reads); assert.equal(f.calls.length, 0);
+  }
+  for (const authorization of ["", "Bearer malformed", `Bearer ${jwt("authenticated")}`,
+    `Bearer ${jwt("service_role", { exp: 1 })}`, `Bearer ${jwt("service_role", { iss: "forged" })}`,
+    `Bearer ${service.slice(0, -1)}b`]) {
+    const f = fixture({ secret: undefined });
+    await safe(await handleRequest(request({ headers: { authorization } }), f.dependencies), 401);
+    assert.deepEqual(f.events, authorization.endsWith("b") ? ["SUPABASE_SERVICE_ROLE_KEY"] : []);
+    assert.equal(f.calls.length, 0);
+  }
+});
+
+test("DOM browsers including forged Deno markers, and missing server capabilities, fail before env reads", async t => {
+  const names = ["window", "document", "Deno"];
+  const original = new Map(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
+  t.after(() => { for (const name of names) {
+    const descriptor = original.get(name);
+    if (descriptor) Object.defineProperty(globalThis, name, descriptor); else Reflect.deleteProperty(globalThis, name);
+  } });
+  const forbidden = () => assert.fail("Global environment/listener forbidden");
+  const capabilities = { env: { get: forbidden }, serve: forbidden };
+  for (const [windowValue, documentValue, denoValue] of [
+    [globalThis, {}, undefined], [globalThis, {}, capabilities], [undefined, {}, capabilities],
+    [globalThis, undefined, undefined], [undefined, undefined, undefined],
+    [globalThis, undefined, {}], [globalThis, undefined, { env: {}, serve: forbidden }],
+    [globalThis, undefined, { env: { get: forbidden } }],
+    [globalThis, undefined, { env: { get: true }, serve: forbidden }],
+    [globalThis, undefined, { env: { get: forbidden }, serve: true }]
+  ]) {
+    for (const [name, value] of [["window", windowValue], ["document", documentValue], ["Deno", denoValue]])
+      Object.defineProperty(globalThis, name, { configurable: true, value });
+    const f = fixture();
+    await safe(await handleRequest(request(), f.dependencies), 401);
+    assert.deepEqual(f.events, []); assert.equal(f.calls.length, 0);
+  }
 });
 
 test("no/malformed/ordinary/forged/expired auth fails before Google secret or any network", async () => {
