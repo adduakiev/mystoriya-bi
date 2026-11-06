@@ -1,0 +1,110 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "branch": "astra/issue-43-40107435112",
+  "reviewed_base_sha": "9c91c116a92ad619874b9995fdc0ea6b652bdd69",
+  "candidate_commit_sha": null,
+  "candidate_state": "UNCOMMITTED_WORKSPACE_CHANGES",
+  "recorded_at_utc": "2026-11-03T00:26:12.681959+00:00",
+  "status": "PREPARE_ONLY_LOCAL_ACCEPTANCE_BLOCKED",
+  "trusted_base_receipt": {
+    "source": "issue trigger; not a candidate receipt",
+    "url": "https://github.com/adduakiev/mystoriya-bi/actions/runs/41546061091",
+    "tests": 461,
+    "fail": 0,
+    "skip": 0
+  },
+  "candidate_runner_url": null,
+  "checks": {
+    "npm_ci_web": "PASS; lockfile unchanged",
+    "focused": {
+      "pass": 36,
+      "fail": 0,
+      "skip": 0
+    },
+    "native_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "command": "npm run check",
+      "location": "byte-identical source/test candidate in /tmp/issue-43-transport-candidate",
+      "file_pass": 43,
+      "file_fail": 1,
+      "skip": 0,
+      "sole_failure": "web/tests/sales-atomic-postgres.test.mjs; listen EPERM 127.0.0.1",
+      "subsequent_tsc_build": "not reached by check; passed independently"
+    },
+    "expanded_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "command": "node --experimental-strip-types --test --test-isolation=none .agents/*.test.mjs web/tests/*.test.mjs",
+      "pass": 461,
+      "fail": 1,
+      "skip": 0,
+      "total": 462,
+      "sole_failure": "atomic sales snapshot server startup; listen EPERM before nested server tests execute"
+    },
+    "typescript": "PASS; run independently because native check stops at test failure",
+    "optimized_next_build": "PASS; independent isolated candidate build",
+    "inventory_generator_check": "PASS; 22 pages, 7 API routes, 758 templates",
+    "git_diff_check": "PASS",
+    "postgres_version": "16.15",
+    "single_user_47001_raw_47000_facts": "PASS in isolated native suite; real PostgreSQL numeric/rollback test",
+    "server_concurrency_cancellation_transport_47k": "NOT_EXECUTED; inner sandbox loopback listen EPERM before server startup; not skipped",
+    "initial_workspace_check": {
+      "result": "FAIL",
+      "file_pass": 40,
+      "file_fail": 4,
+      "skip": 0,
+      "reason": "read-only .agents/runtime affected three files; using writable isolated archive resolves those; PostgreSQL socket restriction persists"
+    }
+  },
+  "baseline": {
+    "current_source_min_date": "UNKNOWN",
+    "accepted_source_v1_emitted_by_current_importers": false,
+    "warehouse_min_used_as_source_min": false,
+    "fallback_or_user_baseline_allowed": false,
+    "required": "separately authorized read-only retained accepted-source provenance and source/warehouse reconciliation; future governed evidence contract; no metadata writes in this patch"
+  },
+  "safety": {
+    "active_runtime_imports": 0,
+    "production_entrypoints_byte_identical": true,
+    "sql_design_unchanged": true,
+    "sql_applied": false,
+    "live_google_or_supabase_calls": false,
+    "commit_push_pr_deploy_scheduler_credential_or_business_actions": false
+  },
+  "blockers": [
+    {
+      "kind": "LOCAL_VERIFICATION",
+      "reproduce": "node --test --test-isolation=none web/tests/sales-atomic-postgres.test.mjs",
+      "reason": "listen EPERM 127.0.0.1 in inner sandbox; same exact-base reproduction",
+      "required": "trusted outer Actions runner must independently verify exact new SHA, with zero skips and real disposable PostgreSQL server tests; do not waive"
+    },
+    {
+      "kind": "RELEASE_EVIDENCE",
+      "reason": "prior accepted source minDate/provenance not established by current import_runs alone; full release gates remain closed"
+    }
+  ],
+  "handoff": {
+    "workflow_only": true,
+    "must_attach_final_sha_and_runner_url_to_existing_pr_44": true,
+    "ready_for_gate_or_released_claimed": false
+  },
+  "file_sha256": {
+    "supabase/functions/sync-google-sheet/prepared-sales-transport.mjs": "aba3f184294d7b136c91993db94ca43c47f0cb831e2ac8c677b5d09925c62a63",
+    "supabase/functions/sync-google-sheet/google-sheet-reader.mjs": "2896c5481dfb2448db27ad6ed9ae46460825e7af6e17d7735119708eef383dcd",
+    "web/tests/prepared-sales-transport.test.mjs": "1ed2de4d0e627dbe6f5b3afb07205476ad4f6fee73fad197857a65b873a4c96d",
+    "web/tests/google-sheet-reader.test.mjs": "bc9a468db6d7c14760aac14f81277e3b110b7e3ad3fa4c21939ceca1be804b90",
+    "web/tests/sales-atomic-postgres.test.mjs": "f3254c7c2cfcbb6b92d4f86f9b4c2ac558dfc6930d25fc0182481d34b3b1b0ec",
+    "supabase/functions/sync-google-sheet/index.ts": "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3",
+    "web/app/api/data-sync/route.ts": "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1",
+    "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql": "30138b03f6851fd8b5aac2b2d810bfd80d639953008e42ec1053ced19a0f1c58"
+  },
+  "local_log_sha256": {
+    "/tmp/issue-43-transport-focused-final.log": "0b088de79df7ba25ccca2a57fb4e81b01ff292e17ba758c13a53358f8b4a4c33",
+    "/tmp/issue-43-transport-candidate-check-final.log": "82febf435ee89886049a502b0c4a230e5e945d2a440ca1b426e6336e2b19b4e9",
+    "/tmp/issue-43-transport-expanded-final.log": "03e56482f8f7c93652c2b8a1ba8b189d321123e45385359be41680cf65d515c9",
+    "/tmp/issue-43-transport-base-pg.log": "37ad2359a233c8fa2ab43e36fc9ad2e16365f731b122ddca3959bdad595ff772",
+    "/tmp/issue-43-transport-tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/issue-43-transport-build.log": "19b37bc62513fb14234c3524f6e8fe4059625523381f9475b2dc4dabb8a6c33b",
+    "/tmp/issue-43-npm-ci.log": "6abb8a5682f82907359c74495c40ae3bd3bc951a8e80bd6fc6e46cba43b9474d"
+  }
+}

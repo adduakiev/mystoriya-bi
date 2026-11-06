@@ -1,0 +1,146 @@
+{
+  "recorded_at": "2026-10-26T06:29:13.317663+00:00",
+  "issue": 43,
+  "existing_pr": 44,
+  "discrepancy_id": "D23",
+  "status": "CODE_READY_FOR_REVIEW_REMOTE_HANDOFF_BLOCKED_FULL_AUDIT_INCOMPLETE",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40279645896",
+  "requested_source_sha": "9c89d854d9f8b0906e348fc430ecf6451e85c8b0",
+  "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "candidate_commit_sha": null,
+  "candidate_sha_owner": "TRUSTED_GITHUB_RUNNER",
+  "restoration": "91 differing baseline files restored from local git objects before edits; refs/index unchanged; baseline additions remain untracked",
+  "baseline_modified_files": [
+    "docs/BI-DATA-AUDIT-2026-10-24.md",
+    "docs/PROJECT-STATUS.md",
+    "docs/audit/2026-10-24/HANDOFF.md",
+    "docs/audit/2026-10-24/KPI-LINEAGE.md",
+    "docs/audit/2026-10-24/discrepancies.json",
+    "docs/audit/2026-10-24/inventory.json",
+    "docs/audit/2026-10-24/rpc-contract-lineage.json",
+    "docs/audit/2026-10-24/source-register.json",
+    "docs/audit/2026-10-24/tab-block-matrix.csv",
+    "web/app/digital/audience/page.tsx",
+    "web/app/digital/channels/page.tsx",
+    "web/app/digital/page.tsx",
+    "web/app/digital/site/page.tsx",
+    "web/components/DigitalHistoryChart.tsx",
+    "web/tests/google-ads-currency.test.mjs"
+  ],
+  "new_revision_files": [
+    "docs/audit/2026-10-24/GA4-CURRENCY-REVISION-2026-10-26.md",
+    "docs/audit/2026-10-24/ga4-currency-verification-2026-10-26.json",
+    "docs/audit/2026-10-24/ga4-monetary-lineage-2026-10-26.json",
+    "web/lib/ga4-presentation.ts",
+    "web/tests/ga4-currency.test.mjs"
+  ],
+  "source_byte_identity_with_full_check_copy": true,
+  "source_files_compared": 165,
+  "code_and_targeted_test_sha256": {
+    "web/app/digital/audience/page.tsx": "3b5f3ed4d1a40a8bc22fc1f5d58177e92d7e610c89c7749c2b03b84319a8fe69",
+    "web/app/digital/channels/page.tsx": "3a00d7bbc91df6529499e5f527de5daec1d0b0945e35baa0708634db77a0d97d",
+    "web/app/digital/page.tsx": "e794385fe7ab0df8d26f843cce70c49f32f7bb6fbe3f66e0a4ada39f06eb4784",
+    "web/app/digital/site/page.tsx": "b412dd499df3ecc2d7757b76d7db7f9e7b8ee91576ff18c1b6ee744b74751a3d",
+    "web/components/DigitalHistoryChart.tsx": "ae9fdc70f4cc73cf6154ee12ebe6d338b42f73239c3a9d5b156e27e21ff8de5a",
+    "web/lib/ga4-presentation.ts": "e1edaa313f64a3b1cb9bdcc47801f46a191f232a91b028f86c1fa6a9b6b12e0e",
+    "web/tests/ga4-currency.test.mjs": "3f3f739aaecd406a435998e3b35332c25e0294ed5d514629c7445c61262d4040",
+    "web/tests/google-ads-currency.test.mjs": "9f5081ae3d4875f10981ae6f2d5f27fb10bc7491bfba162879f48db084364ffb"
+  },
+  "checks": [
+    {
+      "command": "npm ci --prefix web",
+      "scope": "WORKSPACE",
+      "result": "PASS",
+      "packages": 71
+    },
+    {
+      "command": "node --experimental-strip-types web/tests/ga4-currency.test.mjs",
+      "scope": "WORKSPACE_SYNTHETIC_SSR_COMPONENTS",
+      "result": "PASS",
+      "tests": 8,
+      "skips": 0
+    },
+    {
+      "command": "npm run check",
+      "scope": "WORKSPACE",
+      "result": "BLOCKED_BY_READ_ONLY_RUNTIME_MOUNT",
+      "test_files_passed": 20,
+      "test_files_failed": 3,
+      "failure_files": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs"
+      ],
+      "reproduced_error": "ENOENT creating .agents/runtime on read-only .agents mount; types/build not reached"
+    },
+    {
+      "command": "npm run check",
+      "scope": "WRITABLE_IDENTICAL_SOURCE_COPY",
+      "result": "PASS",
+      "test_files_passed": 23,
+      "test_files_failed": 0,
+      "skips": 0,
+      "typescript": "PASS",
+      "optimized_next_build": "PASS",
+      "network_or_production_io": "NONE; source fixtures/local PostgreSQL only"
+    },
+    {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "static_templates": 749
+    },
+    {
+      "command": "node scripts/bi-audit-contracts.mjs --check",
+      "result": "PASS",
+      "static_kpi_contracts": 6,
+      "production_rpc_invocations": 0
+    },
+    {
+      "command": "node scripts/bi-audit-browser-qa.mjs --check",
+      "result": "PASS_PLAN_CONSISTENCY_ONLY",
+      "browser_cases_not_executed": 66
+    },
+    {
+      "command": "git diff --check",
+      "scope": "WORKSPACE_TRACKED_DIFF",
+      "result": "PASS"
+    },
+    {
+      "command": "npm test",
+      "scope": "WRITABLE_IDENTICAL_SOURCE_COPY_AFTER_FINAL_LINEAGE_AND_STATUS_DOC_UPDATES",
+      "result": "PASS",
+      "test_files_passed": 23,
+      "test_files_failed": 0,
+      "skips": 0
+    },
+    {
+      "command": "Revision whitespace, audit JSON parsing and protected-source byte comparison versus requested source",
+      "scope": "WORKSPACE_INCLUDING_NEW_UNTRACKED_REVISION_FILES",
+      "result": "PASS"
+    }
+  ],
+  "browser": {
+    "authenticated_cases": 66,
+    "NOT_EXECUTED": 66,
+    "PASS": 0,
+    "screenshots": []
+  },
+  "production_data_proof": "NONE NEW; zero GA4 currency/property catalog columns is trusted-trigger relayed evidence, not rerun",
+  "remote_status": {
+    "working_comment": "ATTEMPTED_NOT_POSTED_NO_GH_TOKEN",
+    "acceptance_comment_read": "BLOCKED_NO_GH_TOKEN_AND_API_DNS_FAILURE",
+    "acknowledgement": "ASSIGNED_NOT_ACKNOWLEDGED_REMOTELY"
+  },
+  "unchanged_gates": [
+    "AGENTS.md",
+    ".github/workflows/astra-runner.yml",
+    "all supabase SQL/migrations",
+    "Google Ads ROAS UNKNOWN guard",
+    "Meta USD/null contracts",
+    "no production/external writes"
+  ],
+  "residual_risk": "GA4 reporting currency/property/account/grain UNKNOWN; source restoration requires separate verified contract review. Full #43 audit incomplete. Runner must post WORKING then exact candidate SHA/READY to same PR #44.",
+  "owner_action_needed_for_code_tests": false
+}

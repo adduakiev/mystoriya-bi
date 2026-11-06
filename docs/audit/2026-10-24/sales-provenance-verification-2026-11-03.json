@@ -1,0 +1,117 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "status": "PREPARED_ONLY; TRUSTED_CANDIDATE_ACCEPTANCE_PENDING",
+  "branch": "astra/issue-43-40107435112",
+  "starting_and_final_local_head": "2d64ce8232e4b762e7e09fbbf1b1226a3182dbea",
+  "starting_worktree": "clean",
+  "candidate_commit_sha": null,
+  "codex_commit_push_or_pr_creation": false,
+  "working_acknowledgement": "Codex transcript only; remote GitHub acknowledgement not asserted",
+  "authoritative_scope": "Embedded D188 contract in issue trigger; external retrieval unnecessary",
+  "trusted_base_receipt": {
+    "url": "https://github.com/adduakiev/mystoriya-bi/actions/runs/41551698285",
+    "native_tests_passed": 477,
+    "skips": 0,
+    "attribution": "Trigger-supplied exact-base evidence; not a new candidate check"
+  },
+  "changes": [
+    "Exact typed source-byte SHA-256 serialization and golden synthetic vector",
+    "Unreferenced pure verifier for two independently pinned Ed25519 observations, prior receipt, actual reserved run and generation",
+    "Full synthetic source/manifest/alias/canonical-identity/exact-cent reconciliation, historical key guard and readback model",
+    "Closed historical first-run attestation and review-only future same-transaction persistence protocol"
+  ],
+  "new_provenance_tests": 17,
+  "verification": {
+    "npm_ci_prefix_web": {
+      "result": "PASS",
+      "lockfile_changed": false
+    },
+    "final_focused": {
+      "command": "node --test --test-isolation=none web/tests/prepared-sales-provenance.test.mjs web/tests/prepared-sales-recovery.test.mjs web/tests/prepared-sales-transport.test.mjs web/tests/google-sheet-reader.test.mjs",
+      "passed": 53,
+      "failed": 0,
+      "skipped": 0
+    },
+    "initial_workspace_npm_run_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "reported_units": "test file wrappers, not native test count",
+      "passed_files": 41,
+      "failed_files": 4,
+      "reported_skips": 0,
+      "failures": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs",
+        "web/tests/sales-atomic-postgres.test.mjs"
+      ],
+      "runtime_error": "ENOENT mkdir .agents/runtime in restricted workspace; all three runtime-related files pass in writable isolated copy",
+      "pipeline_stopped_before_typescript_and_build": true
+    },
+    "final_isolated_npm_run_check": {
+      "result": "FAIL_INNER_SANDBOX",
+      "method": "git archive of exact HEAD plus byte-verified final new module/test/contract; writable /tmp; existing dependency directory linked; no permissions or skips altered",
+      "reported_units": "test file wrappers, not native test count",
+      "passed_files": 44,
+      "failed_files": 1,
+      "reported_skips": 0,
+      "failure": "web/tests/sales-atomic-postgres.test.mjs",
+      "independent_reproduction": "node --test --test-isolation=none --test-reporter=spec web/tests/sales-atomic-postgres.test.mjs",
+      "actual_error": "listen EPERM: operation not permitted 127.0.0.1",
+      "pipeline_stopped_before_typescript_and_build": true
+    },
+    "typescript_independent": {
+      "command": "node web/node_modules/typescript/bin/tsc --noEmit --project web/tsconfig.json",
+      "result": "PASS"
+    },
+    "next_build_independent": {
+      "cwd": "web",
+      "command": "node node_modules/next/dist/bin/next build",
+      "result": "PASS"
+    },
+    "inventory_check": {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "static_templates": 758
+    },
+    "git_diff_check": {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  },
+  "final_content_sha256": {
+    "supabase/functions/sync-google-sheet/prepared-sales-provenance.mjs": "5ffc13c1ee788ec226fe303ee6a80898164c97629e5173093e9e0fc8ed069be0",
+    "web/tests/prepared-sales-provenance.test.mjs": "f2a9609936aea81554a8533c2401fa36b99b26e29481c6677bc1fe768e5e5e53",
+    "docs/audit/2026-10-24/SALES-PROVENANCE-CONTRACT-2026-11-03.md": "45f3b90496ea60f84e72a4861e0701819011c4cc9b6c14f7d4dabd10801ccd96"
+  },
+  "preserved_unchanged": [
+    "Both active manual-sync 503 SALES_IMPORT_SAFETY_GATE entrypoints",
+    "Private OAuth reader",
+    "Existing prepared transport",
+    "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql (ends ROLLBACK; not applied)",
+    "AGENTS.md and runner workflow"
+  ],
+  "not_implemented": [
+    "Legacy attestation/trust-root creation or metadata backfill",
+    "Typed capture adapter, production attestor, signer/key provisioning or evidence storage",
+    "Transactional accepted_source_v1 persistence or migration changes",
+    "Runtime integration, import or release"
+  ],
+  "not_executed": [
+    "Production/source/Supabase requests or writes",
+    "Production or staging migrations",
+    "Authenticated RPC/desktop/mobile parity QA",
+    "PostgreSQL tests of the NEW proposed persistence design; new contract tests are synthetic only"
+  ],
+  "remaining_gates": [
+    "Historical source closure and independently authorized authentic trust root",
+    "Retention/custodians, read-only access and credential provisioning",
+    "Backup and restore rehearsal",
+    "Grants and writer quiescence",
+    "Reviewed and disposable-PG-tested evidence SQL and coordinated Edge+SQL release",
+    "Separately authorized first import and RPC-to-desktop/mobile UI QA"
+  ],
+  "handoff": "Trusted workflow must independently verify its new exact candidate SHA and publish only to existing PR #44. No READY FOR GATE or RELEASED claim; broader audit INCOMPLETE."
+}

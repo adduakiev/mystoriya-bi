@@ -1,0 +1,146 @@
+name: Sales PR 44 exact-SHA native acceptance
+
+# PREPARE ONLY: execute mandatory native Sales/PostgreSQL acceptance on
+# the exact pushed head of the existing, unmerged PR #44. This workflow
+# never deploys, migrates, imports, or accesses production credentials.
+on:
+  push:
+    branches:
+      - astra/issue-43-40107435112
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sales-native-pr44-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  exact-sha-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Assert immutable input SHA
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "Sales PR #44 native acceptance SHA: $GITHUB_SHA"
+
+      # D266: standalone Deno evidence only; never invoke a deployed function.
+      # Installation failure blocks this gate; no Node/simulated fallback.
+      - name: Install pinned Deno on disposable trusted runner
+        id: deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: '2.1.4'
+
+      - name: Report Deno installation blocker
+        if: ${{ failure() && steps.deno.outcome == 'failure' }}
+        run: |
+          echo 'BLOCKED: denoland/setup-deno@v2 could not install Deno 2.1.4; see the failed setup step for the exact cause. No synthetic fallback.'
+          exit 1
+
+      - name: Offline real-Deno synthetic handler diagnosis
+        run: |
+          deno --version
+          deno test --no-config --no-lock --no-remote --no-prompt \
+            --allow-read=scripts/deno,supabase/functions/sales-private-header-probe,supabase/functions/sync-google-sheet/google-sheet-reader.mjs \
+            --deny-net --deny-env --deny-run --deny-write --deny-ffi --deny-sys \
+            scripts/deno/sales-header-runtime.test.ts
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Require local PostgreSQL 16 for native tests
+        run: |
+          test -x /usr/lib/postgresql/16/bin/initdb || {
+            echo 'BLOCKED: native PostgreSQL 16 initdb missing; no reduced-test fallback.'
+            exit 1
+          }
+          /usr/lib/postgresql/16/bin/pg_config --version
+
+      - name: Install deterministic dependencies
+        run: npm ci --prefix web
+
+      - name: Full native verification including disposable PostgreSQL
+        env:
+          GITHUB_ACTIONS: 'true'
+          SALES_TEST_PG_BIN: /usr/lib/postgresql/16/bin
+        run: |
+          npm run check
+          git diff --check
+
+  # Exact-SHA PostgreSQL 17 major-version parity: deliberately sequenced
+  # after the already accepted PostgreSQL 16 control, never in parallel.
+  # Ephemeral Actions runner only: no Supabase or Production connections.
+  exact-sha-pg17-parity:
+    needs: exact-sha-native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Assert immutable input SHA
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "Sales PR #44 PostgreSQL 17 parity SHA: $GITHUB_SHA"
+
+      - name: Provision PostgreSQL 17 only on disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Official PGDG signed apt repository for Ubuntu 24.04 (noble).
+          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
+          sudo curl --fail --silent --show-error --location \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            | grep -q '^fpr:::::::::B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8:'
+          printf '%s\n' \
+            'Types: deb' \
+            'URIs: https://apt.postgresql.org/pub/repos/apt' \
+            'Suites: noble-pgdg' \
+            'Components: main' \
+            'Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc' \
+            | sudo tee /etc/apt/sources.list.d/sales-pg17.sources >/dev/null
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends postgresql-17
+          test -x /usr/lib/postgresql/17/bin/initdb
+          test "$(/usr/lib/postgresql/17/bin/pg_config --version | cut -d' ' -f2 | cut -d. -f1)" = 17
+          /usr/lib/postgresql/17/bin/pg_config --version
+          /usr/lib/postgresql/17/bin/postgres --version
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install deterministic dependencies
+        run: npm ci --prefix web
+
+      - name: Full native verification on real PostgreSQL 17
+        env:
+          GITHUB_ACTIONS: 'true'
+          SALES_TEST_PG_BIN: /usr/lib/postgresql/17/bin
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(/usr/lib/postgresql/17/bin/pg_config --version | cut -d' ' -f2 | cut -d. -f1)" = 17
+          npm run check
+          git diff --check

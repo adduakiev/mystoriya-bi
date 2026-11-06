@@ -26,7 +26,7 @@ export type DeliveryLocationRow = {
   markupRate: number;
   deliveryShare: number;
   aggregatorRevenue: number;
-  versusAggregator: number;
+  versusAggregator: number | null;
 };
 
 export type DeliveryData = {
@@ -45,7 +45,7 @@ export type DeliveryData = {
   typeSummary: DeliveryTypeSummary[];
   deliveryMetrics: DeliveryMetricSet;
   aggregatorMetrics: DeliveryMetricSet;
-  ownVsAggregatorRatio: number;
+  ownVsAggregatorRatio: number | null;
   compareSeries: Array<{ label: string; delivery: number; aggregator: number }>;
   locationRows: DeliveryLocationRow[];
 };
@@ -171,10 +171,15 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
   const previous=metricSet(payload.previous);
   const label=String(meta.previousYear ?? "");
 
-  const revenueGrowth=pct(current.revenue,previous.revenue)??0;
-  const checksGrowth=pct(current.checks,previous.checks)??0;
-  const aovGrowth=pct(current.averageCheck,previous.averageCheck)??0;
-  const markupPp=pp(current.markupRate,previous.markupRate)??0;
+  // A missing/zero prior-year denominator is not measured 0% growth.
+  const revenueGrowth=pct(current.revenue,previous.revenue);
+  const checksGrowth=pct(current.checks,previous.checks);
+  const aovGrowth=pct(current.averageCheck,previous.averageCheck);
+  const markupPp=current.revenue>0&&previous.revenue>0
+    ? pp(current.markupRate,previous.markupRate) : null;
+  const comparison=(delta:number|null,baseline:number):string =>
+    delta===null ? (baseline===0?"немає зіставної бази":"дані відсутні")
+      : `${delta>=0?"+":""}${delta.toFixed(1)}%`;
 
   return {
     sourceRows:num(meta.rowCount),
@@ -192,16 +197,18 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
       kpi("Чеки",Math.round(current.checks).toLocaleString("uk-UA"),pct(current.checks,previous.checks),label),
       kpi("Середній чек",`₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,pct(current.averageCheck,previous.averageCheck),label),
       kpi("Націнка",compactUah(current.markup),pct(current.markup,previous.markup),label),
-      kpi("Націнка %",`${current.markupRate.toFixed(1)}%`,pp(current.markupRate,previous.markupRate),`п.п. vs ${label}`)
+      kpi("Націнка %",`${current.markupRate.toFixed(1)}%`,markupPp,`п.п. vs ${label}`)
     ],
     trend:[],
     channels:[],
     locations:[],
     monthlyTable:[],
     signal:{
-      severity:revenueGrowth>0&&markupPp< -0.5?"warning":"info",
-      title:revenueGrowth>=0?"Позитивна динаміка":"Період нижче бази порівняння",
-      body:`Оборот: ${revenueGrowth>=0?"+":""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth>=0?"+":""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth>=0?"+":""}${aovGrowth.toFixed(1)}% vs ${label}.`
+      severity:revenueGrowth!==null&&revenueGrowth>0&&markupPp!==null&&markupPp< -0.5?"warning":"info",
+      title:revenueGrowth===null?"Немає зіставної бази для обороту"
+        :revenueGrowth===0?"Без змін обороту"
+        :revenueGrowth>0?"Позитивна динаміка":"Період нижче бази порівняння",
+      body:`Оборот: ${comparison(revenueGrowth,previous.revenue)}. Чеки: ${comparison(checksGrowth,previous.checks)}. Середній чек: ${comparison(aovGrowth,previous.averageCheck)} vs ${label}.`
     }
   };
 }
@@ -290,7 +297,7 @@ async function legacy(query:DeliveryQuery):Promise<DeliveryData> {
       name,revenue:dm.revenue,growth:pct(dm.revenue,pm.revenue),checks:dm.checks,
       averageCheck:dm.averageCheck,markupRate:dm.markupRate,
       deliveryShare:total>0?dm.revenue/total*100:0,
-      aggregatorRevenue:ar,versusAggregator:ar>0?dm.revenue/ar*100:0
+      aggregatorRevenue:ar,versusAggregator:ar!==0?dm.revenue/ar*100:null
     };
   }).filter((r)=>r.revenue>0).sort((a,b)=>b.revenue-a.revenue);
 
@@ -316,7 +323,7 @@ async function legacy(query:DeliveryQuery):Promise<DeliveryData> {
       ?buildMultiYearWeeklyMetricSeries(main,years,query.metric)
       :buildMultiYearMetricSeries(main,years,query.metric,selectedMonth),
     typeSummary,deliveryMetrics,aggregatorMetrics,
-    ownVsAggregatorRatio:aggregatorMetrics.revenue>0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:0,
+    ownVsAggregatorRatio:aggregatorMetrics.revenue!==0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:null,
     compareSeries,locationRows
   };
 }
@@ -368,7 +375,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
       })),
       deliveryMetrics,
       aggregatorMetrics,
-      ownVsAggregatorRatio:aggregatorMetrics.revenue>0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:0,
+      ownVsAggregatorRatio:aggregatorMetrics.revenue!==0?deliveryMetrics.revenue/aggregatorMetrics.revenue*100:null,
       compareSeries:(payload.compareSeries ?? []).map((item)=>({
         label:item.label ?? "",
         delivery:num(item.delivery),
@@ -383,7 +390,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
         markupRate:num(item.markupRate),
         deliveryShare:num(item.deliveryShare),
         aggregatorRevenue:num(item.aggregatorRevenue),
-        versusAggregator:num(item.versusAggregator)
+        versusAggregator:num(item.aggregatorRevenue)!==0?nullableNum(item.versusAggregator):null
       }))
     };
   } catch(error) {

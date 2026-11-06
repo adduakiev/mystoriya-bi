@@ -1,0 +1,92 @@
+{
+  "checked_on": "2026-10-24",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40140314226",
+  "code_basis": "Exact requested existing PR source bd126b802068553dc45194bfb8429516c7bc2569 restored over checkout 4f0cfce using git apply without index/ref changes; current code/contract/tests layered on top.",
+  "statuses": {
+    "code_docs": "CODE/DOCS TESTED",
+    "end_to_end_audit": "END-TO-END AUDIT NOT VERIFIED"
+  },
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types --test web/tests/bi-audit-contracts.test.mjs web/tests/bi-audit.test.mjs web/tests/merchant-contract.test.mjs web/tests/bi-audit-postgres.test.mjs web/tests/meta-social-correctness.test.mjs",
+    "exit_code": 0,
+    "files_passed": 5,
+    "files_failed": 0,
+    "skipped_files": 0,
+    "new_contract_regressions": 7,
+    "postgres_fixture_tests_executed": 2,
+    "note": "Node test runner reports file-level results. New contract file also executed directly: seven subtests PASS."
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 12,
+    "files_failed": 3,
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "cause": "Sandbox disallows .agents/runtime writes; ENOENT on mkdir reproduced. Same-source full check passed in writable /tmp copy.",
+    "typescript_build": "NOT REACHED by workspace command"
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40140314226-check-0pmmn6wg",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 15,
+    "files_failed": 0,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "source_copy": "Source-only copy excludes secrets/.env/.git/runtime/build artifacts; installed web dependencies symlinked. Same final code/tests/SQL/contract generator; subsequent changes only check receipts and QA narrative."
+  },
+  "deterministic_artifacts": {
+    "commands": [
+      "node scripts/bi-audit-contracts.mjs --check",
+      "node scripts/bi-audit-inventory.mjs --check",
+      "node scripts/bi-audit-queries.mjs --check"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "static_contracts": 6,
+    "route_pages": 22,
+    "api_routes": 7,
+    "visual_control_templates": 742
+  },
+  "browser_matrix": {
+    "command": "node scripts/bi-audit-browser-qa.mjs --matrix",
+    "exit_code": 0,
+    "generated_cases": 66,
+    "executed_cases": 0,
+    "case_status": "NOT_EXECUTED",
+    "screenshots": [],
+    "protected_preview": "403 per earlier independent receipt; no fresh navigation or protection change"
+  },
+  "preservation": "14 critical evidence/guard/gate files byte-identical to bd126b8: independent production receipt, reviewer summary, coverage CSV/MD, source register, dated post-handoff receipt, App/Merchant adapters/pages, Merchant tests, digital-sources.ts, AGENTS.md and astra-runner.yml.",
+  "live_sql": "NOT EXECUTED",
+  "payload_rpc_invocations": 0,
+  "service_credentials_used": false,
+  "migrations": "NOT APPLIED; no staging/production migration execution",
+  "deployed_definition_parity": "UNKNOWN; repo hashes/signatures and reviewer attributes are separate; no exact deployed definitions/signatures/hashes supplied",
+  "upstream_completeness": "UNKNOWN",
+  "all_field_rpc_rendered_ui_parity": "UNKNOWN",
+  "business_timezone": "UNKNOWN",
+  "git_diff_check": "PASS tracked git diff --check plus no-index whitespace checks for every untracked file; no whitespace diagnostics",
+  "github_working_post": "Attempted gh api with current run URL: exit 4, no configured GH_TOKEN. No remote post claimed; trusted runner publication pending.",
+  "commit_push_pr_creation": "NOT PERFORMED BY CODEX; trusted runner supplies actual new revision full SHA/check/push receipt and updates existing PR #44 only",
+  "owner_action_now": "NONE for this code revision; release/data-write gates unchanged",
+  "historical_receipts": [
+    "verification-history-40135370633.json",
+    "sql-validation-history-40135370633.json",
+    "POST-HANDOFF-2026-10-25.json"
+  ],
+  "evidence_date_note": "Independent 2026-10-25 bounded receipts retain their original supplied date and fixed windows; no new production queries inferred from local checks."
+}

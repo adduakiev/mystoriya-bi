@@ -1,3 +1,4 @@
+import { overviewRpcArgs } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableMonths,
@@ -33,7 +34,7 @@ export type OverviewQuery = {
   lfl: boolean;
 };
 
-export type OverviewData = {
+type OverviewContext = {
   source: "supabase-sql" | "legacy";
   sourceRowCount: number;
   filteredRowCount: number;
@@ -46,8 +47,15 @@ export type OverviewData = {
   locations: string[];
   orderTypes: string[];
   latestSourceDate: string;
+};
+
+export type OverviewData = OverviewContext & ({
+  status: "unavailable";
+  reason: "SELECTED_PERIOD_CONTRACT_MISMATCH" | "MONTHLY_OBSERVATION_CONTRACT_MISMATCH";
+} | {
+  status: "ready";
   snapshot: DashboardSnapshot;
-  multiYearData: Array<Record<string, string | number>>;
+  multiYearData: Array<Record<string, string | number | null>>;
   channelMixData: Array<{
     label: string;
     venue: number;
@@ -69,14 +77,14 @@ export type OverviewData = {
       contribution: number | null;
     }>;
   };
-};
+});
 
 type RpcMetricSet = {
-  revenue?: number | string;
-  checks?: number | string;
-  markup?: number | string;
-  averageCheck?: number | string;
-  markupRate?: number | string;
+  revenue?: number | string | null;
+  checks?: number | string | null;
+  markup?: number | string | null;
+  averageCheck?: number | string | null;
+  markupRate?: number | string | null;
 };
 
 type RpcChannel = {
@@ -98,16 +106,19 @@ type RpcLocation = {
 type RpcMonthlyRow = {
   month?: number | string;
   label?: string;
-  revenue?: number | string;
+  revenue?: number | string | null;
   revenueGrowth?: number | string | null;
-  checks?: number | string;
+  checks?: number | string | null;
   checksGrowth?: number | string | null;
-  averageCheck?: number | string;
-  markupRate?: number | string;
-  venueShare?: number | string;
-  aggregatorShare?: number | string;
-  deliveryShare?: number | string;
+  averageCheck?: number | string | null;
+  markupRate?: number | string | null;
+  venueShare?: number | string | null;
+  aggregatorShare?: number | string | null;
+  deliveryShare?: number | string | null;
   isPartial?: boolean;
+  // Optional until the corresponding owner-approved SQL contract is installed.
+  currentObservationCount?: number | null;
+  previousObservationCount?: number | null;
 };
 
 type RpcDriver = {
@@ -143,7 +154,7 @@ type RpcOverviewPayload = {
   channels?: RpcChannel[];
   locations?: RpcLocation[];
   monthlyTable?: RpcMonthlyRow[];
-  multiYearData?: Array<Record<string, string | number>>;
+  multiYearData?: Array<Record<string, string | number | null>>;
   channelMixData?: Array<{
     label?: string;
     venue?: number | string;
@@ -168,6 +179,25 @@ function nullableNum(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+// Metadata must cover the same twelve ordered month cells on both comparison
+// sides. Partial/malformed metadata fails closed instead of fabricating zeros.
+function hasMonthlyObservationCounts(rows: RpcMonthlyRow[]): boolean {
+  return rows.some((row) =>
+    Object.hasOwn(row, "currentObservationCount") || Object.hasOwn(row, "previousObservationCount"));
+}
+
+function validMonthlyObservationCounts(rows: RpcMonthlyRow[]): boolean {
+  if (!hasMonthlyObservationCounts(rows)) return true; // installed SQL: old schema
+  return rows.length === 12 && rows.every((row, index) =>
+    Number(row.month) === index + 1
+    && typeof row.currentObservationCount === "number"
+    && Number.isSafeInteger(row.currentObservationCount)
+    && row.currentObservationCount >= 0
+    && typeof row.previousObservationCount === "number"
+    && Number.isSafeInteger(row.previousObservationCount)
+    && row.previousObservationCount >= 0);
 }
 
 function pctDelta(current: number, previous: number): number | null {
@@ -207,17 +237,41 @@ function toMetricSet(raw: RpcMetricSet | undefined): MetricSet {
   };
 }
 
-function buildSignal(
-  current: MetricSet,
-  previous: MetricSet,
+export function buildOverviewSignal(
+  current: RpcMetricSet | undefined,
+  previous: RpcMetricSet | undefined,
   comparisonLabel: string
 ): DashboardSnapshot["signal"] {
-  const revenueGrowth = pctDelta(current.revenue, previous.revenue) ?? 0;
-  const markupPp = ppDelta(current.markupRate, previous.markupRate) ?? 0;
-  const checksGrowth = pctDelta(current.checks, previous.checks) ?? 0;
-  const aovGrowth = pctDelta(current.averageCheck, previous.averageCheck) ?? 0;
+  // Inspect raw fields before the legacy MetricSet normalization erases missingness.
+  function value(raw: unknown): number | null {
+    if (typeof raw !== "number" && typeof raw !== "string") return null;
+    if (typeof raw === "string" && raw.trim() === "") return null;
+    return nullableNum(raw);
+  }
 
-  if (revenueGrowth > 0 && markupPp < -0.5) {
+  function growth(key: keyof RpcMetricSet): number | null {
+    const now = value(current?.[key]);
+    const before = value(previous?.[key]);
+    if (now === null || before === null) return null;
+    return pctDelta(now, before);
+  }
+
+  function comparison(key: keyof RpcMetricSet, delta: number | null): string {
+    if (delta !== null) return `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
+    const before = value(previous?.[key]);
+    return before === null || before === 0 ? "немає зіставної бази" : "дані відсутні";
+  }
+
+  const revenueGrowth = growth("revenue");
+  const checksGrowth = growth("checks");
+  const aovGrowth = growth("averageCheck");
+  const currentMarkupRate = value(current?.markupRate);
+  const previousMarkupRate = value(previous?.markupRate);
+  const markupPp = currentMarkupRate === null || previousMarkupRate === null
+    ? null
+    : ppDelta(currentMarkupRate, previousMarkupRate);
+
+  if (revenueGrowth !== null && revenueGrowth > 0 && markupPp !== null && markupPp < -0.5) {
     return {
       severity: "warning",
       title: "Оборот росте швидше за націнку %",
@@ -227,8 +281,13 @@ function buildSignal(
 
   return {
     severity: "info",
-    title: revenueGrowth >= 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
-    body: `Оборот: ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth >= 0 ? "+" : ""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth >= 0 ? "+" : ""}${aovGrowth.toFixed(1)}% vs ${comparisonLabel}.`
+    title: revenueGrowth === null
+      ? (value(previous?.revenue) === null || value(previous?.revenue) === 0
+        ? "Немає зіставної бази для обороту"
+        : "Недостатньо даних для порівняння обороту")
+      : revenueGrowth === 0 ? "Без змін обороту"
+      : revenueGrowth > 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
+    body: `Оборот: ${comparison("revenue", revenueGrowth)}. Чеки: ${comparison("checks", checksGrowth)}. Середній чек: ${comparison("averageCheck", aovGrowth)} vs ${comparisonLabel}.`
   };
 }
 
@@ -253,8 +312,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
     ),
     kpi(
       "Середній чек",
-      `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,
-      pctDelta(current.averageCheck, previous.averageCheck),
+      current.checks === 0 ? "—" : `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`,
+      current.checks === 0 || previous.checks === 0 ? null : pctDelta(current.averageCheck, previous.averageCheck),
       comparisonLabel
     ),
     kpi(
@@ -265,8 +324,8 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
     ),
     kpi(
       "Націнка %",
-      `${current.markupRate.toFixed(1)}%`,
-      ppDelta(current.markupRate, previous.markupRate),
+      current.revenue === 0 ? "—" : `${current.markupRate.toFixed(1)}%`,
+      current.revenue === 0 || previous.revenue === 0 ? null : ppDelta(current.markupRate, previous.markupRate),
       `п.п. vs ${comparisonLabel}`
     )
   ];
@@ -298,32 +357,74 @@ function buildSnapshot(payload: RpcOverviewPayload): DashboardSnapshot {
       growth: nullableNum(item.growth),
       share: num(item.share)
     })),
-    monthlyTable: (payload.monthlyTable ?? []).map((item) => ({
-      month: num(item.month),
-      label: item.label ?? "",
-      revenue: num(item.revenue),
-      revenueGrowth: nullableNum(item.revenueGrowth),
-      checks: num(item.checks),
-      checksGrowth: nullableNum(item.checksGrowth),
-      averageCheck: num(item.averageCheck),
-      markupRate: num(item.markupRate),
-      venueShare: num(item.venueShare),
-      aggregatorShare: num(item.aggregatorShare),
-      deliveryShare: num(item.deliveryShare),
-      isPartial: Boolean(item.isPartial)
-    })),
-    signal: buildSignal(current, previous, comparisonLabel)
+    monthlyTable: (payload.monthlyTable ?? []).map((item) => {
+      const currentCount = item.currentObservationCount;
+      const previousCount = item.previousObservationCount;
+      const currentObserved = currentCount == null || currentCount > 0;
+      const previousObserved = previousCount == null || previousCount > 0;
+      const revenue = currentObserved ? nullableNum(item.revenue) : null;
+      const checks = currentObserved ? nullableNum(item.checks) : null;
+      const averageCheck = checks === null || checks === 0 ? null : nullableNum(item.averageCheck);
+      const markupRate = revenue === null || revenue === 0 ? null : nullableNum(item.markupRate);
+      const share = (value: unknown) => revenue === null || revenue === 0 ? null : nullableNum(value);
+      return {
+        month: num(item.month),
+        label: item.label ?? "",
+        revenue,
+        revenueGrowth: currentObserved && previousObserved ? nullableNum(item.revenueGrowth) : null,
+        checks,
+        checksGrowth: currentObserved && previousObserved ? nullableNum(item.checksGrowth) : null,
+        averageCheck,
+        markupRate,
+        venueShare: share(item.venueShare),
+        aggregatorShare: share(item.aggregatorShare),
+        deliveryShare: share(item.deliveryShare),
+        currentObservationCount: currentCount,
+        previousObservationCount: previousCount,
+        isPartial: Boolean(item.isPartial)
+      };
+    }),
+    signal: buildOverviewSignal(payload.current, payload.previous, comparisonLabel)
   };
 }
 
+// Installed monthly SQL pads unobserved grid cells with zero. Without
+// observation counts, only future months beyond this filtered source's latest
+// observed date are provably unknown; do not rewrite historical zeroes.
 function normalizeSeries(
-  input: Array<Record<string, string | number>> | undefined
-): Array<Record<string, string | number>> {
-  return (input ?? []).map((point) => {
-    const next: Record<string, string | number> = {};
-    Object.entries(point).forEach(([key, value]) => {
-      next[key] = key === "label" ? String(value) : num(value);
-    });
+  input: Array<Record<string, string | number | null>> | undefined,
+  { grain, selectedMonth, latestSourceDate, scopedCutoffDate }: {
+    grain: GrainMode; selectedMonth?: number; latestSourceDate: string; scopedCutoffDate: string;
+  }
+): Array<Record<string, string | number | null>> {
+  const cutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate)
+    ? new Date(`${latestSourceDate}T00:00:00Z`) : null;
+  const validCutoff = cutoff !== null && Number.isFinite(cutoff.getTime())
+    && cutoff.toISOString().slice(0, 10) === latestSourceDate;
+  const cutoffYear = validCutoff ? latestSourceDate.slice(0, 4) : "";
+  const cutoffMonth = validCutoff ? Number(latestSourceDate.slice(5, 7)) : 0;
+  // SQL meta.latestSourceDate is global, whereas meta.cutoffDate follows
+  // the selected filter/year. Do not plot false zeroes after that cutoff.
+  const scopeDate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(scopedCutoffDate)
+    ? new Date(`${scopedCutoffDate}T00:00:00Z`) : null;
+  const validScope = scopeDate !== null && Number.isFinite(scopeDate.getTime())
+    && scopeDate.toISOString().slice(0, 10) === scopedCutoffDate;
+  const effectiveCutoffMonth = validCutoff && validScope && scopedCutoffDate.slice(0, 4) === cutoffYear
+    ? Math.min(cutoffMonth, Number(scopedCutoffDate.slice(5, 7))) : cutoffMonth;
+  const monthlyGrid = grain === "month" && selectedMonth === undefined && input?.length === 12;
+
+  return (input ?? []).map((point, index) => {
+    const next: Record<string, string | number | null> = {};
+    for (const [key, value] of Object.entries(point)) {
+      if (key === "label") {
+        next[key] = String(value);
+      } else if (monthlyGrid && key === cutoffYear && index + 1 > effectiveCutoffMonth) {
+        next[key] = null;
+      } else {
+        next[key] = typeof value === "string" && value.trim() === "" ? null
+          : typeof value === "string" || typeof value === "number" ? nullableNum(value) : null;
+      }
+    }
     return next;
   });
 }
@@ -336,22 +437,6 @@ function normalizeDrivers(input: RpcDriver[] | undefined) {
   }));
 }
 
-function rpcArgs(query: OverviewQuery): Record<string, unknown> {
-  return {
-    p_channel: query.channel ?? null,
-    p_order_type: query.orderType ?? null,
-    p_location: query.location ?? null,
-    p_brand: query.brand ?? null,
-    p_ownership: query.ownership ?? null,
-    p_focus_year: query.year ?? null,
-    p_focus_month: query.month ?? null,
-    p_period: query.period,
-    p_comparison: query.compare,
-    p_metric: query.metric,
-    p_grain: query.grain,
-    p_lfl: query.lfl
-  };
-}
 
 function queryCacheKey(query: OverviewQuery): string {
   return JSON.stringify([
@@ -370,11 +455,35 @@ function queryCacheKey(query: OverviewQuery): string {
   ]);
 }
 
+function periodInteger(value: unknown): number | null {
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  if (typeof value === "string" && !/^\d+$/.test(value)) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function matchesSelectedPeriod(meta: NonNullable<RpcOverviewPayload["meta"]>, query: OverviewQuery): boolean {
+  const cutoff = meta.cutoffDate;
+  // Reject missing dates, timestamps and impossible calendar dates (e.g. Feb 30).
+  if (typeof cutoff !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) return false;
+  const date = new Date(`${cutoff}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
+  const selectedYear = periodInteger(meta.selectedYear);
+  const expectedYear = query.year ?? selectedYear;
+  if (!expectedYear || selectedYear !== expectedYear || periodInteger(meta.currentYear) !== expectedYear
+    || date.getUTCFullYear() !== expectedYear) return false;
+
+  const selectedMonth = meta.selectedMonth == null ? undefined : periodInteger(meta.selectedMonth);
+  if (selectedMonth !== query.month) return false;
+  return selectedMonth === undefined || (selectedMonth !== null && selectedMonth <= 12
+    && date.getUTCMonth() + 1 === selectedMonth);
+}
+
 async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
   const key = queryCacheKey(query);
 
   const payload = await unstable_cache(
-    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", rpcArgs(query), 10_000),
+    () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", overviewRpcArgs(query), 10_000),
     ["bi-overview-sql-v1", key],
     {
       revalidate: 180,
@@ -383,26 +492,39 @@ async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
   )();
 
   const meta = payload.meta ?? {};
-  const selectedYear = num(meta.selectedYear);
-  const selectedMonth = meta.selectedMonth === null || meta.selectedMonth === undefined
-    ? undefined
-    : num(meta.selectedMonth);
-
-  return {
+  const selectedYear = query.year ?? periodInteger(meta.selectedYear) ?? 0;
+  const selectedMonth = query.month;
+  const context: OverviewContext = {
     source: "supabase-sql",
     sourceRowCount: num(meta.sourceRowCount),
     filteredRowCount: num(meta.filteredRowCount),
-    years: (meta.years ?? []).map(num),
+    years: [...new Set([...(meta.years ?? []).map(num), selectedYear])].sort((a, b) => a - b),
     selectedYear,
     selectedMonth,
-    availableMonthNumbers: (meta.availableMonths ?? []).map(num),
+    availableMonthNumbers: [...new Set([
+      ...(meta.availableMonths ?? []).map(num), ...(selectedMonth ? [selectedMonth] : [])
+    ])].sort((a, b) => a - b),
     brands: meta.brands ?? [],
     ownerships: meta.ownerships ?? [],
     locations: meta.locations ?? [],
     orderTypes: meta.orderTypes ?? [],
-    latestSourceDate: meta.latestSourceDate ?? "",
+    latestSourceDate: meta.latestSourceDate ?? ""
+  };
+
+  // Return a distinct result before normalizing any metrics. A known contract
+  // mismatch must never enter the exception-driven legacy fallback.
+  if (!matchesSelectedPeriod(meta, query)) {
+    return {...context, status: "unavailable", reason: "SELECTED_PERIOD_CONTRACT_MISMATCH"};
+  }
+  if (!validMonthlyObservationCounts(payload.monthlyTable ?? [])) {
+    return {...context, status: "unavailable", reason: "MONTHLY_OBSERVATION_CONTRACT_MISMATCH"};
+  }
+
+  return {
+    ...context,
+    status: "ready",
     snapshot: buildSnapshot(payload),
-    multiYearData: normalizeSeries(payload.multiYearData),
+    multiYearData: normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "", scopedCutoffDate: meta.cutoffDate ?? "" }),
     channelMixData: (payload.channelMixData ?? []).map((item) => ({
       label: item.label ?? "",
       venue: num(item.venue),
@@ -458,6 +580,8 @@ async function fetchLegacyOverview(query: OverviewQuery): Promise<OverviewData> 
     focusYear: selectedYear,
     focusMonth: selectedMonth
   });
+  // Keep the Overview presentation contract when the SQL adapter falls back.
+  snapshot.signal = buildOverviewSignal(snapshot.current, snapshot.previous, snapshot.comparisonLabel);
 
   const dimensionRows = filterSalesRows(sourceRows, { lfl: query.lfl });
   const brands = [...new Set(dimensionRows.map((row) => row.brand))].sort((a, b) => a.localeCompare(b, "uk"));
@@ -479,6 +603,7 @@ async function fetchLegacyOverview(query: OverviewQuery): Promise<OverviewData> 
   );
 
   return {
+    status: "ready",
     source: "legacy",
     sourceRowCount: sourceRows.length,
     filteredRowCount: rows.length,

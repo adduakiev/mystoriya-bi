@@ -1,0 +1,133 @@
+{
+  "issue": 43,
+  "existing_pr": 44,
+  "branch": "astra/issue-43-40107435112",
+  "reviewed_base_sha": "74e85661d4ff9231238b73cd4268c851017fca0f",
+  "candidate_commit_sha": null,
+  "candidate_state": "UNCOMMITTED_WORKSPACE_CHANGES",
+  "recorded_at_utc": "2026-11-02T22:25:33.921233+00:00",
+  "status": "BLOCKED_SERVER_CONCURRENCY_VERIFICATION_NOT_READY_FOR_GATE",
+  "isolated_checkouts": {
+    "base": "git archive of exact reviewed SHA",
+    "candidate": "same archive plus byte-identical changed code/tests; dependency symlink",
+    "detached_worktree": "unavailable: .git read-only; no new branch created"
+  },
+  "checks": {
+    "npm_ci_web": "PASS; lockfile unchanged",
+    "focused": {
+      "pass": 38,
+      "fail": 0,
+      "skip": 0,
+      "includes": "private OAuth, exact cents, 47k preparation, fail-closed preflight, actual Next/Edge 503 and SSR control"
+    },
+    "postgres_single_user": {
+      "result": "PASS",
+      "postgres": "16.15",
+      "rows": 47000,
+      "batches": 24,
+      "duration_ms": 11107.526867,
+      "revenue": "90071992552109.81",
+      "checks": "47000",
+      "markup": "-1410.00",
+      "relations": [
+        "fact_sales_daily",
+        "bi_sales_flat_mv",
+        "agg_sales_monthly",
+        "agg_sales_weekly"
+      ],
+      "evidence": [
+        "exact numeric equality",
+        "seeded historical identity retained",
+        "injected post-refresh failure rolls back full ordered snapshot digest and status",
+        "retry receipt and full 47k snapshot digest unchanged"
+      ],
+      "concurrency_proven": false,
+      "initial_piped_input_attempts": "TIMEOUT; fixed using file-backed SQL input; final full-suite runs pass"
+    },
+    "npm_run_check": {
+      "result": "FAIL",
+      "test_file_pass": 42,
+      "test_file_fail": 1,
+      "skip": 0,
+      "failed_file": "web/tests/sales-atomic-postgres.test.mjs",
+      "reason": "listen EPERM 127.0.0.1 before initdb/server start",
+      "subsequent_tsc_build_stages": "NOT_REACHED; separately passed"
+    },
+    "expanded_full_suite": {
+      "command": "node --experimental-strip-types --test --test-isolation=none .agents/*.test.mjs web/tests/*.test.mjs",
+      "pass": 444,
+      "fail": 1,
+      "skip": 0,
+      "total": 445,
+      "sole_failure": "atomic server fixture: listen EPERM"
+    },
+    "typescript_no_emit": "PASS",
+    "optimized_next_build": "PASS",
+    "inventory_and_tab_block_matrix_generator_check": "PASS; 22 pages, 7 API routes, 758 templates",
+    "audit_artifact_tests": {
+      "pass": 17,
+      "fail": 0,
+      "skip": 0
+    },
+    "git_diff_check": "PASS",
+    "authenticated_desktop_mobile_qa": "NOT_PERFORMED; no authorized session used"
+  },
+  "review": {
+    "type": "local implementation review, no independent reviewer claimed",
+    "checked": [
+      "exact monetary serialization without JS-number roundtrip",
+      "source rejection before any staging",
+      "historical-key guard retained in unchanged SQL",
+      "unconditional production manual 503 guards",
+      "no public fallback or DB executor",
+      "release/backup/rollback gates documented"
+    ]
+  },
+  "blocker": {
+    "reproduce": "node --test web/tests/sales-atomic-postgres.test.mjs",
+    "same_failure_on_exact_base": true,
+    "unix_socket": "also EPERM",
+    "permission_escalation": "not available; not requested",
+    "needed": "trusted runner with permitted local socket binding must run full native server rollback/concurrency/cancellation/47k suite on resulting exact commit, with zero PG skips"
+  },
+  "remaining": [
+    "no production service-account probe or live source reconciliation",
+    "no production backup or restore rehearsal",
+    "no database sender, deployment, import, SQL application or permission/schedule/credential changes",
+    "duplicate source-key semantics still need review; adapter rejects them",
+    "source calendar cutoff is not proof of business close or full source completeness"
+  ],
+  "handoff": {
+    "publication": "trusted workflow only, existing PR #44",
+    "must_attach_actual_commit_sha_and_check_urls": true,
+    "remote_receipt_posted": false,
+    "new_pr_or_branch_created": false,
+    "commit_push_merge_deploy_import_or_production_actions": false
+  },
+  "file_sha256": {
+    "supabase/functions/sync-google-sheet/google-sheet-reader.mjs": "726eb2b77527d4ce324e5f7d034093bc03cfa79eaca214e6936f90cac0c83d81",
+    "supabase/functions/sync-google-sheet/prepared-sales-recovery.mjs": "97381efee45a17d0157be85d23bba201ecba5e120bdd683ddde608dc42f0d089",
+    "web/tests/google-sheet-reader.test.mjs": "9f0fd046bb3410192a2e2cfce7bc8a287f034c4e01e9fe18540b9a2736eec604",
+    "web/tests/prepared-sales-recovery.test.mjs": "a7617bf69edb821e1c373c004e7855afdf7d7354038d636129d98ff3a2c22ff9",
+    "web/tests/prepared-sales-recovery-postgres.test.mjs": "78f12011a6dfee775621c94fbc26731f50b7f41e0858314983ebd29620c27267",
+    "web/tests/sales-atomic-postgres.test.mjs": "9b1c90ad8be9c8819058d63ca56ee3f4ec5e6e39ec2887a15215070fe634a366",
+    "supabase/functions/sync-google-sheet/index.ts": "04eb5d69d07bb7b8175be04b158a33d8315d867c8d80f97c6ecf8967103fb9b3",
+    "web/app/api/data-sync/route.ts": "11b86897dc12bee12c904f799ed42dc9ee7bb8cfeee97e1a588c73ed3ca008d1",
+    "docs/sql/issue-43-sales-atomic-NOT-APPLIED.sql": "30138b03f6851fd8b5aac2b2d810bfd80d639953008e42ec1053ced19a0f1c58",
+    "docs/BI-DATA-AUDIT-2026-10-24.md": "ebcd4625bf2601cd2e6fb9738d0c1d083e58bd71bb25c0bd462c7f8069d15138",
+    "docs/PROJECT-STATUS.md": "7c13366d5d8576f81fe77a683eafada3a2af8233df85e1e9cc94c89d33b67b88",
+    "docs/audit/2026-10-24/SALES-RECOVERY-PREPARATION-2026-11-02.md": "f50804d0dc239999f5f7fb3b1dad609e8630afbb8e3f549639d8639266e4cfb4",
+    "docs/audit/2026-10-24/inventory.json": "34532a5088f634e7ce3741b9cb28df480715b08ef623aef4f8b3434db803940f",
+    "docs/audit/2026-10-24/tab-block-matrix.csv": "7eb0c3dcb1d88b46b8a3ccd870c9ac265e8da8c50f63a98464d4a5d38571b631"
+  },
+  "local_log_sha256": {
+    "/tmp/issue-43-focused.log": "7e53cd9177ad689650fd65551aaa653ee1fa50314d10460ce496d3dc7b9b90b3",
+    "/tmp/issue-43-single-pg-file.log": "3868ed72c2a195db42522c435f93e19e186cc3a7aaeb3affa92ea58477cda89b",
+    "/tmp/issue-43-isolated-check-final.log": "66d70b03a717a4b02d6f916ebc4cbd4b57b03b3ee0f32fb85c2578baa239f5d1",
+    "/tmp/issue-43-all-tests-final.log": "2f9538474262d9ec28bf9fb4b672b37dba3728b2e7af008c9fc491dfc47ffec7",
+    "/tmp/issue-43-tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/issue-43-build.log": "f334b36a5a409c623bc1d6a7417ea516c7c7b648a0cbb639c094415884aea6de",
+    "/tmp/issue-43-audit-artifacts.log": "2aff69e4057c8ba0d842c5bf81f8dfdfd0cd2f1bd406487b2a5d740dd68497fa",
+    "/tmp/issue-43-baseline-pg.log": "dc77e78f65d513c6392dfc28aa2bd505d6025a65e9a36563dd7707e71a6fa389"
+  }
+}

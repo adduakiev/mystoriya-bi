@@ -111,11 +111,13 @@ test("recovery uses the verified Vault value and exposes only hashes and metadat
   assert.ok(!/\bdelete\s+from\s+vault\.|\bvault\.update_secret\(/i.test(code), "never delete or rotate an existing secret");
 });
 
-test("unchanged Edge Function path is documented without claiming live validation", () => {
+test("rollback-only Vault design cannot be enabled through the closed Edge Sales handler", () => {
   const edge = read("supabase/functions/sync-google-sheet/index.ts");
-  for (const fragment of ['req.headers.get("x-bi-sync-key")', '.eq("config_key", "sync_key")', '(await sha256Hex(presentedSyncKey)) !== syncConfig.value_hash', 'status: 401']) {
-    includes(edge, fragment, "existing Edge authentication contract changed; review required");
-  }
+  includes(edge, "SALES_IMPORT_SAFETY_GATE", "Edge must retain the import safety gate");
+  assert.match(edge, /status:\s*503/, "all POST imports must remain rejected");
+  assert.match(edge, /status:\s*405/, "non-POST requests must remain rejected");
+  assert.doesNotMatch(edge, /x-bi-sync-key|bi_runtime_config|sha256Hex|sync_sales_batch|finalize_sales_snapshot|gviz\/tq|\bimport_runs\b|Deno\.env|createClient|\bfetch\s*\(/,
+    "historical Vault/sync-key writer must not be reachable in the Edge handler");
   for (const fragment of ["Barbara", "Kostiantyn", "including local SQL", "No executable recovery/apply path", "asynchronous", "already running", "external log redaction", "pg_net", "non-relocatable", "pre-change", "No plaintext backup"]) {
     includes(doc, fragment, "review, validation or recovery limitation is missing");
   }

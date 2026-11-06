@@ -1,0 +1,16 @@
+# D244 — P0 Sales Recovery: D243 trusted OUTER receipt and exact-SHA acceptance gate
+
+Status: **PREPARE ONLY; not ready for production; no migration, deploy, import, credential, merge, or schedule modification.** Evidence date: **2026-11-05 UTC**.
+
+## Independently verified on prior published D243 code SHA
+
+- Existing issue **#43**, SAME OPEN UNMERGED PR **#44**, branch `astra/issue-43-40107435112`. Verified expected head before publishing this receipt: `67709260e0590f9eb8555667b6798fb298d2bcb3` (one child of previously accepted `8c5ea13c323bd358197198194d3606776496dfe3`).
+- [Astra Actions #41956817737](https://github.com/adduakiev/mystoriya-bi/actions/runs/41956817737), trusted OUTER job **127013598389** completed **SUCCESS** (not the inner Codex sandbox). **Native disposable PostgreSQL 16.15** `npm run check`: **612 tests / 612 pass / 0 fail / 0 skipped**. TypeScript, optimized Next.js build and `git diff --check` passed. Inner Codex could not bind disposable sockets and reported failures; those are not the trusted outer acceptance verdict.
+- The trusted outer runner **committed and pushed** `67709260e0590f9eb8555667b6798fb298d2bcb3`; the stale inner handoff sentence claiming no commit/push is false. Exact compare against `8c5ea13c...`: only **three paths** — `web/tests/fixtures/sales-capture-contract.mjs` (new), `web/tests/sales-release-v234-postgres.test.mjs` (modified), and `docs/BI-DATA-AUDIT-2026-10-24.md` (modified). No active Edge/Next route, workflow, UI, source credential, production DB, import or timer changes.
+- Synthetic private readonly Sheets OAuth capture → immutable canonical bytes → exact cents/manifest → isolated v234 SQL/receipt parity tested. All signatures/capture/credentials in this gate are ephemeral synthetic test-only; this does **not** establish live private-sheet access, pinned owner/reviewer roots, real legacy source provenance, production backup/rollback or cutover readiness.
+- Vercel Preview deployment `dpl_CTR7HNzRCJkQ8Aw89DYA9vWxjk6w` on **exact previous SHA** `67709260e0590f9eb8555667b6798fb298d2bcb3` is **READY**, separately confirmed via Vercel read-only API.
+- **No exact-published-SHA PG16+PG17 GitHub native workflow exists for `67709260e0590f9eb8555667b6798fb298d2bcb3`** (verified GitHub Actions branch run list); GitHub App runner push did not trigger the native push workflow. This receipt is a **documentation-only, bounded follow-up commit** with an expected-HEAD Git ref lease to invoke one necessary full **PG16 → PG17 exact-SHA** gate, not an approval or cosmetic rerun. Validate both job logs' GITHUB_SHA, full test counts, Vercel READY on resulting HEAD before continuing. Do not dispatch a new Astra run until adjudicated.
+
+## Still blocked for actual Production
+
+Require verified private Sheets read credentials (server-only), real source integrity/provenance, independent owner/reviewer attestor authority, measured production checkpoint + restore/rollback, compatible Edge cutover with fail-closed manual update/status, independent exact-SHA PG16/PG17 acceptance, and authenticated desktop/mobile source→warehouse→RPC→UI QA. **Existing batch/finalize remain unsafe**. Data Gap Workshop and Digital UX/UI remain queued/read-only. No Production changes authorized by this receipt.

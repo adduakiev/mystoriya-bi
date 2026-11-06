@@ -1,0 +1,41 @@
+{
+  "checked_on": "2026-10-24",
+  "scope": "SYNTHETIC DISPOSABLE POSTGRESQL 16 FIXTURES ONLY",
+  "production_warehouse_execution": "NOT EXECUTED",
+  "upstream_parity": "UNKNOWN",
+  "rpc_rendered_ui_parity": "UNKNOWN",
+  "test_command": "node --experimental-strip-types web/tests/bi-audit-postgres.test.mjs",
+  "result": "PASS: current 2 fixture tests executed, not skipped; catalog-only query, no payload invocation",
+  "relation_diagnostics_executed": 35,
+  "raw_curated_mapping_queries_executed": [
+    "Google Ads",
+    "GA4",
+    "GSC",
+    "GBP",
+    "Meta"
+  ],
+  "actual_repository_rpc_body_executed": "NONE_IN_CURRENT_REVISION; payload-invocation fixture removed under current review constraint",
+  "validated": [
+    "repository date/key/metric names match DDL column contracts",
+    "schema preflight returns no missing columns",
+    "read-only transaction and bounded 12-month/current30/prior30/monthly windows",
+    "out-of-range and current incomplete dates excluded",
+    "null event date probe",
+    "duplicate keys and unknown keys",
+    "missing dates and event age at fixed cutoff",
+    "missing field invalidates complete_stored_total; measured zero retained",
+    "raw/curated mismatch and missing field detected",
+    "account currency groups remain separate",
+    "empty source totals remain null",
+    "catalog-only metadata query executes on disposable PostgreSQL without any payload call"
+  ],
+  "limitations": [
+    "No existing database connection or production migration used",
+    "No RLS/concurrency/upstream completeness claim",
+    "Fixtures omit table constraints to inject diagnostic defects; deployed schema UNKNOWN",
+    "RPCs without explicit date boundaries remain outside bounded parity checks",
+    "No password, service credentials or payload function execution in this revision"
+  ],
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40140314226",
+  "historical_receipt": "sql-validation-history-40135370633.json describes earlier fixture execution, not current production proof"
+}

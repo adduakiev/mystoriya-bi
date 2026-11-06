@@ -1,0 +1,125 @@
+{
+  "recorded_on": "2026-10-25",
+  "issue": 43,
+  "existing_pr": 44,
+  "evidence_kind": "INDEPENDENT_SELECT_ONLY_RESULTS_RELAYED_IN_TRUSTED_TRIGGER",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6399469440",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40206730240",
+  "source_base_sha": "922d04d2afec8181ab17e175b582e113c95c5c17",
+  "review_comment_independently_fetched": false,
+  "runner_executed_warehouse_sql": false,
+  "exact_upstream_or_query_execution_timestamp": "UNKNOWN",
+  "query_artifact": "google-ads-daily-reconciliation.sql",
+  "query_status": "NEW_REPRODUCTION_QUERY_PREPARED_AND_TESTED_ON_SYNTHETIC_LOCAL_FIXTURES_ONLY; NOT_EXECUTED_ON_WAREHOUSE",
+  "original_reviewer_sql_text": "NOT_SUPPLIED_IN_TRIGGER",
+  "google_ads_daily": {
+    "window": {
+      "from": "2026-10-12",
+      "to": "2026-10-24",
+      "inclusive": true,
+      "calendar_timezone": "UTC",
+      "expected_calendar_dates": 13
+    },
+    "raw_relation": "public.staging_google_ads_windsor",
+    "raw_date_column": "date",
+    "raw_conversion_value_column": "conversions_value",
+    "curated_relation": "public.digital_google_ads_daily",
+    "curated_date_column": "date_id",
+    "curated_conversion_value_column": "conversion_value",
+    "raw_rows": 157,
+    "raw_observed_dates": 13,
+    "curated_rows": 13,
+    "curated_observed_dates": 13,
+    "join": "FULL OUTER JOIN by date",
+    "comparison": "IS DISTINCT FROM; NULL-aware",
+    "missing_date_groups": 0,
+    "mismatched_daily_aggregate_groups": 0,
+    "metric_mismatch_groups": {
+      "cost": 0,
+      "clicks": 0,
+      "impressions": 0,
+      "conversions": 0,
+      "conversion_value": 0
+    },
+    "duplicate_raw_key_columns": [
+      "date",
+      "account_id",
+      "campaign_id"
+    ],
+    "duplicate_raw_key_groups": 0,
+    "currency_columns": "ABSENT per supplied schema caveat and prior independent receipt",
+    "raw_unknown_metric_rows": "UNKNOWN",
+    "curated_unknown_metric_rows": "UNKNOWN",
+    "raw_unknown_identity_rows": "UNKNOWN",
+    "duplicate_curated_date_groups": "UNKNOWN",
+    "metric_amounts": "NOT_SUPPLIED; no currency-labelled totals inferred",
+    "proven_scope": "BOUNDED_STORED_DAILY_AGGREGATES_ONLY"
+  },
+  "shifted_current30": {
+    "from": "2026-09-25",
+    "to": "2026-10-24",
+    "inclusive": true,
+    "calendar_timezone": "UTC",
+    "expected_calendar_dates": 30,
+    "sources": {
+      "ga4": {
+        "relation": "public.digital_ga4_daily",
+        "observed_dates": 30,
+        "row_count": "UNKNOWN",
+        "missing_calendar_dates": 0
+      },
+      "gsc": {
+        "relation": "public.digital_search_daily",
+        "observed_dates": 28,
+        "row_count": "UNKNOWN",
+        "latest_observed_date": "2026-10-22",
+        "missing_calendar_dates": 2
+      },
+      "google_ads": {
+        "relation": "public.digital_google_ads_daily",
+        "observed_dates": 13,
+        "row_count": 13,
+        "missing_calendar_dates": 17,
+        "first_observed_date": "2026-10-12",
+        "latest_observed_date": "2026-10-24",
+        "onboarded_interval_expected_dates": 13,
+        "onboarded_interval_observed_dates": 13,
+        "pre_onboarding_calendar_dates": 17,
+        "note": "13/13 stored dates in observed onboarded interval; 13/30 in full shifted window. Onboarding does not prove upstream completeness."
+      }
+    }
+  },
+  "historical_window": {
+    "from": "2026-09-24",
+    "to": "2026-10-23",
+    "expected_calendar_dates": 30,
+    "ga4_rows": 30,
+    "ga4_observed_dates": 30,
+    "gsc_rows": 29,
+    "gsc_observed_dates": 29,
+    "receipt": "REVIEWER-RECEIPT-2026-10-25-6397712491.json",
+    "note": "Prior GSC 29 rows / 29 observed dates out of 30 expected; not 29/29 complete coverage. Different bounds and receipt; no date-loss inference from subtraction."
+  },
+  "unknown_contracts": [
+    "upstream_completeness",
+    "business_account_timezone",
+    "account_scope_parity",
+    "currency",
+    "conversion_action_attribution",
+    "refunds",
+    "all_field_completeness",
+    "rpc_rendered_ui_parity",
+    "shifted_prior30_coverage",
+    "shifted_trailing12months_coverage"
+  ],
+  "guards": "D22 ROAS fail-closed; D06 OPEN; Meta USD/null; App/Merchant; sidebar/prefetch unchanged",
+  "browser_qa": {
+    "status": "NOT_EXECUTED",
+    "cases": 66,
+    "gate_review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6398044302",
+    "exact_sha_authenticated_session": "NOT_AVAILABLE",
+    "new_screenshots": 0
+  },
+  "release_readiness": "NOT_READY_FOR_GATE; bounded stored parity only",
+  "owner_action_now": "NONE for code/docs/tests"
+}

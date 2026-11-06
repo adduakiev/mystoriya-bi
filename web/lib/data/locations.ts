@@ -146,10 +146,16 @@ function snapshotFromRpc(payload: RpcPayload): DashboardSnapshot {
   const previous = metricSet(payload.previous);
   const comparisonLabel = String(meta.previousYear ?? "");
 
-  const revenueGrowth = pct(current.revenue, previous.revenue) ?? 0;
-  const checksGrowth = pct(current.checks, previous.checks) ?? 0;
-  const aovGrowth = pct(current.averageCheck, previous.averageCheck) ?? 0;
-  const markupDelta = pp(current.markupRate, previous.markupRate) ?? 0;
+  // The installed Locations RPC returns numeric zero when the previous
+  // period has no rows. A zero denominator is not measured 0% growth.
+  const revenueGrowth = pct(current.revenue, previous.revenue);
+  const checksGrowth = pct(current.checks, previous.checks);
+  const aovGrowth = current.checks === 0 || previous.checks === 0
+    ? null : pct(current.averageCheck, previous.averageCheck);
+  const markupDelta = current.revenue === 0 || previous.revenue === 0
+    ? null : pp(current.markupRate, previous.markupRate);
+  const comparison = (delta: number | null): string =>
+    delta === null ? "немає зіставної бази" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
 
   return {
     sourceRows: 0,
@@ -165,18 +171,21 @@ function snapshotFromRpc(payload: RpcPayload): DashboardSnapshot {
     kpis: [
       kpi("Оборот", compactUah(current.revenue), pct(current.revenue, previous.revenue), comparisonLabel),
       kpi("Чеки", Math.round(current.checks).toLocaleString("uk-UA"), pct(current.checks, previous.checks), comparisonLabel),
-      kpi("Середній чек", `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`, pct(current.averageCheck, previous.averageCheck), comparisonLabel),
+      kpi("Середній чек", current.checks === 0 ? "—" : `₴ ${Math.round(current.averageCheck).toLocaleString("uk-UA")}`, aovGrowth, comparisonLabel),
       kpi("Націнка", compactUah(current.markup), pct(current.markup, previous.markup), comparisonLabel),
-      kpi("Націнка %", `${current.markupRate.toFixed(1)}%`, pp(current.markupRate, previous.markupRate), `п.п. vs ${comparisonLabel}`)
+      kpi("Націнка %", current.revenue === 0 ? "—" : `${current.markupRate.toFixed(1)}%`, markupDelta, `п.п. vs ${comparisonLabel}`)
     ],
     trend: [],
     channels: [],
     locations: [],
     monthlyTable: [],
     signal: {
-      severity: revenueGrowth > 0 && markupDelta < -0.5 ? "warning" : "info",
-      title: revenueGrowth >= 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
-      body: `Оборот: ${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth.toFixed(1)}%. Чеки: ${checksGrowth >= 0 ? "+" : ""}${checksGrowth.toFixed(1)}%. Середній чек: ${aovGrowth >= 0 ? "+" : ""}${aovGrowth.toFixed(1)}% vs ${comparisonLabel}.`
+      severity: revenueGrowth !== null && revenueGrowth > 0
+        && markupDelta !== null && markupDelta < -0.5 ? "warning" : "info",
+      title: revenueGrowth === null ? "Немає зіставної бази для обороту"
+        : revenueGrowth === 0 ? "Без змін обороту"
+        : revenueGrowth > 0 ? "Позитивна динаміка" : "Період нижче бази порівняння",
+      body: `Оборот: ${comparison(revenueGrowth)}. Чеки: ${comparison(checksGrowth)}. Середній чек: ${comparison(aovGrowth)} vs ${comparisonLabel}.`
     }
   };
 }

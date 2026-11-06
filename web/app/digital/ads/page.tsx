@@ -1,22 +1,16 @@
-import { formatMetric, metricSum } from "@/lib/digital-quality";
+import { formatMetric } from "@/lib/digital-quality";
+import { sourceMoney as money } from "@/lib/source-evidence";
+import { adsCampaignSignal as signal, hasSpendWithoutConversions } from "@/lib/ads-presentation";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { DigitalAdsTrendChart } from "@/components/DigitalAdsTrendChart";
 import { DigitalSourceEvidence } from "@/components/DigitalSourceEvidence";
-import { loadDigitalMetaAdsData, loadDigitalAdsData, type AdsCampaign } from "@/lib/data/digital-sources";
+import { loadDigitalMetaAdsData, loadDigitalAdsData } from "@/lib/data/digital-sources";
 
 function n(v:number|null|undefined){return formatMetric(v);}
-function money(v:number|null){if(v===null)return "—";return `₴ ${Math.round(v).toLocaleString("uk-UA")}`;}
 function pct(v:number|null){if(v===null)return "—";return `${(v*100).toFixed(2)}%`;}
 function x(v:number|null){if(v===null)return "—";return `${v.toFixed(2)}x`;}
 function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
-function signal(r:AdsCampaign){
-  if(r.cost!==null&&r.cost>=500&&r.conversions===0) return {label:"0 conversions",cls:"negative"};
-  if(r.conversions!==null&&r.conversions>0&&r.conversionValue===0) return {label:"Value = 0",cls:""};
-  if(r.roas===null) return {label:"ROAS не визначено",cls:""};
-  if(r.roas>0&&r.roas<1) return {label:"Value нижче spend",cls:"negative"};
-  return {label:"Перевірити",cls:""};
-}
 
 export default async function Page(){
   const [googleResult, metaResult]=await Promise.allSettled([loadDigitalAdsData(), loadDigitalMetaAdsData()]);
@@ -24,8 +18,7 @@ export default async function Page(){
   const data=googleResult.value;
   const meta=metaResult.status === "fulfilled" ? metaResult.value : null;
   const s=data.summary;
-  const noConversions=data.campaigns.filter(r=>r.cost!==null&&r.cost>=500&&r.conversions===0);
-  const noConversionSpend=metricSum(...noConversions.map(r=>r.cost));
+  const noConversions=data.campaigns.filter(hasSpendWithoutConversions);
   const unvalued=data.campaigns.filter(r=>r.conversions!==null&&r.conversions>0&&r.conversionValue===0);
   return <main className="shell">
     <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Paid Advertising" statusDetail={`Google Ads ${data.meta.available ? "дані є" : "очікує"} · Meta Ads ${meta?.meta.status ?? "недоступно"}`}/>
@@ -33,7 +26,7 @@ export default async function Page(){
       <header className="topbar"><div><span className="eyebrow">DIGITAL · PAID ADVERTISING</span><h1>Paid Advertising · Google Ads / Meta Ads</h1></div><div className="digital-source-badge">Google Ads · М’ясторія · 824-018-4168</div></header>
       <DigitalTabs active="ads"/>
       <h2>Google Ads · окрема атрибуція</h2>
-      <div className="lfl-banner">Дати Google Ads: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Календарне вікно не підтверджує кількість днів з даними. Підсумки warehouse та кампанії staging можуть мати різні дати оновлення; валюта не підтверджена контрактом.</div>
+      <div className="lfl-banner">Дати Google Ads: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Календарне вікно не підтверджує кількість днів з даними. Підсумки warehouse та кампанії staging можуть мати різні дати оновлення; акаунт і валюта value та spend не підтверджені контрактом. ROAS і порівняння value зі spend приховано до звірки.</div>
       {!data.meta.available?<div className="lfl-banner">Google Ads підключений, але в бойовій таблиці ще немає імпортованих рядків. Нулі не підставляємо — чекаємо фактичний sync.</div>:<>
         <section className="digital-kpi-grid">
           <article className="digital-kpi-card"><span>Витрати</span><strong>{money(s.cost)}</strong><small>Google Ads spend</small><em>{formatMetric(data.meta.days)} календарних днів у вікні</em></article>
@@ -49,7 +42,7 @@ export default async function Page(){
           <article className="panel">
             <span className="eyebrow">ПОТРЕБУЄ УВАГИ</span>
             <div className="digital-metric-list">
-              <div><b>Кампанії у вибірці з витратами ≥ ₴500 і 0 conversions</b><span>{n(noConversions.length)} · {money(noConversionSpend)}</span></div>
+              <div><b>Кампанії у вибірці з витратами і 0 conversions · без грошового порогу</b><span>{n(noConversions.length)}</span></div>
               <div><b>Conversions є, але conversion value = 0</b><span>{n(unvalued.length)} кампаній</span></div>
               <div><b>Середній Google Ads ROAS</b><span>{x(s.roas)}</span></div>
             </div>
@@ -59,7 +52,7 @@ export default async function Page(){
             <div className="digital-decision-list">
               <div><span>1</span><b>ROAS тут — атрибуція Google Ads, не фінальний бізнес-ROAS.</b></div>
               <div><span>2</span><b>Value = 0 при conversions потребує перевірки цілей і передавання цінності; це не доводить відсутність продажів.</b></div>
-              <div><span>3</span><b>Кампанії з витратами та 0 conversions — перші кандидати на перевірку.</b></div>
+              <div><span>3</span><b>Валюта Google Ads UNKNOWN. Грошові значення та поріг 500 приховано до підтвердження валюти; ROAS і порівняння value зі spend потребують підтвердження одного акаунта й валюти для обох сум; кількість кампаній з витратами та 0 conversions — спостереження для перевірки, без ранжування бюджету.</b></div>
             </div>
           </article>
         </section>
@@ -75,7 +68,7 @@ export default async function Page(){
             <div className="table-row table-head" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .8fr .8fr .7fr .9fr"}}><span>Кампанія</span><span>Spend</span><span>Кліки</span><span>Conv.</span><span>CPA</span><span>Conv. value</span><span>ROAS</span><span>Сигнал</span></div>
             {data.campaigns.map(r=>{const s=signal(r);return <div className="table-row" style={{gridTemplateColumns:"1.7fr .8fr .7fr .7fr .8fr .8fr .7fr .9fr"}} key={r.campaignName}><b>{r.campaignName}</b><span>{money(r.cost)}</span><span>{n(r.clicks)}</span><span>{formatMetric(r.conversions, 1)}</span><span>{money(r.cpa)}</span><span>{money(r.conversionValue)}</span><span>{x(r.roas)}</span><span className={s.cls}>{s.label}</span></div>})}
           </div></div>
-          <small className="table-note">«—» означає, що показник неможливо обчислити: відсутні дані або знаменник дорівнює нулю. ROAS не визначає прибутковість без маржі та перевірки цілей конверсій. Це рекламна атрибуція Google Ads. Реальний бізнес-ROAS згодом рахуємо через фактичні замовлення та виручку warehouse.</small>
+          <small className="table-note">«—» означає, що показник неможливо обчислити: відсутні дані, знаменник дорівнює нулю або акаунт/валюта value та spend не звірені. ROAS не визначає прибутковість без маржі та перевірки цілей конверсій. Це рекламна атрибуція Google Ads. Реальний бізнес-ROAS згодом рахуємо через фактичні замовлення та виручку warehouse.</small>
         </section>
       </>}
       <h2>Meta Ads · окрема атрибуція</h2>

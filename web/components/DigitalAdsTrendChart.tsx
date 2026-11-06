@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMetric, metricNumber } from "@/lib/digital-quality";
+import { formatAdsTrend, type AdsTrendMetric } from "@/lib/ads-presentation";
 import { useState } from "react";
 import {
   CartesianGrid,
@@ -14,7 +14,7 @@ import {
 import type { DigitalAdsData } from "@/lib/data/digital-sources";
 
 type Row=DigitalAdsData["trend"][number];
-type Metric="cost"|"conversionValue"|"clicks"|"conversions";
+type Metric=AdsTrendMetric;
 
 const CONFIG:Record<Metric,{label:string;money?:boolean}>={
   cost:{label:"Spend",money:true},
@@ -22,16 +22,6 @@ const CONFIG:Record<Metric,{label:string;money?:boolean}>={
   clicks:{label:"Clicks"},
   conversions:{label:"Conversions"}
 };
-
-function format(raw:unknown,m:Metric){
-  const v=metricNumber(raw);
-  if(v===null)return "—";
-  if(CONFIG[m].money){
-    if(Math.abs(v)>=1000) return `₴${(v/1000).toFixed(1)}K`;
-    return `₴${Math.round(v)}`;
-  }
-  return v.toLocaleString("uk-UA",{maximumFractionDigits:1});
-}
 
 export function DigitalAdsTrendChart({data}:{data:Row[]}){
   const [metric,setMetric]=useState<Metric>("cost");
@@ -44,20 +34,20 @@ export function DigitalAdsTrendChart({data}:{data:Row[]}){
         onClick={()=>setMetric(key)}
       >{CONFIG[key].label}</button>)}
     </div>
-    <div className="chart-wrap">
+    {CONFIG[metric].money ? <p>currency UNKNOWN · грошовий тренд приховано до підтвердження єдиної валюти джерела. Кліки та conversions доступні окремо.</p> : <div className="chart-wrap">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid stroke="#222833" vertical={false}/>
           <XAxis dataKey="date" stroke="#77808f" tickLine={false} axisLine={false} tickFormatter={v=>String(v).slice(5)}/>
-          <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={64} tickFormatter={v=>format(Number(v),metric)}/>
+          <YAxis stroke="#77808f" tickLine={false} axisLine={false} width={64} tickFormatter={v=>formatAdsTrend(v,metric)}/>
           <Tooltip
-            formatter={raw=>format(raw,metric)}
+            formatter={raw=>formatAdsTrend(raw,metric)}
             labelFormatter={label=>String(label)}
             contentStyle={{background:"#111720",border:"1px solid #29313d",borderRadius:12}}
           />
           <Line connectNulls={false} type="monotone" dataKey={metric} name={CONFIG[metric].label} stroke="#f5a623" strokeWidth={3} dot={false} activeDot={{r:4}}/>
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </div>}
   </div>;
 }

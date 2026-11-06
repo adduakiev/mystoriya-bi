@@ -1,25 +1,25 @@
+import { formatMetric, metricRatio } from "@/lib/digital-quality";
+import { sourceMoney, presenceStatus } from "@/lib/source-evidence";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { DigitalTabs } from "@/components/DigitalReportShell";
 import { loadDigitalAppData } from "@/lib/data/digital-sources";
 
-function n(v:number){return Math.round(v).toLocaleString("uk-UA");}
-function money(v:number){return "₴ "+Math.round(v).toLocaleString("uk-UA");}
-function pct(v:number){return (v*100).toFixed(2)+"%";}
-function ratio(a:number,b:number){return b>0?a/b:0;}
+function n(v:number|null){return formatMetric(v);}
+const money=sourceMoney;
+function pct(v:number|null){return v===null?"—":(v*100).toFixed(2)+"%";}
+
 function dateLabel(v?:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):"—";}
 
 export default async function Page(){
   const data=await loadDigitalAppData();
   const o=data.overview,e=data.economics;
-  const android=data.googleAdsApp.find(x=>x.platform==="android");
-  const ios=data.googleAdsApp.find(x=>x.platform==="ios");
-  const storeReady=data.sources.store.rows>0;
-  const firebaseReady=data.sources.firebase.rows>0;
-  const usersReady=data.sources.users.rows>0;
-  const ordersReady=data.sources.orders.rows>0;
-  const acquisitionReady=data.sources.acquisition.rows>0;
-  const cpi=ratio(e.spend,e.installs), cpr=ratio(e.spend,e.registrations), cac=ratio(e.spend,e.firstBuyers), roas=ratio(e.revenue,e.spend);
-  const regToBuyer=ratio(o.buyers,o.registeredUsers), repeatRate=ratio(o.repeatBuyers,o.buyers);
+  const storeReady=(data.sources.store.rows??0)>0;
+  const firebaseReady=(data.sources.firebase.rows??0)>0;
+  const usersReady=(data.sources.users.rows??0)>0;
+  const ordersReady=(data.sources.orders.rows??0)>0;
+  const acquisitionReady=(data.sources.acquisition.rows??0)>0;
+  const cpi=metricRatio(e.spend,e.installs), cpr=metricRatio(e.spend,e.registrations), cac=metricRatio(e.spend,e.firstBuyers), roas=metricRatio(e.revenue,e.spend);
+  const regToBuyer=metricRatio(o.buyers,o.registeredUsers), repeatRate=metricRatio(o.repeatBuyers,o.buyers);
   const sources=[
     ["App Store / Google Play",data.sources.store,"downloads / installs / store conversion"],
     ["Firebase Analytics",data.sources.firebase,"first_open / sign_up / cart / checkout / purchase"],
@@ -34,18 +34,25 @@ export default async function Page(){
     <section className="workspace">
       <header className="topbar"><div><span className="eyebrow">DIGITAL · MOBILE APP</span><h1>App Analytics</h1></div><div className="digital-source-badge">iOS + Android</div></header>
       <DigitalTabs active="app"/>
-      <div className="lfl-banner">App Analytics уже побудований як окремий бізнес-канал. Нулі не підставляємо: якщо джерело ще не передає дані, показуємо «—». Перший живий шар зараз — Google Ads App campaigns.</div>
+      <div className="lfl-banner">App Analytics уже побудований як окремий бізнес-канал. Нулі не підставляємо: якщо джерело ще не передає дані, показуємо «—». Google Ads App — окремий частковий зріз; повнота та звірка UNKNOWN.</div>
 
       <div className="pnl-section-heading"><div><span className="eyebrow">ЩО ВЖЕ БАЧИМО</span><h2>Google Ads · App acquisition</h2></div><small>Conversions поки не вважаємо installs або buyers</small></div>
-      <section className="digital-kpi-grid">
-        <article className="digital-kpi-card"><span>Android Spend</span><strong>{android?money(android.spend):"—"}</strong><small>{android?n(android.clicks):"—"} кліків · {android?n(android.impressions):"—"} показів</small><em>{android?dateLabel(android.fromDate)+" — "+dateLabel(android.toDate):"немає даних"}</em></article>
-        <article className="digital-kpi-card"><span>Android Ads conversions</span><strong>{android?n(android.conversions):"—"}</strong><small>тип conversion action ще підтверджуємо</small><em>{android?money(android.costPerConversion)+" / conversion":"—"}</em></article>
-        <article className="digital-kpi-card"><span>iOS Spend</span><strong>{ios?money(ios.spend):"—"}</strong><small>{ios?n(ios.clicks):"—"} кліків</small><em>App_IOS</em></article>
-        <article className="digital-kpi-card"><span>Conversion Value</span><strong>{android?money(android.conversionValue):"—"}</strong><small>App_Android</small><em>value tracking треба перевірити</em></article>
+      <section className="panel">
+        <div className="lfl-banner">PARTIAL · валюта та акаунт джерела потребують підтвердження. Без однозначної валюти грошові KPI показують UNKNOWN; змішані валюти не об’єднуємо. Період Ads незалежний від App funnel.</div>
+        <div className="management-table-wrap"><table style={{minWidth:980,width:"100%"}}>
+          <thead><tr><th>Campaign / platform</th><th>Account / currency</th><th>Dates</th><th>Spend</th><th>Clicks / impressions</th><th>Conversions</th><th>CPA</th><th>Conversion value</th></tr></thead>
+          <tbody>{data.googleAdsApp.map((row,index)=><tr key={`${row.accountId}:${row.campaignName}:${index}`}>
+            <td>{row.campaignName} · {row.platform}</td><td>{row.accountId??"UNKNOWN"} · {row.currency??row.currencyStatus}</td>
+            <td>{dateLabel(row.fromDate)} — {dateLabel(row.toDate)}</td><td>{money(row.spend,row)}</td>
+            <td>{n(row.clicks)} / {n(row.impressions)}</td><td>{n(row.conversions)}</td>
+            <td>{money(row.costPerConversion,row)}</td><td>{money(row.conversionValue,row)}</td>
+          </tr>)}</tbody>
+        </table></div>
+        {data.googleAdsApp.length===0&&<p>UNKNOWN · немає підтверджених campaign rows</p>}
       </section>
       <div className="lfl-banner">Критична перевірка: Google Ads conversions не можна називати installs або клієнтами, доки агенція не підтвердить conversion action. Тому CAC з цієї цифри поки не рахуємо.</div>
 
-      <div className="pnl-section-heading"><div><span className="eyebrow">APP FUNNEL</span><h2>Store → Install → Registration → Buyer → Repeat</h2></div><small>автоматично оживе після надходження джерел</small></div>
+      <div className="pnl-section-heading"><div><span className="eyebrow">APP FUNNEL</span><h2>Store → Install → Registration → Buyer → Repeat</h2></div><small>наявність рядків не доводить повноту</small></div>
       <section className="digital-kpi-grid">
         <article className="digital-kpi-card"><span>Downloads</span><strong>{storeReady?n(o.downloads):"—"}</strong><small>App Store + Google Play</small><em>first-time окремо</em></article>
         <article className="digital-kpi-card"><span>First opens</span><strong>{firebaseReady?n(o.firstOpens):"—"}</strong><small>реально відкрили app</small><em>Firebase</em></article>
@@ -60,14 +67,14 @@ export default async function Page(){
         <article className="digital-kpi-card"><span>CPI</span><strong>{acquisitionReady?money(cpi):"—"}</strong><small>spend / installs</small><em>acquisition</em></article>
         <article className="digital-kpi-card"><span>Cost / Registration</span><strong>{acquisitionReady?money(cpr):"—"}</strong><small>spend / registrations</small><em>acquisition</em></article>
         <article className="digital-kpi-card"><span>CAC</span><strong>{acquisitionReady?money(cac):"—"}</strong><small>spend / first buyers</small><em>головний acquisition KPI</em></article>
-        <article className="digital-kpi-card"><span>ROAS App</span><strong>{acquisitionReady?roas.toFixed(2)+"x":"—"}</strong><small>attributed revenue / spend</small><em>до звірки з order DB</em></article>
+        <article className="digital-kpi-card"><span>ROAS App</span><strong>{acquisitionReady&&roas!==null?roas.toFixed(2)+"x":"—"}</strong><small>attributed revenue / spend</small><em>до звірки з order DB</em></article>
         <article className="digital-kpi-card"><span>LTV 30 / 60 / 90</span><strong>—</strong><small>user_id_hash + orders</small><em>по contribution margin</em></article>
         <article className="digital-kpi-card"><span>LTV / CAC</span><strong>—</strong><small>економіка клієнта</small><em>+ payback period</em></article>
       </section>
 
       <section className="content-grid">
         <article className="panel"><div className="panel-head"><div><span className="eyebrow">DATA SOURCES</span><h2>Готовність джерел</h2></div></div><div className="digital-metric-list">
-          {sources.map(([name,source,hint])=><div key={name}><b>{name}</b><span>{source.rows>0?"LIVE · "+n(source.rows)+" rows"+(source.latest?" · "+dateLabel(source.latest.slice(0,10)):""):"очікує · "+hint}</span></div>)}
+          {sources.map(([name,source,hint])=><div key={name}><b>{name}</b><span>{(source.rows??0)>0?"PARTIAL · "+n(source.rows)+" rows · completeness UNKNOWN"+(source.latest?" · "+dateLabel(source.latest.slice(0,10)):""):presenceStatus(source.rows)+" · "+hint}</span></div>)}
         </div></article>
         <article className="panel"><span className="eyebrow">ЄДИНИЙ CUSTOMER KEY</span><div className="digital-decision-list">
           <div><span>1</span><b>user_id_hash зв’язує registration, app events та orders без PII.</b></div>

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "prebuild": "node ../scripts/test.mjs",
+    "test:full": "node --test --test-concurrency=2 tests/*.test.mjs"
   },
   "dependencies": {
     "next": "15.5.27",
