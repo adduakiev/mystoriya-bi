@@ -1,5 +1,11 @@
 # Issue #43 / existing PR #44 — QA handoff
 
+Latest investigation: **D286 responsive overflow — NO CHANGE to application code**,
+2026-11-10, exact starting HEAD `371607af0027e3197cd07e20f865a7a46bc4819e`.
+[Source trace, reproducible browser startup blocker and verification](RESPONSIVE-D286-NO-CHANGE-2026-11-10.md).
+Current viewport behavior is unverified; all historical 17 cases remain open.
+Trusted runner to relay NO CHANGE to issue #43. No release or correctness claim.
+
 Latest bounded task: **D284 GBP stable identity**, 2026-11-10, preview code on
 `astra/issue-43-40107435112`, initial exact HEAD
 `6934e0def8b18bfed7d4f17882ef024fa829e35c`.
