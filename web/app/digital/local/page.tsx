@@ -47,7 +47,7 @@ export default async function Page(){
         {topIntent&&<section className="content-grid">
           <article className="panel">
             <span className="eyebrow">LOCAL INTENT</span>
-            <div className="digital-metric-list">
+            <div className="digital-metric-list gbp-intent-list">
               <div><b>Усі локальні дії</b><span>{n(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks))}</span></div>
               <div><b>Дії / покази</b><span>{rate(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks),s.impressions)}</span></div>
               <div><b>Найбільше локальних дій</b><span aria-label={`${n(topIntent.intentActions)} · ${topIntent.locationLabel} · ${topIntent.locationIdentityNote}`}>{n(topIntent.intentActions)} · {topIntent.locationLabel}</span></div>
@@ -73,7 +73,7 @@ export default async function Page(){
                 <span>Профіль</span><span>Покази</span><span>Дзвінки</span><span>Маршрути</span><span>Сайт</span><span>Меню</span><span>Дії</span><span>Action rate</span>
               </div>
               {ranked.map(row=><div className="table-row" style={{gridTemplateColumns:"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr"}} key={row.locationId}>
-                <div><b>{row.locationLabel}</b><small className="table-note">{row.locationIdentityNote}</small></div><span>{n(row.impressions)}</span><span>{n(row.calls)}</span><span>{n(row.directions)}</span><span>{n(row.websiteClicks)}</span><span>{n(row.menuClicks)}</span><span>{n(row.intentActions)}</span><span>{pct(row.intentRate)}</span>
+                <div className="gbp-location-identity"><b>{row.locationLabel}</b><small className="table-note">{row.locationIdentityNote}</small></div><span>{n(row.impressions)}</span><span>{n(row.calls)}</span><span>{n(row.directions)}</span><span>{n(row.websiteClicks)}</span><span>{n(row.menuClicks)}</span><span>{n(row.intentActions)}</span><span>{pct(row.intentRate)}</span>
               </div>)}
             </div>
           </div>

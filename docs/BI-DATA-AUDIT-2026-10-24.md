@@ -83,6 +83,11 @@ base receipt supersedes earlier sandbox-only failures for that base; candidate
 checks are separate. No new live reads or source/warehouse/UI parity is claimed.
 The full audit remains INCOMPLETE; release/backup/rollback gates remain closed.
 
+D284 bounded follow-up (2026-11-10): [stable full-ID profile labels](audit/2026-10-24/GBP-D284-IDENTITY-2026-11-10.md)
+supersede the historical suffix expansion below. Address crosswalk remains
+unverified; source data and metrics are unchanged. Native OUTER checks and
+Preview acceptance remain separate and pending; broader audit INCOMPLETE.
+
 D26 bounded follow-up (2026-10-27): GBP duplicate profile titles now use
 ID-derived labels with accessible full IDs in preview code. Verified address
 crosswalk remains UNKNOWN; all 66 authenticated browser cases NOT_EXECUTED.

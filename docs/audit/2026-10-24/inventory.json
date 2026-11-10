@@ -7254,7 +7254,7 @@
       "evidence": "web/app/digital/local/page.tsx:50"
     },
     {
-      "id": "web/app/digital/local/page.tsx:4605",
+      "id": "web/app/digital/local/page.tsx:4621",
       "paths": [
         "/digital/local"
       ],
@@ -7269,7 +7269,7 @@
       "evidence": "web/app/digital/local/page.tsx:56"
     },
     {
-      "id": "web/app/digital/local/page.tsx:4710",
+      "id": "web/app/digital/local/page.tsx:4726",
       "paths": [
         "/digital/local"
       ],
@@ -7284,7 +7284,7 @@
       "evidence": "web/app/digital/local/page.tsx:58"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5231",
+      "id": "web/app/digital/local/page.tsx:5247",
       "paths": [
         "/digital/local"
       ],
@@ -7296,7 +7296,7 @@
       "bindings": [
         "{minWidth:980}",
         "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
-        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div><b>{row.locationLabel}</b><small",
+        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
         "row.locationId",
         "row.locationLabel",
         "row.locationIdentityNote"
@@ -7306,7 +7306,7 @@
       "evidence": "web/app/digital/local/page.tsx:70"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5283",
+      "id": "web/app/digital/local/page.tsx:5299",
       "paths": [
         "/digital/local"
       ],
@@ -7318,7 +7318,7 @@
       "bindings": [
         "{minWidth:980}",
         "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
-        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div><b>{row.locationLabel}</b><small",
+        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
         "row.locationId",
         "row.locationLabel",
         "row.locationIdentityNote"
@@ -7328,7 +7328,7 @@
       "evidence": "web/app/digital/local/page.tsx:71"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5355",
+      "id": "web/app/digital/local/page.tsx:5371",
       "paths": [
         "/digital/local"
       ],
@@ -7346,7 +7346,7 @@
       "evidence": "web/app/digital/local/page.tsx:72"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5695",
+      "id": "web/app/digital/local/page.tsx:5711",
       "paths": [
         "/digital/local"
       ],
@@ -7368,7 +7368,7 @@
       "evidence": "web/app/digital/local/page.tsx:75"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5869",
+      "id": "web/app/digital/local/page.tsx:5919",
       "paths": [
         "/digital/local"
       ],

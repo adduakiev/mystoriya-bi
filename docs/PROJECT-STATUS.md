@@ -89,6 +89,15 @@ skips) on base `9c91c116a92ad619874b9995fdc0ea6b652bdd69`; historical sandbox
 failures below do not negate that base receipt. New candidate verification and
 all release/data-write gates remain separate. No new production observations.
 
+## D284 GBP identity — 2026-11-10 (preview code)
+
+[D284 evidence and verification limits](audit/2026-10-24/GBP-D284-IDENTITY-2026-11-10.md): profile labels now always retain full source IDs,
+so result-set changes cannot switch between a title, suffix and full ID.
+Addresses remain unverified and explicitly labelled; no guessed crosswalk.
+This supersedes the historical D26 suffix-label behavior below. Synthetic
+regressions pass; trusted OUTER native CI and authenticated Preview acceptance
+remain pending. No new production observations, Sales changes or release.
+
 ## D26 GBP profile identity — 2026-10-27 (preview code)
 
 [Bounded D26 report](audit/2026-10-24/GBP-IDENTITY-REVISION-40444470576.md)

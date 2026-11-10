@@ -1,5 +1,12 @@
 # Issue #43 / existing PR #44 — QA handoff
 
+Latest bounded task: **D284 GBP stable identity**, 2026-11-10, preview code on
+`astra/issue-43-40107435112`, initial exact HEAD
+`6934e0def8b18bfed7d4f17882ef024fa829e35c`.
+[Changes, source provenance, checks and sandbox blockers](GBP-D284-IDENTITY-2026-11-10.md).
+Candidate SHA and trusted OUTER CI/Preview acceptance remain runner-owned.
+No production change or complete-audit claim. All handoffs below are historical.
+
 Current bounded task (D188, 2026-11-03): **PREPARED ONLY provenance contract
 and synthetic fail-closed verifier** on existing branch
 `astra/issue-43-40107435112`, verified starting HEAD

@@ -628,3 +628,8 @@ html.is-navigating, html.is-navigating body, html.is-navigating a, html.is-navig
   .digital-quality-grid { grid-template-columns:1fr; }
   .digital-history-toolbar { align-items:flex-start; }
 }
+
+/* Full GBP source IDs must wrap inside the profile cell and intent card. */
+.gbp-location-identity { min-width: 0; overflow-wrap: anywhere; }
+.gbp-intent-list > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.gbp-intent-list span { min-width: 0; overflow-wrap: anywhere; }
