@@ -89,6 +89,19 @@ skips) on base `9c91c116a92ad619874b9995fdc0ea6b652bdd69`; historical sandbox
 failures below do not negate that base receipt. New candidate verification and
 all release/data-write gates remain separate. No new production observations.
 
+## D287 shared shell containment — 2026-11-10 (preview code)
+
+[D287 evidence and verification limits](audit/2026-10-24/RESPONSIVE-D287-SHARED-SHELL-2026-11-10.md):
+three shared CSS declarations constrain the workspace grid minimum while
+retaining internal table scrolling. Source/SSR failure controls pass; Chromium
+startup remains blocked locally. Trigger-supplied independent synthetic metrics
+are labelled separately from authenticated Preview, which remains unverified.
+Inner full check reports 49/59 file-level passes and the same 10 failing files
+documented in D286; separate TypeScript and optimized build pass. Trusted OUTER
+PG16/PG17, new SHA and Preview acceptance remain pending. Historical 17 overflow
+cases remain open. No production observations or Sales recovery changes;
+SU-545195 HOLD and owner gates remain. NOT READY FOR RELEASE.
+
 ## D284 GBP identity — 2026-11-10 (preview code)
 
 [D284 evidence and verification limits](audit/2026-10-24/GBP-D284-IDENTITY-2026-11-10.md): profile labels now always retain full source IDs,
