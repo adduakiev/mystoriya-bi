@@ -112,3 +112,39 @@ No Sales/auth/recovery change, hosted-401 retry, production/main deployment,
 production SQL change/application, credential/provider/scheduler/import, upstream profile
 mutation, business write or merge. SU-545195 remains HOLD. All owner gates and
 production fail-closed paths remain intact; no next backlog task was started.
+
+## D285 independent trusted-OUTER verification and CI trigger finding (2026-11-10 UTC)
+
+This paragraph supersedes the *pre-commit* candidate and verification status
+in the D284 inner-sandbox handoff above. A separate independent reviewer read
+the trusted OUTER job `130097258421` in
+[Astra Actions #42892583888](https://github.com/adduakiev/mystoriya-bi/actions/runs/42892583888):
+actual PostgreSQL **16.15**, **642/642 PASS, 0 fail, 0 skip**; optimized Next
+build and diff check PASS. The outer runner **committed and pushed** the
+D284 candidate as `9b6eae101e5e36104a3b31a6179428663fa45029`
+at 2026-11-10 20:18:51–52 UTC. Old-to-new compare: exactly **one commit,
+ten files**, scoped to GBP identity, generated inventories and documentation.
+The inner report's no-commit language described only the earlier Codex
+workspace and does not override the outer push.
+
+Exact D284-head Vercel Preview
+[READY](https://vercel.com/adduakiev-9572s-projects/mystoriya-bi/HiwhwF1T9UBhsxsHJJUTaBRWpyX1),
+branch and SHA matched, `target=null` (not Production). The essential
+**exact-new-head GitHub PG17 verification was not present** in the workflow-run
+collection at this review; the older dual-PG 639/639 applies to an older SHA,
+not D284. Root cause: the Astra workflow pushes using `${{ github.token }}`
+while `sales-pr44-native.yml` listens only for `push`; GitHub explicitly
+suppresses downstream push workflow runs caused by its own `GITHUB_TOKEN`.
+[GitHub trigger rules](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow).
+The separate PR-only evidence-receipt update containing this section is
+intended to obtain a normally triggered **exact-current-SHA** native CI
+verification via the connected GitHub App write, without modifying any
+test/production code. This is a gate attempt, not CI acceptance; independently
+inspect whether a new run is created and its trusted PG16+PG17 logs. If no run
+appears, diagnose rather than claim success. No duplicate Astra cycle,
+production action, importer, server request or credentials were used.
+
+See [independent PR D285 adjudication](https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6779665474)
+and [Control Room D285 receipt](https://github.com/adduakiev/mystoriya-bi/issues/6#issuecomment-6779671764).
+Real GBP address crosswalk, 66-case authenticated browser QA, source-to-UI
+parity, and hosted Sales auth still remain unverified. NOT RELEASED.
