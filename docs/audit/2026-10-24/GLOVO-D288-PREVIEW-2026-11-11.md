@@ -210,3 +210,36 @@ issue #43's broader audit.
    scheduler, provider, paid service, ad or Glovo action, deployment or merge.
    Sales atomic recovery and its 503 guards remain unchanged; SU-545195 / hosted
    401 HOLD remains unresolved. Digital v2/Data Gap Workshop remain queued.
+
+## Independent post-commit runner adjudication (2026-11-11 UTC; NOT RELEASED)
+
+The trusted **OUTER** GitHub Actions Astra run
+[#42938258160](https://github.com/adduakiev/mystoriya-bi/actions/runs/42938258160),
+job `130253568436`, completed SUCCESS. Its actual native PostgreSQL 16.15
+verification ended **657/657 PASS; zero fail/skip**, with optimized Next.js build
+and TypeScript PASS, followed by an **actual commit and push** of
+`737c96307b254ad03e6abcdd10666ddf1d3a4899` to the SAME existing PR #44.
+The inner Codex sandbox's 51/61 file-level run (10 sandbox failures) and its
+"no push" wording do not override the trusted outer result. Independent compare
+`c390951..737c963` is exactly one commit / 18 changed paths: Glovo route,
+read-only disconnected source/transform, child navigation, tests and inventory/docs;
+no production database, Edge, credentials, import or Sales handler mutation.
+
+Vercel Preview `dpl_HmDqRBiXoQowgwmTFXesKC5CYCN8` reported READY with
+`target=null` and exact code commit `737c963`. This is NOT authenticated
+browser QA, nor does it demonstrate live private Glovo source or correctness of
+monthly financial measures. Exact-SHA **PostgreSQL 17 acceptance has not yet
+been observed**. To verify the same executable code using the existing
+push-triggered PREPARE-ONLY `sales-pr44-native.yml`, this documentation-only
+receipt was committed through the existing authorized GitHub App to this SAME
+PR branch; the resulting NEW SHA must receive independent exact-SHA PG16+PG17,
+Deno, Next and Preview acceptance before the D288 gate can be marked accepted.
+This is an evidence/CI-trigger commit, not a new application change or release.
+
+The authorized Glovo source adapter still returns **SOURCE UNAVAILABLE**;
+the approved Google Sheet is accessible only in the owner's connected reader,
+which does not establish credentials/access inside the BI server runtime.
+No source values are embedded in code, no test result is represented as live
+source parity, and historical partial November must not be treated as complete.
+Supabase support `SU-545195` has no substantive technical reply as of this
+receipt; historic 401 is unresolved and no live probe is authorized.
