@@ -1,7 +1,7 @@
 import "server-only";
 import { normalizeGlovoSheet, buildGlovoReport } from "./glovo-contract";
 
-// OFFLINE PREPARATION ONLY. No transport implementation or runtime caller.
+// OFFLINE PREPARATION ONLY. No default transport or runtime caller.
 // Authorization is a caller assertion, not a credential or proof of Google access.
 export const GLOVO_SHEETS_REQUEST = Object.freeze({
   spreadsheetId: "1HyYPtd1A369n7FYs0Oty_Z2oCZaq5hBxe4E-g2B0k98",
@@ -20,7 +20,7 @@ export type GlovoSheetsTransport = Readonly<{
     spreadsheetId: typeof GLOVO_SHEETS_REQUEST.spreadsheetId;
     scope: typeof GLOVO_SHEETS_REQUEST.scope;
   }>;
-  // A future owner-gated transport must enforce redirect:error before sending
+  // Any supplied transport must enforce redirect:error before sending
   // authorization, consume the whole response, and supply parsed JSON only.
   getValues: (request: typeof GLOVO_SHEETS_REQUEST) => Promise<Readonly<{
     status: number;

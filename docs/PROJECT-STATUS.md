@@ -1,5 +1,20 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D292 issue #43 / #48 / same PR #44:
+[Offline-only private Sheets HTTP transport and remaining gates](audit/2026-10-24/GLOVO-D292-HTTP-2026-11-11.md).
+Prepared an opt-in, server-only, dependency-injected fixed readonly GET transport;
+14 synthetic regressions. Runtime Glovo remains SOURCE UNAVAILABLE / report:null;
+Sales/Supabase unchanged. No actual provider request or credential discovery.
+The trusted trigger reports D291 baseline `92e536e53808e1af7eb27a2d77f7c61e57ade3d3`
+accepted OFFLINE ONLY: PG16+PG17 673/673 each, Next build and matching READY
+Preview; older D291 pending statements below are historical for that baseline.
+Candidate: 14 synthetic tests, TypeScript, optimized build and inventory checks
+PASS; full inner check 53/63 file suites PASS, 10 FAIL, zero skip (protected runtime
+directory / reproduced native PG16 socket EPERM). Full OUTER and exact-new-SHA
+acceptance remain pending; detailed reproducible evidence is in the linked note.
+Owner permission, independent coverage/parity and authenticated QA remain gates.
+NOT RELEASED; SU-545195 remains HOLD.
+
 2026-11-11, D291 issue #43 / #48 / same PR #44:
 [Offline private Sheets adapter contract and acceptance limits](audit/2026-10-24/GLOVO-D291-ADAPTER-2026-11-11.md).
 Prepared a pinned server-only request/response seam with test-injected transport,

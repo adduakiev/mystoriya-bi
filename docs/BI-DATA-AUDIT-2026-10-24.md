@@ -1,5 +1,20 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D292 issue #43 / #48 / same PR #44:
+[Offline HTTP transport, synthetic evidence and acceptance limits](audit/2026-10-24/GLOVO-D292-HTTP-2026-11-11.md).
+Prepared only: pinned official readonly Sheets GET, injected fetch/short-lived
+opaque bearer, bounded response/deadline, sanitized failures and 14 synthetic
+regressions. Live Glovo source/page stay SOURCE UNAVAILABLE with zero new I/O;
+Sales/Supabase and inventory unchanged. No new independent source completeness,
+30-day/12-month, OAuth acceptance, browser or source-to-UI parity proof.
+Supplied D291 exact-baseline receipt reports PG16+PG17 673/673 each and matching
+READY Preview; supersedes older pending statements for that baseline only.
+Candidate synthetic tests (14), TypeScript, inventory and optimized build PASS;
+full inner check 53/63 file suites PASS, 10 FAIL, zero skip; native PG16 socket
+EPERM reproduced. Full OUTER acceptance and separate owner/coverage/QA gates
+remain pending; evidence is in the linked note. OFFLINE/PREVIEW ONLY,
+NOT RELEASED; SU-545195 remains HOLD.
+
 2026-11-11, D291 issue #43 / #48 / same PR #44:
 [Offline private Sheets request/response contract, lineage and gates](audit/2026-10-24/GLOVO-D291-ADAPTER-2026-11-11.md).
 Pinned server-only adapter preparation rejects absent authorization/coverage,
