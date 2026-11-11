@@ -16,6 +16,7 @@ function harness(current, previous, {fallbackRows} = {}) {
     '@/components/MultiYearMetricChart': {MultiYearMetricChart: () => null},
     '@/components/ChannelMixChart': {ChannelMixChart: () => null},
     '@/lib/data/source': {
+      loadSalesDataStatus: async () => ({source:'unknown',status:'unavailable',cutoffDate:null}),
       callBiRpc: async (name, args) => {
         calls.push({name, args});
         if (fallbackRows) throw Error('SYNTHETIC SQL failure');

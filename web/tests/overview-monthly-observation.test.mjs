@@ -18,6 +18,7 @@ function harness(rows) {
     '@/components/MultiYearMetricChart':{MultiYearMetricChart:()=>null},
     '@/components/ChannelMixChart':{ChannelMixChart:()=>null},
     '@/lib/data/source':{
+      loadSalesDataStatus: async () => ({source:'unknown',status:'unavailable',cutoffDate:null}),
       callBiRpc:async(name,args)=>{
         assert.equal(name,'bi_overview_payload');
         const payload=rpcFixture(name,args);

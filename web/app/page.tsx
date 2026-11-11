@@ -5,7 +5,10 @@ import { KpiCard } from "@/components/KpiCard";
 import { MultiYearMetricChart } from "@/components/MultiYearMetricChart";
 import { ChannelMixChart } from "@/components/ChannelMixChart";
 import { formatUah } from "@/lib/analytics";
-import { loadOverviewData } from "@/lib/data/overview";
+import { loadOverviewData, type OverviewQuery } from "@/lib/data/overview";
+import { loadSalesDataStatus } from "@/lib/data/source";
+import { warehouseObservation, reportObservation } from "@/lib/overview-freshness";
+import { OverviewFreshness } from "@/components/OverviewFreshness";
 import { queryHref, type DashboardFilters, type MetricMode, type GrainMode } from "@/lib/filters";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
 
@@ -83,7 +86,8 @@ export default async function Home({
   const grain = selectedMonth ? "month" : parseGrain(first(params.grain));
   const lfl = first(params.lfl) === "1";
 
-  const overview = await loadOverviewData({
+  const warehouse = warehouseObservation(await loadSalesDataStatus());
+  const overviewQuery: OverviewQuery = {
     channel: first(params.channel),
     orderType: first(params.orderType),
     location: first(params.location),
@@ -96,7 +100,8 @@ export default async function Home({
     metric,
     grain,
     lfl
-  });
+  };
+  const overview = await loadOverviewData(overviewQuery, warehouse.version);
 
   const {
     sourceRowCount,
@@ -297,6 +302,8 @@ export default async function Home({
             </div>
           </form>
         </details>
+
+        <OverviewFreshness report={reportObservation(overview, overviewQuery)} warehouse={warehouse} />
 
         {fallbackReady && (
           <section className="panel" role="status">

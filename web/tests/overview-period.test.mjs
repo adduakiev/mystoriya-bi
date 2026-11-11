@@ -17,6 +17,7 @@ function harness(overrides = {}, multiYearData) {
       `@/components/${name}`, {[name]: props => {charts.push({name,...props}); return React.createElement('div', {'data-chart':name});}}
     ])),
     '@/lib/data/source': {
+      loadSalesDataStatus: async () => ({source:'unknown',status:'unavailable',cutoffDate:null}),
       callBiRpc: async (name,args) => {
         calls.push({name,args});
         payload = {...rpcFixture(name,args), current:metrics, previous:{...metrics,revenue:100},

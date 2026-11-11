@@ -1,5 +1,15 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D293 issue #43 / same PR #44:
+[Overview freshness repair, synthetic totals and remaining acceptance gates](audit/2026-10-24/OVERVIEW-D293-FRESHNESS-2026-11-11.md).
+Preview candidate versions the Overview cache by server-observed warehouse
+metadata, displays stale/unknown/scoped dates and adds bounded authenticated
+GET-only recovery. Eight new synthetic regressions and five existing import
+safety tests pass; no Production RPC or source-parity proof. Full native
+acceptance is sandbox-blocked; trusted outer PG16/17, exact-new-SHA CI/Preview
+and authenticated desktop/mobile QA remain required. Import gates unchanged;
+Glovo #48 queued and SU-545195 HOLD. NOT RELEASED.
+
 2026-11-11, D292 issue #43 / #48 / same PR #44:
 [Offline HTTP transport, synthetic evidence and acceptance limits](audit/2026-10-24/GLOVO-D292-HTTP-2026-11-11.md).
 Prepared only: pinned official readonly Sheets GET, injected fetch/short-lived

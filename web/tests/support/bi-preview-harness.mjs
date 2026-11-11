@@ -21,6 +21,7 @@ export function moduleLoader(overrides = {}) {
     });
     function resolve(name) {
       if (Object.hasOwn(overrides, name)) return overrides[name];
+      if (name === 'next/navigation') return {useRouter: () => ({refresh() {}})};
       if (name.endsWith('.css')) return new Proxy({}, {get: (_, key) => String(key)});
       if (name.startsWith('@/') || name.startsWith('.')) {
         let target = name.startsWith('@/') ? path.resolve(web, name.slice(2)) : path.resolve(path.dirname(file), name);
@@ -83,7 +84,8 @@ export function previewHarness({state = 'partial', reject = []} = {}) {
     },
     'next/cache': {unstable_cache: fn => fn},
     'next/link': {default: ({prefetch, children, ...props}) => React.createElement('a', props, children)},
-    '@/lib/data/source': {callBiRpc, loadSalesData: () => {throw Error('Unexpected sales fallback');}},
+    '@/lib/data/source': {
+      loadSalesDataStatus: async () => ({source:'unknown',status:'unavailable',cutoffDate:null}),callBiRpc, loadSalesData: () => {throw Error('Unexpected sales fallback');}},
     '@/components/SidebarBrand': {SidebarBrand: () => React.createElement('span', null, 'SYNTHETIC · no sync/session')},
     '@/components/OperatingTasks': {OperatingTasks: () => React.createElement('div', {'data-mock': 'tasks'}, 'Tasks interaction excluded')},
     '@/lib/operating-data': {loadOperatingData: async () => ({

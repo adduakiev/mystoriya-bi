@@ -479,12 +479,14 @@ function matchesSelectedPeriod(meta: NonNullable<RpcOverviewPayload["meta"]>, qu
     && date.getUTCMonth() + 1 === selectedMonth);
 }
 
-async function fetchSqlOverview(query: OverviewQuery): Promise<OverviewData> {
+async function fetchSqlOverview(query: OverviewQuery, warehouseVersion: string): Promise<OverviewData> {
   const key = queryCacheKey(query);
 
   const payload = await unstable_cache(
     () => callBiRpc<RpcOverviewPayload>("bi_overview_payload", overviewRpcArgs(query), 10_000),
-    ["bi-overview-sql-v1", key],
+    // A newer warehouse snapshot must not reuse a pre-import report cache entry.
+    // Version comes from bounded server-side status metadata, never client input.
+    ["bi-overview-sql-v2", key, warehouseVersion],
     {
       revalidate: 180,
       tags: ["sales-data", "overview-data"]
@@ -628,9 +630,9 @@ async function fetchLegacyOverview(query: OverviewQuery): Promise<OverviewData> 
   };
 }
 
-export async function loadOverviewData(query: OverviewQuery): Promise<OverviewData> {
+export async function loadOverviewData(query: OverviewQuery, warehouseVersion = "unknown"): Promise<OverviewData> {
   try {
-    return await fetchSqlOverview(query);
+    return await fetchSqlOverview(query, warehouseVersion);
   } catch (error) {
     console.error("SQL-first Overview failed; using legacy analytics fallback.", error);
     return fetchLegacyOverview(query);

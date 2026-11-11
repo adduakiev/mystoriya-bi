@@ -1,5 +1,18 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D293 issue #43 / same PR #44:
+[Overview warehouse/report freshness candidate and evidence limits](audit/2026-10-24/OVERVIEW-D293-FRESHNESS-2026-11-11.md).
+Server-observed warehouse version selects the Overview cache entry; visible
+stale/unknown/scoped state and finite authenticated GET-only checks permit
+read recovery without importer POST. Eight synthetic regressions plus five
+existing import safety tests pass. Supplied baseline SHA `13293a54266296f038873fa4ad05b5602dc9dd02`
+has authoritative outer preflight / prior-SHA CI evidence only; candidate full
+native acceptance is sandbox-blocked. New-SHA PG16+PG17, matching Preview,
+authenticated desktop/mobile and independent payload parity are still gates.
+No new Production measurement, release, SQL/credential/source/import change.
+Older stale project observations below remain historical; this does not
+certify current production completeness. Glovo #48 stays queued; SU-545195 HOLD.
+
 2026-11-11, D292 issue #43 / #48 / same PR #44:
 [Offline-only private Sheets HTTP transport and remaining gates](audit/2026-10-24/GLOVO-D292-HTTP-2026-11-11.md).
 Prepared an opt-in, server-only, dependency-injected fixed readonly GET transport;
