@@ -1,5 +1,17 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D288 issue #43 / #48 / same PR #44:
+[Glovo preview and source limitations](audit/2026-10-24/GLOVO-D288-PREVIEW-2026-11-11.md).
+Added `/aggregators/glovo` with discoverable child navigation, explicit SOURCE
+UNAVAILABLE state, blocked KPI/trend/drilldown structure and a pure tested
+monthly contract. No authorized exact Glovo runtime provider is established;
+private Sales readers target another source. No business records were fetched,
+no financial amounts are published, and no live/source-parity claim is made.
+Jan–Oct default excludes partial November; unknown mappings and missing measures
+remain unknown. New candidate native CI/Preview acceptance remains pending;
+historical 17 real-Preview responsive cases and wider audit remain incomplete.
+Sales atomic recovery, both 503 guards and SU-545195 HOLD are unchanged.
+
 2026-11-04, issue #43 / same PR #44: [coordinated Sales release checklist](audit/2026-10-24/SALES-RECOVERY-RELEASE-CHECKLIST-2026-11-04.md).
 Code audit confirms the prepared SQL alternatives are not a deployable bundle:
 hardening requires the old rejection bodies; prewrite replaces them; production
@@ -96,10 +108,14 @@ three shared CSS declarations constrain the workspace grid minimum while
 retaining internal table scrolling. Source/SSR failure controls pass; Chromium
 startup remains blocked locally. Trigger-supplied independent synthetic metrics
 are labelled separately from authenticated Preview, which remains unverified.
-Inner full check reports 49/59 file-level passes and the same 10 failing files
-documented in D286; separate TypeScript and optimized build pass. Trusted OUTER
-PG16/PG17, new SHA and Preview acceptance remain pending. Historical 17 overflow
-cases remain open. No production observations or Sales recovery changes;
+Historical inner full check reported 49/59 file-level passes and the same 10
+failing files documented in D286; separate TypeScript and optimized build passed.
+Superseding D288 trigger receipt independently accepts the narrow offline CSS
+gate at `c39095111d895833c95fc6b26145a689a25533a9`: [exact-SHA native CI](https://github.com/adduakiev/mystoriya-bi/actions/runs/42929459819)
+PG16.15 and PG17.11 each 646/646 PASS (zero failures/skips), build PASS and
+Preview READY. This does not accept the new Glovo candidate, source parity or
+authenticated browser containment. Historical 17 overflow cases remain open.
+No production observations or Sales recovery changes;
 SU-545195 HOLD and owner gates remain. NOT READY FOR RELEASE.
 
 ## D284 GBP identity — 2026-11-10 (preview code)

@@ -29,7 +29,7 @@ function captureLinks() {
   return {links, Link};
 }
 
-const sidebarRoutes = ["/operating", "/", "/delivery", "/aggregators", "/locations",
+const sidebarRoutes = ["/operating", "/", "/delivery", "/aggregators", "/aggregators/glovo", "/locations",
   "/dynamics", "/pnl", "/digital", "/explorer", "/insights"];
 
 for (const lfl of [false, true]) {
@@ -44,10 +44,12 @@ for (const lfl of [false, true]) {
       renderToStaticMarkup(createElement(DashboardSidebar, {
         activeHref, lfl, statusTitle: "Fixture", statusDetail: "Fixture"
       }));
-      assert.deepEqual(links.map(link => link.href), sidebarRoutes.map(href => lfl ? `${href}?lfl=1` : href));
+      assert.deepEqual(links.map(link => link.href), sidebarRoutes.map(href => lfl && href !== "/aggregators/glovo" ? `${href}?lfl=1` : href));
       for (const [index, link] of links.entries()) {
         assert.equal(link.prefetch, false, `${link.href} must explicitly disable Next Link prefetch`);
-        assert.equal(link.className, sidebarRoutes[index] === activeHref ? "nav-item active" : "nav-item");
+        const baseClass = sidebarRoutes[index] === "/aggregators/glovo" ? "nav-item nav-child" : "nav-item";
+        assert.equal(link.className, `${baseClass}${sidebarRoutes[index] === activeHref ? " active" : ""}`);
+        assert.equal(link["aria-current"], sidebarRoutes[index] === activeHref ? "page" : undefined);
       }
     }
   });

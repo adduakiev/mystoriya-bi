@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
   BarChart3,
   CircleDollarSign,
@@ -51,15 +51,30 @@ export function DashboardSidebar({
             : href;
 
           return (
-            <Link
-              key={label}
-              href={target}
-              prefetch={false}
-              className={href === activeHref ? "nav-item active" : "nav-item"}
-            >
-              <Icon size={18} />
-              {label}
-            </Link>
+            <Fragment key={label}>
+              <Link
+                href={target}
+                prefetch={false}
+                aria-label={label}
+                aria-current={href === activeHref ? "page" : undefined}
+                className={href === activeHref ? "nav-item active" : "nav-item"}
+              >
+                <Icon size={18} />
+                {label}
+              </Link>
+              {href === "/aggregators" && (
+                <Link
+                  href="/aggregators/glovo"
+                  prefetch={false}
+                  aria-label="Агрегатори → Glovo · Аналітика брендів"
+                  aria-current={activeHref === "/aggregators/glovo" ? "page" : undefined}
+                  className={activeHref === "/aggregators/glovo" ? "nav-item nav-child active" : "nav-item nav-child"}
+                >
+                  <BarChart3 size={18} />
+                  Glovo · Аналітика брендів
+                </Link>
+              )}
+            </Fragment>
           );
         })}
       </nav>

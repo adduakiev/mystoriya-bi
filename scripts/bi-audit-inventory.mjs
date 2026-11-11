@@ -30,7 +30,7 @@ function closure(file,result=new Set()){
   result.add(file);for(const child of parse(file).imports)closure(child,result);return result;
 }
 const rpcByRoute={
-  '/':['bi_overview_payload'],'/aggregators':['bi_aggregators_payload_v2'],'/delivery':['bi_delivery_payload'],
+  '/':['bi_overview_payload'],'/aggregators':['bi_aggregators_payload_v2'],'/aggregators/glovo':[],'/delivery':['bi_delivery_payload'],
   '/locations':['bi_locations_payload'],'/dynamics':['bi_dynamics_payload'],'/explorer':['bi_explorer_payload'],
   '/insights':['bi_insights_payload'],'/pnl':[], '/login':[],
   '/digital':['bi_digital_payload','bi_digital_history_payload','bi_digital_ads_payload','bi_digital_local_payload'],
@@ -79,14 +79,15 @@ for(const page of pages){
   const dependencies=[...tree].sort();
   const sources=rpcByRoute[route];if(!sources)throw Error(`Missing reviewed route contract: ${route}`);
   const sales=['/','/delivery','/aggregators','/locations','/dynamics','/explorer','/insights'].includes(route);
+  const glovo=route==='/aggregators/glovo';
   const contract={path:route,page,component_tree:dependencies.filter(p=>p.endsWith('.tsx')),
     rpc:sources,warehouse_relations:[...new Set(sources.flatMap(n=>lineage(n)))].sort(),
-    grain:route==='/pnl'?'month × workbook metric × fact/plan/year':sales?'date × location × brand × ownership × channel × order_type':route==='/operating'?'current-run evidence_id; source aggregate periods':'source-specific daily aggregates or snapshots; see source-register and SQL definitions',
-    filters:route==='/digital'?'GET from/to/year/month/period; Ads/GBP retain their own RPC windows':sales?'GET year/month/brand/ownership/lfl; route-specific channel/orderType/location/metric/grain/compare (see individual controls)':route==='/pnl'?'GET month/mode/view; eight imported months':route.startsWith('/digital')?'RPC-selected default windows; most submodules have no arbitrary date selector':'see individual controls',
-    timezone:sales?'UTC date arithmetic; source business timezone UNKNOWN':route==='/pnl'?'monthly workbook; source timezone UNKNOWN':'RPC date boundaries; account/property timezone UNKNOWN',
-    freshness:'UNKNOWN (no authenticated data observation in this audit)',status:route==='/login'?'PREPARED':route==='/pnl'?'PARTIAL':route==='/digital/app'||route==='/digital/commerce'?'WAITING':'PARTIAL',
+    grain:glovo?'brand × source location × local created month; PREPARED private Sheet contract':route==='/pnl'?'month × workbook metric × fact/plan/year':sales?'date × location × brand × ownership × channel × order_type':route==='/operating'?'current-run evidence_id; source aggregate periods':'source-specific daily aggregates or snapshots; see source-register and SQL definitions',
+    filters:glovo?'SOURCE UNAVAILABLE; no interactive filters; prepared default 2026-01..2026-10 excludes partial November':route==='/digital'?'GET from/to/year/month/period; Ads/GBP retain their own RPC windows':sales?'GET year/month/brand/ownership/lfl; route-specific channel/orderType/location/metric/grain/compare (see individual controls)':route==='/pnl'?'GET month/mode/view; eight imported months':route.startsWith('/digital')?'RPC-selected default windows; most submodules have no arbitrary date selector':'see individual controls',
+    timezone:glovo?'source local created month; exact timezone UNKNOWN':sales?'UTC date arithmetic; source business timezone UNKNOWN':route==='/pnl'?'monthly workbook; source timezone UNKNOWN':'RPC date boundaries; account/property timezone UNKNOWN',
+    freshness:'UNKNOWN (no authenticated data observation in this audit)',status:route==='/login'?'PREPARED':route==='/pnl'?'PARTIAL':glovo||route==='/digital/app'||route==='/digital/commerce'?'WAITING':'PARTIAL',
     evidence_basis:'STATIC_REPOSITORY_ONLY',runtime_parity:'UNKNOWN',
-    fallback:sales?'bi_sales_snapshot → Google Sheets CSV → JS analytics; 600s dataset cache, not reconciled':route==='/pnl'?'versioned PNL_SOURCE workbook import; no warehouse RPC':'none asserted; inspect loader errors',
+    fallback:glovo?'NONE; disconnected server-only Glovo boundary; no public CSV, Sales/P&L or fixtures':sales?'bi_sales_snapshot → Google Sheets CSV → JS analytics; 600s dataset cache, not reconciled':route==='/pnl'?'versioned PNL_SOURCE workbook import; no warehouse RPC':'none asserted; inspect loader errors',
     evidence:[page,...dependencies.filter(p=>p.startsWith('web/lib/data/')||p==='web/lib/operating-data.ts')],
   };
   routes.push(contract);

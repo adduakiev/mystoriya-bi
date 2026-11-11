@@ -11,7 +11,8 @@ test('read-only probe manually follows only same-origin login, never sends authe
     if (target.pathname === '/login') return login();
     return new Response(null,{status:307,headers:{location:`/login?next=${encodeURIComponent(target.pathname)}`}});
   });
-  assert.equal(result.results.length,28);
+  assert.equal(result.results.length,29);
+  assert.equal(result.results.find(row=>row.path === '/aggregators/glovo')?.result,'DENIED_TO_LOGIN');
   assert.ok(result.results.every(r=>r.result === 'LOGIN_SHELL' || r.result === 'DENIED_TO_LOGIN'));
   for (const {url,options} of requests) {
     assert.equal(new URL(url).origin,'https://preview.invalid');
@@ -29,7 +30,7 @@ test('off-origin redirects, Vercel 403, 200 BI payloads and network errors canno
     ()=>{throw Object.assign(new Error('Do not persist raw error'),{code:'ENOTFOUND'});}]) {
     let calls=0;
     const result = await probePreview('https://preview.invalid',async ()=>{calls++;return response();});
-    assert.equal(calls,28,'no redirect followed');
+    assert.equal(calls,29,'no redirect followed');
     assert.ok(result.results.every(r=>['UNEXPECTED_RESPONSE','BLOCKED_403_LAYER_UNVERIFIED','BLOCKED_NETWORK'].includes(r.result)));
     assert.doesNotMatch(JSON.stringify(result),/Do not persist raw error|revenue/);
   }

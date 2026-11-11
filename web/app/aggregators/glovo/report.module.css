@@ -1,0 +1,14 @@
+.report { display: grid; gap: 14px; overflow-wrap: anywhere; }
+.report p { color: #a6b0bd; line-height: 1.6; font-size: 13px; }
+.navigation { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+.navigation a { padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpis h2 { font-size: 15px; }
+.value { display: block; font-size: 28px; margin-top: 12px; }
+.scroll { max-width: 100%; overflow-x: auto; margin-top: 12px; }
+.scroll table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13px; }
+.scroll th, .scroll td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.scroll caption { text-align: left; padding: 8px; color: #a6b0bd; }
+.report a:focus-visible, .scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .kpis { grid-template-columns: minmax(0, 1fr); } }

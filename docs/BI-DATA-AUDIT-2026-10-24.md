@@ -1,5 +1,14 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D288 issue #43 / #48 / same PR #44:
+[Glovo scoped preview addendum](audit/2026-10-24/GLOVO-D288-PREVIEW-2026-11-11.md)
+and [per-block matrix](audit/2026-10-24/glovo-d288-inventory.json).
+New `/aggregators/glovo` report is SOURCE UNAVAILABLE with no business values;
+private source integration and source/SQL/UI reconciliation remain blocked.
+Synthetic contract/SSR evidence is distinct from live data and authenticated
+Preview QA. Jan–Oct default excludes partial November. No Sales recovery,
+production data, SQL or release gate changed; broader audit remains incomplete.
+
 2026-11-04, issue #43 / same PR #44: [coordinated Sales release checklist](audit/2026-10-24/SALES-RECOVERY-RELEASE-CHECKLIST-2026-11-04.md).
 Repository contract audit identifies incompatible SQL alternatives and the missing
 production success/attestor API. A separately signed, owner-approved transition

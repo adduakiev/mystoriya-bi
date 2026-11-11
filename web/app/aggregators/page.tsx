@@ -92,6 +92,12 @@ export default async function AggregatorsPage({
           </div>
         </header>
 
+        <nav aria-label="Звіти агрегаторів" className="control-stack">
+          <Link className="quick-mode" href="/aggregators/glovo" prefetch={false}>
+            Glovo · Аналітика брендів →
+          </Link>
+        </nav>
+
         {!sqlConnected && (
           <p role="status" className="context-line">
             SQL RPC недоступний · резервний шлях, джерело UNKNOWN (Supabase snapshot або Google Sheets).

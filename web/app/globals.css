@@ -25,6 +25,7 @@ nav { display: grid; gap: 4px; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 11px; border: 0; background: transparent; color: #8d97a5; border-radius: 9px; text-align: left; cursor: pointer; }
 .nav-item:hover, .nav-item.active { color: white; background: #151c25; }
 .nav-item.active { box-shadow: inset 2px 0 var(--accent); }
+.nav-child { margin-left: 8px; border-left: 1px solid var(--border); font-size: 12px; }
 .sidebar-status { margin-top: auto; padding: 14px 10px; color: #a6b0bd; font-size: 12px; border-top: 1px solid var(--border); }
 .sidebar-status small { display: block; color: #65707e; margin-top: 5px; }
 .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 7px; }
