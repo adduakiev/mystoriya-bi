@@ -82,3 +82,11 @@ handoff to the same open PR #44. Independent exact-new-SHA PG16+PG17 CI and matc
 Vercel Preview require separate adjudication. Runtime source reconciliation and
 authenticated desktop/mobile browser QA remain blocked by the absent authorized
 BI runtime source/access; offline contract/SSR checks cannot satisfy those gates.
+
+## Independent trusted OUTER adjudication — 2026-11-11 UTC
+
+- [Astra D289 run 42949175081](https://github.com/adduakiev/mystoriya-bi/actions/runs/42949175081), job `130289158249`, COMPLETED SUCCESS. Trusted OUTER native PostgreSQL **16.15, 660/660 PASS, 0 FAIL, 0 SKIP**; optimized Next.js build and TypeScript PASS. The outer runner then actually committed/pushed `3d726c732c2cbe6692daef03018cfe6118222acf` to the existing open/unmerged PR #44. Codex inner sandbox's 51/61 suite-level result and no-push wording are not outer results.
+- Independent compare `0ebf0ffe4d2d453103d34a125bb3492bd752640b..3d726c732c2cbe6692daef03018cfe6118222acf` = **one commit / five paths**: Glovo contract, synthetic contract regressions, and three audit/status docs. No runtime source adapter or Production/DB/Sales handler changed.
+- Authorized owner-connected Google Sheet **read-only** `Дані!A5:I8` with `UNFORMATTED_VALUE` independently confirms the exact nine expected headers, numeric F/G/H cells and numeric I=1 in sampled rows; this does not establish BI runtime private source authorization, full transformed-to-raw parity or any live refresh. No customer rows or values are copied here.
+- [Exact code-head Vercel Preview](https://vercel.com/adduakiev-9572s-projects/mystoriya-bi/2d9LdbPbWcZfFWvoRCuWVpsNjrYh) **READY**, correct code SHA, `target=null`. No exact-head native PG17 CI was present at this checkpoint; the mandatory **dual-PG exact-SHA acceptance remains PENDING**. This documentation-only receipt is used to trigger independent GitHub native CI on the new head without changing executable code; assess its actual jobs and matching Preview before declaring OFFLINE ACCEPTED.
+- Glovo runtime source remains **SOURCE UNAVAILABLE**. No authenticated actual Preview browser/data QA, private Sheet runtime credentials, Supabase SU-545195 resolution, SQL/import/Edge/secret change, merge, Production deployment or scheduler changes are claimed.
