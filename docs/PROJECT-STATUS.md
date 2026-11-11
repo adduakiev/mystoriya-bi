@@ -1,5 +1,20 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D291 issue #43 / #48 / same PR #44:
+[Offline private Sheets adapter contract and acceptance limits](audit/2026-10-24/GLOVO-D291-ADAPTER-2026-11-11.md).
+Prepared a pinned server-only request/response seam with test-injected transport,
+strict matrix/coverage validation and existing normalization/aggregation only.
+Runtime Glovo source/page are unchanged: SOURCE UNAVAILABLE / report null / zero
+new I/O. No deployable authorization, transport implementation or live read added.
+The trusted D291 trigger reports baseline `9c3eea436d4177b8e973ddbc3fdee6ac2e7ad779`
+D290 accepted OFFLINE ONLY (PG16+PG17 665/665 each and matching READY Preview);
+historical D290 pending statements below are superseded for that baseline only.
+New offline regressions (8), TypeScript, inventory checks and optimized build pass.
+Inner full check: 52/62 file-level pass, 10 fail, zero skip; PG16 Unix socket EPERM
+is reproduced and Operating runtime writes are denied. Full trusted outer and
+exact-new-SHA acceptance remain BLOCKED/pending; no checks were weakened.
+Owner-only credential/runtime-read and coverage gates remain; SU-545195 stays HOLD.
+
 2026-11-11, D290 issue #43 / #48 / same PR #44:
 [Offline synthetic Glovo report rendering](audit/2026-10-24/GLOVO-D290-REPORT-2026-11-11.md).
 Added a typed presenter and conditional report branch using the existing contract;

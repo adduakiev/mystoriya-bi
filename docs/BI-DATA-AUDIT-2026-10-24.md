@@ -1,5 +1,21 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D291 issue #43 / #48 / same PR #44:
+[Offline private Sheets request/response contract, lineage and gates](audit/2026-10-24/GLOVO-D291-ADAPTER-2026-11-11.md).
+Pinned server-only adapter preparation rejects absent authorization/coverage,
+malformed matrices, redirects and unknown responses, then uses the existing
+normalizer/builder in synthetic tests only. The actual loader/page still return
+SOURCE UNAVAILABLE / report null, with no new I/O or runtime dependency.
+No new visual blocks; inventory remains unchanged. No actual-source 30-day,
+12-month, browser or source-to-UI parity proof is added. The trusted D291 trigger
+reports D290 baseline `9c3eea436d4177b8e973ddbc3fdee6ac2e7ad779` independently
+accepted OFFLINE ONLY; older pending descriptions below apply historically.
+Eight new offline regressions, TypeScript, inventory checks and optimized build
+pass. Full inner check fails (52/62 file-level pass, 10 fail, zero skip); native
+PG16 socket EPERM is reproduced. Trusted outer acceptance, source-specific runtime
+authorization and independent coverage evidence remain separate gates; SU-545195
+stays HOLD.
+
 2026-11-11, D290 issue #43 / #48 / same PR #44:
 [Offline synthetic Glovo presenter, block lineage and evidence limits](audit/2026-10-24/GLOVO-D290-REPORT-2026-11-11.md).
 The conditional report branch consumes the existing pure builder; actual runtime
