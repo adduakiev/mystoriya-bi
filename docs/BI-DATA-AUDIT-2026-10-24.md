@@ -1,5 +1,14 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D290 issue #43 / #48 / same PR #44:
+[Offline synthetic Glovo presenter, block lineage and evidence limits](audit/2026-10-24/GLOVO-D290-REPORT-2026-11-11.md).
+The conditional report branch consumes the existing pure builder; actual runtime
+remains SOURCE UNAVAILABLE / report null / zero transport. Synthetic SSR proves
+typed rendering and missingness controls only. TypeScript/build pass; full inner
+acceptance is blocked by sandbox test-runtime restrictions (51/61 file-level pass,
+native Unix socket EPERM reproduced). Trusted outer and exact-new-SHA acceptance
+remain pending; no source parity, authenticated Preview QA or release claim.
+
 2026-11-11, D289 issue #43 / #48 / same PR #44:
 [Glovo column I correction and evidence limits](audit/2026-10-24/GLOVO-D289-CONTRACT-2026-11-11.md).
 Owner-connected-reader evidence reports native numeric 1/0 under UNFORMATTED_VALUE;

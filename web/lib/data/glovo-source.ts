@@ -1,4 +1,5 @@
 import "server-only";
+import type { buildGlovoReport } from "./glovo-contract";
 
 /** Server read boundary, intentionally disconnected. The prepared private Sales
  * reader is pinned to another spreadsheet/range; it grants no Glovo access.
@@ -11,6 +12,6 @@ export async function loadGlovoSource() {
     reason: "Авторизоване приватне джерело Glovo не підключене до BI. Дані та оновлення недоступні.",
     latestEventMonth: null,
     lastReadAt: null,
-    report: null
+    report: null as ReturnType<typeof buildGlovoReport>
   };
 }

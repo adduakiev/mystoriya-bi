@@ -15,6 +15,7 @@
       "path": "/aggregators/glovo",
       "page": "web/app/aggregators/glovo/page.tsx",
       "component_tree": [
+        "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
         "web/app/aggregators/glovo/page.tsx",
         "web/app/layout.tsx",
         "web/app/loading.tsx",
@@ -35,6 +36,7 @@
       "fallback": "NONE; disconnected server-only Glovo boundary; no public CSV, Sales/P&L or fixtures",
       "evidence": [
         "web/app/aggregators/glovo/page.tsx",
+        "web/lib/data/glovo-contract.ts",
         "web/lib/data/glovo-source.ts",
         "web/lib/data/source.ts",
         "web/lib/data/types.ts"
@@ -1404,12 +1406,118 @@
   },
   "items": [
     {
-      "id": "web/app/aggregators/glovo/page.tsx:336",
+      "id": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:1285",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
+      "line": 22,
+      "kind": "section",
+      "displayed_kpi_definition": "section",
+      "props": {
+        "aria-label": "{`KPI · ${report.coverage}`}"
+      },
+      "bindings": [
+        "styles.kpis",
+        "`KPI · ${report.coverage}`",
+        "[ { label: \"Доставлені замовлення\", metric: report.metrics.deliveredOrders, detail: \"Місячний агрегат джерела\" }, { label: \"Сума покупок, лок. вал.\", metric: report.metrics.purchas",
+        "{styles.kpis}",
+        "{`KPI · ${report.coverage}`}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:22"
+    },
+    {
+      "id": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:1819",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
+      "line": 27,
+      "kind": "article",
+      "displayed_kpi_definition": ". .",
+      "props": {},
+      "bindings": [
+        "label",
+        "styles.value",
+        "value(metric)",
+        "detail",
+        "report.coverage",
+        "metric === null ? \" · недоступно\" : \"\""
+      ],
+      "repeat_template": "[ { label: \"Доставлені замовлення\", metric: report.metrics.deliveredOrders, detail: \"Місячний агрегат джерела\" }, { label: \"Сума покупок, лок. вал.\", metric: report.metrics.purchas",
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:27"
+    },
+    {
+      "id": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:2050",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
+      "line": 31,
+      "kind": "article",
+      "displayed_kpi_definition": "Зміна до попереднього періоду — · недоступно Немає перевіреного попереднього періоду.",
+      "props": {},
+      "bindings": [
+        "styles.value"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:31"
+    },
+    {
+      "id": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:2667",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
+      "line": 42,
+      "kind": "table",
+      "displayed_kpi_definition": "Місячна динаміка ·",
+      "props": {},
+      "bindings": [
+        "report.coverage",
+        "[\"Місяць\", \"Доставлені замовлення\", \"Сума покупок, лок. вал.\", \"Середній чек, лок. вал.\", \"Покриття\"] .map(label => <th scope=\"col\" key={label}>{label}</th>)",
+        "label",
+        "report.trend.map(point => <tr key={point.month}> <th scope=\"row\">{point.month}</th><td>{value(point.deliveredOrders)}</td> <td>{value(point.purchaseSum)}</td><td>{value(point.avera",
+        "point.month",
+        "value(point.deliveredOrders)"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:42"
+    },
+    {
+      "id": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:3703",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoReportPresenter.tsx",
+      "line": 59,
+      "kind": "table",
+      "displayed_kpi_definition": "Бренд × заклад × місяць · рядки джерела; покриття періоду — · недоступно · немає рядків у вибраному періоді",
+      "props": {},
+      "bindings": [
+        "report.coverage",
+        "[\"Місяць\", \"Бренд у джерелі\", \"Погоджена група\", \"Заклад у таблиці\", \"Назва у джерелі\", \"Адреса у джерелі\", \"Фізична локація\", \"Власність\", \"Реальний / віртуальний тип\", \"Доставлен",
+        "label",
+        "report.rows.length ? report.rows.map(row => <tr key={row.key}> <th scope=\"row\">{row.month}</th><td>{row.rawBrand}</td><td>{row.normalizedGroup ?? \"UNKNOWN / needs mapping\"}</td> <t",
+        "row.key",
+        "row.month"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoReportPresenter.tsx:59"
+    },
+    {
+      "id": "web/app/aggregators/glovo/page.tsx:399",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 10,
+      "line": 11,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -1421,15 +1529,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:10"
+      "evidence": "web/app/aggregators/glovo/page.tsx:11"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:562",
+      "id": "web/app/aggregators/glovo/page.tsx:625",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 13,
+      "line": 14,
       "kind": "nav",
       "displayed_kpi_definition": "nav",
       "props": {
@@ -1441,15 +1549,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:13"
+      "evidence": "web/app/aggregators/glovo/page.tsx:14"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:639",
+      "id": "web/app/aggregators/glovo/page.tsx:702",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 14,
+      "line": 15,
       "kind": "Link",
       "displayed_kpi_definition": "← Агрегатори",
       "props": {
@@ -1461,15 +1569,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:14"
+      "evidence": "web/app/aggregators/glovo/page.tsx:15"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:712",
+      "id": "web/app/aggregators/glovo/page.tsx:775",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 15,
+      "line": 16,
       "kind": "Link",
       "displayed_kpi_definition": "Glovo · Аналітика брендів",
       "props": {
@@ -1481,15 +1589,33 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:15"
+      "evidence": "web/app/aggregators/glovo/page.tsx:16"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:1531",
+      "id": "web/app/aggregators/glovo/page.tsx:1631",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 31,
+      "line": 32,
+      "kind": "GlovoReportPresenter",
+      "displayed_kpi_definition": "GlovoReportPresenter",
+      "props": {},
+      "bindings": [
+        "source.report",
+        "{source.report}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/page.tsx:32"
+    },
+    {
+      "id": "web/app/aggregators/glovo/page.tsx:1692",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/page.tsx",
+      "line": 33,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {
@@ -1502,15 +1628,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:31"
+      "evidence": "web/app/aggregators/glovo/page.tsx:33"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:1980",
+      "id": "web/app/aggregators/glovo/page.tsx:2141",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 38,
+      "line": 40,
       "kind": "article",
       "displayed_kpi_definition": "— . SOURCE UNAVAILABLE.",
       "props": {},
@@ -1522,15 +1648,15 @@
       ],
       "repeat_template": "[ [\"Доставлені замовлення\", \"Місячний агрегат джерела\"], [\"Сума покупок, лок. вал.\", \"Ідентичність валюти не підтверджена\"], [\"Середній чек, лок. вал.\", \"Сума покупок / доставлені ",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:38"
+      "evidence": "web/app/aggregators/glovo/page.tsx:40"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:2635",
+      "id": "web/app/aggregators/glovo/page.tsx:2796",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 50,
+      "line": 52,
       "kind": "table",
       "displayed_kpi_definition": "Структура звіту · без даних джерела Місяць Доставлені замовлення Сума покупок, лок. вал. Покриття SOURCE UNAVAILABLE · місячні значення відсутні",
       "props": {},
@@ -1539,15 +1665,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:50"
+      "evidence": "web/app/aggregators/glovo/page.tsx:52"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:3498",
+      "id": "web/app/aggregators/glovo/page.tsx:3659",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/page.tsx",
-      "line": 64,
+      "line": 66,
       "kind": "table",
       "displayed_kpi_definition": "Структура деталізації · без даних джерела SOURCE UNAVAILABLE · мапінг UNKNOWN / needs mapping",
       "props": {},
@@ -1558,7 +1684,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/page.tsx:64"
+      "evidence": "web/app/aggregators/glovo/page.tsx:66"
     },
     {
       "id": "web/app/layout.tsx:1303",

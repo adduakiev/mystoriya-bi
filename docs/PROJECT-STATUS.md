@@ -1,5 +1,16 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D290 issue #43 / #48 / same PR #44:
+[Offline synthetic Glovo report rendering](audit/2026-10-24/GLOVO-D290-REPORT-2026-11-11.md).
+Added a typed presenter and conditional report branch using the existing contract;
+runtime source still returns SOURCE UNAVAILABLE and null report with zero I/O.
+Synthetic contract/SSR tests, TypeScript and optimized build pass. Inner full
+check fails (51/61 file-level pass); native test socket bind is denied by sandbox
+EPERM. Trusted outer full checks and exact-new-SHA CI/Preview remain pending.
+No live data, authenticated browser QA, source parity or release is claimed.
+The following D288/D289 candidate descriptions are historical; the D290 trigger
+reports baseline `440bd15b52ae37dd6e898e5da440496ab35513fc` independently accepted.
+
 2026-11-11, D289 issue #43 / #48 / same PR #44:
 [Glovo column I contract correction](audit/2026-10-24/GLOVO-D289-CONTRACT-2026-11-11.md).
 Prepared normalization accepts native numeric 1/0 and booleans using the supplied

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { loadGlovoSource } from "@/lib/data/glovo-source";
+import { GlovoReportPresenter } from "./GlovoReportPresenter";
 import styles from "./report.module.css";
 
 export default async function GlovoBrandsPage() {
@@ -24,10 +25,11 @@ export default async function GlovoBrandsPage() {
           <h2 id="glovo-source-heading">{source.status}</h2>
           <p role="status">{source.reason}</p>
           <p>Останній місяць подій: UNKNOWN · Останнє читання: UNKNOWN · Автооновлення не активне.</p>
-          <p>Запланований період: січень–жовтень 2026. Листопад поза типовим періодом;
-            його часткові дані потребують окремої перевірки. Покриття в BI не підтверджене.</p>
+          {!source.report && <p>Запланований період: січень–жовтень 2026. Листопад поза типовим періодом;
+            його часткові дані потребують окремої перевірки. Покриття в BI не підтверджене.</p>}
         </section>
 
+        {source.report ? <GlovoReportPresenter report={source.report} /> : <>
         <section className={styles.kpis} aria-label="KPI · дані недоступні">
           {[
             ["Доставлені замовлення", "Місячний агрегат джерела"],
@@ -71,6 +73,7 @@ export default async function GlovoBrandsPage() {
           </div>
         </section>
 
+        </>}
         <section className="panel" aria-labelledby="glovo-definition-heading">
           <h2 id="glovo-definition-heading">Визначення та обмеження</h2>
           <p>Джерело містить агрегати бренд × заклад × місяць. Сума покупок у локальній валюті
