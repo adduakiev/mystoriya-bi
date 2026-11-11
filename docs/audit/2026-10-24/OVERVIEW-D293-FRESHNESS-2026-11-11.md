@@ -134,3 +134,12 @@ runtime 404/500/performance acceptance are claimed. Production source→warehous
 
 No Production/Edge/SQL/import execution, credentials, scheduling, provider
 activation, ad/SYRVE/business writes, merge, deploy or GitHub message occurred.
+
+
+## D293.1 — independent trusted OUTER PG16 acceptance receipt (2026-11-11 UTC)
+
+Review of the ACTUAL outer GitHub Actions [D293 run #43007537173](https://github.com/adduakiev/mystoriya-bi/actions/runs/43007537173), trusted job `130478647637`: native disposable **PostgreSQL 16.15** `npm run check` **695 tests / 695 PASS / 0 fail / 0 skip / 0 cancelled**, strict TypeScript, optimized Next.js build and diff check PASS in the worktree. Trusted runner then ACTUALLY committed/pushed `44392a1907298a979bd51421f4302af8a4c8a4d9` to the SAME unmerged PR #44 (the inner Codex 'no push' wording is sandbox-only). Independent compare from prior accepted `13293a54266296f038873fa4ad05b5602dc9dd02` shows **one commit / 18 paths**, limited to Overview warehouse-aware freshness / GET-only metadata, regression tests, regenerated inventory and audit docs; no importer, SQL, Edge or Production changes. The exact code SHA has **Vercel Preview READY**, target null, correct branch/SHA.
+
+**This PG16 check is not exact immutable dual-PostgreSQL final acceptance:** real PostgreSQL 17.11 still requires the established trusted exact-final-SHA workflow, along with its PG16 check and exact-head READY Preview. This documentation-only receipt is intentionally written to this existing PR branch with the authorized GitHub App, to trigger that existing push-only exact-SHA CI (GITHUB_TOKEN-created Astra pushes do not trigger a second push workflow). It changes no executable file. Do not interpret the triggered workflow as accepted before independent job-log review.
+
+**Live BI incident remains unresolved** until the owner-visible Production Overview date, November 1–10 totals, actual RPC/rendered parity, authenticated browser behavior and release gate are independently confirmed. Do not merge this broad PR or deploy to Production by implication; existing no-import, no-DB/SQL/Edge/credential/schedule rules stand.
