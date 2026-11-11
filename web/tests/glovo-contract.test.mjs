@@ -9,6 +9,49 @@ const row = (changes = {}) => Object.assign(['2026-01', 'SYNTHETIC novel brand',
   'Fixture source name', 'Fixture address', 2, 10, 12, true], changes);
 const normalize = (...rows) => normalizeGlovoSheet([GLOVO_HEADERS, ...rows]);
 
+test('unformatted native 1/0 flags normalize to booleans without changing row identity or lineage', () => {
+  // Copies of the observed cell types only; labels and figures are synthetic.
+  for (const [flag, expected] of [[true, true], [false, false], [1, true], [0, false]]) {
+    const result = normalize(row({8:flag}));
+    assert.equal(result.status, 'valid');
+    assert.equal(result.rows[0].sourceHasNumeric, expected);
+    assert.deepEqual(result.rows, normalize(row({8:expected})).rows);
+    assert.equal(result.rows[0].sourceRow, 12);
+  }
+});
+
+test('numeric flags never supply missing measures or coerce formatted numeric text', () => {
+  for (const flag of [1, 0]) {
+    for (const blank of ['', null, undefined]) {
+      const result = normalize(row({5:blank, 6:blank, 8:flag}));
+      assert.equal(result.status, 'valid');
+      assert.equal(result.rows[0].sourceHasNumeric, flag === 1);
+      assert.deepEqual(glovoMetrics(result.rows), {deliveredOrders:null, purchaseSum:null, averageTicket:null});
+      assert.equal(buildGlovoReport(result, ['2026-01'], ['2026-01']).coverage, 'PARTIAL');
+    }
+    const zero = normalize(row({5:0, 6:0, 8:flag}));
+    assert.deepEqual(glovoMetrics(zero.rows), {deliveredOrders:0, purchaseSum:0, averageTicket:null});
+    assert.equal(buildGlovoReport(zero, ['2026-01'], ['2026-01']).coverage, 'COMPLETE');
+    const formatted = normalize(row({5:'2', 6:'1 234,50', 8:flag}));
+    assert.deepEqual(glovoMetrics(formatted.rows), {deliveredOrders:null, purchaseSum:null, averageTicket:null});
+  }
+});
+
+test('unsupported flags and structural drift reject the whole dataset even beside a valid numeric flag', () => {
+  for (const flag of ['1', '0', 'true', 'false', '', null, undefined, 2, -1, 0.5, NaN, Infinity, {}, []]) {
+    const result = normalize(row({8:1}), row({1:'Other synthetic brand', 8:flag}));
+    assert.deepEqual(result, {status:'invalid', rows:[], brands:[], issues:[{row:7, code:'ROW_CONTRACT_INVALID'}]});
+  }
+  const extra = normalize(row({8:1}), [...row({1:'Other synthetic brand', 8:0}), 'extra']);
+  assert.deepEqual(extra, {status:'invalid', rows:[], brands:[], issues:[{row:7, code:'ROW_CONTRACT_INVALID'}]});
+  for (const headers of [[...GLOVO_HEADERS, 'extra'], GLOVO_HEADERS.map((h, i) => i === 8 ? 'wrong flag header' : h)]) {
+    assert.deepEqual(normalizeGlovoSheet([headers, row({8:1})]),
+      {status:'invalid', rows:[], brands:[], issues:[{row:5, code:'HEADER_MISMATCH'}]});
+  }
+  assert.equal(normalize(row({8:1}), row({8:0})).issues[0].code, 'DUPLICATE_COMPOSITE_KEY');
+  assert.equal(normalize(row({0:'2026-13', 8:1})).status, 'invalid');
+});
+
 test('strict header/local month/typed cell contract rejects drift without leaking rejected records', () => {
   for (const values of [[], [['wrong']], [[...GLOVO_HEADERS].reverse(), row()]]) {
     const result = normalizeGlovoSheet(values);

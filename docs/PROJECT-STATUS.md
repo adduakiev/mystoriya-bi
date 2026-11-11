@@ -1,5 +1,12 @@
 # М'ясторія BI — стан проєкту та задачі команди
 
+2026-11-11, D289 issue #43 / #48 / same PR #44:
+[Glovo column I contract correction](audit/2026-10-24/GLOVO-D289-CONTRACT-2026-11-11.md).
+Prepared normalization accepts native numeric 1/0 and booleans using the supplied
+owner-connected-reader shape evidence; other flags fail closed. Runtime source
+remains SOURCE UNAVAILABLE. New candidate exact-SHA native CI/Preview acceptance
+is pending; source parity and authenticated browser QA remain blocked.
+
 2026-11-11, D288 issue #43 / #48 / same PR #44:
 [Glovo preview and source limitations](audit/2026-10-24/GLOVO-D288-PREVIEW-2026-11-11.md).
 Added `/aggregators/glovo` with discoverable child navigation, explicit SOURCE

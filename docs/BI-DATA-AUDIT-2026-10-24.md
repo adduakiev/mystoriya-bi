@@ -1,5 +1,12 @@
 # М'ЯСТОРІЯ BI — повний source/code inventory, аудит #43 від 24.10.2026
 
+2026-11-11, D289 issue #43 / #48 / same PR #44:
+[Glovo column I correction and evidence limits](audit/2026-10-24/GLOVO-D289-CONTRACT-2026-11-11.md).
+Owner-connected-reader evidence reports native numeric 1/0 under UNFORMATTED_VALUE;
+the pure contract now normalizes only these and booleans. Missing measures remain
+null; no runtime provider or live reconciliation is established. Earlier D288
+boolean-only/source-shape-unverified descriptions below are historical.
+
 2026-11-11, D288 issue #43 / #48 / same PR #44:
 [Glovo scoped preview addendum](audit/2026-10-24/GLOVO-D288-PREVIEW-2026-11-11.md)
 and [per-block matrix](audit/2026-10-24/glovo-d288-inventory.json).

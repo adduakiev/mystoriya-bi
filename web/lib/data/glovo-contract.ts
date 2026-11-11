@@ -66,8 +66,12 @@ export function normalizeGlovoSheet(values: readonly (readonly unknown[])[]): Gl
     const row = index + 6;
     if (cells.every(cell => cell === null || cell === undefined || cell === "")) continue;
     const [month, rawBrand, sourceLocation, sourceName, sourceAddress, orders, sum, sourceRow, hasNumeric] = cells;
+    // UNFORMATTED_VALUE exposes column I as native 1/0; accept only these
+    // exact numeric flags or booleans, never strings or other coercible values.
+    const sourceHasNumeric = typeof hasNumeric === "boolean" ? hasNumeric
+      : hasNumeric === 1 ? true : hasNumeric === 0 ? false : undefined;
     if (!isMonth(month) || [rawBrand, sourceLocation, sourceName, sourceAddress].some(v => typeof v !== "string" || !v.trim()) ||
-        !Number.isSafeInteger(sourceRow) || (sourceRow as number) < 1 || typeof hasNumeric !== "boolean" || cells.length > 9) {
+        !Number.isSafeInteger(sourceRow) || (sourceRow as number) < 1 || sourceHasNumeric === undefined || cells.length > 9) {
       issues.push({ row, code: "ROW_CONTRACT_INVALID" });
       continue;
     }
@@ -89,7 +93,7 @@ export function normalizeGlovoSheet(values: readonly (readonly unknown[])[]): Gl
     const normalizedGroup = meatbarAliases.has(aliasKey(brand)) ? "МітБар" : null;
     rows.push({ key, month, rawBrand: brand, normalizedGroup, sourceLocation: location,
       sourceName: name, sourceAddress: address, sourceRow: sourceRow as number,
-      deliveredOrders, purchaseSum, sourceHasNumeric: hasNumeric, physicalLocation: null, ownership: "UNKNOWN", identity: "UNKNOWN",
+      deliveredOrders, purchaseSum, sourceHasNumeric, physicalLocation: null, ownership: "UNKNOWN", identity: "UNKNOWN",
       mappingReason: normalizedGroup === null
         ? "UNKNOWN / needs mapping: група, фізична локація, власність та тип закладу не підтверджені"
         : "UNKNOWN / needs mapping: фізична локація, власність та тип закладу не підтверджені" });
