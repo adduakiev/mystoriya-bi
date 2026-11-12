@@ -1,3 +1,4 @@
+import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import { buildDashboardSnapshot } from "@/lib/analytics";
 import { filterSalesRows } from "@/lib/filters";
@@ -302,8 +303,8 @@ export async function loadLocationsData(options: {
   try {
     const payload=await unstable_cache(
       ()=>callBiRpc<RpcPayload>("bi_locations_payload",{
-        p_brand:options.brand??null,
-        p_ownership:options.ownership??null,
+        p_brand:optionalSalesDimension(options.brand),
+        p_ownership:optionalSalesDimension(options.ownership),
         p_focus_year:options.year??null,
         p_focus_month:options.month??null,
         p_lfl:options.lfl

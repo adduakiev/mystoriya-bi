@@ -98,7 +98,7 @@ test("successful status preserves measured zero and missing counts with the exis
 function brand(loadSalesDataStatus) {
   return load("../components/SidebarBrand.tsx", {
     "@/lib/data/source": {loadSalesDataStatus},
-    "@/components/DataSyncControl": {DataSyncControl: ({initialCutoff}) =>
+    "@/components/AtomicDataSyncControl": {AtomicDataSyncControl: ({initialCutoff}) =>
       React.createElement("button", {"data-cutoff": initialCutoff}, "sync")}
   });
 }

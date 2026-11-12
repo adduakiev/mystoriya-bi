@@ -5,14 +5,20 @@ type SalesRpcQuery = DashboardFilters & {
   period: PeriodMode; compare: ComparisonMode; metric: MetricMode; grain: GrainMode; lfl: boolean;
 };
 
+// HTML selects submit "" for “all”. SQL treats only NULL as an absent filter.
+// Preserve a selected dimension verbatim; whitespace-only values are also absent.
+export function optionalSalesDimension(value: string | undefined): string | null {
+  return value?.trim() ? value : null;
+}
+
 /** Exact caller arguments only; this does not establish deployed RPC parity. */
 export function overviewRpcArgs(query: SalesRpcQuery): Record<string, unknown> {
   return {
-    p_channel: query.channel ?? null,
-    p_order_type: query.orderType ?? null,
-    p_location: query.location ?? null,
-    p_brand: query.brand ?? null,
-    p_ownership: query.ownership ?? null,
+    p_channel: optionalSalesDimension(query.channel),
+    p_order_type: optionalSalesDimension(query.orderType),
+    p_location: optionalSalesDimension(query.location),
+    p_brand: optionalSalesDimension(query.brand),
+    p_ownership: optionalSalesDimension(query.ownership),
     p_focus_year: query.year ?? null,
     p_focus_month: query.month ?? null,
     p_period: query.period,

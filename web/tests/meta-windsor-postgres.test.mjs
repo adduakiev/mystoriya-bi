@@ -18,8 +18,8 @@ test('Meta candidate stays outside automatic migrations and cannot activate dest
 
 // Never reads DATABASE_URL or connects to an existing server. A missing local
 // PostgreSQL installation is reported as skipped; static tests are not a substitute.
-const pgBin = ['/usr/lib/postgresql/16/bin', '/usr/local/pgsql/bin']
-  .find(dir => existsSync(path.join(dir, 'initdb')));
+const pgBin = [process.env.SALES_TEST_PG_BIN, '/usr/lib/postgresql/16/bin', '/usr/local/pgsql/bin']
+  .find(dir => dir && existsSync(path.join(dir, 'initdb')));
 test('Meta candidate: disposable PostgreSQL transform, privileges, nulls, evidence and isolation',
   {skip: !pgBin || process.getuid?.() === 0 ? 'requires local PostgreSQL binaries and a non-root user' : false}, () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'meta-windsor-pg-'));

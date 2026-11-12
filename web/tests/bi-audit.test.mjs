@@ -105,12 +105,12 @@ test('audit inventories are reproducible and cover every current page/API route'
     assert.equal(route.runtime_parity,'UNKNOWN');
     for(const name of route.rpc)assert.ok(audit.sql_definitions[name],`Missing SQL definition ${name}`);
   }
-  assert.ok(audit.items.some(i=>i.component==='web/components/DataSyncControl.tsx'));
+  assert.ok(audit.items.some(i=>i.component==='web/components/AtomicDataSyncControl.tsx'));
   assert.ok(audit.items.some(i=>i.component==='web/components/NavigationFeedback.tsx'));
   for(const i of audit.items){assert.ok(i.paths.length);assert.ok(i.evidence);}
   assert.equal(audit.schema_version,2);
   assert.ok(fs.statSync(path.join(root,'docs/audit/2026-10-24/inventory.json')).size<600000);
-  const shared=audit.items.filter(i=>i.component==='web/components/DataSyncControl.tsx');
+  const shared=audit.items.filter(i=>i.component==='web/components/AtomicDataSyncControl.tsx');
   assert.ok(shared.some(i=>i.paths.length>1));
   const download=audit.items.find(i=>i.component==='web/app/digital/app/page.tsx'&&i.displayed_kpi_definition.includes('Downloads'));
   assert.ok(download,'enclosing KPI blocks retain child text labels');

@@ -1,3 +1,4 @@
+import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableMonths,
@@ -337,10 +338,10 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
   try {
     const payload=await unstable_cache(
       ()=>callBiRpc<RpcPayload>("bi_delivery_payload",{
-        p_order_type:query.orderType??null,
-        p_location:query.location??null,
-        p_brand:query.brand??null,
-        p_ownership:query.ownership??null,
+        p_order_type:optionalSalesDimension(query.orderType),
+        p_location:optionalSalesDimension(query.location),
+        p_brand:optionalSalesDimension(query.brand),
+        p_ownership:optionalSalesDimension(query.ownership),
         p_focus_year:query.year??null,
         p_focus_month:query.month??null,
         p_metric:query.metric,

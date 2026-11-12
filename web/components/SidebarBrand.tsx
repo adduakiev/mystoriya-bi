@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 import { Suspense } from "react";
-import { DataSyncControl } from "@/components/DataSyncControl";
+import { AtomicDataSyncControl } from "@/components/AtomicDataSyncControl";
 import { loadSalesDataStatus } from "@/lib/data/source";
 
 const OFFICIAL_MYASTORIYA_LOGO =
@@ -50,7 +50,7 @@ export async function SidebarSalesStatus() {
         <b>Дані по {cutoff}</b>
         <span>{hasWarehouseSnapshot ? "Warehouse · актуальність UNKNOWN" : "Статус даних недоступний"}</span>
       </div>
-      <DataSyncControl initialCutoff={cutoff === "—" ? null : status.cutoffDate} />
+      <AtomicDataSyncControl initialCutoff={cutoff === "—" ? null : status.cutoffDate} />
     </div>
   );
 }

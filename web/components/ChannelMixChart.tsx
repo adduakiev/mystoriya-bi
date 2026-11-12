@@ -27,7 +27,7 @@ export function ChannelMixChart({
             stroke="#77808f"
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `${value}%`}
+            tickFormatter={(value) => `${Number(value).toFixed(0)}%`}
           />
           <Tooltip
             formatter={(value, name) => [`${Number(value).toFixed(1)}%`, String(name)]}

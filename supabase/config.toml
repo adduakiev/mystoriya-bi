@@ -1,0 +1,6 @@
+# The historical index.ts remains quarantined. All deployments of this function
+# use the atomic runtime; its database release policy fails closed until enabled.
+[functions.sync-google-sheet]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/sync-google-sheet/index-atomic.ts"

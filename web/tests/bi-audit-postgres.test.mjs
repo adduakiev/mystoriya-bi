@@ -67,7 +67,7 @@ test('dated Ads SELECT uses aligned schema and NULL-aware daily joins, never a p
   assert.equal((sql.match(/;/g)??[]).length,1,'single SELECT, no session changes');
 });
 
-const pgBin=['/usr/lib/postgresql/16/bin','/usr/local/pgsql/bin'].find(p=>fs.existsSync(path.join(p,'initdb')));
+const pgBin=[process.env.SALES_TEST_PG_BIN,'/usr/lib/postgresql/16/bin','/usr/local/pgsql/bin'].find(p=>p&&fs.existsSync(path.join(p,'initdb')));
 test('SELECT diagnostics execute on disposable PostgreSQL: gaps, duplicates, nulls, freshness and currency',
   {skip:!pgBin||process.getuid?.()===0?'requires local PostgreSQL and non-root user':false},()=>{
   const dir=fs.mkdtempSync(path.join(tmpdir(),'bi-audit-pg-'));

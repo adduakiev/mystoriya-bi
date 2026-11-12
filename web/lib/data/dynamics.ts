@@ -1,3 +1,4 @@
+import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableYears,
@@ -248,11 +249,11 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       () => callBiRpc<RpcPayload>("bi_dynamics_payload", {
         p_metric: query.metric,
         p_grain: query.grain,
-        p_channel: query.channel ?? null,
-        p_order_type: query.orderType ?? null,
-        p_location: query.location ?? null,
-        p_brand: query.brand ?? null,
-        p_ownership: query.ownership ?? null,
+        p_channel: optionalSalesDimension(query.channel),
+        p_order_type: optionalSalesDimension(query.orderType),
+        p_location: optionalSalesDimension(query.location),
+        p_brand: optionalSalesDimension(query.brand),
+        p_ownership: optionalSalesDimension(query.ownership),
         p_lfl: query.lfl
       }),
       ["bi-dynamics-sql-v1", key],
