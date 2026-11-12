@@ -1,3 +1,4 @@
+import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
   availableYears,
@@ -19,10 +20,10 @@ export type DynamicsQuery = {
 };
 
 export type DynamicsData = {
-  source: "supabase-sql" | "legacy";
+  source: "supabase-sql" | "legacy" | "unavailable";
   rowCount: number;
   years: number[];
-  series: Array<Record<string, string | number>>;
+  series: Array<Record<string, string | number | null>>;
   channels: string[];
   orderTypes: string[];
   locations: string[];
@@ -34,6 +35,11 @@ export type DynamicsData = {
   latestYearTotal: number;
   previousYearTotal: number;
   totalGrowth: number | null;
+};
+
+type RpcObservationPoint = {
+  month?: number | string;
+  counts?: Record<string, number | string | null>;
 };
 
 type RpcPayload = {
@@ -49,7 +55,8 @@ type RpcPayload = {
     brands?: string[];
     ownerships?: string[];
   };
-  series?: Array<Record<string, string | number>>;
+  series?: Array<Record<string, string | number | null>>;
+  seriesObservationCounts?: RpcObservationPoint[];
   summary?: {
     latestYearTotal?: number | string;
     previousYearTotal?: number | string;
@@ -68,13 +75,69 @@ const nullableNum = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+// Observation-count metadata is optional until an approved SQL migration is deployed.
+// If present it must align exactly with the chart or the RPC is unavailable.
+function validObservationCounts(
+  input: RpcObservationPoint[] | undefined,
+  years: Array<number | string> | undefined,
+  series: Array<Record<string, string | number | null>> | undefined,
+  grain: GrainMode
+): boolean {
+  if (grain !== "month" || !Array.isArray(input) || input.length !== 12 ||
+      !Array.isArray(series) || series.length !== 12 || !Array.isArray(years) || !years.length) return false;
+  const keys = years.map(String);
+  if (new Set(keys).size !== keys.length || keys.some((key) => !/^\d{4}$/.test(key))) return false;
+  for (let index = 0; index < 12; index += 1) {
+    const point = input[index];
+    const plotted = series[index];
+    const month = index + 1;
+    if (!point || !plotted || (point.month !== month && point.month !== String(month)) ||
+        !point.counts || Array.isArray(point.counts) ||
+        typeof plotted.label !== "string") return false;
+    const countKeys = Object.keys(point.counts);
+    const seriesKeys = Object.keys(plotted).filter((key) => key !== "label");
+    if (countKeys.length !== keys.length || seriesKeys.length !== keys.length ||
+        keys.some((key) => !Object.hasOwn(point.counts!, key) || !Object.hasOwn(plotted, key))) return false;
+    for (const key of keys) {
+      const count = point.counts[key];
+      if (typeof count === "number" ? !Number.isSafeInteger(count) || count < 0 :
+          typeof count !== "string" || !/^(0|[1-9]\d*)$/.test(count) ||
+          !Number.isSafeInteger(Number(count))) return false;
+    }
+  }
+  return true;
+}
+
+// SQL currently emits 0 for every unobserved calendar-month grid cell.
+// Future months *after the filtered source's latest observed date* are known to be
+// missing, not measured zero. Other historical holes still require SQL provenance.
 function normalizeSeries(
-  input: Array<Record<string, string | number>> | undefined
-): Array<Record<string, string | number>> {
-  return (input ?? []).map((point) => {
-    const next: Record<string, string | number> = {};
+  input: Array<Record<string, string | number | null>> | undefined,
+  { grain, latestYear, latestSourceDate, observationCounts }: {
+    grain: GrainMode; latestYear: number; latestSourceDate: string;
+    observationCounts?: RpcObservationPoint[];
+  }
+): Array<Record<string, string | number | null>> {
+  const validCutoff = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(latestSourceDate);
+  const cutoffYear = Number(latestSourceDate.slice(0, 4));
+  const cutoffMonth = Number(latestSourceDate.slice(5, 7));
+  const orderedMonths = grain === "month" && input?.length === 12;
+  const pointValue = (value: unknown): number | null => {
+    if (value === null || value === undefined ||
+      (typeof value === "string" && value.trim() === "")) return null;
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  return (input ?? []).map((point, index) => {
+    const next: Record<string, string | number | null> = {};
+    const futureUnobservedMonth = orderedMonths && validCutoff &&
+      latestYear === cutoffYear && index + 1 > cutoffMonth;
     for (const [key, value] of Object.entries(point)) {
-      next[key] = key === "label" ? String(value) : num(value);
+      next[key] = key === "label" ? String(value)
+        : (observationCounts && Number(observationCounts[index].counts?.[key]) === 0) ||
+          (futureUnobservedMonth && key === String(latestYear)) ? null
+        : pointValue(value);
     }
     return next;
   });
@@ -154,7 +217,7 @@ async function legacy(query: DynamicsQuery): Promise<DynamicsData> {
     source: "legacy",
     rowCount: rows.length,
     years,
-    series,
+    series: normalizeSeries(series, { grain: query.grain, latestYear, latestSourceDate }),
     channels,
     orderTypes,
     locations,
@@ -186,16 +249,45 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       () => callBiRpc<RpcPayload>("bi_dynamics_payload", {
         p_metric: query.metric,
         p_grain: query.grain,
-        p_channel: query.channel ?? null,
-        p_order_type: query.orderType ?? null,
-        p_location: query.location ?? null,
-        p_brand: query.brand ?? null,
-        p_ownership: query.ownership ?? null,
+        p_channel: optionalSalesDimension(query.channel),
+        p_order_type: optionalSalesDimension(query.orderType),
+        p_location: optionalSalesDimension(query.location),
+        p_brand: optionalSalesDimension(query.brand),
+        p_ownership: optionalSalesDimension(query.ownership),
         p_lfl: query.lfl
       }),
       ["bi-dynamics-sql-v1", key],
       { revalidate: 180, tags: ["sales-data", "dynamics-data"] }
     )();
+
+    // The installed SQL RPC returns JSON null when a valid filter combination has
+    // no matching sales: year_totals is empty, so its grouped totals CTE has no row.
+    // Do not mistake an absent contract for measured zero or silently substitute
+    // the Google Sheets legacy path.
+    if (
+      !payload || typeof payload !== "object" || Array.isArray(payload) ||
+      !payload.meta || !Array.isArray(payload.meta.years) ||
+      !Array.isArray(payload.series) || !payload.summary ||
+      (payload.seriesObservationCounts !== undefined &&
+        !validObservationCounts(payload.seriesObservationCounts, payload.meta.years, payload.series, query.grain))
+    ) {
+      return {
+        source: "unavailable",
+        rowCount: 0,
+        years: [],
+        series: [],
+        channels: [],
+        orderTypes: [],
+        locations: [],
+        brands: [],
+        ownerships: [],
+        latestYear: 0,
+        latestSourceDate: "",
+        latestYearTotal: 0,
+        previousYearTotal: 0,
+        totalGrowth: null
+      };
+    }
 
     const meta = payload.meta ?? {};
     const previousYearRaw = meta.previousYear;
@@ -204,7 +296,12 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       source: "supabase-sql",
       rowCount: num(meta.rowCount),
       years: (meta.years ?? []).map(num),
-      series: normalizeSeries(payload.series),
+      series: normalizeSeries(payload.series, {
+        grain: query.grain,
+        latestYear: num(meta.latestYear),
+        latestSourceDate: meta.latestSourceDate ?? "",
+        observationCounts: payload.seriesObservationCounts
+      }),
       channels: meta.channels ?? [],
       orderTypes: meta.orderTypes ?? [],
       locations: meta.locations ?? [],

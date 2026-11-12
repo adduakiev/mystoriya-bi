@@ -1,0 +1,232 @@
+{
+  "scope": "D288 issue #43 / #48 same PR #44, new route addendum only",
+  "baseline_sha": "c39095111d895833c95fc6b26145a689a25533a9",
+  "source_evidence": "Supplied connected-reader receipt; no local private data read",
+  "items": [
+    {
+      "id": "glovo-d288-navigation",
+      "path": "/aggregators/glovo",
+      "component": "DashboardSidebar / reports navigation",
+      "definition": "Links to /aggregators and /aggregators/glovo",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "PREPARED",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-source-status",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "SOURCE UNAVAILABLE; last event/read/refresh UNKNOWN",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-kpi-orders",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Sum deliveredOrders only when every selected row known",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-kpi-purchases",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Sum purchaseSum, local currency identity UNKNOWN; no profit claim",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-kpi-ticket",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Sum purchaseSum / sum deliveredOrders, positive known denominator",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-kpi-change",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Purchase-sum change only for two complete periods with positive prior denominator",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-monthly-trend",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Local created-month orders/purchases and independent coverage; blocked table structure",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-brand-location",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Raw brand to approved group to physical location; source names/addresses retained; mapping UNKNOWN",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "WAITING",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    },
+    {
+      "id": "glovo-d288-definitions",
+      "path": "/aggregators/glovo",
+      "component": "GlovoBrandsPage",
+      "definition": "Monthly aggregates; missing != zero; mapping and original-export parity limitations",
+      "source_boundary": "web/lib/data/glovo-source.ts:loadGlovoSource",
+      "source_rpc": null,
+      "source_table": null,
+      "source_contract": "private Glovo Sheet / Дані A5:I; NOT CONNECTED",
+      "grain": "brand x source location x local created month",
+      "filters": {
+        "default_months": "2026-01..2026-10",
+        "partial_november": "excluded from default",
+        "interactive": "unavailable"
+      },
+      "timezone": "source local month; exact timezone UNKNOWN",
+      "freshness": "UNKNOWN",
+      "status": "PREPARED",
+      "values": "SOURCE UNAVAILABLE; no financial values rendered",
+      "evidence": [
+        "web/tests/glovo-contract.test.mjs",
+        "web/tests/glovo-preview.test.mjs"
+      ],
+      "browser": "NOT AUTHENTICATED / NOT PREVIEW VERIFIED"
+    }
+  ]
+}

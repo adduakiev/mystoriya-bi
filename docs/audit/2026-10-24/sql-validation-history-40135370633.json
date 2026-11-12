@@ -1,0 +1,39 @@
+{
+  "checked_on": "2026-10-24",
+  "scope": "SYNTHETIC DISPOSABLE POSTGRESQL 16 FIXTURES ONLY",
+  "production_warehouse_execution": "NOT EXECUTED",
+  "upstream_parity": "UNKNOWN",
+  "rpc_rendered_ui_parity": "UNKNOWN",
+  "test_command": "node --experimental-strip-types web/tests/bi-audit-postgres.test.mjs",
+  "result": "PASS (2 tests; executed, not skipped)",
+  "relation_diagnostics_executed": 35,
+  "raw_curated_mapping_queries_executed": [
+    "Google Ads",
+    "GA4",
+    "GSC",
+    "GBP",
+    "Meta"
+  ],
+  "actual_repository_rpc_body_executed": "bi_digital_payload from 20261023133005_digital_correctness_rpc.sql; isolated fixture function only",
+  "validated": [
+    "repository date/key/metric names match DDL column contracts",
+    "schema preflight returns no missing columns",
+    "read-only transaction and bounded 12-month/current30/prior30/monthly windows",
+    "out-of-range and current incomplete dates excluded",
+    "null event date probe",
+    "duplicate keys and unknown keys",
+    "missing dates and event age at fixed cutoff",
+    "missing field invalidates complete_stored_total; measured zero retained",
+    "raw/curated mismatch and missing field detected",
+    "account currency groups remain separate",
+    "empty source totals remain null",
+    "missing RPC session auth returns BLOCKED; known prior-period totals yield PASS_STORED_RPC_ONLY; null metrics yield UNKNOWN"
+  ],
+  "limitations": [
+    "No existing database connection or production migration used",
+    "No RLS/concurrency/upstream completeness claim",
+    "Fixtures omit table constraints to inject diagnostic defects; deployed schema UNKNOWN",
+    "No production auth/password provided; fixture password is synthetic test input",
+    "RPCs without explicit date boundaries remain outside bounded parity checks"
+  ]
+}

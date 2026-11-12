@@ -1,5 +1,6 @@
 import { metricNumber, metricRatio, periodSourceDate, snapshotDate, sourceCoverage } from "../digital-quality.ts";
 import { selectedPeriodMetric } from "./digital-source-contract.ts";
+import { currencyEvidence } from "../source-evidence.ts";
 
 type Raw = Record<string, any>;
 export type SourceStatus = "LIVE" | "STALE" | "WAITING" | "PARTIAL";
@@ -67,7 +68,7 @@ export function normalizeMetaAds(raw: Raw, asOf = today()): DigitalMetaAdsData {
   // conclusive. Require the reviewed versioned contract before trusting totals.
   const versioned = m.contractVersion === 2 || m.contractVersion === 3;
   const evidence = periodEvidence({...m, rows: versioned || count(m.rows) === 0 ? m.rows : null}, asOf);
-  const currency = (value: unknown) => typeof value === "string" && /^[A-Z]{3}$/.test(value) ? value : null;
+  const currency = (value: unknown) => currencyEvidence({currency: value}).currency;
   const v3 = m.contractVersion === 3;
   const summaryCurrency = v3 && evidence.available ? currency(m.currency) : null;
   const attributionVerified = v3 && m.attributionVerified === true;

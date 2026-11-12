@@ -1,0 +1,104 @@
+{
+  "checked_on": "2026-10-25",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40193841845",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6397712491",
+  "code_basis": "Recovered PR #44 ac64aad96628da197a3e02fd0d12e33cb324e3b1 restored via git archive over checkout 4f0cfcec48408428d51ee916cb87a97a256e4807. All recovered tracked files byte-matched before revision. Read-only git metadata prevents fast-forward; no refs/index changed. D22 ROAS revision layered on top.",
+  "statuses": {
+    "code_docs": "READY FOR REVIEW — local code/checks only",
+    "end_to_end_audit": "NOT VERIFIED",
+    "remote_publication": "PENDING_TRUSTED_RUNNER"
+  },
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types --test web/tests/google-ads-currency.test.mjs web/tests/bi-audit.test.mjs web/tests/meta-social-ui.test.mjs web/tests/meta-social-correctness.test.mjs web/tests/meta-windsor-contract.test.mjs web/tests/navigation-prefetch.test.mjs web/tests/sidebar-status.test.mjs",
+    "exit_code": 0,
+    "files_passed": 7,
+    "currency_subtests": {
+      "command": "node --experimental-strip-types web/tests/google-ads-currency.test.mjs",
+      "passed": 9,
+      "failed": 0
+    }
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 15,
+    "files_failed": 3,
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "cause": "Sandbox prevents .agents/runtime writes (mkdir ENOENT). TypeScript/build not reached in this workspace command.",
+    "log": "/tmp/issue43-40193841845-workspace-check.log"
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40193841845-check-t87tox7m",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 18,
+    "files_failed": 0,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "source_copy": "Same source/tests/generators/artifacts; excludes .git, .env*, credentials directories, runtime and build output; installed dependencies symlinked. Later changes only narrative/check/handoff receipts.",
+    "log": "/tmp/issue43-40193841845-full-check.log"
+  },
+  "deterministic_artifacts": {
+    "commands": [
+      "node scripts/bi-audit-inventory.mjs --check",
+      "node scripts/bi-audit-contracts.mjs --check",
+      "node scripts/bi-audit-queries.mjs --check"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "route_pages": 22,
+    "api_routes": 7,
+    "visual_control_templates": 745,
+    "static_contracts": 6
+  },
+  "code_sha256": {
+    "web/lib/ads-roas.ts": "f49f2c5299131ce28907d7c3d92d3b509bcbd2b6759b0c3cf338b57e602453e3",
+    "web/lib/ads-presentation.ts": "da5b21af9dfd56431bfb371d6f50fc1008b4ae52cb6250c2b683018dd9394e0f",
+    "web/lib/data/digital-source-contract.ts": "b923de09c2c2375fcda9d8237f4ba7d4077e78610085243e007d218f68a7a221",
+    "web/app/digital/ads/page.tsx": "f0af026760d80e031e979cbd8041fcdf90519506f82ec3018ffa439bd6616f90",
+    "web/app/digital/page.tsx": "81cbda6a6b59a11f5f5e1a526fed2652c22fe5d466ad85df3d0d0c625f2d883d",
+    "web/tests/google-ads-currency.test.mjs": "12354918fc167cf921ba8d55037b722b4c0f68eb6bec322101894066c776cf22",
+    "web/tests/meta-social-ui.test.mjs": "63990379dfcf446b1f8309eb6134710c214b28e9507eaf1f34f6cc648d9c76e4",
+    "web/tests/meta-social-correctness.test.mjs": "4cacb9b4189eb8fdbfec7d6256ce427c80bbd57cca0f53a75b33ff4afa168ca4",
+    "web/tests/bi-audit.test.mjs": "7b957d2500a4085e96ee11a53850c99d5ad3b762499c9b0727d122fd2c4cf1ab"
+  },
+  "git_diff_check": "PASS; tracked git diff --check and restored/new untracked files checked via git diff --no-index --check against /dev/null",
+  "preservation": "Recovered App/Merchant, Meta contract/USD/null/attribution, sidebar/prefetch fixes retained. No changes to AGENTS.md, runner workflow or SQL/migrations. Earlier reviewer and verification receipts retain original provenance.",
+  "github_working_post": {
+    "attempt": "gh api --method POST repos/adduakiev/mystoriya-bi/issues/43/comments with WORKING and trusted run URL",
+    "exit_code": 4,
+    "reason": "No configured GH_TOKEN; no remote post performed",
+    "runner_required": "Publish WORKING before remote READY; reuse existing PR #44"
+  },
+  "handoff": {
+    "existing_pr": 44,
+    "intended_branch": "astra/issue-43-40107435112",
+    "actual_runner_branch": "astra/issue-43-40193841845",
+    "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+    "recovered_source_head": "ac64aad96628da197a3e02fd0d12e33cb324e3b1",
+    "new_revision_sha": "PENDING_TRUSTED_RUNNER_COMMIT_AND_PUSH",
+    "commit_push_create_pr": "NOT PERFORMED BY CODEX",
+    "remote_ready": "PENDING_TRUSTED_RUNNER_WITH_ACTUAL_FULL_SHA"
+  },
+  "production_queries": 0,
+  "payload_rpc_invocations": 0,
+  "migrations": "NOT APPLIED; no SQL/migration changes",
+  "browser_qa": "66 cases NOT_EXECUTED; no authorized preview session, new navigation or screenshots. Prior 403 evidence historical; no bypass or credential changes.",
+  "latest_reviewer_receipt": "REVIEWER-RECEIPT-2026-10-25-6397712491.json",
+  "upstream_completeness": "UNKNOWN",
+  "source_contract": "Google Ads ROAS suppressed for current RPC. Synthetic verified same-account/same-currency helper fixture enables no production path. D06 remains OPEN. No invented fields or currency conversion.",
+  "owner_action_now": "NONE for code-only; existing release/data-write gates unchanged."
+}

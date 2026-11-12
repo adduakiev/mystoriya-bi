@@ -5,19 +5,26 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "prebuild": "node ../scripts/test.mjs",
+    "test:full": "node --test --test-concurrency=2 tests/*.test.mjs"
   },
   "dependencies": {
-    "next": "15.5.27",
+    "lucide-react": "0.544.0",
+    "next": "15.5.29",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "recharts": "3.2.1",
-    "lucide-react": "0.544.0"
+    "recharts": "3.2.1"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.32"
+    }
   }
 }

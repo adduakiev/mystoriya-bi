@@ -476,12 +476,16 @@ export function buildChannelMixSeries(
 }
 
 
-function isoWeekNumber(date: Date): number {
+function isoWeekParts(date: Date): { year: number; week: number } {
+  // ISO 8601: the week-year is the calendar year containing this week's Thursday.
+  // It can differ from the date's calendar year around New Year.
   const target = new Date(date.getTime());
   const day = target.getUTCDay() || 7;
   target.setUTCDate(target.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
-  return Math.ceil((((target.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
+  const year = target.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const week = Math.ceil((((target.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
+  return { year, week };
 }
 
 export function buildMultiYearWeeklyMetricSeries(
@@ -492,7 +496,7 @@ export function buildMultiYearWeeklyMetricSeries(
   if (rows.length === 0) return [];
 
   const sourceCutoff = maxDate(rows);
-  const cutoffWeek = isoWeekNumber(sourceCutoff);
+  const cutoffWeek = isoWeekParts(sourceCutoff).week;
 
   return Array.from({ length: cutoffWeek }, (_, index) => {
     const week = index + 1;
@@ -503,7 +507,8 @@ export function buildMultiYearWeeklyMetricSeries(
     years.forEach((year) => {
       const subset = rows.filter((row) => {
         const date = new Date(`${row.date}T00:00:00Z`);
-        return date.getUTCFullYear() === year && isoWeekNumber(date) === week;
+        const isoWeek = isoWeekParts(date);
+        return isoWeek.year === year && isoWeek.week === week;
       });
       point[String(year)] = metricValue(subset, metric);
     });

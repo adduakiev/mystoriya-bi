@@ -26,6 +26,22 @@ function pctLabel(value: number | null): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
 }
 
+function locationsPeriodMatches(
+  requestedYear: number | undefined,
+  requestedMonth: number | undefined,
+  data: Awaited<ReturnType<typeof loadLocationsData>>
+): boolean {
+  const cutoff = data.snapshot.cutoffDate;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) return false;
+  const date = new Date(`${cutoff}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== cutoff) return false;
+  const expectedYear = requestedYear ?? data.selectedYear;
+  return data.selectedYear === expectedYear
+    && data.selectedMonth === requestedMonth
+    && date.getUTCFullYear() === expectedYear
+    && (requestedMonth === undefined || (requestedMonth <= 12 && date.getUTCMonth() + 1 === requestedMonth));
+}
+
 export default async function LocationsPage({
   searchParams
 }: {
@@ -46,6 +62,40 @@ export default async function LocationsPage({
     lfl
   });
 
+  // The installed Locations RPC falls back to a later year/month when the
+  // requested filtered period has no sales. Never render that other period's
+  // KPIs as though they belong to the requested year/month.
+  if (!locationsPeriodMatches(requestedYear, selectedMonth, data)) {
+    return (
+      <main className="shell">
+        <DashboardSidebar
+          activeHref="/locations"
+          lfl={lfl}
+          statusTitle="NO DATA / UNKNOWN"
+          statusDetail="Обраний період не підтверджено"
+        />
+        <section className="workspace">
+          <header className="topbar">
+            <div>
+              <span className="eyebrow">LOCATIONS PERFORMANCE · UNKNOWN</span>
+              <h1>Заклади</h1>
+            </div>
+          </header>
+          <section className="panel" role="status">
+            <h2>Немає підтверджених даних за обраний період</h2>
+            <p>
+              {requestedYear ?? data.selectedYear}{selectedMonth ? ` · ${MONTHS[selectedMonth - 1] ?? "невідомий місяць"}` : " · YTD"}
+              {brand ? ` · ${brand}` : ""}.
+              Обрані рік, місяць або фільтри не відповідають даті отриманих даних.
+              Відсутність даних не означає нуль; показники, порівняння та графіки приховано.
+            </p>
+            <Link className="clear-filter" href="/locations">Скинути фільтри</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
   const {
     years,
     selectedYear,
@@ -60,6 +110,8 @@ export default async function LocationsPage({
     lflGrowth
   } = data;
 
+  const sqlVerified = data.source === "supabase-sql";
+
   const chartData = locationRows.map((row) => ({
     location: row.location,
     venue: row.venueRevenue,
@@ -71,14 +123,16 @@ export default async function LocationsPage({
       <DashboardSidebar
         activeHref="/locations"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${locationRows.length} активних точок у зрізі`}
+        statusTitle={sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}
+        statusDetail={sqlVerified
+          ? `${locationRows.length} активних точок у зрізі · cutoff ${snapshot.cutoffDate || "UNKNOWN"} · freshness UNKNOWN`
+          : "SQL RPC недоступний · резервний шлях, джерело UNKNOWN"}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">LOCATIONS PERFORMANCE · LIVE</span>
+            <span className="eyebrow">LOCATIONS PERFORMANCE · {sqlVerified ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED"}</span>
             <h1>Заклади</h1>
           </div>
 <div className="quick-context">
@@ -136,6 +190,13 @@ export default async function LocationsPage({
             </div>
           </form>
         </details>
+
+        {!sqlVerified && (
+          <section className="panel" role="status">
+            <span className="eyebrow">FALLBACK / UNVERIFIED</span>
+            <p>SQL RPC недоступний. Показники розраховані резервним шляхом; фактичне джерело (Supabase snapshot або Google Sheets), свіжість і повнота не підтверджені.</p>
+          </section>
+        )}
 
         <div className="context-line">
           <b>{snapshot.periodLabel}</b>

@@ -20,6 +20,11 @@ test('state machine rejects skips, missing owner, stale revision and invalid dat
   assert.equal(patchTask(done, {id:'task-1',revision:3,status:'CHECK RESULT',check_date:'2026-10-21',result:'Verified'}).status, 'CHECK RESULT');
 });
 test('atomic store enforces exclusive lock and preserves content on conflict/corruption', async () => {
+  // This test exercises the local-file adapter against an isolated temporary path.
+  // Vercel runtime protection is tested separately and must remain enabled in production.
+  const previousVercel = process.env.VERCEL;
+  delete process.env.VERCEL;
+  try {
   const file = path.join(directory,'tasks.json');
   await mutateTasks(() => [task()],file);
   await writeFile(`${file}.lock`, '');
@@ -31,6 +36,10 @@ test('atomic store enforces exclusive lock and preserves content on conflict/cor
   await writeFile(file,'broken');
   await assert.rejects(mutateTasks(() => [],file), /refusing/);
   assert.equal(await readFile(file,'utf8'),'broken');
+  } finally {
+    if (previousVercel === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = previousVercel;
+  }
 });
 test('task draft is taken only from server completed live council; duplicate denied', async () => {
   const old = {bus:process.env.OPERATING_BUS_PATH, tasks:process.env.OPERATING_TASKS_PATH, vercel:process.env.VERCEL};

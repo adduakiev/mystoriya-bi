@@ -1,3 +1,4 @@
+import { digitalPeriodRpcArgs } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import { callBiRpc } from "@/lib/data/source";
 
@@ -8,9 +9,7 @@ type Raw = Record<string, any>;
 
 const cachedPeriod = unstable_cache(
   async (from: string, to: string): Promise<DigitalData> => {
-    const args: Record<string, unknown> = {};
-    if (from) args.p_from = from;
-    if (to) args.p_to = to;
+    const args = digitalPeriodRpcArgs(from, to);
     return normalizeDigital(await callBiRpc<Raw>("bi_digital_payload", args));
   },
   ["digital-dashboard-correctness-v3"],

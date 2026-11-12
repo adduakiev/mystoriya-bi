@@ -1,0 +1,54 @@
+{
+  "recorded_on": "2026-10-25",
+  "evidence_kind": "INDEPENDENT_REVIEWER_READ_ONLY_REPORTED",
+  "observer": "Independent reviewer (trusted issue #43 trigger)",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6397712491",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40193841845",
+  "runner_executed_sql": false,
+  "exact_execution_timestamp": "UNKNOWN",
+  "sql_text": "NOT_SUPPLIED",
+  "window": {
+    "from": "2026-09-24",
+    "to": "2026-10-23",
+    "inclusive": true,
+    "calendar_timezone": "UTC",
+    "expected_calendar_dates": 30,
+    "business_account_timezone": "UNKNOWN"
+  },
+  "observations": {
+    "ga4": {
+      "relation": "digital_ga4_daily",
+      "row_count": 30,
+      "observed_dates": 30
+    },
+    "gsc": {
+      "relation": "digital_search_daily",
+      "row_count": 29,
+      "observed_dates": 29
+    },
+    "google_ads_staging": {
+      "relation": "staging_google_ads_windsor",
+      "currency_columns_count": 0,
+      "verified_account_currency_contract": false
+    }
+  },
+  "not_reverified": [
+    "prior30 and trailing12months counts",
+    "core metric null checks",
+    "exact latest event date/time",
+    "duplicate keys",
+    "upstream parity",
+    "all-field completeness",
+    "RPC/rendered UI parity"
+  ],
+  "historical_gsc_receipt": {
+    "file": "barbara-production-evidence.json",
+    "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6389882016",
+    "recorded_on": "2026-10-25",
+    "row_count": 28,
+    "observed_dates": 28,
+    "meaning": "Earlier dated receipt retained verbatim; superseded for current30 count only. No new missing date inferred."
+  },
+  "browser_qa": "66 cases NOT_EXECUTED; no authorized preview session available",
+  "production_writes": 0
+}

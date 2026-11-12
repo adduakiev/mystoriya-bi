@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "issue": 43,
+  "existing_pr": 44,
+  "recorded_at": "2026-10-26T01:58:36.105300+00:00",
+  "status": "LOCAL_QA_CODE_PREPARED_FULL_AUDIT_INCOMPLETE",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40255887088",
+  "source": {
+    "reviewed_sha": "6f624cf64a50ba4f33ca24998f6140fa79ad9957",
+    "reviewed_files_compared": 248,
+    "production_source_files_unchanged": 117,
+    "modified_reviewed_files": [
+      "docs/BI-DATA-AUDIT-2026-10-24.md",
+      "docs/PROJECT-STATUS.md",
+      "docs/audit/2026-10-24/HANDOFF.md",
+      "docs/audit/2026-10-24/browser-qa.json",
+      "docs/audit/2026-10-24/discrepancies.json",
+      "scripts/bi-audit-browser-qa.mjs"
+    ],
+    "actual_checkout_sha": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+    "actual_branch": "astra/issue-43-40255887088",
+    "candidate_commit_sha": null,
+    "candidate_sha_owner": "TRUSTED_GITHUB_RUNNER",
+    "restoration": "git diff --binary HEAD reviewed-sha + git apply; Git refs/index unchanged; reviewed additions remain untracked in this checkout",
+    "qa_code_sha256": {
+      "scripts/bi-audit-auth-probe.mjs": "f15643d5eb6153eb712f2c29cb98ec24bf0a6b6d3c28262ffd0e965a1d0bc934",
+      "scripts/bi-audit-browser-qa.mjs": "eaed0701c6fbc04127101a1813dea57e12e14fc3cafea7f208bd29ea92860084",
+      "scripts/bi-audit-qa-contracts.mjs": "8789b55065639990eef2ed5485eecd89f061b5747330eddf13290ac544672205",
+      "scripts/bi-audit-login-browser.mjs": "5f72daf597c00565940786da97ab66c768dafda5ab03bac58638e344eae5ff45",
+      "web/tests/preview-auth-boundary.test.mjs": "58124489f5ad29dc9869c34d5ee76ed1d7d362217169d9c34da2a02df4875b2b",
+      "web/tests/preview-auth-probe.test.mjs": "1018ebb9a8c3e87d241a09262b627f1d78652a5ea98480e6163b722a0437ffbb",
+      "web/tests/preview-ui-contracts.test.mjs": "44e0a2be0acd9e866014e36c7806770cb2371eb809e0165203018136b66e378b",
+      "web/tests/support/bi-preview-harness.mjs": "dd3bf0760a4e52e34b8add425b522c3c02231bcd5897102c6030128b833bd8da"
+    },
+    "copy_qa_code_byte_identity": true
+  },
+  "checks": [
+    {
+      "command": "npm ci --prefix web",
+      "scope": "WORKSPACE",
+      "result": "PASS",
+      "packages": 71
+    },
+    {
+      "command": "node --experimental-strip-types --test web/tests/preview-auth-boundary.test.mjs web/tests/preview-auth-probe.test.mjs web/tests/preview-ui-contracts.test.mjs",
+      "scope": "WORKSPACE_FINAL_QA_CODE",
+      "result": "PASS",
+      "files": 3,
+      "subtests": 41,
+      "skips": 0
+    },
+    {
+      "command": "npm run check",
+      "scope": "WORKSPACE_ATTEMPT",
+      "result": "FAIL_SANDBOX_RUNTIME_WRITE_RESTRICTION",
+      "files_passed": 19,
+      "files_failed": 3,
+      "failed_files": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs"
+      ],
+      "typescript_and_build": "NOT_REACHED"
+    },
+    {
+      "command": "npm run check",
+      "scope": "/tmp/issue43-40255887088-check-if6d4uj6",
+      "result": "PASS",
+      "test_files": 22,
+      "skips": 0,
+      "typescript": "PASS",
+      "optimized_next_build": "PASS",
+      "isolation": "Source copy; runtime/build writes in /tmp; node_modules symlink to workspace installation. Initial incomplete copy failed; supabase and .github copied unchanged before successful complete runs."
+    },
+    {
+      "command": "node scripts/bi-audit-browser-qa.mjs --check",
+      "result": "PASS",
+      "cases": 66,
+      "browser_passes_inferred": 0
+    },
+    {
+      "command": "node scripts/bi-audit-inventory.mjs --check",
+      "result": "PASS",
+      "pages": 22,
+      "api_routes": 7,
+      "static_templates": 745
+    },
+    {
+      "command": "node scripts/bi-audit-queries.mjs --check",
+      "result": "PASS",
+      "relation_diagnostics": 35,
+      "warehouse_queries_executed": 0
+    },
+    {
+      "command": "node scripts/bi-audit-contracts.mjs --check",
+      "result": "PASS",
+      "kpi_contracts": 6,
+      "live_rpc_invocations": 0
+    },
+    {
+      "command": "git diff --check + untracked text whitespace check",
+      "result": "PASS"
+    }
+  ],
+  "mock_ui": {
+    "scope": "19 real RPC-backed server pages x 4 synthetic states plus login/PnL/disabled Operating once; real loaders/adapters; IO/chart/task/brand stubs",
+    "page_modules": 22,
+    "rpc_backed_pages": 19,
+    "renders": 79,
+    "states": [
+      "partial",
+      "empty",
+      "missing",
+      "zero"
+    ],
+    "fixed_fixture_time": "2026-10-24T00:00:00Z",
+    "sales_filter_contracts": 7,
+    "digital_current_prior_windows": true,
+    "null_zero_currency_freshness_failure_assertions": true,
+    "hydration_verified": false,
+    "layout_verified": false,
+    "upstream_or_deployed_parity": false
+  },
+  "auth_boundary": {
+    "local_middleware": "PASS_SYNTHETIC_CONFIG_AND_MISSING_CONFIG",
+    "protected_matchers": "ALL_CURRENT_PAGE_AND_API_PATHS",
+    "middleware_unauthenticated_response": "307 same-origin /login; configured next preserved; no Set-Cookie; no fetch",
+    "operating_handler_denials": "401 JSON Unauthorized, no-store, no collector/task/manual IO",
+    "remote_http": "NOT_EXECUTED",
+    "remote_origin": null,
+    "remote_blocker": "No supplied exact Preview origin; GitHub deployment discovery fails DNS api.github.com (curl exit 6, HTTP 000)",
+    "trusted_trigger_relay": {
+      "reviewed_sha": "6f624cf64a50ba4f33ca24998f6140fa79ad9957",
+      "deployment": "dpl_AVPAkndup2LzBitj9p5Ztict5GUp",
+      "state": "READY",
+      "former_vercel_403": "RESOLVED_REPORTED",
+      "get_200": [
+        "/",
+        "/digital",
+        "/operating"
+      ],
+      "body": "APPLICATION_LOGIN_SHELL_NOT_AUTHENTICATED_BI",
+      "independently_verified": false
+    }
+  },
+  "browser": {
+    "matrix_cases": 66,
+    "real_cases_completed": 0,
+    "real_case_status": "NOT_EXECUTED",
+    "screenshots": [],
+    "login_fixture_command": "node scripts/bi-audit-login-browser.mjs",
+    "fixture_viewports": [
+      360,
+      768,
+      1440
+    ],
+    "fixture_attempts": 3,
+    "fixture_completed": 0,
+    "fixture_result": "BLOCKED_BROWSER_STARTUP",
+    "signal": "SIGABRT",
+    "error_code": "EPERM",
+    "local_http_binding": "BLOCKED_EPERM_127.0.0.1:3100"
+  },
+  "handoff": {
+    "working_transcript": "ACKNOWLEDGED_WITH_TRUSTED_ACTIONS_URL",
+    "working_github_comment": "FAILED_GH_TOKEN_ABSENT",
+    "pr_publication": "PENDING_TRUSTED_RUNNER_EXISTING_PR_44",
+    "new_candidate_sha": "PENDING_TRUSTED_RUNNER_COMMIT",
+    "owner_action": "NONE_FOR_QA_CODE_TASKS",
+    "authenticated_test_process": "PREVIEW-QA-2026-10-26.md; existing authorized tester session; no password/cookie/storageState exchange",
+    "production_release": "NOT_AUTHORIZED_NOT_PERFORMED"
+  },
+  "safety": {
+    "production_code_delta_from_reviewed_source": false,
+    "credentials_read_or_changed_for_access": false,
+    "login_submissions": 0,
+    "brute_force_attempts": 0,
+    "commits": 0,
+    "pushes": 0,
+    "new_prs": 0,
+    "deployments": 0,
+    "warehouse_migrations": 0,
+    "business_writes": 0,
+    "schedulers_created": 0,
+    "paid_providers_activated": 0
+  },
+  "limitations": [
+    "No new upstream/warehouse/RPC/rendered reconciliation",
+    "Stored-layer Google Ads 2026-10-25 parity receipts preserved; not re-executed",
+    "No new prior30/rolling12 coverage count",
+    "Sales null preservation, LFL parity, finances and independent Ads/GBP windows remain open findings",
+    "No independent Preview HTTP or authenticated browser evidence",
+    "No mobile/desktop browser PASS; no screenshots; no performance or RBAC certification"
+  ]
+}

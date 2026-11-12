@@ -54,15 +54,17 @@ export type LocationSummary = {
 export type MonthlyManagementRow = {
   month: number;
   label: string;
-  revenue: number;
+  revenue: number | null;
   revenueGrowth: number | null;
-  checks: number;
+  checks: number | null;
   checksGrowth: number | null;
-  averageCheck: number;
-  markupRate: number;
-  venueShare: number;
-  aggregatorShare: number;
-  deliveryShare: number;
+  averageCheck: number | null;
+  markupRate: number | null;
+  venueShare: number | null;
+  aggregatorShare: number | null;
+  deliveryShare: number | null;
+  currentObservationCount?: number | null;
+  previousObservationCount?: number | null;
   isPartial: boolean;
 };
 

@@ -74,9 +74,11 @@ its original three allowlisted RPCs. Domain and current-run gates remain intact.
 | Snapshot metadata | `periodBasis=REQUESTED_EXACT_30_DAYS`; `snapshotId=null`; completeness UNKNOWN. Known RPC row limits: landing 30, queries 40, pages 30. Display slices (SEO 15 queries/20 pages/10 opportunities) are separate from RPC limits. | Requested period is not proof of actual source coverage, snapshot identity, batch freshness or upstream completeness. Upstream row limits remain null. Query sums can differ from site totals due to GSC omissions. |
 | Coverage | Missing completeness is UNKNOWN, never inferred FULL from a date span or count. Quality cards do not claim OK. History counts are labeled all stored rows; Ads trend length counts returned rows only; GBP rows are unknown. | `days` is calendar span, not observed day count. `days × locationCount` is not an observed GBP row count. Daily Ads summary and staging campaign aggregates can differ in freshness, grain and currency. |
 
-App and Merchant remain outside the correctness phases. Social now uses the
-issue #26 nullable evidence contract linked above. App/Merchant legacy numeric
-adapters and activation status are unchanged. Ads money
+App and Merchant were outside the connected-Google correctness phases.
+Issue #43 now prepares nullable App/Merchant adapters and source-evidence badges
+in PR #44; these do not restore SQL-erased missingness or prove source completeness.
+See [the audit](BI-DATA-AUDIT-2026-10-24.md). Social uses the issue #26 nullable
+evidence contract linked above. No activation status is changed. Ads money
 formatting remains compatible with the existing UI, with the unconfirmed currency
 limitation exposed; no financial reconciliation or ad mutation is performed.
 

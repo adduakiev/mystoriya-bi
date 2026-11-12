@@ -31,20 +31,24 @@ export default async function AggregatorsPage({
 
   const data = await loadAggregatorsData(period, comparison, lfl);
   const { snapshot, aggregators, rowCount } = data;
+  const sqlConnected = data.source === "supabase-sql";
+  const sourceStatus = sqlConnected ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED";
 
   return (
     <main className="shell">
       <DashboardSidebar
         activeHref="/aggregators"
         lfl={lfl}
-        statusTitle="Live data connected"
-        statusDetail={`${rowCount.toLocaleString("uk-UA")} aggregator rows`}
+        statusTitle={sourceStatus}
+        statusDetail={sqlConnected
+          ? `${rowCount.toLocaleString("uk-UA")} SQL rows · freshness UNKNOWN`
+          : `${rowCount.toLocaleString("uk-UA")} fallback rows · source and completeness UNKNOWN`}
       />
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <span className="eyebrow">AGGREGATORS · LIVE</span>
+            <span className="eyebrow">AGGREGATORS · {sourceStatus}</span>
             <h1>Aggregator Control Center</h1>
           </div>
 
@@ -87,6 +91,19 @@ export default async function AggregatorsPage({
             </div>
           </div>
         </header>
+
+        <nav aria-label="Звіти агрегаторів" className="control-stack">
+          <Link className="quick-mode" href="/aggregators/glovo" prefetch={false}>
+            Glovo · Аналітика брендів →
+          </Link>
+        </nav>
+
+        {!sqlConnected && (
+          <p role="status" className="context-line">
+            SQL RPC недоступний · резервний шлях, джерело UNKNOWN (Supabase snapshot або Google Sheets).
+            Свіжість і повнота даних не перевірені.
+          </p>
+        )}
 
         <div className="context-line">
           <b>{snapshot.periodLabel}</b>

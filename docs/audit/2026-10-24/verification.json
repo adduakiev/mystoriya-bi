@@ -1,0 +1,123 @@
+{
+  "checked_on": "2026-10-25",
+  "actions_run": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40206730240",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6399469440",
+  "code_basis": "All 242 tracked files restored/byte-verified against requested PR #44 base 922d04d2afec8181ab17e175b582e113c95c5c17 before edits. Git metadata read-only. Only audit docs and tests changed from that base; production application and migration code byte-identical.",
+  "statuses": {
+    "code_docs": "READY FOR REVIEW — local code/docs/tests only",
+    "end_to_end_audit": "INCOMPLETE; NOT READY FOR GATE",
+    "remote_publication": "PENDING_TRUSTED_RUNNER; WORKING NOT POSTED"
+  },
+  "dependency_install": {
+    "command": "npm ci --prefix web",
+    "exit_code": 0,
+    "packages_added": 71
+  },
+  "focused": {
+    "command": "node --experimental-strip-types --test web/tests/google-ads-reconciliation.test.mjs web/tests/bi-audit-postgres.test.mjs web/tests/google-ads-currency.test.mjs web/tests/bi-audit.test.mjs web/tests/bi-audit-contracts.test.mjs web/tests/meta-social-ui.test.mjs web/tests/meta-social-correctness.test.mjs web/tests/meta-windsor-contract.test.mjs web/tests/merchant-contract.test.mjs web/tests/navigation-prefetch.test.mjs web/tests/sidebar-status.test.mjs",
+    "exit_code": 0,
+    "files_passed": 11,
+    "files_failed": 0,
+    "log": "/tmp/issue43-40206730240-focused.log"
+  },
+  "sql_contract_subtests": {
+    "command": "node --experimental-strip-types web/tests/bi-audit-postgres.test.mjs",
+    "exit_code": 0,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "execution_scope": "Local disposable synthetic PostgreSQL only; single-user, no network, no existing server/migration/warehouse/RPC",
+    "log": "/tmp/issue43-40206730240-sql-subtests.log"
+  },
+  "receipt_subtests": {
+    "command": "node --experimental-strip-types web/tests/google-ads-reconciliation.test.mjs",
+    "exit_code": 0,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "log": "/tmp/issue43-40206730240-receipt-subtests.log"
+  },
+  "workspace_check": {
+    "command": "npm run check",
+    "exit_code": 1,
+    "files_passed": 16,
+    "files_failed": 3,
+    "failed_files": [
+      ".agents/run.test.mjs",
+      "web/tests/operating-tasks.test.mjs",
+      "web/tests/operating-v2.test.mjs"
+    ],
+    "cause": "Existing sandbox prevents .agents/runtime writes: mkdir ENOENT. TypeScript/build not reached in this workspace command. No gates/tests weakened.",
+    "log": "/tmp/issue43-40206730240-workspace-check.log"
+  },
+  "writable_full_check": {
+    "directory": "/tmp/issue43-40206730240-check-m3qpwfdt",
+    "command": "npm run check",
+    "exit_code": 0,
+    "files_passed": 19,
+    "files_failed": 0,
+    "skipped_files": 0,
+    "typescript": "PASS",
+    "optimized_next_build": "PASS",
+    "byte_matched_source_files": 247,
+    "source_copy": "All requested-base files plus five new artifacts/tests; current content copied byte-for-byte. No credentials, .env*, git metadata, runtime or build output; installed dependencies symlinked. Only three narrative docs changed after copy; no tested source/tests/query/receipt changed.",
+    "log": "/tmp/issue43-40206730240-full-check.log"
+  },
+  "deterministic_artifacts": {
+    "commands": [
+      "node scripts/bi-audit-inventory.mjs --check",
+      "node scripts/bi-audit-contracts.mjs --check",
+      "node scripts/bi-audit-queries.mjs --check"
+    ],
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "route_pages": 22,
+    "api_routes": 7,
+    "visual_control_templates": 745,
+    "static_contracts": 6
+  },
+  "tested_sha256": {
+    "docs/audit/2026-10-24/google-ads-daily-reconciliation.sql": "1e965f2e3448b02dbf0b024a0ad62a4f34addcc1ef9da9171a5bda604d9d02bd",
+    "docs/audit/2026-10-24/REVIEWER-RECEIPT-2026-10-25-6399469440.json": "d1b6c2da9aed2e2036b439da43be39f4150d9e30d180a0fd94b1c365edc7dedd",
+    "docs/audit/2026-10-24/coverage-shifted-2026-10-25.csv": "2b57c809028297eaa117e8d366d7bd026242a4546100e638b02400f6f7a02f55",
+    "web/tests/bi-audit-postgres.test.mjs": "c23a9b83edaa8fc74a22bebc904a935e1b3f0ca5bec5f4ff9ec58cfff017371c",
+    "web/tests/google-ads-reconciliation.test.mjs": "799a249c7766af4a8a0f76ce66df75660c3551e7bdb7986baa7b47395ec224e5"
+  },
+  "preserved_application_schema_and_safety_files_byte_matched_to_requested_base": 134,
+  "git_diff_check": "PASS for tracked changes; restored/new untracked text separately checked with git diff --no-index --check against /dev/null (see handoff)",
+  "github_working_post": {
+    "command": "gh issue comment 43 --repo adduakiev/mystoriya-bi --body WORKING-with-trusted-run-URL",
+    "exit_code": 4,
+    "reason": "GH_TOKEN absent; no remote post performed",
+    "remote_acknowledgement": "ASSIGNED/NOT ACKNOWLEDGED until runner posts WORKING"
+  },
+  "handoff": {
+    "existing_pr": 44,
+    "intended_branch": "astra/issue-43-40107435112",
+    "actual_runner_branch": "astra/issue-43-40206730240",
+    "checkout_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+    "restored_pr_base": "922d04d2afec8181ab17e175b582e113c95c5c17",
+    "new_revision_sha": "PENDING_TRUSTED_RUNNER_COMMIT_AND_PUSH",
+    "commit_push_create_pr": "NOT PERFORMED BY CODEX",
+    "remote_ready": "PENDING_RUNNER_WITH_ACTUAL_FULL_SHA"
+  },
+  "latest_bounded_reviewer_receipt": "REVIEWER-RECEIPT-2026-10-25-6399469440.json",
+  "original_coverage_csv": "Historical original windows unchanged; new shifted window in coverage-shifted-2026-10-25.csv",
+  "warehouse_queries": 0,
+  "payload_rpc_invocations": 0,
+  "migrations": "NOT APPLIED; no migration changes",
+  "browser_qa": {
+    "cases": 66,
+    "status": "NOT_EXECUTED",
+    "gate_review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6398044302",
+    "authorized_exact_sha_session": "NOT_AVAILABLE",
+    "new_screenshots": 0,
+    "protection_access_links_or_secrets_changed": false
+  },
+  "unknown_contracts": "Currency/account/action attribution, business timezone, source/upstream completeness, all-field and RPC/UI parity remain UNKNOWN. D06 OPEN; D22 fail-closed. No shifted prior30 or 12-month recount.",
+  "external_business_writes": 0,
+  "owner_action_now": "NONE for code/docs/tests; release/data-write gates unchanged"
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "issue": 43,
+  "existing_pr": 44,
+  "discrepancy": "D26",
+  "date": "2026-10-27",
+  "status": "CODE_READY_FOR_REVIEW_RUNNER_PUBLICATION_PENDING",
+  "trusted_actions_url": "https://github.com/adduakiev/mystoriya-bi/actions/runs/40444470576",
+  "review_url": "https://github.com/adduakiev/mystoriya-bi/pull/44#issuecomment-6433027975",
+  "requested_pr_head": "7fd3233ab5d83885de38eef7316097b59d0370d0",
+  "git_metadata_head": "4f0cfcec48408428d51ee916cb87a97a256e4807",
+  "candidate_commit_sha": null,
+  "source_restoration": {
+    "all_273_tracked_file_blobs_matched_requested_head_before_edits": true,
+    "git_metadata_read_only": true,
+    "runner_must_preserve_restored_pr_overlay": true
+  },
+  "working_acknowledgement": "TRANSCRIPT_WITH_TRUSTED_ACTIONS_URL; REMOTE_COMMENT_NOT_PROVEN",
+  "linked_review_independently_retrieved": false,
+  "github_cli_blocker": "GH_TOKEN unavailable",
+  "production_observation": "RELAYED_FROM_TRUSTED_TRIGGER; NO_NEW_SELECT_OR_INSTALLED_RPC",
+  "checks": {
+    "npm_ci_web": {
+      "status": "PASS",
+      "packages": 71
+    },
+    "focused_helper_and_actual_ssr": {
+      "status": "PASS",
+      "tests": 20
+    },
+    "original_page_regression": {
+      "original_failed_assertions": 9,
+      "revised_failed_assertions": 0,
+      "total_assertions": 9,
+      "evidence": "SYNTHETIC_ACTUAL_PAGE_SSR"
+    },
+    "workspace_npm_run_check": {
+      "status": "SANDBOX_BLOCKED",
+      "passing_test_files": 25,
+      "failing_test_files": [
+        ".agents/run.test.mjs",
+        "web/tests/operating-tasks.test.mjs",
+        "web/tests/operating-v2.test.mjs"
+      ],
+      "reason": "Cannot create .agents/runtime under read-only mount; TypeScript/build not reached"
+    },
+    "writable_copy_npm_run_check": {
+      "status": "PASS",
+      "passing_test_files": 28,
+      "typescript_no_emit": "PASS",
+      "optimized_next_build": "PASS",
+      "path": "/tmp/issue43-d26-check-buaikcxv",
+      "copied_source_files_byte_verified_before_run": 276,
+      "final_executable_files_unchanged": true
+    },
+    "inventory_contracts_and_66_case_plan_reproducibility": "PASS",
+    "git_diff_check_including_untracked_pr_paths": "PASS"
+  },
+  "source_sha256": {
+    "web/app/digital/local/page.tsx": "8fa8e6ce56e874e2da3afe21a0abcd983a36e1ee550b183853642b34dd104094",
+    "web/lib/gbp-location-labels.ts": "19f61313e1a8dd33d1ea5221f5bf9a2fc882c40900342646371897e68e1579dc",
+    "web/tests/gbp-location-labels.test.mjs": "e23ec04ab033b945822387debbfa610f0741a18facd2c115c29131cfb64c9909"
+  },
+  "authenticated_browser_cases": {
+    "total": 66,
+    "status": "NOT_EXECUTED"
+  },
+  "id_address_crosswalk": "UNKNOWN_UNVERIFIED",
+  "residual_risks": [
+    "Missing/repeated IDs remain ambiguous; existing raw-ID React key limitations preserved.",
+    "Suffix expansion may change when a new colliding ID enters the input set.",
+    "Synthetic SSR does not establish production/upstream/data completeness."
+  ],
+  "owner_action": "NONE_FOR_CODE_ONLY",
+  "sql_or_migration_changes": false,
+  "production_or_external_business_actions": false,
+  "codex_commit_push_or_pr_creation": false,
+  "handoff": "Trusted runner must acknowledge WORKING if needed and publish actual new SHA and successful checks to existing PR #44 only; no duplicate PR.",
+  "broader_audit": "INCOMPLETE"
+}

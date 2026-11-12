@@ -48,18 +48,18 @@ export default async function Page(){
           <div className="digital-metric-list">
             <div><b>Сесії сайту GA4 · останні 7 днів</b><span>{n(q.ga4.last7Sessions)}</span></div>
             <div><b>Purchase GA4 · останні 7 днів</b><span>{n(q.ga4.last7Purchases)}</span></div>
-            <div><b>Google Ads</b><span>{ads.meta.available?`LIVE · ${formatMetric(ads.meta.days)} днів · до ${dateLabel(ads.meta.to)}`:"акаунт підключений · sync очікує"}</span></div>
-            <div><b>Google PageSpeed</b><span>{local.pageSpeed?`LIVE · mobile ${n(local.pageSpeed.mobileScore)} / desktop ${n(local.pageSpeed.desktopScore)} · оброблено ${dateLabel(local.pageSpeed.capturedOn)}; вимірювання невідоме`:"очікує sync"}</span></div>
-            <div><b>Google Business Profile</b><span>{Object.values(local.summary).some(value=>value!==null)?`LIVE · ${n(local.locations.length)} власні точки · ${formatMetric(local.meta.days)} днів`:"4 власні профілі підключено · sync очікує"}</span></div>
-            <div><b>Myastoria App · GA4 property 321739013</b><span>0 рядків за 01.01.2025–14.10.2026</span></div>
+            <div><b>Google Ads</b><span>{ads.meta.available?`PARTIAL · completeness UNKNOWN · ${formatMetric(ads.meta.days)} днів · до ${dateLabel(ads.meta.to)}`:"акаунт підключений · sync очікує"}</span></div>
+            <div><b>Google PageSpeed</b><span>{local.pageSpeed?`PARTIAL · completeness UNKNOWN · mobile ${n(local.pageSpeed.mobileScore)} / desktop ${n(local.pageSpeed.desktopScore)} · оброблено ${dateLabel(local.pageSpeed.capturedOn)}; вимірювання невідоме`:"очікує sync"}</span></div>
+            <div><b>Google Business Profile</b><span>{Object.values(local.summary).some(value=>value!==null)?`PARTIAL · completeness UNKNOWN · ${n(local.locations.length)} власні точки · ${formatMetric(local.meta.days)} днів`:"4 власні профілі підключено · sync очікує"}</span></div>
+            <div><b>Myastoria App · GA4 property 321739013</b><span>UNKNOWN · актуальну кількість рядків і період не перевірено</span></div>
           </div>
         </article>
         <article className="panel">
           <span className="eyebrow">ПРІОРИТЕТИ DATA QUALITY</span>
           <div className="digital-decision-list">
-            <div><span>1</span><b>Паша: перевірити Firebase/GA4 SDK та streams мобільного застосунку — app telemetry зараз не надходить.</b></div>
+            <div><span>1</span><b>Паша: перевірити надходження подій Firebase/GA4 та streams мобільного застосунку — актуальний стан не підтверджено.</b></div>
             <div><span>2</span><b>Підключити точну послідовну GA4 funnel-модель.</b></div>
-            <div><span>3</span><b>Google daily sync уже автоматизований. Наступний шар — Meta / Instagram та точна funnel-модель.</b></div>
+            <div><span>3</span><b>Свіжість Google та Meta оцінюємо за датою джерела. Повнота збору, Instagram та точна funnel-модель потребують окремої звірки.</b></div>
           </div>
         </article>
       </section>

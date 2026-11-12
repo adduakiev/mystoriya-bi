@@ -5,6 +5,8 @@ import {createRequire} from "node:module";
 import {normalizeSocial, normalizeMetaAds} from "../lib/data/meta-social-contract.ts";
 import {normalizeAds} from "../lib/data/digital-source-contract.ts";
 import * as quality from "../lib/digital-quality.ts";
+import * as evidence from "../lib/source-evidence.ts";
+import * as presentation from "../lib/ads-presentation.ts";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -25,6 +27,8 @@ const shell = {
   "@/components/DigitalReportShell": {DigitalTabs: () => null},
   "@/components/DigitalAdsTrendChart": {DigitalAdsTrendChart: () => null},
   "@/lib/digital-quality": quality,
+  "@/lib/source-evidence": evidence,
+  "@/lib/ads-presentation": presentation,
   "@/components/DigitalSourceEvidence": loadTsx("../components/DigitalSourceEvidence.tsx", {"@/lib/digital-quality": quality})
 };
 const asOf = "2026-10-23";
@@ -53,7 +57,7 @@ test("paid SSR presents Google and empty Meta independently with null Meta metri
   assert.match(html, /Meta Ads · WAITING/);
   assert.match(html, /Meta spend<\/span><strong>—<\/strong>/);
   assert.match(html, /Meta ROAS<\/span><strong>—<\/strong>/);
-  assert.match(html, /ROAS Ads<\/span><strong>8.00x<\/strong>/);
+  assert.match(html, /ROAS Ads<\/span><strong>—<\/strong>/);
   assert.match(html, /не об’єднуємо ROAS/);
 });
 
@@ -62,7 +66,7 @@ test("Meta RPC rejection leaves Google results visible and reports unavailable s
   const {default: Page} = loadTsx("../app/digital/ads/page.tsx", {...shell,
     "@/lib/data/digital-sources": {loadDigitalAdsData: async () => google, loadDigitalMetaAdsData: async () => {throw Error("RPC failed");}}});
   const html = renderToStaticMarkup(await Page());
-  assert.match(html, /ROAS Ads<\/span><strong>8.00x<\/strong>/);
+  assert.match(html, /ROAS Ads<\/span><strong>—<\/strong>/);
   assert.match(html, /Meta Ads · джерело недоступне/);
   assert.doesNotMatch(html, /Meta Ads · WAITING|Meta Ads · LIVE/);
 });
@@ -81,5 +85,5 @@ test("paid SSR labels Windsor USD, keeps null purchases and blocks unverified RO
   assert.match(html, /Meta purchases<\/span><strong>—<\/strong>/);
   assert.match(html, /Meta ROAS<\/span><strong>—<\/strong>/);
   assert.match(html, /fixture-account · USD/);
-  assert.match(html, /ROAS Ads<\/span><strong>8.00x<\/strong>/);
+  assert.match(html, /ROAS Ads<\/span><strong>—<\/strong>/);
 });
