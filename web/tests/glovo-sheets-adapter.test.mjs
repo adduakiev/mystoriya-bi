@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import * as crypto from 'node:crypto';
 import {moduleLoader, React, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
 
 const modules = () => moduleLoader({'server-only': {}});
@@ -162,12 +163,15 @@ test('coverage evidence is snapshotted before the injected asynchronous dependen
   assert.equal(result.report.trend[0].coverage, 'PARTIAL');
 });
 
-test('actual loader and page remain disconnected: zero adapter, auth, or network calls and SOURCE UNAVAILABLE', async t => {
+test('without configured credential loader/page fail closed and legacy adapter remains disconnected', async t => {
+  const previous = process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  t.after(() => previous === undefined ? delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON : process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON = previous);
   t.mock.method(globalThis, 'fetch', () => assert.fail('zero network calls'));
   let adapterCalls = 0;
   const forbidden = {prepareGlovoSheetReport:() => {adapterCalls++; assert.fail('live adapter call');}};
   const load = moduleLoader({
-    'server-only': {},
+    'server-only': {}, 'node:crypto':crypto,
     './glovo-sheets-adapter':forbidden,
     '@/lib/data/glovo-sheets-adapter':forbidden,
     'next/link':{default:({prefetch, children, ...props}) => React.createElement('a', props, children)},
@@ -182,6 +186,6 @@ test('actual loader and page remain disconnected: zero adapter, auth, or network
   assert.equal(adapterCalls, 0);
   for (const file of ['lib/data/glovo-source.ts', 'app/aggregators/glovo/page.tsx']) {
     const source = fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
-    assert.doesNotMatch(source, /glovo-sheets-adapter|process\.env|\bfetch\s*\(|getValues\s*\(/);
+    assert.doesNotMatch(source, /glovo-sheets-adapter|\bfetch\s*\(|getValues\s*\(/);
   }
 });

@@ -1,15 +1,27 @@
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { GLOVO_SORTS, selectGlovoReport, type GlovoFilters } from "@/lib/data/glovo-contract";
 import { loadGlovoSource } from "@/lib/data/glovo-source";
 import { GlovoReportPresenter } from "./GlovoReportPresenter";
 import styles from "./report.module.css";
 
-export default async function GlovoBrandsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function GlovoBrandsPage(props: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const {searchParams} = props ?? {};
   const source = await loadGlovoSource();
+  const params = await searchParams ?? {};
+  const input = (key: string) => typeof params[key] === "string" ? params[key] as string : "";
+  const filters: GlovoFilters = {month: input("month"), brand: input("brand"), group: input("group"),
+    location: input("location"), mapping: input("mapping"), sort: input("sort")};
+  if (!GLOVO_SORTS.includes(filters.sort as typeof GLOVO_SORTS[number])) filters.sort = "source";
+  const report = source.report ? selectGlovoReport(source.report, filters) : null;
   return (
     <main className="shell">
       <DashboardSidebar activeHref="/aggregators/glovo" lfl={false}
-        statusTitle={source.status} statusDetail="Glovo · read-only preview · свіжість UNKNOWN" />
+        statusTitle={source.status} statusDetail={`Glovo · приватне читання · останній місяць ${source.latestEventMonth ?? "UNKNOWN"}`} />
       <section className={`workspace ${styles.report}`}>
         <nav aria-label="Звіти агрегаторів" className={styles.navigation}>
           <Link href="/aggregators" prefetch={false}>← Агрегатори</Link>
@@ -24,12 +36,14 @@ export default async function GlovoBrandsPage() {
         <section className="panel" aria-labelledby="glovo-source-heading">
           <h2 id="glovo-source-heading">{source.status}</h2>
           <p role="status">{source.reason}</p>
-          <p>Останній місяць подій: UNKNOWN · Останнє читання: UNKNOWN · Автооновлення не активне.</p>
+          <p>Останній місяць подій: {source.latestEventMonth ?? "UNKNOWN"} · Останнє читання: {source.lastReadAt ?? "UNKNOWN"} · Автооновлення не активне.</p>
+          {source.report && <p><a href="/aggregators/glovo">Оновити з приватного джерела</a> · Повторне читання при відкритті сторінки.
+            Час читання не підтверджує свіжість оригінального експорту.</p>}
           {!source.report && <p>Запланований період: січень–жовтень 2026. Листопад поза типовим періодом;
             його часткові дані потребують окремої перевірки. Покриття в BI не підтверджене.</p>}
         </section>
 
-        {source.report ? <GlovoReportPresenter report={source.report} /> : <>
+        {source.report && report ? <GlovoReportPresenter report={report} sourceReport={source.report} filters={filters} /> : <>
         <section className={styles.kpis} aria-label="KPI · дані недоступні">
           {[
             ["Доставлені замовлення", "Місячний агрегат джерела"],
@@ -79,7 +93,7 @@ export default async function GlovoBrandsPage() {
           <p>Джерело містить агрегати бренд × заклад × місяць. Сума покупок у локальній валюті
             не визначає чистий прибуток або суму після комісій. Середній чек доступний лише
             за відомих суми та додатної кількості доставлених замовлень.</p>
-          <p>Сирі назви зберігаються. Погоджені варіанти Мʼясторія Meat Bar,
+          <p>Сирі назви зберігаються. Погоджені варіанти Мʼясторія Meat Bar, Meatbar Івано-Франківська,
             Meatbar М&apos;ясторія та Мітбар М&apos;ясторія належать до групи «МітБар».
             Решта груп, фізичні локації, власність і реальний/віртуальний тип: UNKNOWN / needs mapping.</p>
           <p>Немає ID замовлень, статусів, комісій чи підтвердження валюти.

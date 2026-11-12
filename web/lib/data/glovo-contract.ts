@@ -35,7 +35,7 @@ export type GlovoContract = {
 // Match only explicitly approved aliases, never substring/fuzzy brand matching.
 const aliasKey = (value: string) => value.trim().replace(/[ʼ’`]/g, "'").replace(/\s+/g, " ").toLocaleLowerCase("uk");
 const meatbarAliases = new Set([
-  "Мʼясторія Meat Bar", "Meatbar М'ясторія", "Мітбар М'ясторія",
+  "Мʼясторія Meat Bar", "Meatbar Івано-Франківська", "Meatbar М'ясторія", "Мітбар М'ясторія",
   "Meatbar М'ясторія / Мітбар М'ясторія"
 ].map(aliasKey));
 
@@ -142,4 +142,47 @@ export function glovoPeriodChange(current: { coverage: string; metrics: GlovoMet
   if (current.coverage !== "COMPLETE" || previous.coverage !== "COMPLETE" || a === null || b === null || b <= 0) return null;
   const change = (a / b - 1) * 100;
   return Number.isFinite(change) ? change : null;
+}
+
+
+export type GlovoReport = NonNullable<ReturnType<typeof buildGlovoReport>>;
+export type GlovoFilters = {
+  month: string; brand: string; group: string; location: string; mapping: string; sort: string;
+};
+export const GLOVO_SORTS = ["source", "month", "brand", "orders-desc", "amount-desc"] as const;
+
+/** URL input selects exact source values only; no matching/identity inference.
+ * Coverage can only remain as trusted by the input report, never be upgraded.
+ */
+export function selectGlovoReport(report: GlovoReport, filters: GlovoFilters): GlovoReport {
+  const months = filters.month === "all" ? report.months : filters.month
+    ? report.months.filter(month => month === filters.month) : GLOVO_DEFAULT_MONTHS;
+  const rows = report.rows.filter(row => months.includes(row.month) &&
+    (!filters.brand || row.rawBrand === filters.brand) &&
+    (!filters.group || (filters.group === "unknown" ? row.normalizedGroup === null : row.normalizedGroup === filters.group)) &&
+    (!filters.location || row.sourceLocation === filters.location) &&
+    (!filters.mapping || (filters.mapping === "unknown" ? row.normalizedGroup === null :
+      filters.mapping === "group-only" && row.normalizedGroup !== null)));
+  const compareText = (a: string, b: string) => a.localeCompare(b, "uk");
+  rows.sort((a, b) => {
+    if (filters.sort === "orders-desc" || filters.sort === "amount-desc") {
+      const field = filters.sort === "orders-desc" ? "deliveredOrders" : "purchaseSum";
+      const x = a[field], y = b[field];
+      if (x === null || y === null) return x === y ? compareText(a.key, b.key) : x === null ? 1 : -1;
+      return y - x || compareText(a.key, b.key);
+    }
+    if (filters.sort === "brand") return compareText(a.rawBrand, b.rawBrand) || compareText(a.key, b.key);
+    if (filters.sort === "month") return compareText(a.month, b.month) || compareText(a.key, b.key);
+    return a.sourceRow - b.sourceRow || compareText(a.key, b.key);
+  });
+  const trend = [...months].sort().map(month => {
+    const selected = rows.filter(row => row.month === month);
+    const metrics = glovoMetrics(selected);
+    return {month, ...metrics, coverage: selected.length > 0 &&
+      report.trend.find(point => point.month === month)?.coverage === "COMPLETE" &&
+      metrics.deliveredOrders !== null && metrics.purchaseSum !== null ? "COMPLETE" as const : "PARTIAL" as const};
+  });
+  return {months: [...months], rows, brands: [...new Set(rows.map(row => row.rawBrand))].sort(),
+    metrics: glovoMetrics(rows), trend,
+    coverage: trend.length > 0 && trend.every(point => point.coverage === "COMPLETE") ? "COMPLETE" : "PARTIAL"};
 }

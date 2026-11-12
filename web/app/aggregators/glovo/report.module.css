@@ -13,3 +13,12 @@
 .report a:focus-visible, .scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.filters label { display: grid; gap: 6px; max-width: 100%; font-size: 13px; }
+.filters select, .filters button { max-width: 100%; min-height: 40px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel, #171c24); color: inherit; }
+.filters select { width: 240px; }
+.filters a { padding: 10px; }
+.report summary { cursor: pointer; }
+.report code { overflow-wrap: anywhere; }
+.filters select:focus-visible, .filters button:focus-visible, .report summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

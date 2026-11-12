@@ -1,4 +1,4 @@
-import type { buildGlovoReport } from "@/lib/data/glovo-contract";
+import { glovoMetrics, type buildGlovoReport, type GlovoFilters } from "@/lib/data/glovo-contract";
 import styles from "./report.module.css";
 
 // Accept only the existing pure builder's non-null result. No parsing,
@@ -7,8 +7,51 @@ type Report = NonNullable<ReturnType<typeof buildGlovoReport>>;
 const number = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 2 });
 const value = (metric: number | null) => metric === null ? "— · недоступно" : number.format(metric);
 
-export function GlovoReportPresenter({ report }: { report: Report }) {
+export function GlovoReportPresenter({ report, sourceReport = report, filters }: {
+  report: Report; sourceReport?: Report; filters?: GlovoFilters
+}) {
+  const locations = [...new Set(sourceReport.rows.map(row => row.sourceLocation))].sort();
+  const groups = [...new Set(sourceReport.rows.flatMap(row => row.normalizedGroup ? [row.normalizedGroup] : []))].sort();
+  const drilldown = (brand: string, location: string) => {
+    const params = new URLSearchParams({brand, location});
+    if (filters?.month) params.set("month", filters.month);
+    return `/aggregators/glovo?${params.toString()}#glovo-drilldown-heading`;
+  };
   return <>
+    {filters && <section className="panel" aria-labelledby="glovo-filters-heading">
+      <h2 id="glovo-filters-heading">Вибір даних</h2>
+      <form action="/aggregators/glovo" method="get" className={styles.filters}>
+        <label>Місяць<select name="month" defaultValue={filters.month}>
+          <option value="">Січень–жовтень 2026</option><option value="all">Усі доступні місяці</option>
+          {sourceReport.months.map(month => <option key={month} value={month}>{month}</option>)}
+        </select></label>
+        <label>Бренд у джерелі<select name="brand" defaultValue={filters.brand}>
+          <option value="">Усі бренди</option>
+          {sourceReport.brands.map(brand => <option key={brand} value={brand}>{brand}</option>)}
+        </select></label>
+        <label>Погоджена група<select name="group" defaultValue={filters.group}>
+          <option value="">Усі групи</option><option value="unknown">UNKNOWN / needs mapping</option>
+          {groups.map(group => <option key={group} value={group}>{group}</option>)}
+        </select></label>
+        <label>Заклад у таблиці<select name="location" defaultValue={filters.location}>
+          <option value="">Усі заклади</option>
+          {locations.map(location => <option key={location} value={location}>{location}</option>)}
+        </select></label>
+        <label>Мапінг групи<select name="mapping" defaultValue={filters.mapping}>
+          <option value="">Усі стани</option><option value="unknown">Група UNKNOWN</option>
+          <option value="group-only">Група погоджена; фізична локація UNKNOWN</option>
+        </select></label>
+        <label>Сортування рядків<select name="sort" defaultValue={filters.sort}>
+          <option value="source">Рядок Excel</option><option value="month">Місяць</option>
+          <option value="brand">Бренд</option><option value="orders-desc">Замовлення ↓</option>
+          <option value="amount-desc">Сума покупок ↓</option>
+        </select></label>
+        <button type="submit">Застосувати</button><a href="/aggregators/glovo">Скинути</a>
+      </form>
+      <p role="status">Рядків: {report.rows.length} із {sourceReport.rows.length}. KPI і динаміка відповідають вибору.
+        Фізична локація, власність і реальний / віртуальний тип залишаються UNKNOWN.</p>
+    </section>}
+
     <section className="panel" aria-labelledby="glovo-coverage-heading">
       <h2 id="glovo-coverage-heading">Покриття: {report.coverage}</h2>
       <p role="status">{report.coverage === "PARTIAL"
@@ -60,14 +103,17 @@ export function GlovoReportPresenter({ report }: { report: Report }) {
           <caption>Бренд × заклад × місяць · рядки джерела; покриття періоду {report.coverage}</caption>
           <thead><tr>{["Місяць", "Бренд у джерелі", "Погоджена група", "Заклад у таблиці",
             "Назва у джерелі", "Адреса у джерелі", "Фізична локація", "Власність", "Реальний / віртуальний тип",
-            "Доставлені замовлення", "Сума покупок, лок. вал.", "Рядок Excel", "Мапінг"]
+            "Доставлені замовлення", "Сума покупок, лок. вал.", "Середній чек, лок. вал.", "Рядок Excel", "Мапінг"]
             .map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead>
           <tbody>{report.rows.length ? report.rows.map(row => <tr key={row.key}>
-            <th scope="row">{row.month}</th><td>{row.rawBrand}</td><td>{row.normalizedGroup ?? "UNKNOWN / needs mapping"}</td>
+            <th scope="row">{row.month}</th><td><a href={drilldown(row.rawBrand, row.sourceLocation)}>{row.rawBrand}</a></td><td>{row.normalizedGroup ?? "UNKNOWN / needs mapping"}</td>
             <td>{row.sourceLocation}</td><td>{row.sourceName}</td><td>{row.sourceAddress}</td>
             <td>{row.physicalLocation ?? "UNKNOWN / needs mapping"}</td><td>{row.ownership}</td><td>{row.identity}</td>
-            <td>{value(row.deliveredOrders)}</td><td>{value(row.purchaseSum)}</td><td>{row.sourceRow}</td><td>{row.mappingReason}</td>
-          </tr>) : <tr><td colSpan={13}>— · недоступно · немає рядків у вибраному періоді</td></tr>}</tbody>
+            <td>{value(row.deliveredOrders)}</td><td>{value(row.purchaseSum)}</td><td>{value(glovoMetrics([row]).averageTicket)}</td><td>{row.sourceRow}</td><td><details><summary>Походження та мапінг</summary>
+              <p>{row.mappingReason}</p><p>Ключ агрегату: <code>{row.key}</code></p>
+              <p>Місяць {row.month} · рядок Excel {row.sourceRow}. Ідентифікатор замовлення відсутній.</p>
+            </details></td>
+          </tr>) : <tr><td colSpan={14}>— · недоступно · немає рядків у вибраному періоді</td></tr>}</tbody>
         </table>
       </div>
     </section>

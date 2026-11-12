@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import * as crypto from 'node:crypto';
 import {moduleLoader, previewHarness, React, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
 
 const load = (overrides = {}) => moduleLoader({
   'server-only': {},
+  'node:crypto': crypto,
   './report.module.css': {default:Object.fromEntries(['report','navigation','kpis','value','scroll'].map(name => [name, name]))},
   'next/link': {default: ({prefetch, children, ...props}) => React.createElement('a', props, children)},
   '@/components/SidebarBrand': {SidebarBrand: () => React.createElement('span', null, 'TEST ONLY · no session/sync')},
@@ -40,8 +42,8 @@ test('actual SSR presenter renders builder totals, ratio of sums, every month an
     assert.ok(trend.includes(`<th scope="row">${month}</th><td>10</td><td>40</td><td>4</td><td>COMPLETE</td>`));
   }
   assert.equal((detail.match(/<tr>/g) ?? []).length, 20);
-  assert.match(detail, /Мʼясторія Meat Bar<\/td><td>МітБар/);
-  assert.match(detail, /SYNTHETIC new brand<\/td><td>UNKNOWN \/ needs mapping/);
+  assert.match(detail, /Мʼясторія Meat Bar<\/a><\/td><td>МітБар/);
+  assert.match(detail, /SYNTHETIC new brand<\/a><\/td><td>UNKNOWN \/ needs mapping/);
   assert.match(detail, /SYNTHETIC location<\/td><td>SYNTHETIC source name<\/td><td>SYNTHETIC address/);
   assert.match(detail, /<td>42<\/td>/);
   assert.match(detail, /<td>43<\/td>/);
@@ -56,13 +58,13 @@ test('actual SSR presenter renders builder totals, ratio of sums, every month an
 });
 
 test('actual presenter keeps every approved alias and raw label, including escaped unknown source names', () => {
-  const aliases = ['Мʼясторія Meat Bar', "Meatbar М'ясторія", "Мітбар М'ясторія", "Meatbar М'ясторія / Мітбар М'ясторія"];
+  const aliases = ['Meatbar Івано-Франківська', 'Мʼясторія Meat Bar', "Meatbar М'ясторія", "Мітбар М'ясторія", "Meatbar М'ясторія / Мітбар М'ясторія"];
   const report = reportFrom([...aliases.map(brand => syntheticRow({1:brand})),
     syntheticRow({1:'SYNTHETIC <unknown>', 3:'<script>synthetic only</script>'})], ['2026-01'], ['2026-01']);
   const [, detail] = bodies(renderReport(report));
   assert.equal((detail.match(/<td>МітБар<\/td>/g) ?? []).length, aliases.length);
   for (const brand of aliases) assert.ok(detail.includes(brand.replaceAll("'", '&#x27;')));
-  assert.match(detail, /SYNTHETIC &lt;unknown&gt;<\/td><td>UNKNOWN \/ needs mapping/);
+  assert.match(detail, /SYNTHETIC &lt;unknown&gt;<\/a><\/td><td>UNKNOWN \/ needs mapping/);
   assert.match(detail, /&lt;script&gt;synthetic only&lt;\/script&gt;/);
   assert.doesNotMatch(detail, /<script>/);
 });
@@ -122,7 +124,10 @@ test('actual page conditionally presents only a non-null builder report supplied
   }
 });
 
-test('actual Glovo server boundary and SSR fail closed without network, fixtures or zero KPIs', async t => {
+test('actual Glovo server boundary and SSR fail closed without credentials, network, fixtures or zero KPIs', async t => {
+  const previous = process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  t.after(() => previous === undefined ? delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON : process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON = previous);
+  delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
   t.mock.method(globalThis, 'fetch', () => assert.fail('Glovo unavailable must make no remote call'));
   const modules = load();
   const state = await modules('lib/data/glovo-source.ts').loadGlovoSource();
@@ -145,7 +150,9 @@ test('actual Glovo server boundary and SSR fail closed without network, fixtures
   assert.doesNotMatch(html, /SYNTHETIC|Покриття:|KPI · COMPLETE|KPI · PARTIAL|<td>\d/);
   const boundary = fs.readFileSync(new URL('../lib/data/glovo-source.ts', import.meta.url), 'utf8');
   assert.match(boundary, /^import "server-only";/);
-  assert.doesNotMatch(boundary, /process\.env|fetch\(|callBiRpc\(|loadSalesData\(|https:\/\//);
+  assert.match(boundary, /process\.env\.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON/);
+  assert.match(boundary, /glovo-private-runtime/);
+  assert.doesNotMatch(boundary, /callBiRpc\(|loadSalesData\(|https:\/\//);
 });
 
 test('child navigation is discoverable, accessible when collapsed and does not propagate unsupported LFL', async () => {
@@ -190,4 +197,54 @@ test('report tables retain local horizontal scrolling, keyboard focus and mobile
   assert.match(css, /\.scroll table\s*\{[^}]*min-width: 720px;/);
   assert.match(css, /\.scroll:focus-visible/);
   assert.match(css, /@media \(max-width: 720px\)[^\n]*grid-template-columns: minmax\(0, 1fr\)/);
+});
+
+
+test('actual GET filters update KPI/trend/detail together and expose exact drilldown lineage', async () => {
+  const report = reportFrom([
+    syntheticRow({1:'Meatbar Івано-Франківська', 5:3, 6:30}),
+    syntheticRow({1:'SYNTHETIC other', 5:8, 6:80}),
+    syntheticRow({0:'2026-02', 1:'Meatbar Івано-Франківська', 5:9, 6:90})
+  ]);
+  const page = load({'@/lib/data/glovo-source': {loadGlovoSource: async () => ({
+    status:'OFFLINE SYNTHETIC PREVIEW', reason:'TEST ONLY', report
+  })}})('app/aggregators/glovo/page.tsx').default;
+  const html = renderToStaticMarkup(await page({searchParams:Promise.resolve({
+    month:'2026-01', group:'МітБар', location:'SYNTHETIC location', sort:'amount-desc'
+  })}));
+  assert.deepEqual(kpiValues(html), ['3','30','10','— · недоступно']);
+  assert.match(html, /<form[^>]*action="\/aggregators\/glovo"[^>]*method="get"/);
+  for (const name of ['month','brand','group','location','mapping','sort']) assert.ok(html.includes(`name="${name}"`));
+  const [trend, detail] = bodies(html);
+  assert.equal((trend.match(/<tr>/g) ?? []).length, 1);
+  assert.equal((detail.match(/<tr>/g) ?? []).length, 1);
+  assert.match(detail, /brand=Meatbar/);
+  assert.match(detail, /<details><summary>Походження та мапінг<\/summary>/);
+  assert.match(detail, /Ключ агрегату/);
+  assert.match(detail, /UNKNOWN/);
+  assert.match(html, /KPI · PARTIAL/);
+  const noMatch = renderToStaticMarkup(await page({searchParams:Promise.resolve({brand:'not-present'})}));
+  assert.deepEqual(kpiValues(noMatch), Array(4).fill('— · недоступно'));
+  assert.match(noMatch, /немає рядків у вибраному періоді/);
+});
+
+
+test('page defaults to Jan–Oct while November and all months require explicit selection', async () => {
+  const report = reportFrom([syntheticRow({6:10}), syntheticRow({0:'2026-11', 5:4, 6:40})], [], [...GLOVO_DEFAULT_MONTHS, '2026-11']);
+  const page = load({'@/lib/data/glovo-source': {loadGlovoSource: async () => ({
+    status:'CONNECTED', reason:'TEST ONLY', latestEventMonth:'2026-11', lastReadAt:'2026-11-12T00:00:00Z', report
+  })}})('app/aggregators/glovo/page.tsx').default;
+  const render = async params => renderToStaticMarkup(await page({searchParams:Promise.resolve(params)}));
+  const historical = await render({});
+  assert.deepEqual(kpiValues(historical), ['2','10','5','— · недоступно']);
+  assert.equal((bodies(historical)[0].match(/<tr>/g) ?? []).length, 10);
+  assert.doesNotMatch(bodies(historical)[1], /2026-11/);
+  assert.match(historical, /Січень–жовтень 2026/);
+  const november = await render({month:'2026-11'});
+  assert.deepEqual(kpiValues(november), ['4','40','10','— · недоступно']);
+  assert.equal((bodies(november)[0].match(/<tr>/g) ?? []).length, 1);
+  const all = await render({month:'all'});
+  assert.deepEqual(kpiValues(all), ['6','50','8,33','— · недоступно']);
+  assert.equal((bodies(all)[0].match(/<tr>/g) ?? []).length, 11);
+  assert.match(all, /KPI · PARTIAL/);
 });
