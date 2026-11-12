@@ -1,6 +1,7 @@
 import test, {beforeEach} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import * as crypto from 'node:crypto';
 import {moduleLoader, React, renderToStaticMarkup} from './support/bi-preview-harness.mjs';
 
 const load = () => moduleLoader({'server-only': {}});
@@ -212,9 +213,12 @@ test('late ignored-abort fetch response is cancelled; no second request or fallb
   assert.equal(calls, 1); assert.equal(cancelled, 1);
 });
 
-test('runtime loader/page stay SOURCE UNAVAILABLE with zero transport IO; no client/runtime import', async () => {
+test('without configured credential runtime stays unavailable and legacy transport remains inert', async t => {
+  const previous = process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  t.after(() => previous === undefined ? delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON : process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON = previous);
   const forbidden = new Proxy({}, {get() {assert.fail('runtime transport import forbidden');}});
-  const runtime = moduleLoader({'server-only':{}, './glovo-sheets-http-transport':forbidden,
+  const runtime = moduleLoader({'server-only':{}, 'node:crypto':crypto, './glovo-sheets-http-transport':forbidden,
     '@/lib/data/glovo-sheets-http-transport':forbidden,
     'next/link':{default:({prefetch,children,...props}) => React.createElement('a', props, children)},
     '@/components/SidebarBrand':{SidebarBrand:() => React.createElement('span', null, 'TEST ONLY · no session/sync')}});

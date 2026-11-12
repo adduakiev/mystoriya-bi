@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {moduleLoader} from './support/bi-preview-harness.mjs';
 
-const {GLOVO_HEADERS, GLOVO_DEFAULT_MONTHS, normalizeGlovoSheet, buildGlovoReport, glovoMetrics, glovoPeriodChange} =
+const {GLOVO_HEADERS, GLOVO_DEFAULT_MONTHS, normalizeGlovoSheet, buildGlovoReport, glovoMetrics, glovoPeriodChange, selectGlovoReport} =
   moduleLoader()('lib/data/glovo-contract.ts');
 // Synthetic labels and amounts only; never a snapshot of business records.
 const row = (changes = {}) => Object.assign(['2026-01', 'SYNTHETIC novel brand', 'Fixture group',
@@ -69,7 +69,7 @@ test('strict header/local month/typed cell contract rejects drift without leakin
 });
 
 test('brands are discovered dynamically; only approved aliases normalize and raw labels remain inspectable', () => {
-  const aliases = ['Мʼясторія Meat Bar', "Meatbar М'ясторія", "Мітбар М'ясторія", "Meatbar М'ясторія / Мітбар М'ясторія"];
+  const aliases = ['Meatbar Івано-Франківська', 'Мʼясторія Meat Bar', "Meatbar М'ясторія", "Мітбар М'ясторія", "Meatbar М'ясторія / Мітбар М'ясторія"];
   const brands = [...aliases, 'SYNTHETIC new brand', 'Мʼясторія Meat Bar NEW'];
   const result = normalize(...brands.map(brand => row({1:brand})));
   assert.equal(result.status, 'valid');
@@ -153,4 +153,27 @@ test('comparison is unavailable unless both periods are complete with a valid pr
   assert.equal(glovoPeriodChange(period(0), period(10)), -100);
   for (const [a,b] of [[period(15,'PARTIAL'),period(10)], [period(15),period(10,'PARTIAL')],
     [period(null),period(10)], [period(15),period(null)], [period(15),period(0)]]) assert.equal(glovoPeriodChange(a,b), null);
+});
+
+
+test('report filters select exact source identity, retain nulls and cannot promote partial coverage', () => {
+  const input = buildGlovoReport(normalize(
+    row({1:"Meatbar Івано-Франківська", 5:3, 6:30}),
+    row({1:"Meatbar Івано-Франківська", 2:"Other location", 5:0, 6:0}),
+    row({1:"New virtual brand", 6:null}), row({0:"2026-02", 6:20})
+  ), [], ['2026-01', '2026-02']);
+  const empty = {month:'',brand:'',group:'',location:'',mapping:'',sort:'source'};
+  const chosen = selectGlovoReport(input, {...empty, month:'2026-01', group:'МітБар'});
+  assert.equal(chosen.rows.length, 2);
+  assert.deepEqual(chosen.metrics, {deliveredOrders:3, purchaseSum:30, averageTicket:10});
+  assert.equal(chosen.coverage, 'PARTIAL');
+  assert.ok(chosen.rows.every(row => row.physicalLocation === null && row.identity === 'UNKNOWN'));
+  assert.equal(selectGlovoReport(input, {...empty, brand:'Meatbar'}).rows.length, 0);
+  assert.equal(selectGlovoReport(input, {...empty, mapping:'unknown', month:'2026-01'}).metrics.purchaseSum, null);
+  assert.equal(selectGlovoReport(input, {...empty, brand:'Meatbar Івано-Франківська', location:'Other location'}).metrics.purchaseSum, 0);
+  assert.equal(selectGlovoReport(input, {...empty, month:'2030-01'}).coverage, 'PARTIAL');
+  assert.equal(selectGlovoReport(input, {...empty, month:'2030-01'}).metrics.deliveredOrders, null);
+  const sorted = selectGlovoReport(input, {...empty, sort:'amount-desc'});
+  assert.deepEqual(sorted.rows.map(row => row.purchaseSum), [30,20,0,null]);
+  assert.equal(input.rows[0].purchaseSum, 30, 'input rows are not mutated');
 });
