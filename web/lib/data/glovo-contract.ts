@@ -1,4 +1,4 @@
-// Pure PREPARED contract. No network, credentials, storage or business fixtures.
+// Pure source contract. No network, credentials, storage or business fixtures.
 export const GLOVO_HEADERS = [
   "Місяць", "Бренд", "Заклад: група та головний бренд", "Назва у джерелі",
   "Адреса у джерелі", "Доставлені замовлення", "Сума покупок, лок. вал.",
@@ -15,9 +15,9 @@ export type GlovoRow = {
   sourceLocation: string;
   sourceName: string;
   sourceAddress: string;
-  physicalLocation: null;
-  ownership: "UNKNOWN";
-  identity: "UNKNOWN";
+  physicalLocation: string | null;
+  ownership: "UNKNOWN" | "OWNED" | "FRANCHISE" | "PARTNER";
+  identity: "UNKNOWN" | "PHYSICAL" | "VIRTUAL";
   mappingReason: string;
   deliveredOrders: number | null;
   purchaseSum: number | null;
@@ -148,6 +148,7 @@ export function glovoPeriodChange(current: { coverage: string; metrics: GlovoMet
 export type GlovoReport = NonNullable<ReturnType<typeof buildGlovoReport>>;
 export type GlovoFilters = {
   month: string; brand: string; group: string; location: string; mapping: string; sort: string;
+  year?: string; from?: string; to?: string; physical?: string; identity?: string; ownership?: string; compare?: string;
 };
 export const GLOVO_SORTS = ["source", "month", "brand", "orders-desc", "amount-desc"] as const;
 
@@ -155,14 +156,17 @@ export const GLOVO_SORTS = ["source", "month", "brand", "orders-desc", "amount-d
  * Coverage can only remain as trusted by the input report, never be upgraded.
  */
 export function selectGlovoReport(report: GlovoReport, filters: GlovoFilters): GlovoReport {
-  const months = filters.month === "all" ? report.months : filters.month
-    ? report.months.filter(month => month === filters.month) : GLOVO_DEFAULT_MONTHS;
+  const months = glovoSelectedMonths(report, filters);
   const rows = report.rows.filter(row => months.includes(row.month) &&
     (!filters.brand || row.rawBrand === filters.brand) &&
     (!filters.group || (filters.group === "unknown" ? row.normalizedGroup === null : row.normalizedGroup === filters.group)) &&
     (!filters.location || row.sourceLocation === filters.location) &&
-    (!filters.mapping || (filters.mapping === "unknown" ? row.normalizedGroup === null :
-      filters.mapping === "group-only" && row.normalizedGroup !== null)));
+    (!filters.physical || row.physicalLocation === filters.physical) &&
+    (!filters.identity || row.identity === filters.identity) &&
+    (!filters.ownership || row.ownership === filters.ownership) &&
+    (!filters.mapping || (filters.mapping === "approved" ? row.physicalLocation !== null && row.identity !== "UNKNOWN" && row.ownership !== "UNKNOWN" :
+      filters.mapping === "unknown" ? row.normalizedGroup === null || row.physicalLocation === null || row.identity === "UNKNOWN" || row.ownership === "UNKNOWN" :
+      filters.mapping === "group-only" && row.normalizedGroup !== null && row.physicalLocation === null)));
   const compareText = (a: string, b: string) => a.localeCompare(b, "uk");
   rows.sort((a, b) => {
     if (filters.sort === "orders-desc" || filters.sort === "amount-desc") {
@@ -185,4 +189,26 @@ export function selectGlovoReport(report: GlovoReport, filters: GlovoFilters): G
   return {months: [...months], rows, brands: [...new Set(rows.map(row => row.rawBrand))].sort(),
     metrics: glovoMetrics(rows), trend,
     coverage: trend.length > 0 && trend.every(point => point.coverage === "COMPLETE") ? "COMPLETE" : "PARTIAL"};
+}
+
+/** Enumerate the entire contiguous requested window, including absent months. */
+export function glovoSelectedMonths(report: GlovoReport, filters: GlovoFilters): string[] {
+  if (filters.month && filters.month !== "all") return isMonth(filters.month) ? [filters.month] : [];
+  if (filters.from || filters.to) {
+    if (!isMonth(filters.from) || !isMonth(filters.to) || filters.from > filters.to) return [];
+    const start = Number(filters.from.slice(0, 4)) * 12 + Number(filters.from.slice(5)) - 1;
+    const end = Number(filters.to.slice(0, 4)) * 12 + Number(filters.to.slice(5)) - 1;
+    if (end - start > 119) return [];
+    return Array.from({length: end - start + 1}, (_, i) => glovoMonth(start + i));
+  }
+  if (filters.year) return /^\d{4}$/.test(filters.year)
+    ? Array.from({length: 12}, (_, i) => `${filters.year}-${String(i + 1).padStart(2, "0")}`) : [];
+  if (filters.month === "all") {
+    const available = [...report.months].sort();
+    return available.length ? glovoSelectedMonths(report, {...filters, month: "", year: "", from: available[0], to: available.at(-1)}) : [];
+  }
+  return GLOVO_DEFAULT_MONTHS;
+}
+export function glovoMonth(index: number): string {
+  return `${String(Math.floor(index / 12)).padStart(4, "0")}-${String(index % 12 + 1).padStart(2, "0")}`;
 }

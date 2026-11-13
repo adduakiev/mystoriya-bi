@@ -356,3 +356,19 @@ test('new verification, earlier bounded receipts and post-handoff outcomes retai
   assert.equal(browser.observed_browser_navigations,0);
   assert.ok(browser.cases.every(c=>c.status==='NOT_EXECUTED'));
 });
+
+test('Glovo v2 inventory includes actual presenter, management panels and all GET controls', () => {
+  const audit = JSON.parse(fs.readFileSync(path.join(root, 'docs/audit/2026-10-24/inventory.json'), 'utf8'));
+  const route = audit.routes.find(r => r.path === '/aggregators/glovo');
+  for (const name of ['GlovoReportPresenter', 'GlovoManagementPanels']) {
+    const component = `web/app/aggregators/glovo/${name}.tsx`;
+    assert.ok(route.component_tree.includes(component));
+    assert.ok(audit.items.some(i => i.component === component && i.paths.includes(route.path)));
+  }
+  for (const name of ['year','month','from','to','brand','group','location','physical','identity','ownership','mapping','sort','compare']) {
+    assert.ok(audit.items.some(i => i.paths.includes(route.path) && i.props.name === `"${name}"`), name);
+  }
+  assert.match(route.filters, /all network/);
+  assert.match(route.fallback, /digest-bound/);
+  assert.equal(route.runtime_parity, 'UNKNOWN');
+});

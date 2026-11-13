@@ -15,7 +15,8 @@ export default async function GlovoBrandsPage(props: {
   const params = await searchParams ?? {};
   const input = (key: string) => typeof params[key] === "string" ? params[key] as string : "";
   const filters: GlovoFilters = {month: input("month"), brand: input("brand"), group: input("group"),
-    location: input("location"), mapping: input("mapping"), sort: input("sort")};
+    location: input("location"), mapping: input("mapping"), sort: input("sort"), year: input("year"), from: input("from"), to: input("to"),
+    physical: input("physical"), identity: input("identity"), ownership: input("ownership"), compare: input("compare")};
   if (!GLOVO_SORTS.includes(filters.sort as typeof GLOVO_SORTS[number])) filters.sort = "source";
   const report = source.report ? selectGlovoReport(source.report, filters) : null;
   return (
@@ -43,13 +44,22 @@ export default async function GlovoBrandsPage(props: {
             його часткові дані потребують окремої перевірки. Покриття в BI не підтверджене.</p>}
         </section>
 
+        {source.confirmations?.some(item => item.status === "CHANGED") && <section className="panel" aria-label="Змінені історичні факти">
+          <h2>Підтвердження повноти втрачено</h2>
+          {source.confirmations.filter(item => item.status === "CHANGED").map(item => <p key={item.month} role="status">{item.month} · CHANGED · очікуваний SHA-256 <code>{item.expectedDigest}</code> · поточний <code>{item.digest}</code>. Місяць PARTIAL; потрібне повторне підтвердження власника.</p>)}
+        </section>}
+        {source.parity && <section className="panel" aria-labelledby="glovo-parity-heading">
+          <h2 id="glovo-parity-heading">Контрольні значення · січень–жовтень 2026</h2>
+          <p>Порівняння прочитаних даних із D294. MATCH не означає незалежний аудит або перевірку Preview.</p>
+          <ul>{source.parity.assertions.map(item => <li key={item.metric}>{item.metric}: {item.status} · відхилення {item.delta === null ? "UNKNOWN" : item.delta.toFixed(6)} (прочитано {item.observed ?? "UNKNOWN"}; орієнтир {item.expected}).</li>)}</ul>
+        </section>}
         {source.report && report ? <GlovoReportPresenter report={report} sourceReport={source.report} filters={filters} /> : <>
         <section className={styles.kpis} aria-label="KPI · дані недоступні">
           {[
+            ["Сума покупок, UAH", "Валюта підтверджена власником 13.11.2026"],
             ["Доставлені замовлення", "Місячний агрегат джерела"],
-            ["Сума покупок, лок. вал.", "Ідентичність валюти не підтверджена"],
-            ["Середній чек, лок. вал.", "Сума покупок / доставлені замовлення"],
-            ["Зміна до попереднього періоду", "Лише за повного покриття обох періодів"]
+            ["Зважений середній чек, UAH", "Сума / замовлення лише парних рядків"],
+            ["Частка віртуальних брендів, %", "Частка суми за відомої класифікації"]
           ].map(([label, detail]) => (
             <article className="panel" key={label}>
               <h2>{label}</h2><strong className={styles.value}>—</strong>
@@ -66,7 +76,7 @@ export default async function GlovoBrandsPage(props: {
             <table>
               <caption>Структура звіту · без даних джерела</caption>
               <thead><tr><th scope="col">Місяць</th><th scope="col">Доставлені замовлення</th>
-                <th scope="col">Сума покупок, лок. вал.</th><th scope="col">Покриття</th></tr></thead>
+                <th scope="col">Сума покупок, UAH</th><th scope="col">Покриття</th></tr></thead>
               <tbody><tr><td colSpan={4}>SOURCE UNAVAILABLE · місячні значення відсутні</td></tr></tbody>
             </table>
           </div>
@@ -81,7 +91,7 @@ export default async function GlovoBrandsPage(props: {
               <caption>Структура деталізації · без даних джерела</caption>
               <thead><tr>{["Місяць", "Бренд у джерелі", "Погоджена група", "Заклад у таблиці",
                 "Назва у джерелі", "Адреса у джерелі", "Фізична локація", "Власність / тип",
-                "Доставлені замовлення", "Сума покупок, лок. вал."].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead>
+                "Доставлені замовлення", "Сума покупок, UAH"].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead>
               <tbody><tr><td colSpan={10}>SOURCE UNAVAILABLE · мапінг UNKNOWN / needs mapping</td></tr></tbody>
             </table>
           </div>
@@ -95,10 +105,10 @@ export default async function GlovoBrandsPage(props: {
             за відомих суми та додатної кількості доставлених замовлень.</p>
           <p>Сирі назви зберігаються. Погоджені варіанти Мʼясторія Meat Bar, Meatbar Івано-Франківська,
             Meatbar М&apos;ясторія та Мітбар М&apos;ясторія належать до групи «МітБар».
-            Решта груп, фізичні локації, власність і реальний/віртуальний тип: UNKNOWN / needs mapping.</p>
-          <p>Немає ID замовлень, статусів, комісій чи підтвердження валюти.
+            Класифікація закладів, типу і власності — лише з погоджених рядків словників цієї таблиці. Непогоджені значення: UNKNOWN / needs mapping.</p>
+          <p>UAH підтверджено власником 13.11.2026. Немає ID замовлень, статусів чи комісій: дублікати замовлень між локаціями та скасування перевірити неможливо.
             Рядок Excel — походження запису, а не ID замовлення. Звірка всередині таблиці
-            не доводить відповідність оригінальному експорту.</p>
+            не доводить відповідність оригінальному експорту. Glovo-аналіз брендів відокремлений від Aggregator P&amp;L (комісії, промо, результат); Bolt/Loko не включені. Місяць створення замовлення може відрізнятися від глобального облікового дня.</p>
         </section>
       </section>
     </main>

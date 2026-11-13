@@ -8,11 +8,13 @@ export async function loadGlovoSource() {
   try {
     const data = await readGlovoPrivateSheet(process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON, fetch);
     return { status: "CONNECTED" as const,
-      reason: "Приватне джерело прочитане. Повнота місяців незалежно не підтверджена.", ...data };
+      reason: "Приватне джерело прочитане. UAH підтверджено власником 13.11.2026; повнота місяців залежить від digest. Це не незалежний аудит.", ...data };
   } catch {
     return {
       status: "SOURCE UNAVAILABLE" as const,
-      reason: "Приватне джерело Glovo недоступне. Перевірте доступ облікового запису до погодженої таблиці.",
+      reason: "Приватне джерело або контракт Glovo недоступні. Перевірте доступ до погодженої таблиці та структуру фактів і словників мапінгу.",
+      confirmations: [],
+      parity: null,
       latestEventMonth: null,
       lastReadAt: null,
       report: null as ReturnType<typeof buildGlovoReport>

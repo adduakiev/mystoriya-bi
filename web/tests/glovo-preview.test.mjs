@@ -34,9 +34,9 @@ test('actual SSR presenter renders builder totals, ratio of sums, every month an
   ]);
   const report = reportFrom([...rows, syntheticRow({0:'2026-11', 1:'SYNTHETIC NOVEMBER EXCLUDED', 5:987654, 6:987654})], GLOVO_DEFAULT_MONTHS);
   const html = renderReport(report);
-  assert.deepEqual(kpiValues(html), ['100', '400', '4', '— · недоступно']);
+  assert.deepEqual(kpiValues(html), ['400', '100', '4', '— · недоступно']);
   assert.match(html, /KPI · COMPLETE/);
-  const [trend, detail] = bodies(html);
+  const [trend, , , , detail] = bodies(html);
   assert.equal((trend.match(/<tr>/g) ?? []).length, 10);
   for (const month of GLOVO_DEFAULT_MONTHS) {
     assert.ok(trend.includes(`<th scope="row">${month}</th><td>10</td><td>40</td><td>4</td><td>COMPLETE</td>`));
@@ -49,10 +49,10 @@ test('actual SSR presenter renders builder totals, ratio of sums, every month an
   assert.match(detail, /<td>43<\/td>/);
   assert.equal((detail.match(/<td>UNKNOWN<\/td><td>UNKNOWN<\/td>/g) ?? []).length, 20);
   assert.doesNotMatch(html, /2026-11|NOVEMBER EXCLUDED|987654|₴|NaN|Infinity|undefined|\bLIVE\b/);
-  assert.match(html, /Валюта та свіжість джерела: UNKNOWN/);
+  assert.match(html, /Валюта UAH: підтвердження власника/);
   assert.match(html, /Order Created Local Month/);
-  assert.equal((html.match(/role="region"[^>]*tabindex="0"/g) ?? []).length, 2);
-  assert.equal((html.match(/<caption>/g) ?? []).length, 2);
+  assert.equal((html.match(/role="region"[^>]*tabindex="0"/g) ?? []).length, 5);
+  assert.equal((html.match(/<caption>/g) ?? []).length, 5);
   assert.match(html, /scope="col"/);
   assert.match(html, /scope="row"/);
 });
@@ -61,7 +61,7 @@ test('actual presenter keeps every approved alias and raw label, including escap
   const aliases = ['Meatbar Івано-Франківська', 'Мʼясторія Meat Bar', "Meatbar М'ясторія", "Мітбар М'ясторія", "Meatbar М'ясторія / Мітбар М'ясторія"];
   const report = reportFrom([...aliases.map(brand => syntheticRow({1:brand})),
     syntheticRow({1:'SYNTHETIC <unknown>', 3:'<script>synthetic only</script>'})], ['2026-01'], ['2026-01']);
-  const [, detail] = bodies(renderReport(report));
+  const detail = bodies(renderReport(report)).at(-1);
   assert.equal((detail.match(/<td>МітБар<\/td>/g) ?? []).length, aliases.length);
   for (const brand of aliases) assert.ok(detail.includes(brand.replaceAll("'", '&#x27;')));
   assert.match(detail, /SYNTHETIC &lt;unknown&gt;<\/a><\/td><td>UNKNOWN \/ needs mapping/);
@@ -77,8 +77,8 @@ test('actual presenter preserves missing measures, measured zero and undefined a
   const html = renderReport(report);
   assert.deepEqual(kpiValues(html), Array(4).fill('— · недоступно'));
   assert.match(html, /KPI · PARTIAL/);
-  assert.doesNotMatch(html, /COMPLETE/);
-  const [trend, detail] = bodies(html);
+  assert.doesNotMatch(html, /KPI · COMPLETE/);
+  const [trend, , , , detail] = bodies(html);
   assert.match(trend, /<td>— · недоступно<\/td><td>— · недоступно<\/td><td>— · недоступно<\/td><td>PARTIAL/);
   assert.match(detail, /<td>0<\/td><td>0<\/td>/);
   assert.match(detail, /<td>— · недоступно<\/td><td>— · недоступно<\/td>/);
@@ -88,7 +88,7 @@ test('actual presenter preserves missing measures, measured zero and undefined a
   for (const changes of [{5:null}, {6:null}, {5:'2'}, {6:'10'}]) {
     const incomplete = renderReport(reportFrom([syntheticRow(changes)], ['2026-01'], ['2026-01']));
     assert.match(incomplete, /KPI · PARTIAL/);
-    assert.doesNotMatch(incomplete, /COMPLETE/);
+    assert.doesNotMatch(incomplete, /KPI · COMPLETE/);
     assert.equal(kpiValues(incomplete)[2], '— · недоступно');
   }
 });
@@ -99,13 +99,13 @@ test('coverage controls remain visible: unchecked, missing months and empty data
   assert.match(unchecked, /KPI · PARTIAL/);
   assert.match(unchecked, /Це не повний підсумок/);
   assert.equal((bodies(unchecked)[0].match(/<td>PARTIAL<\/td>/g) ?? []).length, 10);
-  assert.doesNotMatch(unchecked, /COMPLETE/);
+  assert.doesNotMatch(unchecked, /KPI · COMPLETE/);
   const gap = renderReport(reportFrom([syntheticRow()], GLOVO_DEFAULT_MONTHS));
   assert.match(gap, /KPI · PARTIAL/);
   assert.match(bodies(gap)[0], /2026-02<\/th><td>— · недоступно<\/td><td>— · недоступно<\/td><td>— · недоступно<\/td><td>PARTIAL/);
   const empty = renderReport(reportFrom([], GLOVO_DEFAULT_MONTHS));
   assert.deepEqual(kpiValues(empty), Array(4).fill('— · недоступно'));
-  assert.doesNotMatch(empty, /COMPLETE|<td>0<\/td>/);
+  assert.doesNotMatch(empty, /KPI · COMPLETE|<td>0<\/td>/);
   assert.match(empty, /немає рядків у вибраному періоді/);
 });
 
@@ -116,7 +116,7 @@ test('actual page conditionally presents only a non-null builder report supplied
     status:'OFFLINE SYNTHETIC PREVIEW', reason:'TEST ONLY · no source connection', report
   })}})('app/aggregators/glovo/page.tsx').default;
   const html = renderToStaticMarkup(await page());
-  assert.deepEqual(kpiValues(html), ['2', '10', '5', '— · недоступно']);
+  assert.deepEqual(kpiValues(html), ['10', '2', '5', '— · недоступно']);
   assert.match(html, /SYNTHETIC new brand/);
   assert.doesNotMatch(html, /Структура звіту · без даних джерела/);
   for (const contract of [normalizeGlovoSheet([['bad header']]), normalizeGlovoSheet([GLOVO_HEADERS, syntheticRow(), syntheticRow()])]) {
@@ -131,7 +131,7 @@ test('actual Glovo server boundary and SSR fail closed without credentials, netw
   t.mock.method(globalThis, 'fetch', () => assert.fail('Glovo unavailable must make no remote call'));
   const modules = load();
   const state = await modules('lib/data/glovo-source.ts').loadGlovoSource();
-  assert.deepEqual(state, {status:'SOURCE UNAVAILABLE', reason:state.reason, latestEventMonth:null, lastReadAt:null, report:null});
+  assert.deepEqual(state, {status:'SOURCE UNAVAILABLE', reason:state.reason, latestEventMonth:null, lastReadAt:null, report:null, confirmations:[], parity:null});
   const page = modules('app/aggregators/glovo/page.tsx').default;
   const html = renderToStaticMarkup(await page());
   assert.match(html, /<h1>Glovo · Аналітика брендів<\/h1>/);
@@ -212,10 +212,10 @@ test('actual GET filters update KPI/trend/detail together and expose exact drill
   const html = renderToStaticMarkup(await page({searchParams:Promise.resolve({
     month:'2026-01', group:'МітБар', location:'SYNTHETIC location', sort:'amount-desc'
   })}));
-  assert.deepEqual(kpiValues(html), ['3','30','10','— · недоступно']);
+  assert.deepEqual(kpiValues(html), ['30','3','10','— · недоступно']);
   assert.match(html, /<form[^>]*action="\/aggregators\/glovo"[^>]*method="get"/);
   for (const name of ['month','brand','group','location','mapping','sort']) assert.ok(html.includes(`name="${name}"`));
-  const [trend, detail] = bodies(html);
+  const [trend, , , , detail] = bodies(html);
   assert.equal((trend.match(/<tr>/g) ?? []).length, 1);
   assert.equal((detail.match(/<tr>/g) ?? []).length, 1);
   assert.match(detail, /brand=Meatbar/);
@@ -236,15 +236,15 @@ test('page defaults to Jan–Oct while November and all months require explicit 
   })}})('app/aggregators/glovo/page.tsx').default;
   const render = async params => renderToStaticMarkup(await page({searchParams:Promise.resolve(params)}));
   const historical = await render({});
-  assert.deepEqual(kpiValues(historical), ['2','10','5','— · недоступно']);
+  assert.deepEqual(kpiValues(historical), ['10','2','5','— · недоступно']);
   assert.equal((bodies(historical)[0].match(/<tr>/g) ?? []).length, 10);
-  assert.doesNotMatch(bodies(historical)[1], /2026-11/);
+  assert.doesNotMatch(bodies(historical).at(-1), /2026-11/);
   assert.match(historical, /Січень–жовтень 2026/);
   const november = await render({month:'2026-11'});
-  assert.deepEqual(kpiValues(november), ['4','40','10','— · недоступно']);
+  assert.deepEqual(kpiValues(november), ['40','4','10','— · недоступно']);
   assert.equal((bodies(november)[0].match(/<tr>/g) ?? []).length, 1);
   const all = await render({month:'all'});
-  assert.deepEqual(kpiValues(all), ['6','50','8,33','— · недоступно']);
+  assert.deepEqual(kpiValues(all), ['50','6','8,33','— · недоступно']);
   assert.equal((bodies(all)[0].match(/<tr>/g) ?? []).length, 11);
   assert.match(all, /KPI · PARTIAL/);
 });
