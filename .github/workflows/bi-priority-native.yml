@@ -6,6 +6,7 @@ on:
     branches:
       - codex/bi-priorities-20261117
       - codex/dynamics-periods-20261117
+      - codex/lavina-confirmed-zero-20261117
 
 permissions:
   contents: read

@@ -76,3 +76,12 @@ test('markup YoY and MoM both use percentage points rather than relative percent
  flag(t);const e={...expected,metric:'markupRate'};const html=renderToStaticMarkup(await pageHarness(fixture(e),e)('app/dynamics/page.tsx').default({searchParams:Promise.resolve({metric:'markupRate'})}));
  assert.match(html,/\+20\.0 п\.п\./);assert.doesNotMatch(html,/\+20\.0%/);
 });
+
+test('confirmed zero-day disclosure is validated and does not change numeric totals',()=>{
+ const p=fixture();p.periods[9].cohort.previousConfirmedZeroDays=2;p.periods[9].cohort.currentConfirmedZeroDays=0;
+ assert.ok(lib.validatePeriodComparison(p,expected));
+ const Cell=moduleLoader()('components/DynamicsComparisonCell.tsx').DynamicsComparisonCell;
+ const html=renderToStaticMarkup(React.createElement(Cell,{period:p.periods[9],metric:'revenue',label:'MoM'}));
+ assert.match(html,/Підтверджений простій із нульовими продажами/);assert.match(html,/0 \/ 2 точко-днів/);
+ for(const bad of [-1,1.5,1000,'2']){p.periods[9].cohort.previousConfirmedZeroDays=bad;assert.equal(lib.validatePeriodComparison(p,expected),null);}
+});

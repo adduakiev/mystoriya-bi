@@ -35,14 +35,14 @@ try{
  const {fixtureSamples}=JSON.parse(sampleLine);
  const {moduleLoader}=await import('../web/tests/support/bi-preview-harness.mjs');
  const {validatePeriodComparison}=moduleLoader()('lib/dynamics-comparison.ts');
- if(fixtureSamples.length!==9)throw Error('Expected nine native SQL integration samples');
+ if(fixtureSamples.length!==11)throw Error('Expected eleven native SQL integration samples');
  for(const sample of fixtureSamples){
   const {latestYear,cutoff,grain,metric,filters}=sample;
   if(!validatePeriodComparison(sample,{latestYear,cutoff,grain,metric,filters})){
    throw Error(`Native SQL failed actual TypeScript contract: ${grain}/${metric}/${cutoff}/${JSON.stringify(filters)}`);
   }
  }
- console.error('PASS 9 native SQL payloads through actual TypeScript validator');
+ console.error('PASS 11 native SQL payloads through actual TypeScript validator');
  const remaining=run('psql',[...database,'-Atc',"SELECT count(*) FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname='bi_dynamics_period_comparison'"]).trim();
  if(remaining!=='0')throw Error('Fixture rollback left a function installed');
  if(process.argv.includes('--json'))console.log(JSON.stringify({status:'PASS',fixtureSamples}));
