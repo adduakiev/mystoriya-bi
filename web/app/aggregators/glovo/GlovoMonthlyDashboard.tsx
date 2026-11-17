@@ -5,7 +5,7 @@ import { aggregateMonthly, aggregateMonthlyRange, compareMonthly, filterMonthlyR
   monthlyAverageTicket, monthlyShare, monthlyVirtualShare, type MonthlyRow } from "@/lib/data/glovo-monthly";
 import styles from "./monthly.module.css";
 
-type Metric="purchaseSum"|"deliveredOrders";
+type Metric="purchaseSum"|"deliveredOrders"|"averageTicket";
 type Secondary="mom"|"share"|"none";
 type Filters={ownership:string;location:string;brand:string;identity:string};
 export type GlovoMonthlyInitialFilters=Partial<Filters>&{year?:number;focusMonth?:string;metric?:Metric;secondary?:Secondary;selectedBrand?:string};
@@ -19,7 +19,7 @@ const monthLabel=(month:string,full=false)=>month?`${(full?FULL:SHORT)[Number(mo
 const num=(value:number,digits=0)=>new Intl.NumberFormat("uk-UA",{maximumFractionDigits:digits}).format(value);
 const pct=(value:number|null,signed=false)=>value===null?"—":`${signed&&value>0?"+":""}${num(value,1)}%`;
 const structural=(summary:Summary)=>summary.value===0&&summary.known===0&&summary.expected===0&&!summary.partial;
-const display=(summary:Summary,metric:Metric,compact=true)=>structural(summary)?"До відкриття":summary.value===null?"?":`${summary.partial?"~":""}${num(compact&&metric==="purchaseSum"?summary.value/1000:summary.value,metric==="purchaseSum"?(compact?1:2):0)}${!compact&&metric==="purchaseSum"?" грн*":""}`;
+const display=(summary:Summary,metric:Metric,compact=true)=>structural(summary)?"До відкриття":summary.value===null?"?":`${summary.partial?"~":""}${num(compact&&metric==="purchaseSum"?summary.value/1000:summary.value,metric==="purchaseSum"?(compact?1:2):metric==="averageTicket"?2:0)}${!compact&&metric!=="deliveredOrders"?" грн*":""}`;
 const reasons:Record<string,string>={INCOMPLETE_MONTH:"Місяць неповний або його завершеність не підтверджена",COHORT_MISMATCH:"Змінився склад порівнюваних вітрин",MISSING_OBSERVATIONS:"Є пропущені чи невідомі значення",NO_COMPARABLE_STOREFRONTS:"Немає зіставних вітрин",ZERO_BASELINE:"Попереднє значення дорівнює нулю",INVALID_MONTH:"Попередній місяць недоступний",UNSAFE_TOTAL:"Підсумок не підтверджений"};
 const changeNote=(reason:string|null)=>reason?(reasons[reason]||"Порівняння недоступне") : "До безпосередньо попереднього місяця, за завантаженими даними";
 const summaryNote=(summary:Summary)=>structural(summary)?"До підтвердженого відкриття; це не виміряний нуль":`${summary.value===null?"Немає числових даних":summary.partial?"Лише відомі значення; підсумок неповний":"За завантаженими даними"}. Числові спостереження: ${summary.known} / ${summary.expected} вітрина-місяців`;
@@ -45,8 +45,8 @@ function MonthlyTable({groups,baseRows,months,focus,metric,secondary,incompleteM
     return <><td className={styles.total} title={summaryNote(total)} data-total-value={total.value??"unknown"}>{display(total,metric)}</td><td title={`Частка за ${monthLabel(focus,true)}; за пропусків недоступна`}>{pct(monthlyShare(rows,baseRows,focus,metric))}</td></>;
   };
   return <div className={styles.scroll} role="region" aria-label={kind==="brands"?"Бренди за місяцями":"Заклади обраного бренду за місяцями"} tabIndex={0}>
-    <table className={styles.table}><caption>{kind==="brands"?"Бренди":"Заклади"} × місяці. {metric==="purchaseSum"?"Тисячі гривень, позначення локальної валюти джерела":"Доставлені замовлення"}. За завантаженими даними.</caption>
-      <thead><tr><th scope="col">{kind==="brands"?"Бренд":"Заклад"}</th>{months.map(month=><th scope="col" key={month} className={[month===focus?styles.focus:"",incompleteMonths.includes(month)?styles.incomplete:""].join(" ")} title={monthLabel(month,true)}>{monthLabel(month)}{incompleteMonths.includes(month)?" †":""}</th>)}<th scope="col" className={styles.total}>Разом за період</th><th scope="col">Частка<br/>{monthLabel(focus)}</th></tr></thead>
+    <table className={styles.table}><caption>{kind==="brands"?"Бренди":"Заклади"} × місяці. {metric==="purchaseSum"?"Тисячі гривень, позначення локальної валюти джерела":metric==="averageTicket"?"Середній чек, грн — сума ÷ замовлення":"Доставлені замовлення"}. За завантаженими даними.</caption>
+      <thead><tr><th scope="col">{kind==="brands"?"Бренд":"Заклад"}</th>{months.map(month=><th scope="col" key={month} className={[month===focus?styles.focus:"",incompleteMonths.includes(month)?styles.incomplete:""].join(" ")} title={monthLabel(month,true)}>{monthLabel(month)}{incompleteMonths.includes(month)?" †":""}</th>)}<th scope="col" className={styles.total}>{metric==="averageTicket"?"Середній за період":"Разом за період"}</th><th scope="col">Частка<br/>{monthLabel(focus)}</th></tr></thead>
       <tbody>{groups.map(group=><tr key={group.key} data-group={group.key} className={selected===group.key?styles.selected:undefined}>
         <th scope="row">{onSelect?<button type="button" className={styles.brandButton} onClick={()=>onSelect(group.key)} aria-pressed={selected===group.key} aria-controls="glovo-monthly-detail">{group.label}</button>:group.label}<span className={styles.rowMeta}>{group.description}</span></th>
         {monthCells(group.rows)}{tail(group.rows)}
@@ -67,7 +67,8 @@ export function GlovoMonthlyDashboard({rows,incompleteMonths,initialFilters={}}:
   const focus=months.includes(requestedFocus)?requestedFocus:defaultFocus;
   const [filters,setFilters]=useState<Filters>({ownership:initialFilters.ownership??"",location:initialFilters.location??"",brand:initialFilters.brand??"",identity:initialFilters.identity??""});
   const [metric,setMetric]=useState<Metric>(initialFilters.metric??"purchaseSum");
-  const [secondary,setSecondary]=useState<Secondary>(initialFilters.secondary??"mom");
+  const [requestedSecondary,setSecondary]=useState<Secondary>(initialFilters.secondary??"mom");
+  const secondary=metric==="averageTicket"&&requestedSecondary==="share"?"mom":requestedSecondary;
   const [selectedBrand,setBrand]=useState(initialFilters.selectedBrand??initialFilters.brand??"");
   const filtered=filterMonthlyRows(yearRows,filters);
   const brands=unique(filtered.map(row=>row.rawBrand)).sort((a,b)=>(aggregateMonthly(filtered.filter(row=>row.rawBrand===b),focus,metric).value??-Infinity)-(aggregateMonthly(filtered.filter(row=>row.rawBrand===a),focus,metric).value??-Infinity)||a.localeCompare(b,"uk"));
@@ -94,9 +95,10 @@ export function GlovoMonthlyDashboard({rows,incompleteMonths,initialFilters={}}:
       <label className={styles.control}>Бренд<select value={filters.brand} onChange={event=>update("brand",event.target.value)}><option value="">Усі бренди</option>{unique(yearRows.map(row=>row.rawBrand)).map(value=><option key={value} value={value}>{value}</option>)}</select></label>
       <label className={styles.control}>Тип вітрини<select value={filters.identity} onChange={event=>update("identity",event.target.value)}><option value="">Реальні + віртуальні</option>{unique(yearRows.map(row=>row.identity)).map(value=><option key={value} value={value}>{value==="UNKNOWN"?"Невідомий":value}</option>)}</select></label>
       <label className={styles.control}>Фокус показників<select value={focus} onChange={event=>setFocus(event.target.value)} disabled={!months.length}>{months.map(month=><option key={month} value={month}>{monthLabel(month,true)}{incompleteMonths.includes(month)?" · неповний":""}</option>)}</select></label>
-      <div className={styles.control}><span>Показник</span><div className={styles.toggle} role="group" aria-label="Показник таблиць і графіків"><button type="button" aria-pressed={metric==="purchaseSum"} onClick={()=>setMetric("purchaseSum")}>Сума, грн*</button><button type="button" aria-pressed={metric==="deliveredOrders"} onClick={()=>setMetric("deliveredOrders")}>Замовлення</button></div></div>
+      <div className={styles.control}><span>Показник</span><div className={styles.toggle} role="group" aria-label="Показник таблиць і графіків"><button type="button" aria-pressed={metric==="purchaseSum"} onClick={()=>setMetric("purchaseSum")}>Сума, грн*</button><button type="button" aria-pressed={metric==="deliveredOrders"} onClick={()=>setMetric("deliveredOrders")}>Замовлення</button><button type="button" aria-pressed={metric==="averageTicket"} onClick={()=>setMetric("averageTicket")}>Середній чек, грн*</button></div></div>
       <button className={styles.reset} type="button" onClick={reset}>Скинути фільтри</button>
     </div>
+    {metric==="averageTicket"&&<p className={styles.notice}>Середній чек = сума покупок ÷ замовлення. Підсумки зважені за замовленнями; за пропусків або відсутності замовлень — «?». Частка для середнього чека не застосовується.</p>}
     {partialMonths.length>0&&<p className={styles.notice} role="note">† {partialMonths.map(month=>monthLabel(month,true)).join(", ")} — неповний період або його завершеність не підтверджена. Показуємо завантажені значення; звичайний MoM для цієї пари недоступний.</p>}
     {!filtered.length?<p className={styles.empty} role="status">Немає даних за вибраними фільтрами. Відсутність записів не означає нуль продажів.</p>:<>
       <div className={styles.metrics} aria-label={`Показники за ${monthLabel(focus,true)}`}>
@@ -105,11 +107,11 @@ export function GlovoMonthlyDashboard({rows,incompleteMonths,initialFilters={}}:
           return <article className={styles.metric} key={item.key}><h3>{item.title} · {monthLabel(focus,true)}</h3><strong title={summaryNote(item.summary)}>{display(item.summary,item.key,false)}</strong><small className={change.percent===null?undefined:change.percent>=0?styles.positive:styles.negative}>{change.percent===null?`MoM недоступний: ${changeNote(change.reason)}`:`${pct(change.percent,true)} до попереднього місяця`}</small></article>;
         })}
         <article className={styles.metric}><h3>Середній чек · {monthLabel(focus,true)}</h3><strong>{aov===null?"—":`${num(aov,2)} грн*`}</strong><small>Сума ÷ замовлення. За пропусків або нульового знаменника — недоступно.</small></article>
-        <article className={styles.metric}><h3>Частка віртуальних · {monthLabel(focus,true)}</h3><strong>{pct(virtualShare)}</strong><small>{metric==="purchaseSum"?"У сумі покупок":"У доставлених замовленнях"}. Тип визначено для пари бренд × заклад; за невідомих даних — недоступно.</small></article>
+        <article className={styles.metric}><h3>Частка віртуальних · {monthLabel(focus,true)}</h3><strong>{pct(virtualShare)}</strong><small>{metric==="purchaseSum"?"У сумі покупок":metric==="averageTicket"?"Частка не застосовується до середнього чека":"У доставлених замовленнях"}. Тип визначено для пари бренд × заклад; за невідомих даних — недоступно.</small></article>
       </div>
       <section className={styles.panel} aria-labelledby="glovo-brands-heading">
-        <div className={styles.panelHead}><div><h3 id="glovo-brands-heading">Бренди × місяці / {year}</h3><div className={styles.sub}>{metric==="purchaseSum"?"Тис. грн*":"Доставлені замовлення"} · усі підсумки за поточними фільтрами · бренд відкриває деталізацію</div></div>
-          <label className={styles.control}>Другий рядок клітинки<select value={secondary} onChange={event=>setSecondary(event.target.value as Secondary)}><option value="mom">Приріст MoM</option><option value="share">Частка за місяць</option><option value="none">Без другого рядка</option></select></label>
+        <div className={styles.panelHead}><div><h3 id="glovo-brands-heading">Бренди × місяці / {year}</h3><div className={styles.sub}>{metric==="purchaseSum"?"Тис. грн*":metric==="averageTicket"?"Середній чек, грн*":"Доставлені замовлення"} · усі підсумки за поточними фільтрами · бренд відкриває деталізацію</div></div>
+          <label className={styles.control}>Другий рядок клітинки<select value={secondary} onChange={event=>setSecondary(event.target.value as Secondary)}><option value="mom">Приріст MoM</option><option value="share" disabled={metric==="averageTicket"}>Частка за місяць</option><option value="none">Без другого рядка</option></select></label>
         </div>
         <MonthlyTable groups={brandGroups} baseRows={filtered} months={months} focus={focus} metric={metric} secondary={secondary} incompleteMonths={incompleteMonths} kind="brands" selected={selected} onSelect={setBrand} totalLabel="Усього за місяць"/>
         <div className={styles.legend}><span>~ лише відомі значення</span><span>? немає даних</span><span>0 підтверджений нуль у джерелі</span><span>† неповний період</span></div>
@@ -118,7 +120,7 @@ export function GlovoMonthlyDashboard({rows,incompleteMonths,initialFilters={}}:
       {selected&&<section className={styles.panel} id="glovo-monthly-detail" aria-labelledby="glovo-detail-heading">
         <div className={styles.panelHead}><div><span className={styles.tag}>Деталі обраного бренду</span><h3 id="glovo-detail-heading" aria-live="polite">{selected} → заклади</h3><div className={styles.sub}>Ті самі місяці й фільтри. Підсумки закладів відповідають рядку бренду вище.</div></div><span className={styles.sub}>{sites.length} закладів</span></div>
         <div className={styles.lowerGrid}>
-          <div><h4>Помісячна динаміка · {metric==="purchaseSum"?"тис. грн*":"замовлення"}</h4><div className={styles.trendScroll} role="region" aria-label={`Помісячна динаміка ${selected}`} tabIndex={0}><div className={styles.trend}>
+          <div><h4>Помісячна динаміка · {metric==="purchaseSum"?"тис. грн*":metric==="averageTicket"?"середній чек, грн*":"замовлення"}</h4><div className={styles.trendScroll} role="region" aria-label={`Помісячна динаміка ${selected}`} tabIndex={0}><div className={styles.trend}>
             {trend.map(({month,summary})=><div key={month} className={styles.trendColumn} aria-label={`${monthLabel(month,true)}: ${display(summary,metric,false)}. ${summaryNote(summary)}`}>
               <span className={styles.barValue}>{structural(summary)?"До відкриття":display(summary,metric)}</span>
               {summary.value!==null&&!structural(summary)&&<span aria-hidden="true" className={[styles.trendBar,month===focus?styles.selectedBar:"",summary.partial||incompleteMonths.includes(month)?styles.partialBar:""].join(" ")} style={{height:`${Math.max(0,summary.value)/trendMax*132}px`}}/>}
@@ -127,7 +129,7 @@ export function GlovoMonthlyDashboard({rows,incompleteMonths,initialFilters={}}:
           </div></div><p className={styles.sub}>Штрихування — неповний період або пропуски. Невідомі значення не показані нульовими стовпчиками.</p></div>
           <div><h4>Заклади · {monthLabel(focus,true)}</h4><div className={styles.sites}>
             {siteValues.map(group=><div key={group.key} className={styles.siteBar} title={summaryNote(group.summary)}><span>{group.label}</span><div className={styles.track} aria-hidden="true">{group.summary.value!==null&&!structural(group.summary)&&<span style={{width:`${Math.max(0,group.summary.value)/siteMax*100}%`}}/>}</div><b>{display(group.summary,metric)}</b></div>)}
-          </div><p className={styles.sub}>Разом за фокусний місяць: <b>{display(aggregateMonthly(brandRows,focus,metric),metric)}</b> {metric==="purchaseSum"?"тис. грн*":"замовлень"}.</p></div>
+          </div><p className={styles.sub}>Разом за фокусний місяць: <b>{display(aggregateMonthly(brandRows,focus,metric),metric)}</b> {metric==="purchaseSum"?"тис. грн*":metric==="averageTicket"?"грн*":"замовлень"}.</p></div>
         </div>
         <MonthlyTable groups={siteGroups} baseRows={brandRows} months={months} focus={focus} metric={metric} secondary={secondary} incompleteMonths={incompleteMonths} kind="sites" totalLabel={`Усього · ${selected}`}/>
         <p className={styles.foot}>Частки закладів — усередині обраного бренду. Невідомі значення не замінюються нулями.</p>

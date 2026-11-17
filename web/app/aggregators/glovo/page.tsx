@@ -26,7 +26,7 @@ export default async function GlovoBrandsPage(props: {
           identity: input("identity"), selectedBrand: input("selectedBrand"),
           ...(/^[1-9]\d{3}$/.test(input("year")) ? {year: Number(input("year"))} : {}),
           ...(input("month") ? {focusMonth: input("month")} : {}),
-          metric: input("metric") === "orders" ? "deliveredOrders" : "purchaseSum",
+          metric: input("metric") === "orders" ? "deliveredOrders" : input("metric") === "averageTicket" ? "averageTicket" : "purchaseSum",
           secondary: input("secondary") === "share" ? "share" : input("secondary") === "none" ? "none" : "mom"}} />
       : <section className="panel" aria-labelledby="glovo-source-error">
           <h2 id="glovo-source-error">Дані Glovo недоступні</h2>

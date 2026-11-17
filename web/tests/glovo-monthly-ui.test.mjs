@@ -114,3 +114,21 @@ test('monthly CSS is scoped with sticky names, horizontal scroll and keyboard fo
   assert.match(css,/@media\(max-width:600px\)/);
   assert.doesNotMatch(css,/(?:^|\})\s*(?:body|html|:root)\s*\{/);
 });
+
+test('average-ticket mode updates brand/site matrices and charts with weighted totals and unavailable shares',()=>{
+  const html=normalized(render({initialFilters:{metric:'averageTicket',selectedBrand:'Alpha',focusMonth:'2026-02'}}));
+  assert.match(html,/aria-pressed="true"[^>]*>Середній чек, грн\*/);
+  assert.match(group(html,'Alpha'),/data-month="2026-01" data-value="600"/);
+  assert.match(group(html,'Alpha'),/data-month="2026-02" data-value="1000"/);
+  assert.match(group(html,'Alpha'),/data-total-value="785\.7142857142857"/);
+  assert.match(group(html,'North'),/data-month="2026-02" data-value="1000"/);
+  assert.match(group(html,'South'),/data-month="2026-03" data-value="unknown"/);
+  assert.match(html,/Помісячна динаміка · середній чек, грн\*/);
+  assert.match(html,/Середній за період/);
+  assert.match(html,/value="share" disabled=""/);
+  assert.match(html,/\+66,7%/);
+  assert.doesNotMatch(html,/NaN|Infinity|undefined/);
+  const filtered=render({initialFilters:{metric:'averageTicket',ownership:'Франчайзі',focusMonth:'2026-02'}});
+  assert.match(group(filtered,'Beta'),/data-month="2026-02" data-value="50"/);
+  assert.ok(!filtered.includes('data-group="Alpha"'));
+});

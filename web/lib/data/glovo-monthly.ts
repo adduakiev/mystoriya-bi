@@ -9,14 +9,14 @@ export type MonthlyRow = Omit<GlovoRow, "physicalLocation" | "ownership" | "iden
   identity: string;
   openingMonth: string | null;
 };
-export type MonthlyMetric = "purchaseSum" | "deliveredOrders";
+export type MonthlyMetric = "purchaseSum" | "deliveredOrders" | "averageTicket";
 export type MonthlyAggregate = { value: number | null; known: number; expected: number; missing: number; partial: boolean };
 export type MonthlyComparison = { percent: number | null; absolute: number | null; reason: string | null };
 export type MonthlyFilters = { brand?: string | null; location?: string | null; ownership?: string | null; identity?: string | null };
 
 const validMonth = (value: unknown): value is string => typeof value === "string" && /^[1-9]\d{3}-(0[1-9]|1[0-2])$/.test(value);
 const storefrontKey = (row: MonthlyRow) => JSON.stringify([row.rawBrand, row.sourceLocation]);
-const validMetric = (metric: MonthlyMetric) => metric === "purchaseSum" || metric === "deliveredOrders";
+const validMetric = (metric: MonthlyMetric) => metric === "purchaseSum" || metric === "deliveredOrders" || metric === "averageTicket";
 const valueOf = (value: unknown, metric: MonthlyMetric): number | null =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER &&
   (metric !== "deliveredOrders" || Number.isSafeInteger(value)) ? value : null;
@@ -65,6 +65,16 @@ function datasetAxis(rows: readonly MonthlyRow[]): string[] {
  */
 export function aggregateMonthlyRange(rows: readonly MonthlyRow[], months: readonly string[], metric: MonthlyMetric): MonthlyAggregate {
   if (!rows.length || !months.length || !validMetric(metric) || months.some(month => !validMonth(month)) || new Set(months).size !== months.length) return unavailable();
+  if (metric === "averageTicket") {
+    const amount = aggregateMonthlyRange(rows, months, "purchaseSum");
+    const orders = aggregateMonthlyRange(rows, months, "deliveredOrders");
+    const partial = amount.partial || orders.partial;
+    const known = Math.min(amount.known, orders.known);
+    const expected = Math.max(amount.expected, orders.expected);
+    const value = expected === 0 && !partial ? 0 : !partial && amount.value !== null && orders.value !== null && orders.value > 0
+      ? amount.value / orders.value : null;
+    return { value: value !== null && Number.isFinite(value) ? value : null, known, expected, missing: expected-known, partial };
+  }
   let expected = 0, known = 0, total = 0, unsafe = false;
   for (const storefront of storefronts(rows)) {
     for (const month of months) {
@@ -129,6 +139,7 @@ export function monthlyAverageTicket(rows: readonly MonthlyRow[], month: string 
 }
 
 export function monthlyShare(partRows: readonly MonthlyRow[], allRows: readonly MonthlyRow[], month: string | null, metric: MonthlyMetric): number | null {
+  if (metric === "averageTicket") return null; // Ratios are not additive shares.
   const axis = month === null ? datasetAxis(allRows) : [month];
   const part = aggregateMonthlyRange(partRows, axis, metric), all = aggregateMonthlyRange(allRows, axis, metric);
   if (part.partial || all.partial || part.value === null || all.value === null || all.value <= 0 || part.value > all.value) return null;
@@ -138,6 +149,7 @@ export function monthlyShare(partRows: readonly MonthlyRow[], allRows: readonly 
 }
 
 export function monthlyVirtualShare(rows: readonly MonthlyRow[], month: string | null, metric: MonthlyMetric): number | null {
+  if (metric === "averageTicket") return null;
   const axis = month === null ? datasetAxis(rows) : [month];
   const all = aggregateMonthlyRange(rows, axis, metric);
   if (all.partial || all.value === null || all.value <= 0) return null;

@@ -130,3 +130,16 @@ test('shares require complete common month axis and known applicable virtual cla
   assert.equal(monthlyShare([all[0]],all,null,'purchaseSum'),null,'trailing numerator month may not disappear');
   assert.equal(monthlyShare([row('2026-01',{rawBrand:'Unrelated'})],[row()],'2026-01','purchaseSum'),null);
 });
+
+test('average ticket metric weights months/sites, compares ratios and never invents shares or zero-denominator values',()=>{
+  const rows=[row('2026-01',{purchaseSum:100,deliveredOrders:1}),row('2026-01',{sourceLocation:'B',purchaseSum:90,deliveredOrders:9}),row('2026-02',{purchaseSum:200,deliveredOrders:2}),row('2026-02',{sourceLocation:'B',purchaseSum:180,deliveredOrders:18})];
+  assert.equal(aggregateMonthly(rows,'2026-01','averageTicket').value,19);
+  assert.equal(aggregateMonthlyRange(rows,['2026-01','2026-02'],'averageTicket').value,19);
+  assert.deepEqual(compareMonthly(rows,'2026-02','averageTicket',[]),{percent:0,absolute:0,reason:null});
+  assert.equal(monthlyShare([rows[0]],rows,'2026-01','averageTicket'),null);
+  assert.equal(monthlyVirtualShare(rows,'2026-01','averageTicket'),null);
+  assert.equal(aggregateMonthly([row('2026-01',{purchaseSum:0,deliveredOrders:0})],'2026-01','averageTicket').value,null);
+  assert.equal(aggregateMonthly([row('2026-01',{purchaseSum:0,deliveredOrders:2})],'2026-01','averageTicket').value,0);
+  rows[0].purchaseSum=null; assert.equal(aggregateMonthly(rows,'2026-01','averageTicket').value,null);
+  assert.equal(compareMonthly(rows,'2026-02','averageTicket',[]).reason,'MISSING_OBSERVATIONS');
+});

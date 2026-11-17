@@ -1452,19 +1452,19 @@
   },
   "items": [
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:4840",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:4887",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
       "line": 48,
       "kind": "table",
-      "displayed_kpi_definition": "× місяці. . За завантаженими даними. Разом за період Частка",
+      "displayed_kpi_definition": "× місяці. . За завантаженими даними. Частка",
       "props": {},
       "bindings": [
         "styles.table",
         "kind===\"brands\"?\"Бренди\":\"Заклади\"",
-        "metric===\"purchaseSum\"?\"Тисячі гривень, позначення локальної валюти джерела\":\"Доставлені замовлення\"",
+        "metric===\"purchaseSum\"?\"Тисячі гривень, позначення локальної валюти джерела\":metric===\"averageTicket\"?\"Середній чек, грн — сума ÷ замовлення\":\"Доставлені замовлення\"",
         "kind===\"brands\"?\"Бренд\":\"Заклад\"",
         "months.map(month=><th scope=\"col\" key={month} className={[month===focus?styles.focus:\"\",incompleteMonths.includes(month)?styles.incomplete:\"\"].join(\" \")} title={monthLabel(month,tr",
         "month"
@@ -1474,7 +1474,7 @@
       "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:48"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:5688",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:5850",
       "paths": [
         "/aggregators/glovo"
       ],
@@ -1498,12 +1498,12 @@
       "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:51"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:10215",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:10485",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 91,
+      "line": 92,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -1519,15 +1519,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:91"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:92"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:10428",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:10698",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 92,
+      "line": 93,
       "kind": "select",
       "displayed_kpi_definition": "Усі",
       "props": {
@@ -1543,15 +1543,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:92"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:93"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:10746",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11016",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 93,
+      "line": 94,
       "kind": "select",
       "displayed_kpi_definition": "Усі заклади",
       "props": {
@@ -1567,15 +1567,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:93"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:94"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11076",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11346",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 94,
+      "line": 95,
       "kind": "select",
       "displayed_kpi_definition": "Усі бренди",
       "props": {
@@ -1591,15 +1591,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:94"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:95"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11368",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11638",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 95,
+      "line": 96,
       "kind": "select",
       "displayed_kpi_definition": "Реальні + віртуальні",
       "props": {
@@ -1615,15 +1615,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:95"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:96"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11711",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:11981",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 96,
+      "line": 97,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -1639,15 +1639,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:96"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:97"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12107",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12377",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 97,
+      "line": 98,
       "kind": "button",
       "displayed_kpi_definition": "Сума, грн*",
       "props": {
@@ -1661,15 +1661,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:97"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:98"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12225",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12495",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 97,
+      "line": 98,
       "kind": "button",
       "displayed_kpi_definition": "Замовлення",
       "props": {
@@ -1683,15 +1683,37 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:97"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:98"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12370",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12621",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
       "line": 98,
+      "kind": "button",
+      "displayed_kpi_definition": "Середній чек, грн*",
+      "props": {
+        "type": "\"button\""
+      },
+      "bindings": [
+        "metric===\"averageTicket\"",
+        "()=>setMetric(\"averageTicket\")",
+        "{metric===\"averageTicket\"}",
+        "{()=>setMetric(\"averageTicket\")}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:98"
+    },
+    {
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:12770",
+      "paths": [
+        "/aggregators/glovo"
+      ],
+      "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
+      "line": 99,
       "kind": "button",
       "displayed_kpi_definition": "Скинути фільтри",
       "props": {
@@ -1705,15 +1727,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:98"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:99"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:13230",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:13863",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 105,
+      "line": 107,
       "kind": "article",
       "displayed_kpi_definition": "·",
       "props": {},
@@ -1727,15 +1749,15 @@
       ],
       "repeat_template": "([{title:\"Сума покупок\",summary:amount,key:\"purchaseSum\"},{title:\"Замовлення\",summary:orders,key:\"deliveredOrders\"}] as const)",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:105"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:107"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:13682",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:14315",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 107,
+      "line": 109,
       "kind": "article",
       "displayed_kpi_definition": "Середній чек · Сума ÷ замовлення. За пропусків або нульового знаменника — недоступно.",
       "props": {},
@@ -1747,15 +1769,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:107"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:109"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:13923",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:14556",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 108,
+      "line": 110,
       "kind": "article",
       "displayed_kpi_definition": "Частка віртуальних · . Тип визначено для пари бренд × заклад; за невідомих даних — недоступно.",
       "props": {},
@@ -1763,20 +1785,20 @@
         "styles.metric",
         "monthLabel(focus,true)",
         "pct(virtualShare)",
-        "metric===\"purchaseSum\"?\"У сумі покупок\":\"У доставлених замовленнях\"",
+        "metric===\"purchaseSum\"?\"У сумі покупок\":metric===\"averageTicket\"?\"Частка не застосовується до середнього чека\":\"У доставлених замовленнях\"",
         "{styles.metric}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:108"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:110"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:14649",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:15399",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 112,
+      "line": 114,
       "kind": "select",
       "displayed_kpi_definition": "Приріст MoM Частка за місяць Без другого рядка",
       "props": {
@@ -1785,20 +1807,21 @@
       "bindings": [
         "secondary",
         "event=>setSecondary(event.target.value as Secondary)",
+        "metric===\"averageTicket\"",
         "{secondary}",
         "{event=>setSecondary(event.target.value as Secondary)}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:112"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:114"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:14914",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:15700",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 114,
+      "line": 116,
       "kind": "MonthlyTable",
       "displayed_kpi_definition": "MonthlyTable",
       "props": {
@@ -1814,15 +1837,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:114"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:116"
     },
     {
-      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:17922",
+      "id": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:18786",
       "paths": [
         "/aggregators/glovo"
       ],
       "component": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx",
-      "line": 132,
+      "line": 134,
       "kind": "MonthlyTable",
       "displayed_kpi_definition": "MonthlyTable",
       "props": {
@@ -1838,7 +1861,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:132"
+      "evidence": "web/app/aggregators/glovo/GlovoMonthlyDashboard.tsx:134"
     },
     {
       "id": "web/app/aggregators/glovo/page.tsx:733",
@@ -1945,7 +1968,7 @@
       "evidence": "web/app/aggregators/glovo/page.tsx:24"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:2248",
+      "id": "web/app/aggregators/glovo/page.tsx:2304",
       "paths": [
         "/aggregators/glovo"
       ],
@@ -1965,7 +1988,7 @@
       "evidence": "web/app/aggregators/glovo/page.tsx:35"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:2348",
+      "id": "web/app/aggregators/glovo/page.tsx:2404",
       "paths": [
         "/aggregators/glovo"
       ],
@@ -1984,7 +2007,7 @@
       "evidence": "web/app/aggregators/glovo/page.tsx:37"
     },
     {
-      "id": "web/app/aggregators/glovo/page.tsx:3070",
+      "id": "web/app/aggregators/glovo/page.tsx:3126",
       "paths": [
         "/aggregators/glovo"
       ],
