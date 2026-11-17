@@ -1,3 +1,4 @@
+import { readIsoWeeklyReport, type IsoWeekMeta, type IsoWeeklyReport } from "@/lib/iso-week-contract";
 import { overviewRpcArgs } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
@@ -54,6 +55,7 @@ export type OverviewData = OverviewContext & ({
   reason: "SELECTED_PERIOD_CONTRACT_MISMATCH" | "MONTHLY_OBSERVATION_CONTRACT_MISMATCH";
 } | {
   status: "ready";
+  weekly?: IsoWeeklyReport;
   snapshot: DashboardSnapshot;
   multiYearData: Array<Record<string, string | number | null>>;
   channelMixData: Array<{
@@ -129,7 +131,7 @@ type RpcDriver = {
 
 type RpcOverviewPayload = {
   source?: string;
-  meta?: {
+  meta?: IsoWeekMeta & {
     sourceRowCount?: number | string;
     filteredRowCount?: number | string;
     latestSourceDate?: string;
@@ -494,6 +496,7 @@ async function fetchSqlOverview(query: OverviewQuery, warehouseVersion: string):
   )();
 
   const meta = payload.meta ?? {};
+  const weekly = query.grain === "week" ? readIsoWeeklyReport(meta,payload.multiYearData) : undefined;
   const selectedYear = query.year ?? periodInteger(meta.selectedYear) ?? 0;
   const selectedMonth = query.month;
   const context: OverviewContext = {
@@ -525,8 +528,9 @@ async function fetchSqlOverview(query: OverviewQuery, warehouseVersion: string):
   return {
     ...context,
     status: "ready",
+    weekly,
     snapshot: buildSnapshot(payload),
-    multiYearData: normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "", scopedCutoffDate: meta.cutoffDate ?? "" }),
+    multiYearData: weekly?.series ?? normalizeSeries(payload.multiYearData, { grain: query.grain, selectedMonth, latestSourceDate: meta.latestSourceDate ?? "", scopedCutoffDate: meta.cutoffDate ?? "" }),
     channelMixData: (payload.channelMixData ?? []).map((item) => ({
       label: item.label ?? "",
       venue: num(item.venue),
@@ -634,6 +638,7 @@ export async function loadOverviewData(query: OverviewQuery, warehouseVersion = 
   try {
     return await fetchSqlOverview(query, warehouseVersion);
   } catch (error) {
+    if (query.grain === "week") throw error;
     console.error("SQL-first Overview failed; using legacy analytics fallback.", error);
     return fetchLegacyOverview(query);
   }

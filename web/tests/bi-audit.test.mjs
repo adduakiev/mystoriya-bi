@@ -109,7 +109,8 @@ test('audit inventories are reproducible and cover every current page/API route'
   assert.ok(audit.items.some(i=>i.component==='web/components/NavigationFeedback.tsx'));
   for(const i of audit.items){assert.ok(i.paths.length);assert.ok(i.evidence);}
   assert.equal(audit.schema_version,2);
-  assert.ok(fs.statSync(path.join(root,'docs/audit/2026-10-24/inventory.json')).size<600000);
+  // Include the added filter and availability templates while keeping the audit bounded.
+  assert.ok(fs.statSync(path.join(root,'docs/audit/2026-10-24/inventory.json')).size<625000);
   const shared=audit.items.filter(i=>i.component==='web/components/AtomicDataSyncControl.tsx');
   assert.ok(shared.some(i=>i.paths.length>1));
   const download=audit.items.find(i=>i.component==='web/app/digital/app/page.tsx'&&i.displayed_kpi_definition.includes('Downloads'));

@@ -12,6 +12,8 @@ function dateLabel(v:string){return v?new Intl.DateTimeFormat("uk-UA",{day:"2-di
 export default async function Page(){
   const data=await loadDigitalLocalData();
   const s=data.summary;
+  const sourceIssue=data.meta.sourceIssue;
+  const historyAvailable=data.meta.historicalDataValidated;
   const available=Object.values(s).some(value=>value!==null);
   const ranked=labelGbpLocations(data.locations).map(row=>({
     ...row,
@@ -21,16 +23,16 @@ export default async function Page(){
   const topIntent=ranked[0]??null;
 
   return <main className="shell">
-    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetric(data.meta.days)} днів`:"джерело підключено · sync очікує"}/>
+    <DashboardSidebar activeHref="/digital" lfl={false} statusTitle="Digital · Google / Maps" statusDetail={sourceIssue?"джерело повернуло помилку · свіжість не підтверджена":available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetric(data.meta.days)} днів`:"джерело підключено · sync очікує"}/>
     <section className="workspace">
       <header className="topbar">
         <div><span className="eyebrow">DIGITAL · LOCAL INTELLIGENCE</span><h1>Google / Maps</h1></div>
-        <div className="digital-source-badge">Google Business Profile · {formatMetric(data.meta.locationCount)} GBP-профілів</div>
+        <div className="digital-source-badge">Google Business Profile · {sourceIssue&&!historyAvailable?"дані не підтверджені":`${formatMetric(data.meta.locationCount)} GBP-профілів`}</div>
       </header>
       <DigitalTabs active="local"/>
-      <div className="lfl-banner">Дати GBP: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Фактична кількість рядків та пропуски по точках невідомі.</div>
+      {sourceIssue?<div className="lfl-banner" role="alert">{sourceIssue.message}</div>:<div className="lfl-banner">Дати GBP: {data.meta.from || "невідомо"} — {data.meta.to || "невідомо"}. Повнота: {data.meta.coverage}. Фактична кількість рядків та пропуски по точках невідомі.</div>}
 
-      {!available ? <div className="lfl-banner">
+      {sourceIssue&&!historyAvailable?null:!available ? <div className="lfl-banner">
         Джерело Google Business Profile підключене, але за період звіту немає підтверджених вимірювань. Належність профілів до власних закладів не підтверджена.
       </div> : <>
         <section className="digital-kpi-grid">
@@ -42,7 +44,7 @@ export default async function Page(){
           <article className="digital-kpi-card"><span>Menu clicks</span><strong>{n(s.menuClicks)}</strong><small>взаємодія з меню</small><em>Google Business Profile</em></article>
         </section>
 
-        <div className="lfl-banner">Звіт охоплює GBP-профілі підключеного джерела. Прив’язка GBP ID до фізичних адрес, власності та брендів не підтверджена; виключення франшиз та інших брендів не доведене. Період: {dateLabel(data.meta.from)} — {dateLabel(data.meta.to)}.</div>
+        <div className="lfl-banner">Звіт охоплює GBP-профілі підключеного джерела. Прив’язка GBP ID до фізичних адрес показана лише за підтвердженим зіставленням. Належність закладів і брендів не підтверджена; виключення франшиз та інших брендів не доведене. Період: {dateLabel(data.meta.from)} — {dateLabel(data.meta.to)}.</div>
 
         {topIntent&&<section className="content-grid">
           <article className="panel">

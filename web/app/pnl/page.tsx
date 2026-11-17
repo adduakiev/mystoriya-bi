@@ -25,7 +25,8 @@ function money(value:number):string{
   return `₴ ${Math.round(value).toLocaleString("uk-UA")}`;
 }
 
-function fullMoney(value:number):string{
+function fullMoney(value:number|null):string{
+  if(value===null) return "—";
   return `${Math.round(value).toLocaleString("uk-UA")} ₴`;
 }
 
@@ -33,12 +34,13 @@ function pct(value:number):string{
   return `${(value*100).toFixed(1)}%`;
 }
 
-function growth(current:number,base:number):number|null{
+function growth(current:number,base:number|null):number|null{
   if(!base) return null;
   return (current/base-1)*100;
 }
 
-function pp(current:number,base:number):number{
+function pp(current:number,base:number|null):number|null{
+  if(base===null) return null;
   return (current-base)*100;
 }
 
@@ -69,7 +71,7 @@ function Kpi({
   label:string;
   fact:number;
   plan:number;
-  ly:number;
+  ly:number|null;
   rate?:boolean;
   goodWhenHigher?:boolean;
   hint?:string;
@@ -120,7 +122,7 @@ function CostCard({
   label:string;
   fact:number;
   plan:number;
-  ly:number;
+  ly:number|null;
   revenue:number;
 }){
   const share=revenue?fact/revenue:0;
@@ -159,11 +161,11 @@ function ChannelCard({
   subtitle:string;
   fact:DeliveryChannel|AggregatorChannel;
   plan:DeliveryChannel|AggregatorChannel;
-  ly:DeliveryChannel|AggregatorChannel;
+  ly:DeliveryChannel|AggregatorChannel|null;
   aggregator?:boolean;
 }){
   const profitPlan=growth(fact.profit,plan.profit);
-  const profitYoy=growth(fact.profit,ly.profit);
+  const profitYoy=growth(fact.profit,ly?.profit??null);
 
   return (
     <article className="panel pnl-channel-card">
@@ -222,7 +224,7 @@ export default async function PnlPage({
   const data=loadPnlData({startMonth:from-1,endMonth:to-1});
   const {fact,plan,ly}=data;
   const revenuePlan=growth(fact.revenue,plan.revenue);
-  const revenueYoy=growth(fact.revenue,ly.revenue);
+  const revenueYoy=growth(fact.revenue,ly?.revenue??null);
 
   return (
     <main className="shell">
@@ -230,7 +232,7 @@ export default async function PnlPage({
         activeHref="/pnl"
         lfl={false}
         statusTitle="P&L · знімок даних"
-        statusDetail="Факт / План / 2025 · Січ–Сер 2026"
+        statusDetail="Факт / План / 2025 · Січ–Вер 2026"
       />
 
       <section className="workspace">
@@ -273,16 +275,24 @@ export default async function PnlPage({
           </label>
           <button type="submit" className="apply-filter">Застосувати</button>
           <a href="/pnl" className="clear-filter">Весь період</a>
-          <div className="pnl-filter-meta">Знімок даних · по серпень 2026</div>
+          <div className="pnl-filter-meta">Знімок даних · по вересень 2026</div>
         </form>
 
+        {!data.meta.comparisonAvailable&&<p className="pnl-filter-meta" role="note">
+          Порівняння з 2025 недоступне: у джерелі немає вересня 2025. Для YoY оберіть період до серпня.
+        </p>}
+        <p className="pnl-filter-meta" role="note">
+          Січень–серпень збережено зі знімка 14.10; вересень додано 17.11. Історичні перерахунки джерела ще не застосовані.
+          Комісія агрегаторів у цьому звіті врахована один раз в OPEX; у джерелі — у собівартості.
+        </p>
+
         <section className="pnl-kpi-grid">
-          <Kpi label="Виручка" fact={fact.revenue} plan={plan.revenue} ly={ly.revenue} hint="усі продажі до вирахування витрат"/>
-          <Kpi label="Валовий прибуток" fact={fact.markup} plan={plan.markup} ly={ly.markup} hint="виручка мінус собівартість товару"/>
-          <Kpi label="Валова маржа" fact={fact.markupRate} plan={plan.markupRate} ly={ly.markupRate} rate hint="валовий прибуток / виручка"/>
-          <Kpi label="Операційні витрати (OPEX)" fact={fact.operatingExpenses} plan={plan.operatingExpenses} ly={ly.operatingExpenses} goodWhenHigher={false} hint="витрати для роботи каналів"/>
-          <Kpi label="Операційний результат (EBITDA)" fact={fact.profit} plan={plan.profit} ly={ly.profit} hint="управлінський показник"/>
-          <Kpi label="EBITDA % від виручки" fact={fact.profitRate} plan={plan.profitRate} ly={ly.profitRate} rate hint="операційна рентабельність"/>
+          <Kpi label="Виручка" fact={fact.revenue} plan={plan.revenue} ly={ly?.revenue??null} hint="усі продажі до вирахування витрат"/>
+          <Kpi label="Валовий прибуток" fact={fact.markup} plan={plan.markup} ly={ly?.markup??null} hint="виручка мінус собівартість товару"/>
+          <Kpi label="Валова маржа" fact={fact.markupRate} plan={plan.markupRate} ly={ly?.markupRate??null} rate hint="валовий прибуток / виручка"/>
+          <Kpi label="Операційні витрати (OPEX)" fact={fact.operatingExpenses} plan={plan.operatingExpenses} ly={ly?.operatingExpenses??null} goodWhenHigher={false} hint="витрати для роботи каналів"/>
+          <Kpi label="Операційний результат (EBITDA)" fact={fact.profit} plan={plan.profit} ly={ly?.profit??null} hint="управлінський показник"/>
+          <Kpi label="EBITDA % від виручки" fact={fact.profitRate} plan={plan.profitRate} ly={ly?.profitRate??null} rate hint="операційна рентабельність"/>
         </section>
 
         <section className="pnl-reference-strip">
@@ -300,14 +310,14 @@ export default async function PnlPage({
             subtitle="КУР’ЄР + САМОВИВІЗ"
             fact={fact.delivery}
             plan={plan.delivery}
-            ly={ly.delivery}
+            ly={ly?.delivery??null}
           />
           <ChannelCard
             title="Агрегатори"
             subtitle="GLOVO · BOLT · LOCO"
             fact={fact.aggregators}
             plan={plan.aggregators}
-            ly={ly.aggregators}
+            ly={ly?.aggregators??null}
             aggregator
           />
         </section>
@@ -332,11 +342,11 @@ export default async function PnlPage({
         </section>
 
         <section className="pnl-cost-grid">
-          <CostCard label="ФОТ" fact={fact.expenseGroups.fot} plan={plan.expenseGroups.fot} ly={ly.expenseGroups.fot} revenue={fact.revenue}/>
-          <CostCard label="Маркетинг" fact={fact.expenseGroups.marketing} plan={plan.expenseGroups.marketing} ly={ly.expenseGroups.marketing} revenue={fact.revenue}/>
-          <CostCard label="IT та сервіси" fact={fact.expenseGroups.digitalServices} plan={plan.expenseGroups.digitalServices} ly={ly.expenseGroups.digitalServices} revenue={fact.revenue}/>
-          <CostCard label="Витрати доставки" fact={fact.expenseGroups.deliveryOperations} plan={plan.expenseGroups.deliveryOperations} ly={ly.expenseGroups.deliveryOperations} revenue={fact.revenue}/>
-          <CostCard label="Витрати агрегаторів" fact={fact.expenseGroups.aggregatorCosts} plan={plan.expenseGroups.aggregatorCosts} ly={ly.expenseGroups.aggregatorCosts} revenue={fact.revenue}/>
+          <CostCard label="ФОТ" fact={fact.expenseGroups.fot} plan={plan.expenseGroups.fot} ly={ly?.expenseGroups.fot??null} revenue={fact.revenue}/>
+          <CostCard label="Маркетинг" fact={fact.expenseGroups.marketing} plan={plan.expenseGroups.marketing} ly={ly?.expenseGroups.marketing??null} revenue={fact.revenue}/>
+          <CostCard label="IT та сервіси" fact={fact.expenseGroups.digitalServices} plan={plan.expenseGroups.digitalServices} ly={ly?.expenseGroups.digitalServices??null} revenue={fact.revenue}/>
+          <CostCard label="Витрати доставки" fact={fact.expenseGroups.deliveryOperations} plan={plan.expenseGroups.deliveryOperations} ly={ly?.expenseGroups.deliveryOperations??null} revenue={fact.revenue}/>
+          <CostCard label="Витрати агрегаторів" fact={fact.expenseGroups.aggregatorCosts} plan={plan.expenseGroups.aggregatorCosts} ly={ly?.expenseGroups.aggregatorCosts??null} revenue={fact.revenue}/>
         </section>
 
         <section className="panel pnl-detail-panel">

@@ -16,19 +16,19 @@ type PnlTrendRow = {
   label: string;
   revenueFact: number;
   revenuePlan: number;
-  revenueLy: number;
+  revenueLy: number|null;
   profitFact: number;
   profitPlan: number;
-  profitLy: number;
+  profitLy: number|null;
   markupFact: number;
   markupPlan: number;
-  markupLy: number;
+  markupLy: number|null;
   markupRateFact: number;
   markupRatePlan: number;
-  markupRateLy: number;
+  markupRateLy: number|null;
   profitRateFact: number;
   profitRatePlan: number;
-  profitRateLy: number;
+  profitRateLy: number|null;
 };
 
 type Metric = "revenue" | "markup" | "profit" | "markupRate" | "profitRate";
@@ -103,6 +103,7 @@ export function PnlTrendChart({data}:{data:PnlTrendRow[]}) {
             />
             <Tooltip
               formatter={(raw,name)=>{
+                if(raw===null||raw===undefined) return ["—",String(name)];
                 const value=Number(raw);
                 return [
                   config.rate ? `${(value*100).toFixed(1)}%` : `₴ ${Math.round(value).toLocaleString("uk-UA")}`,

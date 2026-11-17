@@ -38,13 +38,15 @@ for (const route of ['/', '/delivery', '/locations', '/dynamics', '/explorer', '
   test(`mock selectors ${route}: query → actual loader RPC args; month, LFL and segments stay explicit`, async () => {
     const h = previewHarness();
     const html = await h.render(route, selected);
-    const {args} = h.calls[0];
-    assert.equal(args.p_lfl, true);
     if (route === '/aggregators') {
-      assert.deepEqual(args, {p_period: 'week', p_comparison: 'previous', p_lfl: true});
-      assert.match(html, /period=month&amp;compare=previous&amp;lfl=1/);
+      // v2 cannot honor dimensions: until v3 is enabled, never silently show an unfiltered report.
+      assert.deepEqual(h.calls, []);
+      assert.match(html, /Обраний зріз поки недоступний/);
+      assert.doesNotMatch(html, /kpi-grid|data-mock-chart/);
       return;
     }
+    const {args} = h.calls[0];
+    assert.equal(args.p_lfl, true);
     assert.equal(args.p_brand, selected.brand);
     assert.equal(args.p_ownership, selected.ownership);
     if (route !== '/dynamics') {

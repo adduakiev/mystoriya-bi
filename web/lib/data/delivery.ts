@@ -1,3 +1,4 @@
+import { readIsoWeeklyReport, type IsoWeekMeta, type IsoWeeklyReport } from "@/lib/iso-week-contract";
 import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
@@ -31,6 +32,7 @@ export type DeliveryLocationRow = {
 };
 
 export type DeliveryData = {
+  weekly?: IsoWeeklyReport;
   source: "supabase-sql" | "legacy";
   rowCount: number;
   years: number[];
@@ -42,7 +44,7 @@ export type DeliveryData = {
   brands: string[];
   ownerships: string[];
   snapshot: DashboardSnapshot;
-  multiYearData: Array<Record<string, string | number>>;
+  multiYearData: Array<Record<string, string | number | null>>;
   typeSummary: DeliveryTypeSummary[];
   deliveryMetrics: DeliveryMetricSet;
   aggregatorMetrics: DeliveryMetricSet;
@@ -72,7 +74,7 @@ type RpcMetric = {
 };
 
 type RpcPayload = {
-  meta?: {
+  meta?: IsoWeekMeta & {
     rowCount?: number | string;
     latestSourceDate?: string;
     cutoffDate?: string;
@@ -93,7 +95,7 @@ type RpcPayload = {
   deliveryMetrics?: RpcMetric;
   aggregatorMetrics?: RpcMetric;
   typeSummary?: Array<RpcMetric & { name?: string; share?: number | string }>;
-  multiYearData?: Array<Record<string, string | number>>;
+  multiYearData?: Array<Record<string, string | number | null>>;
   compareSeries?: Array<{ label?: string; delivery?: number | string; aggregator?: number | string }>;
   locationRows?: Array<{
     name?: string;
@@ -214,7 +216,7 @@ function deliverySnapshot(payload:RpcPayload):DashboardSnapshot {
   };
 }
 
-function normalizeSeries(input:Array<Record<string,string|number>>|undefined) {
+function normalizeSeries(input:Array<Record<string,string|number|null>>|undefined) {
   return (input ?? []).map((point)=>{
     const out:Record<string,string|number>={};
     Object.entries(point).forEach(([key,value])=>{
@@ -353,6 +355,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
     )();
 
     const meta=payload.meta ?? {};
+    const weekly=query.grain==="week" ? readIsoWeeklyReport(meta,payload.multiYearData) : undefined;
     const deliveryMetrics=metricSet(payload.deliveryMetrics);
     const aggregatorMetrics=metricSet(payload.aggregatorMetrics);
 
@@ -367,8 +370,9 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
       locations:meta.locations ?? [],
       brands:meta.brands ?? [],
       ownerships:meta.ownerships ?? [],
+      weekly,
       snapshot:deliverySnapshot(payload),
-      multiYearData:normalizeSeries(payload.multiYearData),
+      multiYearData:weekly?.series ?? normalizeSeries(payload.multiYearData),
       typeSummary:(payload.typeSummary ?? []).map((item)=>({
         name:item.name ?? "",
         ...metricSet(item),
@@ -395,6 +399,7 @@ export async function loadDeliveryData(query:DeliveryQuery):Promise<DeliveryData
       }))
     };
   } catch(error) {
+    if(query.grain==="week") throw error;
     console.error("SQL-first Delivery failed; using legacy fallback.",error);
     return legacy(query);
   }

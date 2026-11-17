@@ -210,3 +210,24 @@ test('GBP actual SSR preserves arbitrarily long source IDs with scoped mobile wr
   assert.match(css, /\.management-table-wrap\s*\{[^}]*overflow-x:\s*auto;/);
   // CSS/SSR contract only: this does not claim a real mobile viewport pass.
 });
+
+test('owner-confirmed addresses match exact resource IDs without inferring ownership',()=>{
+  const ids=['14041797018953207147','11452898684627681419','14390582861278894493','15689179339837801980'];
+  const addresses=['вулиця Академіка Вільямса, 3/7, Київ, 02000','вулиця Анни Ахматової, 22, Київ, 02000',
+    'Голосіївський проспект, 58А, 1 поверх, ЖК Парк Авеню, Київ, 03039','проспект Героїв Сталінграду, 8К5, Київ, 04210'];
+  const rows=ids.map(id=>({locationId:`locations/${id}`,locationTitle:'М’ясторія'}));
+  const labels=labelGbpLocations(rows);
+  labels.forEach((row,i)=>{
+    assert.ok(row.locationLabel.includes(addresses[i]));
+    assert.ok(row.locationLabel.includes(rows[i].locationId));
+    assert.match(row.locationIdentityNote,/Адресу підтверджено власником/);
+    assert.match(row.locationIdentityNote,/Належність закладу не підтверджена/);
+    assert.equal(labelGbpLocations([rows[i]])[0].locationLabel,row.locationLabel);
+  });
+  assert.deepEqual(labelGbpLocations([...rows].reverse()),[...labels].reverse());
+  for(const locationId of [ids[0],`accounts/other/locations/${ids[0]}`,`locations/${ids[0]}0`]){
+    const [row]=labelGbpLocations([{locationId,locationTitle:'М’ясторія'}]);
+    assert.match(row.locationIdentityNote,/Адреса не підтверджена/);
+    assert.ok(!row.locationLabel.includes(addresses[0]));
+  }
+});

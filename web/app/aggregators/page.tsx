@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { Filter } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { KpiCard } from "@/components/KpiCard";
 import { RevenueChart } from "@/components/RevenueChart";
 import { formatUah } from "@/lib/analytics";
 import { loadAggregatorsData } from "@/lib/data/aggregators";
 import type { ComparisonMode, PeriodMode } from "@/lib/data/types";
+import { aggregatorHref, type AggregatorFilters } from "@/lib/aggregator-filters";
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -24,13 +26,37 @@ export default async function AggregatorsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const period = parsePeriod(first(params.period));
+  const selectedMonth = first(params.month);
+  const filters: AggregatorFilters = {
+    year:first(params.year) ? Number(first(params.year)) : undefined,
+    month:selectedMonth ? Number(selectedMonth) : undefined,
+    brand:first(params.brand) || undefined,
+    ownership:first(params.ownership) || undefined,
+    location:first(params.location) || undefined,
+    orderType:first(params.orderType) || undefined
+  };
+  const period = selectedMonth ? "month" : parsePeriod(first(params.period));
   const comparison = parseCompare(first(params.compare));
   const lfl = first(params.lfl) === "1";
-  const lflQuery = lfl ? "&lfl=1" : "";
+  const state = {...filters,period,compare:comparison,lfl};
 
-  const data = await loadAggregatorsData(period, comparison, lfl);
+  const data = await loadAggregatorsData(period, comparison, lfl, filters);
   const { snapshot, aggregators, rowCount } = data;
+  if (!snapshot) {
+    return (
+      <main className="shell">
+        <DashboardSidebar activeHref="/aggregators" lfl={lfl} statusTitle="DATA UNAVAILABLE" statusDetail="Обраний зріз не підтверджено" />
+        <section className="workspace">
+          <header className="topbar"><h1>Aggregator Control Center</h1></header>
+          <section className="panel" role="status">
+            <h2>Обраний зріз поки недоступний</h2>
+            <p>Сервер не підтвердив дані та фільтри цього звіту. Показники приховано, щоб не показувати інший період або нефільтровані суми.</p>
+            <Link className="clear-filter" href="/aggregators">Повернутися до доступних даних</Link>
+          </section>
+        </section>
+      </main>
+    );
+  }
   const sqlConnected = data.source === "supabase-sql";
   const sourceStatus = sqlConnected ? "SQL CONNECTED · FRESHNESS UNVERIFIED" : "FALLBACK / UNVERIFIED";
 
@@ -55,7 +81,7 @@ export default async function AggregatorsPage({
           <div className="control-stack">
             <Link
               className={lfl ? "quick-mode lfl-toggle active" : "quick-mode lfl-toggle"}
-              href={`/aggregators?period=${period}&compare=${comparison}${lfl ? "" : "&lfl=1"}`}
+              href={aggregatorHref(state,{lfl:!lfl})}
             >
               LFL · активні
             </Link>
@@ -68,7 +94,7 @@ export default async function AggregatorsPage({
                 <Link
                   key={value}
                   className={period === value ? "segment active" : "segment"}
-                  href={`/aggregators?period=${value}&compare=${comparison}${lflQuery}`}
+                  href={aggregatorHref(state,{period:value,month:undefined})}
                 >
                   {label}
                 </Link>
@@ -78,19 +104,40 @@ export default async function AggregatorsPage({
             <div className="segmented">
               <Link
                 className={comparison === "ly" ? "segment active" : "segment"}
-                href={`/aggregators?period=${period}&compare=ly${lflQuery}`}
+                href={aggregatorHref(state,{compare:"ly"})}
               >
                 LY
               </Link>
               <Link
                 className={comparison === "previous" ? "segment active" : "segment"}
-                href={`/aggregators?period=${period}&compare=previous${lflQuery}`}
+                href={aggregatorHref(state,{compare:"previous"})}
               >
                 Previous
               </Link>
             </div>
           </div>
         </header>
+
+        {data.filterOptions && (
+          <details className="filter-center">
+            <summary><span><Filter size={15} /> Фільтри агрегаторів</span><span className="filter-summary">{filters.year ?? snapshot.currentYear}{filters.month ? ` · ${filters.month}` : ""}{filters.location ? ` · ${filters.location}` : ""}</span></summary>
+            <form className="filter-form" method="get" action="/aggregators">
+              <input type="hidden" name="period" value={period === "month" ? "ytd" : period} />
+              <input type="hidden" name="compare" value={comparison} />
+              {lfl && <input type="hidden" name="lfl" value="1" />}
+              <label>Рік<select name="year" defaultValue={filters.year ?? ""}><option value="">Останній доступний</option>{data.filterOptions.years.map(year=><option key={year} value={year}>{year}</option>)}</select></label>
+              <label>Місяць<select name="month" defaultValue={filters.month ?? ""}><option value="">Усі</option>{["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"].map((month,index)=><option key={index} value={index+1}>{month}</option>)}</select></label>
+              {([
+                ["brand","Бренд",data.filterOptions.brands],
+                ["ownership","Власність",data.filterOptions.ownerships],
+                ["location","Заклад",data.filterOptions.locations],
+                ["orderType","Агрегатор",data.filterOptions.orderTypes]
+              ] as const).map(([key,label,options])=><label key={key}>{label}<select name={key} defaultValue={filters[key] ?? ""}><option value="">Усі</option>{options.map(value=><option key={value} value={value}>{value}</option>)}</select></label>)}
+              <button type="submit" className="apply-filter">Застосувати</button>
+              <Link className="clear-filter" href="/aggregators">Скинути</Link>
+            </form>
+          </details>
+        )}
 
         <nav aria-label="Звіти агрегаторів" className="control-stack">
           <Link className="quick-mode" href="/aggregators/glovo" prefetch={false}>

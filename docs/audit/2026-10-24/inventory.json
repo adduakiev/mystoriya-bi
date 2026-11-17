@@ -97,7 +97,8 @@
         "web/components/KpiCard.tsx",
         "web/components/MultiYearMetricChart.tsx",
         "web/components/NavigationFeedback.tsx",
-        "web/components/SidebarBrand.tsx"
+        "web/components/SidebarBrand.tsx",
+        "web/components/WeeklyReportStatus.tsx"
       ],
       "rpc": [
         "bi_delivery_payload"
@@ -687,7 +688,8 @@
         "web/components/DashboardSidebar.tsx",
         "web/components/MultiYearMetricChart.tsx",
         "web/components/NavigationFeedback.tsx",
-        "web/components/SidebarBrand.tsx"
+        "web/components/SidebarBrand.tsx",
+        "web/components/WeeklyReportStatus.tsx"
       ],
       "rpc": [
         "bi_dynamics_payload"
@@ -922,7 +924,8 @@
         "web/components/MultiYearMetricChart.tsx",
         "web/components/NavigationFeedback.tsx",
         "web/components/OverviewFreshness.tsx",
-        "web/components/SidebarBrand.tsx"
+        "web/components/SidebarBrand.tsx",
+        "web/components/WeeklyReportStatus.tsx"
       ],
       "rpc": [
         "bi_overview_payload"
@@ -2165,7 +2168,7 @@
       "evidence": "web/app/loading.tsx:5"
     },
     {
-      "id": "web/components/AtomicDataSyncControl.tsx:4118",
+      "id": "web/components/AtomicDataSyncControl.tsx:1955",
       "paths": [
         "/aggregators/glovo",
         "/aggregators",
@@ -2191,7 +2194,7 @@
         "/pnl"
       ],
       "component": "web/components/AtomicDataSyncControl.tsx",
-      "line": 87,
+      "line": 45,
       "kind": "button",
       "displayed_kpi_definition": "{`Оновити дані з Google Sheets · дані по ${initialCutoff ?? \"—\"}`}",
       "props": {
@@ -2209,10 +2212,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/AtomicDataSyncControl.tsx:87"
+      "evidence": "web/components/AtomicDataSyncControl.tsx:45"
     },
     {
-      "id": "web/components/AtomicDataSyncControl.tsx:4390",
+      "id": "web/components/AtomicDataSyncControl.tsx:2227",
       "paths": [
         "/aggregators/glovo",
         "/aggregators",
@@ -2238,7 +2241,7 @@
         "/pnl"
       ],
       "component": "web/components/AtomicDataSyncControl.tsx",
-      "line": 90,
+      "line": 48,
       "kind": "Check",
       "displayed_kpi_definition": "Check",
       "props": {},
@@ -2248,10 +2251,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/AtomicDataSyncControl.tsx:90"
+      "evidence": "web/components/AtomicDataSyncControl.tsx:48"
     },
     {
-      "id": "web/components/AtomicDataSyncControl.tsx:4432",
+      "id": "web/components/AtomicDataSyncControl.tsx:2269",
       "paths": [
         "/aggregators/glovo",
         "/aggregators",
@@ -2277,7 +2280,7 @@
         "/pnl"
       ],
       "component": "web/components/AtomicDataSyncControl.tsx",
-      "line": 90,
+      "line": 48,
       "kind": "TriangleAlert",
       "displayed_kpi_definition": "TriangleAlert",
       "props": {},
@@ -2287,10 +2290,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/AtomicDataSyncControl.tsx:90"
+      "evidence": "web/components/AtomicDataSyncControl.tsx:48"
     },
     {
-      "id": "web/components/AtomicDataSyncControl.tsx:4470",
+      "id": "web/components/AtomicDataSyncControl.tsx:2307",
       "paths": [
         "/aggregators/glovo",
         "/aggregators",
@@ -2316,7 +2319,7 @@
         "/pnl"
       ],
       "component": "web/components/AtomicDataSyncControl.tsx",
-      "line": 91,
+      "line": 49,
       "kind": "RefreshCw",
       "displayed_kpi_definition": "RefreshCw",
       "props": {},
@@ -2328,7 +2331,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/AtomicDataSyncControl.tsx:91"
+      "evidence": "web/components/AtomicDataSyncControl.tsx:49"
     },
     {
       "id": "web/components/DashboardSidebar.tsx:1082",
@@ -3108,12 +3111,47 @@
       "evidence": "web/components/SidebarBrand.tsx:76"
     },
     {
-      "id": "web/app/aggregators/page.tsx:1464",
+      "id": "web/app/aggregators/page.tsx:1923",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 39,
+      "line": 48,
+      "kind": "DashboardSidebar",
+      "displayed_kpi_definition": "DashboardSidebar",
+      "props": {},
+      "bindings": [
+        "lfl",
+        "{lfl}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:48"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:2436",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 54,
+      "kind": "Link",
+      "displayed_kpi_definition": "Повернутися до доступних даних",
+      "props": {
+        "href": "\"/aggregators\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:54"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:2796",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 65,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -3127,105 +3165,353 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:39"
+      "evidence": "web/app/aggregators/page.tsx:65"
     },
     {
-      "id": "web/app/aggregators/page.tsx:2075",
+      "id": "web/app/aggregators/page.tsx:3407",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 56,
+      "line": 82,
       "kind": "Link",
       "displayed_kpi_definition": "LFL · активні",
       "props": {
-        "href": "{`/aggregators?period=${period}&compare=${comparison}${lfl ? \"\" : \"&lfl=1\"}`}"
+        "href": "{aggregatorHref(state,{lfl:!lfl})}"
       },
       "bindings": [
         "lfl ? \"quick-mode lfl-toggle active\" : \"quick-mode lfl-toggle\"",
-        "`/aggregators?period=${period}&compare=${comparison}${lfl ? \"\" : \"&lfl=1\"}`",
+        "aggregatorHref(state,{lfl:!lfl})",
         "{lfl ? \"quick-mode lfl-toggle active\" : \"quick-mode lfl-toggle\"}",
-        "{`/aggregators?period=${period}&compare=${comparison}${lfl ? \"\" : \"&lfl=1\"}`}"
+        "{aggregatorHref(state,{lfl:!lfl})}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:56"
+      "evidence": "web/app/aggregators/page.tsx:82"
     },
     {
-      "id": "web/app/aggregators/page.tsx:2560",
+      "id": "web/app/aggregators/page.tsx:3849",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 68,
+      "line": 94,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
-        "href": "{`/aggregators?period=${value}&compare=${comparison}${lflQuery}`}"
+        "href": "{aggregatorHref(state,{period:value,month:undefined})}"
       },
       "bindings": [
         "value",
         "period === value ? \"segment active\" : \"segment\"",
-        "`/aggregators?period=${value}&compare=${comparison}${lflQuery}`",
+        "aggregatorHref(state,{period:value,month:undefined})",
         "label",
         "{value}",
         "{period === value ? \"segment active\" : \"segment\"}"
       ],
       "repeat_template": "([ [\"ytd\", \"YTD\"], [\"month\", \"Місяць\"], [\"week\", \"Тиждень\"] ] as const)",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:68"
+      "evidence": "web/app/aggregators/page.tsx:94"
     },
     {
-      "id": "web/app/aggregators/page.tsx:2923",
+      "id": "web/app/aggregators/page.tsx:4201",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 79,
+      "line": 105,
       "kind": "Link",
       "displayed_kpi_definition": "LY",
       "props": {
-        "href": "{`/aggregators?period=${period}&compare=ly${lflQuery}`}"
+        "href": "{aggregatorHref(state,{compare:\"ly\"})}"
       },
       "bindings": [
         "comparison === \"ly\" ? \"segment active\" : \"segment\"",
-        "`/aggregators?period=${period}&compare=ly${lflQuery}`",
+        "aggregatorHref(state,{compare:\"ly\"})",
         "{comparison === \"ly\" ? \"segment active\" : \"segment\"}",
-        "{`/aggregators?period=${period}&compare=ly${lflQuery}`}"
+        "{aggregatorHref(state,{compare:\"ly\"})}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:79"
+      "evidence": "web/app/aggregators/page.tsx:105"
     },
     {
-      "id": "web/app/aggregators/page.tsx:3156",
+      "id": "web/app/aggregators/page.tsx:4417",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 85,
+      "line": 111,
       "kind": "Link",
       "displayed_kpi_definition": "Previous",
       "props": {
-        "href": "{`/aggregators?period=${period}&compare=previous${lflQuery}`}"
+        "href": "{aggregatorHref(state,{compare:\"previous\"})}"
       },
       "bindings": [
         "comparison === \"previous\" ? \"segment active\" : \"segment\"",
-        "`/aggregators?period=${period}&compare=previous${lflQuery}`",
+        "aggregatorHref(state,{compare:\"previous\"})",
         "{comparison === \"previous\" ? \"segment active\" : \"segment\"}",
-        "{`/aggregators?period=${period}&compare=previous${lflQuery}`}"
+        "{aggregatorHref(state,{compare:\"previous\"})}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:85"
+      "evidence": "web/app/aggregators/page.tsx:111"
     },
     {
-      "id": "web/app/aggregators/page.tsx:3456",
+      "id": "web/app/aggregators/page.tsx:4735",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 95,
+      "line": 122,
+      "kind": "details",
+      "displayed_kpi_definition": "Фільтри агрегаторів",
+      "props": {},
+      "bindings": [
+        "filters.year ?? snapshot.currentYear",
+        "filters.month ? ` · ${filters.month}` : \"\"",
+        "filters.location ? ` · ${filters.location}` : \"\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:122"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:4798",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 123,
+      "kind": "Filter",
+      "displayed_kpi_definition": "Filter",
+      "props": {},
+      "bindings": [
+        "15",
+        "{15}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:123"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:4845",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 123,
+      "kind": "span",
+      "displayed_kpi_definition": "span",
+      "props": {},
+      "bindings": [
+        "filters.year ?? snapshot.currentYear",
+        "filters.month ? ` · ${filters.month}` : \"\"",
+        "filters.location ? ` · ${filters.location}` : \"\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:123"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5040",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 124,
+      "kind": "form",
+      "displayed_kpi_definition": "Рік Останній доступний Місяць Усі Усі Застосувати",
+      "props": {
+        "method": "\"get\"",
+        "action": "\"/aggregators\""
+      },
+      "bindings": [
+        "period === \"month\" ? \"ytd\" : period",
+        "comparison",
+        "lfl && <input type=\"hidden\" name=\"lfl\" value=\"1\" />",
+        "filters.year ?? \"\"",
+        "data.filterOptions.years.map(year=><option key={year} value={year}>{year}</option>)",
+        "year"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:124"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5120",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 125,
+      "kind": "input",
+      "displayed_kpi_definition": "input",
+      "props": {
+        "type": "\"hidden\"",
+        "name": "\"period\"",
+        "value": "{period === \"month\" ? \"ytd\" : period}"
+      },
+      "bindings": [
+        "period === \"month\" ? \"ytd\" : period",
+        "{period === \"month\" ? \"ytd\" : period}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:125"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5216",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 126,
+      "kind": "input",
+      "displayed_kpi_definition": "input",
+      "props": {
+        "type": "\"hidden\"",
+        "name": "\"compare\"",
+        "value": "{comparison}"
+      },
+      "bindings": [
+        "comparison",
+        "{comparison}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:126"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5296",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 127,
+      "kind": "input",
+      "displayed_kpi_definition": "input",
+      "props": {
+        "type": "\"hidden\"",
+        "name": "\"lfl\"",
+        "value": "\"1\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:127"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5366",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 128,
+      "kind": "select",
+      "displayed_kpi_definition": "Останній доступний",
+      "props": {
+        "name": "\"year\""
+      },
+      "bindings": [
+        "filters.year ?? \"\"",
+        "data.filterOptions.years.map(year=><option key={year} value={year}>{year}</option>)",
+        "year",
+        "{filters.year ?? \"\"}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:128"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:5594",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 129,
+      "kind": "select",
+      "displayed_kpi_definition": "Усі",
+      "props": {
+        "name": "\"month\""
+      },
+      "bindings": [
+        "filters.month ?? \"\"",
+        "[\"Січень\",\"Лютий\",\"Березень\",\"Квітень\",\"Травень\",\"Червень\",\"Липень\",\"Серпень\",\"Вересень\",\"Жовтень\",\"Листопад\",\"Грудень\"].map((month,index)=><option key={index} value={index+1}>{mon",
+        "index",
+        "index+1",
+        "month",
+        "{filters.month ?? \"\"}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:129"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:6261",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 135,
+      "kind": "select",
+      "displayed_kpi_definition": "Усі",
+      "props": {
+        "name": "{key}"
+      },
+      "bindings": [
+        "key",
+        "filters[key] ?? \"\"",
+        "options.map(value=><option key={value} value={value}>{value}</option>)",
+        "value",
+        "{key}",
+        "{filters[key] ?? \"\"}"
+      ],
+      "repeat_template": "([ [\"brand\",\"Бренд\",data.filterOptions.brands], [\"ownership\",\"Власність\",data.filterOptions.ownerships], [\"location\",\"Заклад\",data.filterOptions.locations], [\"orderType\",\"Агрегатор",
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:135"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:6449",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 136,
+      "kind": "button",
+      "displayed_kpi_definition": "Застосувати",
+      "props": {
+        "type": "\"submit\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:136"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:6531",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 137,
+      "kind": "Link",
+      "displayed_kpi_definition": "Скинути",
+      "props": {
+        "href": "\"/aggregators\""
+      },
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/aggregators/page.tsx:137"
+    },
+    {
+      "id": "web/app/aggregators/page.tsx:6658",
+      "paths": [
+        "/aggregators"
+      ],
+      "component": "web/app/aggregators/page.tsx",
+      "line": 142,
       "kind": "nav",
       "displayed_kpi_definition": "nav",
       "props": {
@@ -3234,15 +3520,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:95"
+      "evidence": "web/app/aggregators/page.tsx:142"
     },
     {
-      "id": "web/app/aggregators/page.tsx:3529",
+      "id": "web/app/aggregators/page.tsx:6731",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 96,
+      "line": 143,
       "kind": "Link",
       "displayed_kpi_definition": "Glovo · Аналітика брендів →",
       "props": {
@@ -3254,30 +3540,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:96"
+      "evidence": "web/app/aggregators/page.tsx:143"
     },
     {
-      "id": "web/app/aggregators/page.tsx:3714",
+      "id": "web/app/aggregators/page.tsx:6916",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 102,
+      "line": 149,
       "kind": "p",
       "displayed_kpi_definition": "SQL RPC недоступний · резервний шлях, джерело UNKNOWN (Supabase snapshot або Google Sheets). Свіжість і повнота даних не перевірені.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:102"
+      "evidence": "web/app/aggregators/page.tsx:149"
     },
     {
-      "id": "web/app/aggregators/page.tsx:3949",
+      "id": "web/app/aggregators/page.tsx:7151",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 108,
+      "line": 155,
       "kind": "div",
       "displayed_kpi_definition": "cutoff vs LFL · активна мережа",
       "props": {},
@@ -3289,30 +3575,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:108"
+      "evidence": "web/app/aggregators/page.tsx:155"
     },
     {
-      "id": "web/app/aggregators/page.tsx:4143",
+      "id": "web/app/aggregators/page.tsx:7345",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 112,
+      "line": 159,
       "kind": "span",
       "displayed_kpi_definition": "LFL · активна мережа",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:112"
+      "evidence": "web/app/aggregators/page.tsx:159"
     },
     {
-      "id": "web/app/aggregators/page.tsx:4226",
+      "id": "web/app/aggregators/page.tsx:7428",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 115,
+      "line": 162,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
@@ -3321,15 +3607,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:115"
+      "evidence": "web/app/aggregators/page.tsx:162"
     },
     {
-      "id": "web/app/aggregators/page.tsx:4296",
+      "id": "web/app/aggregators/page.tsx:7498",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 116,
+      "line": 163,
       "kind": "KpiCard",
       "displayed_kpi_definition": "KpiCard",
       "props": {},
@@ -3341,15 +3627,15 @@
       ],
       "repeat_template": "snapshot.kpis",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:116"
+      "evidence": "web/app/aggregators/page.tsx:163"
     },
     {
-      "id": "web/app/aggregators/page.tsx:4411",
+      "id": "web/app/aggregators/page.tsx:7613",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 120,
+      "line": 167,
       "kind": "article",
       "displayed_kpi_definition": "AGGREGATOR DYNAMICS Оборот агрегаторів",
       "props": {},
@@ -3359,15 +3645,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:120"
+      "evidence": "web/app/aggregators/page.tsx:167"
     },
     {
-      "id": "web/app/aggregators/page.tsx:4884",
+      "id": "web/app/aggregators/page.tsx:8086",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 131,
+      "line": 178,
       "kind": "RevenueChart",
       "displayed_kpi_definition": "RevenueChart",
       "props": {},
@@ -3381,15 +3667,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:131"
+      "evidence": "web/app/aggregators/page.tsx:178"
     },
     {
-      "id": "web/app/aggregators/page.tsx:5086",
+      "id": "web/app/aggregators/page.tsx:8288",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 138,
+      "line": 185,
       "kind": "article",
       "displayed_kpi_definition": "MIX Структура агрегаторів % від агрегаторів Чеки Ср. чек Націнка % % Δ",
       "props": {},
@@ -3403,15 +3689,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:138"
+      "evidence": "web/app/aggregators/page.tsx:185"
     },
     {
-      "id": "web/app/aggregators/page.tsx:5422",
+      "id": "web/app/aggregators/page.tsx:8624",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 148,
+      "line": 195,
       "kind": "div",
       "displayed_kpi_definition": "% від агрегаторів Чеки Ср. чек Націнка % % Δ",
       "props": {},
@@ -3425,15 +3711,15 @@
       ],
       "repeat_template": "aggregators",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:148"
+      "evidence": "web/app/aggregators/page.tsx:195"
     },
     {
-      "id": "web/app/aggregators/page.tsx:5490",
+      "id": "web/app/aggregators/page.tsx:8692",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 149,
+      "line": 196,
       "kind": "div",
       "displayed_kpi_definition": "% від агрегаторів",
       "props": {},
@@ -3444,15 +3730,15 @@
       ],
       "repeat_template": "aggregators",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:149"
+      "evidence": "web/app/aggregators/page.tsx:196"
     },
     {
-      "id": "web/app/aggregators/page.tsx:6647",
+      "id": "web/app/aggregators/page.tsx:9849",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 172,
+      "line": 219,
       "kind": "article",
       "displayed_kpi_definition": "LOCATIONS Де агрегатори роблять оборот TOP Локація Оборот Δ Частка %",
       "props": {},
@@ -3466,15 +3752,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:172"
+      "evidence": "web/app/aggregators/page.tsx:219"
     },
     {
-      "id": "web/app/aggregators/page.tsx:6985",
+      "id": "web/app/aggregators/page.tsx:10187",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 181,
+      "line": 228,
       "kind": "div",
       "displayed_kpi_definition": "Локація Оборот Δ Частка %",
       "props": {},
@@ -3488,30 +3774,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:181"
+      "evidence": "web/app/aggregators/page.tsx:228"
     },
     {
-      "id": "web/app/aggregators/page.tsx:7032",
+      "id": "web/app/aggregators/page.tsx:10234",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 182,
+      "line": 229,
       "kind": "div",
       "displayed_kpi_definition": "Локація Оборот Δ Частка",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:182"
+      "evidence": "web/app/aggregators/page.tsx:229"
     },
     {
-      "id": "web/app/aggregators/page.tsx:7251",
+      "id": "web/app/aggregators/page.tsx:10453",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 186,
+      "line": 233,
       "kind": "div",
       "displayed_kpi_definition": "%",
       "props": {},
@@ -3525,15 +3811,15 @@
       ],
       "repeat_template": "snapshot.locations",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:186"
+      "evidence": "web/app/aggregators/page.tsx:233"
     },
     {
-      "id": "web/app/aggregators/page.tsx:7817",
+      "id": "web/app/aggregators/page.tsx:11019",
       "paths": [
         "/aggregators"
       ],
       "component": "web/app/aggregators/page.tsx",
-      "line": 198,
+      "line": 245,
       "kind": "article",
       "displayed_kpi_definition": "AGGREGATOR SIGNAL Що відбувається A",
       "props": {},
@@ -3543,7 +3829,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/aggregators/page.tsx:198"
+      "evidence": "web/app/aggregators/page.tsx:245"
     },
     {
       "id": "web/components/KpiCard.tsx:246",
@@ -3786,12 +4072,32 @@
       "evidence": "web/components/RevenueChart.tsx:50"
     },
     {
-      "id": "web/app/delivery/page.tsx:4883",
+      "id": "web/app/delivery/page.tsx:4688",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 138,
+      "line": 134,
+      "kind": "WeeklyReportUnavailable",
+      "displayed_kpi_definition": "WeeklyReportUnavailable",
+      "props": {
+        "href": "\"/delivery\""
+      },
+      "bindings": [
+        "lfl",
+        "{lfl}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/delivery/page.tsx:134"
+    },
+    {
+      "id": "web/app/delivery/page.tsx:5079",
+      "paths": [
+        "/delivery"
+      ],
+      "component": "web/app/delivery/page.tsx",
+      "line": 142,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -3801,15 +4107,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:138"
+      "evidence": "web/app/delivery/page.tsx:142"
     },
     {
-      "id": "web/app/delivery/page.tsx:5795",
+      "id": "web/app/delivery/page.tsx:5991",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 159,
+      "line": 163,
       "kind": "Link",
       "displayed_kpi_definition": "Повернутися до доступних даних",
       "props": {
@@ -3818,15 +4124,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:159"
+      "evidence": "web/app/delivery/page.tsx:163"
     },
     {
-      "id": "web/app/delivery/page.tsx:6448",
+      "id": "web/app/delivery/page.tsx:6644",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 198,
+      "line": 202,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -3840,30 +4146,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:198"
+      "evidence": "web/app/delivery/page.tsx:202"
     },
     {
-      "id": "web/app/delivery/page.tsx:7179",
+      "id": "web/app/delivery/page.tsx:7375",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 213,
+      "line": 217,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:213"
+      "evidence": "web/app/delivery/page.tsx:217"
     },
     {
-      "id": "web/app/delivery/page.tsx:7223",
+      "id": "web/app/delivery/page.tsx:7419",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 214,
+      "line": 218,
       "kind": "Link",
       "displayed_kpi_definition": "← Огляд",
       "props": {
@@ -3875,15 +4181,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:214"
+      "evidence": "web/app/delivery/page.tsx:218"
     },
     {
-      "id": "web/app/delivery/page.tsx:7308",
+      "id": "web/app/delivery/page.tsx:7504",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 215,
+      "line": 219,
       "kind": "Link",
       "displayed_kpi_definition": "LFL · активні",
       "props": {
@@ -3897,15 +4203,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:215"
+      "evidence": "web/app/delivery/page.tsx:219"
     },
     {
-      "id": "web/app/delivery/page.tsx:7583",
+      "id": "web/app/delivery/page.tsx:7779",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 224,
+      "line": 228,
       "kind": "details",
       "displayed_kpi_definition": "Фільтри доставки",
       "props": {},
@@ -3918,15 +4224,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:224"
+      "evidence": "web/app/delivery/page.tsx:228"
     },
     {
-      "id": "web/app/delivery/page.tsx:7657",
+      "id": "web/app/delivery/page.tsx:7853",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 226,
+      "line": 230,
       "kind": "Filter",
       "displayed_kpi_definition": "Filter",
       "props": {},
@@ -3936,15 +4242,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:226"
+      "evidence": "web/app/delivery/page.tsx:230"
     },
     {
-      "id": "web/app/delivery/page.tsx:7714",
+      "id": "web/app/delivery/page.tsx:7910",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 227,
+      "line": 231,
       "kind": "span",
       "displayed_kpi_definition": "span",
       "props": {},
@@ -3957,17 +4263,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:227"
+      "evidence": "web/app/delivery/page.tsx:231"
     },
     {
-      "id": "web/app/delivery/page.tsx:8012",
+      "id": "web/app/delivery/page.tsx:8208",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 234,
+      "line": 238,
       "kind": "form",
-      "displayed_kpi_definition": "Рік Місяць YTD / весь рік Тип доставки Вся доставка Показник графіка Гранулярність Місяці Тижні (тимчасово недоступні) Бренд Всі бренди Власність Вся власність Заклад Всі заклади З",
+      "displayed_kpi_definition": "Рік Місяць YTD / весь рік Тип доставки Вся доставка Показник графіка Гранулярність Місяці Бренд Всі бренди Власність Вся власність Заклад Всі заклади Застосувати",
       "props": {
         "method": "\"get\"",
         "action": "\"/delivery\""
@@ -3982,15 +4288,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:234"
+      "evidence": "web/app/delivery/page.tsx:238"
     },
     {
-      "id": "web/app/delivery/page.tsx:8095",
+      "id": "web/app/delivery/page.tsx:8291",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 235,
+      "line": 239,
       "kind": "input",
       "displayed_kpi_definition": "input",
       "props": {
@@ -4001,15 +4307,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:235"
+      "evidence": "web/app/delivery/page.tsx:239"
     },
     {
-      "id": "web/app/delivery/page.tsx:8206",
+      "id": "web/app/delivery/page.tsx:8402",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 238,
+      "line": 242,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -4023,15 +4329,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:238"
+      "evidence": "web/app/delivery/page.tsx:242"
     },
     {
-      "id": "web/app/delivery/page.tsx:8464",
+      "id": "web/app/delivery/page.tsx:8660",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 245,
+      "line": 249,
       "kind": "select",
       "displayed_kpi_definition": "YTD / весь рік",
       "props": {
@@ -4046,15 +4352,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:245"
+      "evidence": "web/app/delivery/page.tsx:249"
     },
     {
-      "id": "web/app/delivery/page.tsx:8825",
+      "id": "web/app/delivery/page.tsx:9021",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 253,
+      "line": 257,
       "kind": "select",
       "displayed_kpi_definition": "Вся доставка",
       "props": {
@@ -4068,15 +4374,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:253"
+      "evidence": "web/app/delivery/page.tsx:257"
     },
     {
-      "id": "web/app/delivery/page.tsx:9156",
+      "id": "web/app/delivery/page.tsx:9352",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 261,
+      "line": 265,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -4091,35 +4397,37 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:261"
+      "evidence": "web/app/delivery/page.tsx:265"
     },
     {
-      "id": "web/app/delivery/page.tsx:9424",
+      "id": "web/app/delivery/page.tsx:9620",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 268,
+      "line": 272,
       "kind": "select",
-      "displayed_kpi_definition": "Місяці Тижні (тимчасово недоступні)",
+      "displayed_kpi_definition": "Місяці",
       "props": {
         "name": "\"grain\""
       },
       "bindings": [
         "grain",
+        "!isoWeeksEnabled()",
+        "isoWeeksEnabled() ? \"ISO-тижні\" : \"Тижні (тимчасово недоступні)\"",
         "{grain}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:268"
+      "evidence": "web/app/delivery/page.tsx:272"
     },
     {
-      "id": "web/app/delivery/page.tsx:9718",
+      "id": "web/app/delivery/page.tsx:9973",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 276,
+      "line": 280,
       "kind": "select",
       "displayed_kpi_definition": "Всі бренди",
       "props": {
@@ -4133,15 +4441,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:276"
+      "evidence": "web/app/delivery/page.tsx:280"
     },
     {
-      "id": "web/app/delivery/page.tsx:10025",
+      "id": "web/app/delivery/page.tsx:10280",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 284,
+      "line": 288,
       "kind": "select",
       "displayed_kpi_definition": "Вся власність",
       "props": {
@@ -4155,15 +4463,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:284"
+      "evidence": "web/app/delivery/page.tsx:288"
     },
     {
-      "id": "web/app/delivery/page.tsx:10344",
+      "id": "web/app/delivery/page.tsx:10599",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 292,
+      "line": 296,
       "kind": "select",
       "displayed_kpi_definition": "Всі заклади",
       "props": {
@@ -4177,30 +4485,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:292"
+      "evidence": "web/app/delivery/page.tsx:296"
     },
     {
-      "id": "web/app/delivery/page.tsx:10602",
+      "id": "web/app/delivery/page.tsx:10857",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 298,
+      "line": 302,
       "kind": "div",
       "displayed_kpi_definition": "Застосувати",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:298"
+      "evidence": "web/app/delivery/page.tsx:302"
     },
     {
-      "id": "web/app/delivery/page.tsx:10649",
+      "id": "web/app/delivery/page.tsx:10904",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 299,
+      "line": 303,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -4209,15 +4517,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:299"
+      "evidence": "web/app/delivery/page.tsx:303"
     },
     {
-      "id": "web/app/delivery/page.tsx:10731",
+      "id": "web/app/delivery/page.tsx:10986",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 300,
+      "line": 304,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути",
       "props": {
@@ -4226,15 +4534,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:300"
+      "evidence": "web/app/delivery/page.tsx:304"
     },
     {
-      "id": "web/app/delivery/page.tsx:10859",
+      "id": "web/app/delivery/page.tsx:11114",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 305,
+      "line": 309,
       "kind": "div",
       "displayed_kpi_definition": "cutoff vs LFL · активна мережа",
       "props": {},
@@ -4248,30 +4556,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:305"
+      "evidence": "web/app/delivery/page.tsx:309"
     },
     {
-      "id": "web/app/delivery/page.tsx:11095",
+      "id": "web/app/delivery/page.tsx:11350",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 310,
+      "line": 314,
       "kind": "span",
       "displayed_kpi_definition": "LFL · активна мережа",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:310"
+      "evidence": "web/app/delivery/page.tsx:314"
     },
     {
-      "id": "web/app/delivery/page.tsx:11178",
+      "id": "web/app/delivery/page.tsx:11433",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 313,
+      "line": 317,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
@@ -4280,15 +4588,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:313"
+      "evidence": "web/app/delivery/page.tsx:317"
     },
     {
-      "id": "web/app/delivery/page.tsx:11248",
+      "id": "web/app/delivery/page.tsx:11503",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 314,
+      "line": 318,
       "kind": "KpiCard",
       "displayed_kpi_definition": "KpiCard",
       "props": {},
@@ -4300,15 +4608,15 @@
       ],
       "repeat_template": "snapshot.kpis",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:314"
+      "evidence": "web/app/delivery/page.tsx:318"
     },
     {
-      "id": "web/app/delivery/page.tsx:11375",
+      "id": "web/app/delivery/page.tsx:11630",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 318,
+      "line": 322,
       "kind": "div",
       "displayed_kpi_definition": "Доставка чеків",
       "props": {},
@@ -4318,15 +4626,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:318"
+      "evidence": "web/app/delivery/page.tsx:322"
     },
     {
-      "id": "web/app/delivery/page.tsx:11633",
+      "id": "web/app/delivery/page.tsx:11888",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 323,
+      "line": 327,
       "kind": "div",
       "displayed_kpi_definition": "Агрегатори чеків",
       "props": {},
@@ -4336,15 +4644,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:323"
+      "evidence": "web/app/delivery/page.tsx:327"
     },
     {
-      "id": "web/app/delivery/page.tsx:11897",
+      "id": "web/app/delivery/page.tsx:12152",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 328,
+      "line": 332,
       "kind": "div",
       "displayed_kpi_definition": "Доставка / Агрегатори співвідношення обороту",
       "props": {},
@@ -4353,15 +4661,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:328"
+      "evidence": "web/app/delivery/page.tsx:332"
     },
     {
-      "id": "web/app/delivery/page.tsx:12275",
+      "id": "web/app/delivery/page.tsx:12530",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 337,
+      "line": 341,
       "kind": "Link",
       "displayed_kpi_definition": "% · чеків",
       "props": {
@@ -4377,72 +4685,99 @@
       ],
       "repeat_template": "typeSummary",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:337"
+      "evidence": "web/app/delivery/page.tsx:341"
     },
     {
-      "id": "web/app/delivery/page.tsx:12875",
+      "id": "web/app/delivery/page.tsx:13130",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 352,
+      "line": 356,
       "kind": "article",
       "displayed_kpi_definition": "OWN DELIVERY · MULTI-YEAR Тижні (тимчасово недоступні)",
       "props": {},
       "bindings": [
         "METRICS.find(([value]) => value === metric)?.[1] ?? \"Оборот\"",
-        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className=\"metric-pill active\" href={buildHref(state, { grain: \"month\" })}>Місяці</Link> <span className=",
-        "METRICS.map(([value, label]) => ( <Link key={value} className={metric === value ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { metric: value })} > {label} </Link>"
+        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className={grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { grain: \"mon",
+        "isoWeeksEnabled() ? <Link className={grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { grain: \"week\" })}>ISO-тижні</Link> : (<span className=\"metric",
+        "METRICS.map(([value, label]) => ( <Link key={value} className={metric === value ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { metric: value })} > {label} </Link>",
+        "data.weekly && <WeeklyReportStatus report={data.weekly} />"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:352"
+      "evidence": "web/app/delivery/page.tsx:356"
     },
     {
-      "id": "web/app/delivery/page.tsx:13194",
+      "id": "web/app/delivery/page.tsx:13449",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 358,
+      "line": 362,
       "kind": "div",
       "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
       "props": {},
       "bindings": [
-        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className=\"metric-pill active\" href={buildHref(state, { grain: \"month\" })}>Місяці</Link> <span className=",
+        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className={grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { grain: \"mon",
+        "isoWeeksEnabled() ? <Link className={grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { grain: \"week\" })}>ISO-тижні</Link> : (<span className=\"metric",
         "METRICS.map(([value, label]) => ( <Link key={value} className={metric === value ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { metric: value })} > {label} </Link>"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:358"
+      "evidence": "web/app/delivery/page.tsx:362"
     },
     {
-      "id": "web/app/delivery/page.tsx:13351",
+      "id": "web/app/delivery/page.tsx:13606",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 361,
+      "line": 365,
       "kind": "Link",
       "displayed_kpi_definition": "Місяці",
       "props": {
         "href": "{buildHref(state, { grain: \"month\" })}"
       },
       "bindings": [
+        "grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"",
         "buildHref(state, { grain: \"month\" })",
+        "{grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"}",
         "{buildHref(state, { grain: \"month\" })}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:361"
+      "evidence": "web/app/delivery/page.tsx:365"
     },
     {
-      "id": "web/app/delivery/page.tsx:13946",
+      "id": "web/app/delivery/page.tsx:13780",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 373,
+      "line": 366,
+      "kind": "Link",
+      "displayed_kpi_definition": "ISO-тижні",
+      "props": {
+        "href": "{buildHref(state, { grain: \"week\" })}"
+      },
+      "bindings": [
+        "grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"",
+        "buildHref(state, { grain: \"week\" })",
+        "{grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"}",
+        "{buildHref(state, { grain: \"week\" })}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/delivery/page.tsx:366"
+    },
+    {
+      "id": "web/app/delivery/page.tsx:14399",
+      "paths": [
+        "/delivery"
+      ],
+      "component": "web/app/delivery/page.tsx",
+      "line": 377,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -4458,15 +4793,33 @@
       ],
       "repeat_template": "METRICS",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:373"
+      "evidence": "web/app/delivery/page.tsx:377"
     },
     {
-      "id": "web/app/delivery/page.tsx:14318",
+      "id": "web/app/delivery/page.tsx:14787",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 384,
+      "line": 388,
+      "kind": "WeeklyReportStatus",
+      "displayed_kpi_definition": "WeeklyReportStatus",
+      "props": {},
+      "bindings": [
+        "data.weekly",
+        "{data.weekly}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/delivery/page.tsx:388"
+    },
+    {
+      "id": "web/app/delivery/page.tsx:14844",
+      "paths": [
+        "/delivery"
+      ],
+      "component": "web/app/delivery/page.tsx",
+      "line": 389,
       "kind": "MultiYearMetricChart",
       "displayed_kpi_definition": "MultiYearMetricChart",
       "props": {
@@ -4474,23 +4827,23 @@
       },
       "bindings": [
         "multiYearData",
-        "years",
+        "data.weekly?.years ?? years",
         "metric",
         "{multiYearData}",
-        "{years}",
+        "{data.weekly?.years ?? years}",
         "{metric}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:384"
+      "evidence": "web/app/delivery/page.tsx:389"
     },
     {
-      "id": "web/app/delivery/page.tsx:14426",
+      "id": "web/app/delivery/page.tsx:14974",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 387,
+      "line": 392,
       "kind": "article",
       "displayed_kpi_definition": "DELIVERY TYPES Структура доставки % від доставки Чеки Ср. чек Націнка % % Частка %",
       "props": {},
@@ -4504,15 +4857,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:387"
+      "evidence": "web/app/delivery/page.tsx:392"
     },
     {
-      "id": "web/app/delivery/page.tsx:14769",
+      "id": "web/app/delivery/page.tsx:15317",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 396,
+      "line": 401,
       "kind": "div",
       "displayed_kpi_definition": "% від доставки Чеки Ср. чек Націнка % % Частка %",
       "props": {},
@@ -4526,15 +4879,15 @@
       ],
       "repeat_template": "typeSummary",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:396"
+      "evidence": "web/app/delivery/page.tsx:401"
     },
     {
-      "id": "web/app/delivery/page.tsx:14837",
+      "id": "web/app/delivery/page.tsx:15385",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 397,
+      "line": 402,
       "kind": "div",
       "displayed_kpi_definition": "% від доставки",
       "props": {},
@@ -4545,15 +4898,15 @@
       ],
       "repeat_template": "typeSummary",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:397"
+      "evidence": "web/app/delivery/page.tsx:402"
     },
     {
-      "id": "web/app/delivery/page.tsx:16119",
+      "id": "web/app/delivery/page.tsx:16667",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 425,
+      "line": 430,
       "kind": "DeliveryVsAggregatorChart",
       "displayed_kpi_definition": "DeliveryVsAggregatorChart",
       "props": {},
@@ -4563,15 +4916,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:425"
+      "evidence": "web/app/delivery/page.tsx:430"
     },
     {
-      "id": "web/app/delivery/page.tsx:16555",
+      "id": "web/app/delivery/page.tsx:17103",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 437,
+      "line": 442,
       "kind": "div",
       "displayed_kpi_definition": "Заклад Т/О доставка YoY Чеки Ср. чек Націнка % Частка доставки Агрегатори Т/О Дост./Агр.",
       "props": {},
@@ -4580,15 +4933,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:437"
+      "evidence": "web/app/delivery/page.tsx:442"
     },
     {
-      "id": "web/app/delivery/page.tsx:16605",
+      "id": "web/app/delivery/page.tsx:17153",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 438,
+      "line": 443,
       "kind": "div",
       "displayed_kpi_definition": "Заклад Т/О доставка YoY Чеки Ср. чек Націнка % Частка доставки Агрегатори Т/О Дост./Агр.",
       "props": {},
@@ -4597,30 +4950,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:438"
+      "evidence": "web/app/delivery/page.tsx:443"
     },
     {
-      "id": "web/app/delivery/page.tsx:16652",
+      "id": "web/app/delivery/page.tsx:17200",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 439,
+      "line": 444,
       "kind": "div",
       "displayed_kpi_definition": "Заклад Т/О доставка YoY Чеки Ср. чек Націнка % Частка доставки Агрегатори Т/О Дост./Агр.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:439"
+      "evidence": "web/app/delivery/page.tsx:444"
     },
     {
-      "id": "web/app/delivery/page.tsx:17140",
+      "id": "web/app/delivery/page.tsx:17688",
       "paths": [
         "/delivery"
       ],
       "component": "web/app/delivery/page.tsx",
-      "line": 452,
+      "line": 457,
       "kind": "Link",
       "displayed_kpi_definition": "% %",
       "props": {
@@ -4636,7 +4989,7 @@
       ],
       "repeat_template": "locationRows",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/delivery/page.tsx:452"
+      "evidence": "web/app/delivery/page.tsx:457"
     },
     {
       "id": "web/components/DeliveryVsAggregatorChart.tsx:289",
@@ -5009,6 +5362,71 @@
       "repeat_template": "years",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
       "evidence": "web/components/MultiYearMetricChart.tsx:64"
+    },
+    {
+      "id": "web/components/WeeklyReportStatus.tsx:242",
+      "paths": [
+        "/delivery",
+        "/dynamics",
+        "/"
+      ],
+      "component": "web/components/WeeklyReportStatus.tsx",
+      "line": 6,
+      "kind": "p",
+      "displayed_kpi_definition": "ISO-тижні · понеділок–неділя · дані до .",
+      "props": {},
+      "bindings": [
+        "report.cutoff",
+        "report.partial ? \" Неповний тиждень: усі роки порівнюються до однакового дня тижня.\" : \" Повний календарний тиждень.\"",
+        "\" Пропуски означають відсутність спостережень, а не нуль.\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/components/WeeklyReportStatus.tsx:6"
+    },
+    {
+      "id": "web/components/WeeklyReportStatus.tsx:643",
+      "paths": [
+        "/delivery",
+        "/dynamics",
+        "/"
+      ],
+      "component": "web/components/WeeklyReportStatus.tsx",
+      "line": 12,
+      "kind": "DashboardSidebar",
+      "displayed_kpi_definition": "DashboardSidebar",
+      "props": {},
+      "bindings": [
+        "href",
+        "lfl",
+        "{href}",
+        "{lfl}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/components/WeeklyReportStatus.tsx:12"
+    },
+    {
+      "id": "web/components/WeeklyReportStatus.tsx:995",
+      "paths": [
+        "/delivery",
+        "/dynamics",
+        "/"
+      ],
+      "component": "web/components/WeeklyReportStatus.tsx",
+      "line": 15,
+      "kind": "Link",
+      "displayed_kpi_definition": "Повернутися до місячного звіту",
+      "props": {
+        "href": "{href}"
+      },
+      "bindings": [
+        "href",
+        "{href}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/components/WeeklyReportStatus.tsx:15"
     },
     {
       "id": "web/app/digital/ads/page.tsx:1527",
@@ -7865,64 +8283,81 @@
       "evidence": "web/app/digital/funnel/page.tsx:42"
     },
     {
-      "id": "web/app/digital/local/page.tsx:1327",
+      "id": "web/app/digital/local/page.tsx:1430",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 24,
+      "line": 26,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
       "bindings": [
         "false",
-        "available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetric(data.meta.days)} днів`:\"джерело підключено · sync очікує\"",
+        "sourceIssue?\"джерело повернуло помилку · свіжість не підтверджена\":available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetri",
         "{false}",
-        "{available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetric(data.meta.days)} днів`:\"джерело підключено · sync очікує\"}"
+        "{sourceIssue?\"джерело повернуло помилку · свіжість не підтверджена\":available?`PARTIAL · completeness UNKNOWN · ${formatMetric(data.meta.locationCount)} GBP-профілів · ${formatMetr"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:24"
+      "evidence": "web/app/digital/local/page.tsx:26"
     },
     {
-      "id": "web/app/digital/local/page.tsx:1788",
-      "paths": [
-        "/digital/local"
-      ],
-      "component": "web/app/digital/local/page.tsx",
-      "line": 28,
-      "kind": "div",
-      "displayed_kpi_definition": "Google Business Profile · GBP-профілів",
-      "props": {},
-      "bindings": [
-        "formatMetric(data.meta.locationCount)"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:28"
-    },
-    {
-      "id": "web/app/digital/local/page.tsx:1933",
+      "id": "web/app/digital/local/page.tsx:1958",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
       "line": 30,
+      "kind": "div",
+      "displayed_kpi_definition": "Google Business Profile ·",
+      "props": {},
+      "bindings": [
+        "sourceIssue&&!historyAvailable?\"дані не підтверджені\":`${formatMetric(data.meta.locationCount)} GBP-профілів`"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/digital/local/page.tsx:30"
+    },
+    {
+      "id": "web/app/digital/local/page.tsx:2162",
+      "paths": [
+        "/digital/local"
+      ],
+      "component": "web/app/digital/local/page.tsx",
+      "line": 32,
       "kind": "DigitalTabs",
       "displayed_kpi_definition": "DigitalTabs",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:30"
+      "evidence": "web/app/digital/local/page.tsx:32"
     },
     {
-      "id": "web/app/digital/local/page.tsx:1969",
+      "id": "web/app/digital/local/page.tsx:2211",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 31,
+      "line": 33,
+      "kind": "div",
+      "displayed_kpi_definition": "div",
+      "props": {},
+      "bindings": [
+        "sourceIssue.message"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/digital/local/page.tsx:33"
+    },
+    {
+      "id": "web/app/digital/local/page.tsx:2280",
+      "paths": [
+        "/digital/local"
+      ],
+      "component": "web/app/digital/local/page.tsx",
+      "line": 33,
       "kind": "div",
       "displayed_kpi_definition": "Дати GBP: — . Повнота: . Фактична кількість рядків та пропуски по точках невідомі.",
       "props": {},
@@ -7933,45 +8368,45 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:31"
+      "evidence": "web/app/digital/local/page.tsx:33"
     },
     {
-      "id": "web/app/digital/local/page.tsx:2186",
+      "id": "web/app/digital/local/page.tsx:2534",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 33,
+      "line": 35,
       "kind": "div",
       "displayed_kpi_definition": "Джерело Google Business Profile підключене, але за період звіту немає підтверджених вимірювань. Належність профілів до власних закладів не підтверджена.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:33"
+      "evidence": "web/app/digital/local/page.tsx:35"
     },
     {
-      "id": "web/app/digital/local/page.tsx:2402",
+      "id": "web/app/digital/local/page.tsx:2750",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 36,
+      "line": 38,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:36"
+      "evidence": "web/app/digital/local/page.tsx:38"
     },
     {
-      "id": "web/app/digital/local/page.tsx:2451",
+      "id": "web/app/digital/local/page.tsx:2799",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 37,
+      "line": 39,
       "kind": "article",
       "displayed_kpi_definition": "Покази Search + Maps календарних днів у вікні",
       "props": {},
@@ -7981,15 +8416,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:37"
+      "evidence": "web/app/digital/local/page.tsx:39"
     },
     {
-      "id": "web/app/digital/local/page.tsx:2656",
+      "id": "web/app/digital/local/page.tsx:3004",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 38,
+      "line": 40,
       "kind": "article",
       "displayed_kpi_definition": "Переходи дзвінки + website clicks CTR",
       "props": {},
@@ -7999,15 +8434,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:38"
+      "evidence": "web/app/digital/local/page.tsx:40"
     },
     {
-      "id": "web/app/digital/local/page.tsx:2848",
+      "id": "web/app/digital/local/page.tsx:3196",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 39,
+      "line": 41,
       "kind": "article",
       "displayed_kpi_definition": "Дзвінки натискання кнопки дзвінка Google Business Profile",
       "props": {},
@@ -8016,15 +8451,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:39"
+      "evidence": "web/app/digital/local/page.tsx:41"
     },
     {
-      "id": "web/app/digital/local/page.tsx:3028",
+      "id": "web/app/digital/local/page.tsx:3376",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 40,
+      "line": 42,
       "kind": "article",
       "displayed_kpi_definition": "Маршрути запити маршруту до точки локальний намір",
       "props": {},
@@ -8033,15 +8468,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:40"
+      "evidence": "web/app/digital/local/page.tsx:42"
     },
     {
-      "id": "web/app/digital/local/page.tsx:3205",
+      "id": "web/app/digital/local/page.tsx:3553",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 41,
+      "line": 43,
       "kind": "article",
       "displayed_kpi_definition": "Переходи на сайт website clicks з профілю Google",
       "props": {},
@@ -8050,15 +8485,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:41"
+      "evidence": "web/app/digital/local/page.tsx:43"
     },
     {
-      "id": "web/app/digital/local/page.tsx:3384",
+      "id": "web/app/digital/local/page.tsx:3732",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 42,
+      "line": 44,
       "kind": "article",
       "displayed_kpi_definition": "Menu clicks взаємодія з меню Google Business Profile",
       "props": {},
@@ -8067,17 +8502,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:42"
+      "evidence": "web/app/digital/local/page.tsx:44"
     },
     {
-      "id": "web/app/digital/local/page.tsx:3582",
+      "id": "web/app/digital/local/page.tsx:3930",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 45,
+      "line": 47,
       "kind": "div",
-      "displayed_kpi_definition": "Звіт охоплює GBP-профілі підключеного джерела. Прив’язка GBP ID до фізичних адрес, власності та брендів не підтверджена; виключення франшиз та інших брендів не доведене. Період: — ",
+      "displayed_kpi_definition": "Звіт охоплює GBP-профілі підключеного джерела. Прив’язка GBP ID до фізичних адрес показана лише за підтвердженим зіставленням. Належність закладів і брендів не підтверджена; виключ",
       "props": {},
       "bindings": [
         "dateLabel(data.meta.from)",
@@ -8085,38 +8520,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:45"
+      "evidence": "web/app/digital/local/page.tsx:47"
     },
     {
-      "id": "web/app/digital/local/page.tsx:3917",
-      "paths": [
-        "/digital/local"
-      ],
-      "component": "web/app/digital/local/page.tsx",
-      "line": 48,
-      "kind": "article",
-      "displayed_kpi_definition": "LOCAL INTENT Усі локальні дії Дії / покази Найбільше локальних дій ·",
-      "props": {},
-      "bindings": [
-        "n(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks))",
-        "rate(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks),s.impressions)",
-        "`${n(topIntent.intentActions)} · ${topIntent.locationLabel} · ${topIntent.locationIdentityNote}`",
-        "n(topIntent.intentActions)",
-        "topIntent.locationLabel"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:48"
-    },
-    {
-      "id": "web/app/digital/local/page.tsx:4015",
+      "id": "web/app/digital/local/page.tsx:4318",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
       "line": 50,
-      "kind": "div",
-      "displayed_kpi_definition": "Усі локальні дії Дії / покази Найбільше локальних дій ·",
+      "kind": "article",
+      "displayed_kpi_definition": "LOCAL INTENT Усі локальні дії Дії / покази Найбільше локальних дій ·",
       "props": {},
       "bindings": [
         "n(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks))",
@@ -8130,29 +8544,35 @@
       "evidence": "web/app/digital/local/page.tsx:50"
     },
     {
-      "id": "web/app/digital/local/page.tsx:4621",
+      "id": "web/app/digital/local/page.tsx:4416",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 56,
-      "kind": "article",
-      "displayed_kpi_definition": "ЩО ВВАЖАЄМО НАМІРОМ 1 Маршрут до закладу. 2 Дзвінок або перехід на сайт. 3 Перегляд / взаємодія з меню.",
+      "line": 52,
+      "kind": "div",
+      "displayed_kpi_definition": "Усі локальні дії Дії / покази Найбільше локальних дій ·",
       "props": {},
-      "bindings": [],
+      "bindings": [
+        "n(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks))",
+        "rate(metricSum(s.calls,s.directions,s.websiteClicks,s.menuClicks),s.impressions)",
+        "`${n(topIntent.intentActions)} · ${topIntent.locationLabel} · ${topIntent.locationIdentityNote}`",
+        "n(topIntent.intentActions)",
+        "topIntent.locationLabel"
+      ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:56"
+      "evidence": "web/app/digital/local/page.tsx:52"
     },
     {
-      "id": "web/app/digital/local/page.tsx:4726",
+      "id": "web/app/digital/local/page.tsx:5022",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
       "line": 58,
-      "kind": "div",
-      "displayed_kpi_definition": "1 Маршрут до закладу. 2 Дзвінок або перехід на сайт. 3 Перегляд / взаємодія з меню.",
+      "kind": "article",
+      "displayed_kpi_definition": "ЩО ВВАЖАЄМО НАМІРОМ 1 Маршрут до закладу. 2 Дзвінок або перехід на сайт. 3 Перегляд / взаємодія з меню.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
@@ -8160,51 +8580,22 @@
       "evidence": "web/app/digital/local/page.tsx:58"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5247",
+      "id": "web/app/digital/local/page.tsx:5127",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 70,
+      "line": 60,
       "kind": "div",
-      "displayed_kpi_definition": "Профіль Покази Дзвінки Маршрути Сайт Меню Дії Action rate",
+      "displayed_kpi_definition": "1 Маршрут до закладу. 2 Дзвінок або перехід на сайт. 3 Перегляд / взаємодія з меню.",
       "props": {},
-      "bindings": [
-        "{minWidth:980}",
-        "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
-        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
-        "row.locationId",
-        "row.locationLabel",
-        "row.locationIdentityNote"
-      ],
+      "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:70"
+      "evidence": "web/app/digital/local/page.tsx:60"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5299",
-      "paths": [
-        "/digital/local"
-      ],
-      "component": "web/app/digital/local/page.tsx",
-      "line": 71,
-      "kind": "div",
-      "displayed_kpi_definition": "Профіль Покази Дзвінки Маршрути Сайт Меню Дії Action rate",
-      "props": {},
-      "bindings": [
-        "{minWidth:980}",
-        "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
-        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
-        "row.locationId",
-        "row.locationLabel",
-        "row.locationIdentityNote"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:71"
-    },
-    {
-      "id": "web/app/digital/local/page.tsx:5371",
+      "id": "web/app/digital/local/page.tsx:5648",
       "paths": [
         "/digital/local"
       ],
@@ -8214,20 +8605,64 @@
       "displayed_kpi_definition": "Профіль Покази Дзвінки Маршрути Сайт Меню Дії Action rate",
       "props": {},
       "bindings": [
+        "{minWidth:980}",
         "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
-        "{{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}}"
+        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
+        "row.locationId",
+        "row.locationLabel",
+        "row.locationIdentityNote"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
       "evidence": "web/app/digital/local/page.tsx:72"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5711",
+      "id": "web/app/digital/local/page.tsx:5700",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 75,
+      "line": 73,
+      "kind": "div",
+      "displayed_kpi_definition": "Профіль Покази Дзвінки Маршрути Сайт Меню Дії Action rate",
+      "props": {},
+      "bindings": [
+        "{minWidth:980}",
+        "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
+        "ranked.map(row=><div className=\"table-row\" style={{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}} key={row.locationId}> <div className=\"gbp-location-identity",
+        "row.locationId",
+        "row.locationLabel",
+        "row.locationIdentityNote"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/digital/local/page.tsx:73"
+    },
+    {
+      "id": "web/app/digital/local/page.tsx:5772",
+      "paths": [
+        "/digital/local"
+      ],
+      "component": "web/app/digital/local/page.tsx",
+      "line": 74,
+      "kind": "div",
+      "displayed_kpi_definition": "Профіль Покази Дзвінки Маршрути Сайт Меню Дії Action rate",
+      "props": {},
+      "bindings": [
+        "{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}",
+        "{{gridTemplateColumns:\"1.55fr .7fr .65fr .65fr .65fr .65fr .7fr .7fr\"}}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/digital/local/page.tsx:74"
+    },
+    {
+      "id": "web/app/digital/local/page.tsx:6112",
+      "paths": [
+        "/digital/local"
+      ],
+      "component": "web/app/digital/local/page.tsx",
+      "line": 77,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -8241,15 +8676,15 @@
       ],
       "repeat_template": "ranked",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:75"
+      "evidence": "web/app/digital/local/page.tsx:77"
     },
     {
-      "id": "web/app/digital/local/page.tsx:5919",
+      "id": "web/app/digital/local/page.tsx:6320",
       "paths": [
         "/digital/local"
       ],
       "component": "web/app/digital/local/page.tsx",
-      "line": 76,
+      "line": 78,
       "kind": "small",
       "displayed_kpi_definition": "small",
       "props": {},
@@ -8258,7 +8693,7 @@
       ],
       "repeat_template": "ranked",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/digital/local/page.tsx:76"
+      "evidence": "web/app/digital/local/page.tsx:78"
     },
     {
       "id": "web/app/digital/page.tsx:3656",
@@ -11328,12 +11763,32 @@
       "evidence": "web/app/digital/tracking/page.tsx:67"
     },
     {
-      "id": "web/app/dynamics/page.tsx:3900",
+      "id": "web/app/dynamics/page.tsx:3945",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 120,
+      "line": 119,
+      "kind": "WeeklyReportUnavailable",
+      "displayed_kpi_definition": "WeeklyReportUnavailable",
+      "props": {
+        "href": "\"/dynamics\""
+      },
+      "bindings": [
+        "lfl",
+        "{lfl}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:119"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:4095",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 124,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -11343,15 +11798,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:120"
+      "evidence": "web/app/dynamics/page.tsx:124"
     },
     {
-      "id": "web/app/dynamics/page.tsx:4637",
+      "id": "web/app/dynamics/page.tsx:4832",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 136,
+      "line": 140,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути фільтри",
       "props": {
@@ -11360,15 +11815,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:136"
+      "evidence": "web/app/dynamics/page.tsx:140"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5114",
+      "id": "web/app/dynamics/page.tsx:5309",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 162,
+      "line": 166,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -11382,30 +11837,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:162"
+      "evidence": "web/app/dynamics/page.tsx:166"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5833",
+      "id": "web/app/dynamics/page.tsx:6028",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 177,
+      "line": 181,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:177"
+      "evidence": "web/app/dynamics/page.tsx:181"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5877",
+      "id": "web/app/dynamics/page.tsx:6072",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 178,
+      "line": 182,
       "kind": "Link",
       "displayed_kpi_definition": "← Огляд",
       "props": {
@@ -11417,15 +11872,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:178"
+      "evidence": "web/app/dynamics/page.tsx:182"
     },
     {
-      "id": "web/app/dynamics/page.tsx:5962",
+      "id": "web/app/dynamics/page.tsx:6157",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 179,
+      "line": 183,
       "kind": "Link",
       "displayed_kpi_definition": "LFL · активні",
       "props": {
@@ -11439,15 +11894,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:179"
+      "evidence": "web/app/dynamics/page.tsx:183"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6237",
+      "id": "web/app/dynamics/page.tsx:6432",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 188,
+      "line": 192,
       "kind": "details",
       "displayed_kpi_definition": "Фільтри динаміки ·",
       "props": {},
@@ -11460,15 +11915,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:188"
+      "evidence": "web/app/dynamics/page.tsx:192"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6316",
+      "id": "web/app/dynamics/page.tsx:6511",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 190,
+      "line": 194,
       "kind": "Filter",
       "displayed_kpi_definition": "Filter",
       "props": {},
@@ -11478,15 +11933,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:190"
+      "evidence": "web/app/dynamics/page.tsx:194"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6373",
+      "id": "web/app/dynamics/page.tsx:6568",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 191,
+      "line": 195,
       "kind": "span",
       "displayed_kpi_definition": "·",
       "props": {},
@@ -11499,17 +11954,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:191"
+      "evidence": "web/app/dynamics/page.tsx:195"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6646",
+      "id": "web/app/dynamics/page.tsx:6841",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 198,
+      "line": 202,
       "kind": "form",
-      "displayed_kpi_definition": "Гранулярність Місяці Тижні (тимчасово недоступні) Показник Канал Всі канали Деталізація каналу Вся деталізація Бренд Всі бренди Власність Вся власність Заклад Всі заклади Застосува",
+      "displayed_kpi_definition": "Гранулярність Місяці Показник Канал Всі канали Деталізація каналу Вся деталізація Бренд Всі бренди Власність Вся власність Заклад Всі заклади Застосувати",
       "props": {
         "method": "\"get\"",
         "action": "\"/dynamics\""
@@ -11517,22 +11972,22 @@
       "bindings": [
         "lfl && <input type=\"hidden\" name=\"lfl\" value=\"1\" />",
         "grain",
+        "!isoWeeksEnabled()",
+        "isoWeeksEnabled() ? \"ISO-тижні\" : \"Тижні (тимчасово недоступні)\"",
         "metric",
-        "METRICS.map(([value, label]) => ( <option key={value} value={value}>{label}</option> ))",
-        "value",
-        "label"
+        "METRICS.map(([value, label]) => ( <option key={value} value={value}>{label}</option> ))"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:198"
+      "evidence": "web/app/dynamics/page.tsx:202"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6729",
+      "id": "web/app/dynamics/page.tsx:6924",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 199,
+      "line": 203,
       "kind": "input",
       "displayed_kpi_definition": "input",
       "props": {
@@ -11543,35 +11998,37 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:199"
+      "evidence": "web/app/dynamics/page.tsx:203"
     },
     {
-      "id": "web/app/dynamics/page.tsx:6850",
+      "id": "web/app/dynamics/page.tsx:7045",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 202,
+      "line": 206,
       "kind": "select",
-      "displayed_kpi_definition": "Місяці Тижні (тимчасово недоступні)",
+      "displayed_kpi_definition": "Місяці",
       "props": {
         "name": "\"grain\""
       },
       "bindings": [
         "grain",
+        "!isoWeeksEnabled()",
+        "isoWeeksEnabled() ? \"ISO-тижні\" : \"Тижні (тимчасово недоступні)\"",
         "{grain}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:202"
+      "evidence": "web/app/dynamics/page.tsx:206"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7147",
+      "id": "web/app/dynamics/page.tsx:7401",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 210,
+      "line": 214,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -11586,15 +12043,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:210"
+      "evidence": "web/app/dynamics/page.tsx:214"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7445",
+      "id": "web/app/dynamics/page.tsx:7699",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 219,
+      "line": 223,
       "kind": "select",
       "displayed_kpi_definition": "Всі канали",
       "props": {
@@ -11608,15 +12065,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:219"
+      "evidence": "web/app/dynamics/page.tsx:223"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7767",
+      "id": "web/app/dynamics/page.tsx:8021",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 227,
+      "line": 231,
       "kind": "select",
       "displayed_kpi_definition": "Вся деталізація",
       "props": {
@@ -11630,15 +12087,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:227"
+      "evidence": "web/app/dynamics/page.tsx:231"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8087",
+      "id": "web/app/dynamics/page.tsx:8341",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 235,
+      "line": 239,
       "kind": "select",
       "displayed_kpi_definition": "Всі бренди",
       "props": {
@@ -11652,15 +12109,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:235"
+      "evidence": "web/app/dynamics/page.tsx:239"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8394",
+      "id": "web/app/dynamics/page.tsx:8648",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 243,
+      "line": 247,
       "kind": "select",
       "displayed_kpi_definition": "Вся власність",
       "props": {
@@ -11674,15 +12131,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:243"
+      "evidence": "web/app/dynamics/page.tsx:247"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8657",
+      "id": "web/app/dynamics/page.tsx:8911",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 249,
+      "line": 253,
       "kind": "label",
       "displayed_kpi_definition": "Заклад Всі заклади",
       "props": {},
@@ -11693,15 +12150,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:249"
+      "evidence": "web/app/dynamics/page.tsx:253"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8737",
+      "id": "web/app/dynamics/page.tsx:8991",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 251,
+      "line": 255,
       "kind": "select",
       "displayed_kpi_definition": "Всі заклади",
       "props": {
@@ -11715,30 +12172,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:251"
+      "evidence": "web/app/dynamics/page.tsx:255"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8995",
+      "id": "web/app/dynamics/page.tsx:9249",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 257,
+      "line": 261,
       "kind": "div",
       "displayed_kpi_definition": "Застосувати",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:257"
+      "evidence": "web/app/dynamics/page.tsx:261"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9042",
+      "id": "web/app/dynamics/page.tsx:9296",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 258,
+      "line": 262,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -11747,15 +12204,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:258"
+      "evidence": "web/app/dynamics/page.tsx:262"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9124",
+      "id": "web/app/dynamics/page.tsx:9378",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 259,
+      "line": 263,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути",
       "props": {
@@ -11764,15 +12221,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:259"
+      "evidence": "web/app/dynamics/page.tsx:263"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9304",
+      "id": "web/app/dynamics/page.tsx:9558",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 265,
+      "line": 269,
       "kind": "div",
       "displayed_kpi_definition": "Поточний зріз",
       "props": {},
@@ -11782,15 +12239,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:265"
+      "evidence": "web/app/dynamics/page.tsx:269"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9525",
+      "id": "web/app/dynamics/page.tsx:9779",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 270,
+      "line": 274,
       "kind": "div",
       "displayed_kpi_definition": "сума/агрегація видимих періодів",
       "props": {},
@@ -11800,15 +12257,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:270"
+      "evidence": "web/app/dynamics/page.tsx:274"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9755",
+      "id": "web/app/dynamics/page.tsx:10009",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 275,
+      "line": 279,
       "kind": "div",
       "displayed_kpi_definition": "YoY по однаковій кількості періодів",
       "props": {},
@@ -11819,52 +12276,77 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:275"
+      "evidence": "web/app/dynamics/page.tsx:279"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10463",
+      "id": "web/app/dynamics/page.tsx:10717",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 291,
+      "line": 295,
       "kind": "div",
       "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
       "props": {},
       "bindings": [
+        "isoWeeksEnabled() ? <Link className={grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { grain: \"week\" })}>ISO-тижні</Link> : (<span className=\"metric",
         "METRICS.map(([value, label]) => ( <Link key={value} className={metric === value ? \"metric-pill active\" : \"metric-pill\"} href={buildHref(state, { metric: value })} > {label} </Link>"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:291"
+      "evidence": "web/app/dynamics/page.tsx:295"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10575",
+      "id": "web/app/dynamics/page.tsx:10829",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 293,
+      "line": 297,
       "kind": "Link",
       "displayed_kpi_definition": "Місяці",
       "props": {
         "href": "{buildHref(state, { grain: \"month\" })}"
       },
       "bindings": [
+        "grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"",
         "buildHref(state, { grain: \"month\" })",
+        "{grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"}",
         "{buildHref(state, { grain: \"month\" })}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:293"
+      "evidence": "web/app/dynamics/page.tsx:297"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11113",
+      "id": "web/app/dynamics/page.tsx:10999",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 304,
+      "line": 298,
+      "kind": "Link",
+      "displayed_kpi_definition": "ISO-тижні",
+      "props": {
+        "href": "{buildHref(state, { grain: \"week\" })}"
+      },
+      "bindings": [
+        "grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"",
+        "buildHref(state, { grain: \"week\" })",
+        "{grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"}",
+        "{buildHref(state, { grain: \"week\" })}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:298"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:11565",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 308,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -11880,30 +12362,48 @@
       ],
       "repeat_template": "METRICS",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:304"
+      "evidence": "web/app/dynamics/page.tsx:308"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11472",
+      "id": "web/app/dynamics/page.tsx:11924",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 316,
+      "line": 320,
       "kind": "div",
       "displayed_kpi_definition": "LFL · закриті точки виключено з усієї динаміки",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:316"
+      "evidence": "web/app/dynamics/page.tsx:320"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11564",
+      "id": "web/app/dynamics/page.tsx:12034",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 317,
+      "line": 321,
+      "kind": "WeeklyReportStatus",
+      "displayed_kpi_definition": "WeeklyReportStatus",
+      "props": {},
+      "bindings": [
+        "result.weekly",
+        "{result.weekly}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:321"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:12091",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 322,
       "kind": "MultiYearMetricChart",
       "displayed_kpi_definition": "MultiYearMetricChart",
       "props": {
@@ -11919,15 +12419,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:317"
+      "evidence": "web/app/dynamics/page.tsx:322"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11659",
+      "id": "web/app/dynamics/page.tsx:12186",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 320,
+      "line": 325,
       "kind": "section",
       "displayed_kpi_definition": "PIVOT-LIKE VIEW Таблиця динаміки × роки × YoY",
       "props": {},
@@ -11941,59 +12441,59 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:320"
+      "evidence": "web/app/dynamics/page.tsx:325"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12047",
-      "paths": [
-        "/dynamics"
-      ],
-      "component": "web/app/dynamics/page.tsx",
-      "line": 331,
-      "kind": "div",
-      "displayed_kpi_definition": "div",
-      "props": {},
-      "bindings": [
-        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
-        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
-        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
-        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
-        "year",
-        "index === 0 ? \"—\" : \"YoY\""
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:331"
-    },
-    {
-      "id": "web/app/dynamics/page.tsx:12097",
-      "paths": [
-        "/dynamics"
-      ],
-      "component": "web/app/dynamics/page.tsx",
-      "line": 332,
-      "kind": "div",
-      "displayed_kpi_definition": "div",
-      "props": {},
-      "bindings": [
-        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
-        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
-        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
-        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
-        "year",
-        "index === 0 ? \"—\" : \"YoY\""
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:332"
-    },
-    {
-      "id": "web/app/dynamics/page.tsx:12254",
+      "id": "web/app/dynamics/page.tsx:12574",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
       "line": 336,
+      "kind": "div",
+      "displayed_kpi_definition": "div",
+      "props": {},
+      "bindings": [
+        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
+        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
+        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
+        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
+        "year",
+        "index === 0 ? \"—\" : \"YoY\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:336"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:12624",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 337,
+      "kind": "div",
+      "displayed_kpi_definition": "div",
+      "props": {},
+      "bindings": [
+        "{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }",
+        "{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }",
+        "grain === \"week\" ? \"Тиждень\" : \"Місяць\"",
+        "years.map((year, index) => ( <div className=\"dynamics-year-head\" key={year}> <span>{year}</span> <span>{index === 0 ? \"—\" : \"YoY\"}</span> </div> ))",
+        "year",
+        "index === 0 ? \"—\" : \"YoY\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/dynamics/page.tsx:337"
+    },
+    {
+      "id": "web/app/dynamics/page.tsx:12781",
+      "paths": [
+        "/dynamics"
+      ],
+      "component": "web/app/dynamics/page.tsx",
+      "line": 341,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -12007,15 +12507,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:336"
+      "evidence": "web/app/dynamics/page.tsx:341"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12849",
+      "id": "web/app/dynamics/page.tsx:13376",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 350,
+      "line": 355,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -12029,15 +12529,15 @@
       ],
       "repeat_template": "data",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:350"
+      "evidence": "web/app/dynamics/page.tsx:355"
     },
     {
-      "id": "web/app/dynamics/page.tsx:13147",
+      "id": "web/app/dynamics/page.tsx:13674",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 357,
+      "line": 362,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -12050,15 +12550,15 @@
       ],
       "repeat_template": "data",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:357"
+      "evidence": "web/app/dynamics/page.tsx:362"
     },
     {
-      "id": "web/app/dynamics/page.tsx:14526",
+      "id": "web/app/dynamics/page.tsx:15053",
       "paths": [
         "/dynamics"
       ],
       "component": "web/app/dynamics/page.tsx",
-      "line": 389,
+      "line": 394,
       "kind": "Link",
       "displayed_kpi_definition": "Швидкий зріз",
       "props": {
@@ -12074,7 +12574,7 @@
       ],
       "repeat_template": "[\"Заклад\", \"Агрегатор\", \"Доставка\"]",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/dynamics/page.tsx:389"
+      "evidence": "web/app/dynamics/page.tsx:394"
     },
     {
       "id": "web/app/explorer/page.tsx:6055",
@@ -15000,12 +15500,32 @@
       "evidence": "web/components/OperatingTasks.tsx:76"
     },
     {
-      "id": "web/app/page.tsx:5750",
+      "id": "web/app/page.tsx:3956",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 172,
+      "line": 107,
+      "kind": "WeeklyReportUnavailable",
+      "displayed_kpi_definition": "WeeklyReportUnavailable",
+      "props": {
+        "href": "\"/\""
+      },
+      "bindings": [
+        "lfl",
+        "{lfl}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:107"
+    },
+    {
+      "id": "web/app/page.tsx:5876",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 175,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -15019,30 +15539,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:172"
+      "evidence": "web/app/page.tsx:175"
     },
     {
-      "id": "web/app/page.tsx:6585",
+      "id": "web/app/page.tsx:6711",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 186,
+      "line": 189,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:186"
+      "evidence": "web/app/page.tsx:189"
     },
     {
-      "id": "web/app/page.tsx:6629",
+      "id": "web/app/page.tsx:6755",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 187,
+      "line": 190,
       "kind": "Link",
       "displayed_kpi_definition": "YTD",
       "props": {
@@ -15057,15 +15577,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:187"
+      "evidence": "web/app/page.tsx:190"
     },
     {
-      "id": "web/app/page.tsx:6996",
+      "id": "web/app/page.tsx:7122",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 197,
+      "line": 200,
       "kind": "Link",
       "displayed_kpi_definition": "MTD",
       "props": {
@@ -15080,15 +15600,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:197"
+      "evidence": "web/app/page.tsx:200"
     },
     {
-      "id": "web/app/page.tsx:7389",
+      "id": "web/app/page.tsx:7515",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 207,
+      "line": 210,
       "kind": "Link",
       "displayed_kpi_definition": "LFL · активні",
       "props": {
@@ -15103,55 +15623,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:207"
+      "evidence": "web/app/page.tsx:210"
     },
     {
-      "id": "web/app/page.tsx:7836",
-      "paths": [
-        "/"
-      ],
-      "component": "web/app/page.tsx",
-      "line": 220,
-      "kind": "details",
-      "displayed_kpi_definition": "Фільтри",
-      "props": {},
-      "bindings": [
-        "selectedYear",
-        "selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : \" · весь рік\"",
-        "activeDimensionFilters > 0 ? ` · +${activeDimensionFilters} зрізи` : \"\"",
-        "lfl ? \" · LFL\" : \"\""
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:220"
-    },
-    {
-      "id": "web/app/page.tsx:7910",
-      "paths": [
-        "/"
-      ],
-      "component": "web/app/page.tsx",
-      "line": 222,
-      "kind": "Filter",
-      "displayed_kpi_definition": "Filter",
-      "props": {},
-      "bindings": [
-        "15",
-        "{15}"
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:222"
-    },
-    {
-      "id": "web/app/page.tsx:7958",
+      "id": "web/app/page.tsx:7962",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
       "line": 223,
-      "kind": "span",
-      "displayed_kpi_definition": "span",
+      "kind": "details",
+      "displayed_kpi_definition": "Фільтри",
       "props": {},
       "bindings": [
         "selectedYear",
@@ -15164,12 +15646,50 @@
       "evidence": "web/app/page.tsx:223"
     },
     {
-      "id": "web/app/page.tsx:8345",
+      "id": "web/app/page.tsx:8036",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 230,
+      "line": 225,
+      "kind": "Filter",
+      "displayed_kpi_definition": "Filter",
+      "props": {},
+      "bindings": [
+        "15",
+        "{15}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:225"
+    },
+    {
+      "id": "web/app/page.tsx:8084",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 226,
+      "kind": "span",
+      "displayed_kpi_definition": "span",
+      "props": {},
+      "bindings": [
+        "selectedYear",
+        "selectedMonth ? ` · ${MONTHS[selectedMonth - 1]}` : \" · весь рік\"",
+        "activeDimensionFilters > 0 ? ` · +${activeDimensionFilters} зрізи` : \"\"",
+        "lfl ? \" · LFL\" : \"\""
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:226"
+    },
+    {
+      "id": "web/app/page.tsx:8471",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 233,
       "kind": "form",
       "displayed_kpi_definition": "Рік Місяць Весь рік Канал Всі канали Заклад Агрегатор Доставка Деталізація каналу Вся деталізація Бренд Всі бренди Власність Вся власність Локація Всі локації Порівняння Минулого р",
       "props": {
@@ -15186,15 +15706,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:230"
+      "evidence": "web/app/page.tsx:233"
     },
     {
-      "id": "web/app/page.tsx:8450",
+      "id": "web/app/page.tsx:8576",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 231,
+      "line": 234,
       "kind": "input",
       "displayed_kpi_definition": "input",
       "props": {
@@ -15205,15 +15725,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:231"
+      "evidence": "web/app/page.tsx:234"
     },
     {
-      "id": "web/app/page.tsx:8561",
+      "id": "web/app/page.tsx:8687",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 234,
+      "line": 237,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -15227,15 +15747,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:234"
+      "evidence": "web/app/page.tsx:237"
     },
     {
-      "id": "web/app/page.tsx:8819",
+      "id": "web/app/page.tsx:8945",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 241,
+      "line": 244,
       "kind": "select",
       "displayed_kpi_definition": "Весь рік",
       "props": {
@@ -15250,15 +15770,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:241"
+      "evidence": "web/app/page.tsx:244"
     },
     {
-      "id": "web/app/page.tsx:9220",
+      "id": "web/app/page.tsx:9346",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 251,
+      "line": 254,
       "kind": "select",
       "displayed_kpi_definition": "Всі канали Заклад Агрегатор Доставка",
       "props": {
@@ -15270,15 +15790,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:251"
+      "evidence": "web/app/page.tsx:254"
     },
     {
-      "id": "web/app/page.tsx:9635",
+      "id": "web/app/page.tsx:9761",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 261,
+      "line": 264,
       "kind": "select",
       "displayed_kpi_definition": "Вся деталізація",
       "props": {
@@ -15292,15 +15812,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:261"
+      "evidence": "web/app/page.tsx:264"
     },
     {
-      "id": "web/app/page.tsx:10033",
+      "id": "web/app/page.tsx:10159",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 269,
+      "line": 272,
       "kind": "select",
       "displayed_kpi_definition": "Всі бренди",
       "props": {
@@ -15314,15 +15834,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:269"
+      "evidence": "web/app/page.tsx:272"
     },
     {
-      "id": "web/app/page.tsx:10414",
+      "id": "web/app/page.tsx:10540",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 277,
+      "line": 280,
       "kind": "select",
       "displayed_kpi_definition": "Вся власність",
       "props": {
@@ -15336,15 +15856,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:277"
+      "evidence": "web/app/page.tsx:280"
     },
     {
-      "id": "web/app/page.tsx:10775",
+      "id": "web/app/page.tsx:10901",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 283,
+      "line": 286,
       "kind": "label",
       "displayed_kpi_definition": "Локація Всі локації",
       "props": {},
@@ -15355,15 +15875,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:283"
+      "evidence": "web/app/page.tsx:286"
     },
     {
-      "id": "web/app/page.tsx:10856",
+      "id": "web/app/page.tsx:10982",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 285,
+      "line": 288,
       "kind": "select",
       "displayed_kpi_definition": "Всі локації",
       "props": {
@@ -15377,15 +15897,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:285"
+      "evidence": "web/app/page.tsx:288"
     },
     {
-      "id": "web/app/page.tsx:11266",
+      "id": "web/app/page.tsx:11392",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 293,
+      "line": 296,
       "kind": "select",
       "displayed_kpi_definition": "Минулого року Попередній період",
       "props": {
@@ -15397,30 +15917,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:293"
+      "evidence": "web/app/page.tsx:296"
     },
     {
-      "id": "web/app/page.tsx:11497",
+      "id": "web/app/page.tsx:11623",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 299,
+      "line": 302,
       "kind": "div",
       "displayed_kpi_definition": "Застосувати",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:299"
+      "evidence": "web/app/page.tsx:302"
     },
     {
-      "id": "web/app/page.tsx:11544",
+      "id": "web/app/page.tsx:11670",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 300,
+      "line": 303,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -15429,15 +15949,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:300"
+      "evidence": "web/app/page.tsx:303"
     },
     {
-      "id": "web/app/page.tsx:11626",
+      "id": "web/app/page.tsx:11752",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 301,
+      "line": 304,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути все",
       "props": {
@@ -15446,15 +15966,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:301"
+      "evidence": "web/app/page.tsx:304"
     },
     {
-      "id": "web/app/page.tsx:11750",
+      "id": "web/app/page.tsx:11876",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 306,
+      "line": 309,
       "kind": "OverviewFreshness",
       "displayed_kpi_definition": "OverviewFreshness",
       "props": {},
@@ -15466,15 +15986,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:306"
+      "evidence": "web/app/page.tsx:309"
     },
     {
-      "id": "web/app/page.tsx:12270",
+      "id": "web/app/page.tsx:12396",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 315,
+      "line": 318,
       "kind": "div",
       "displayed_kpi_definition": "cutoff vs LFL · активна мережа",
       "props": {},
@@ -15488,30 +16008,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:315"
+      "evidence": "web/app/page.tsx:318"
     },
     {
-      "id": "web/app/page.tsx:12622",
+      "id": "web/app/page.tsx:12748",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 321,
+      "line": 324,
       "kind": "span",
       "displayed_kpi_definition": "LFL · активна мережа",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:321"
+      "evidence": "web/app/page.tsx:324"
     },
     {
-      "id": "web/app/page.tsx:12749",
+      "id": "web/app/page.tsx:12875",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 325,
+      "line": 328,
       "kind": "div",
       "displayed_kpi_definition": "ACTIVE VIEW Канал: Тип: Локація: Бренд: Власність: LFL: без закритих точок",
       "props": {},
@@ -15525,15 +16045,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:325"
+      "evidence": "web/app/page.tsx:328"
     },
     {
-      "id": "web/app/page.tsx:12871",
+      "id": "web/app/page.tsx:12997",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 327,
+      "line": 330,
       "kind": "span",
       "displayed_kpi_definition": "Канал:",
       "props": {},
@@ -15542,15 +16062,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:327"
+      "evidence": "web/app/page.tsx:330"
     },
     {
-      "id": "web/app/page.tsx:12968",
+      "id": "web/app/page.tsx:13094",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 328,
+      "line": 331,
       "kind": "span",
       "displayed_kpi_definition": "Тип:",
       "props": {},
@@ -15559,15 +16079,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:328"
+      "evidence": "web/app/page.tsx:331"
     },
     {
-      "id": "web/app/page.tsx:13064",
+      "id": "web/app/page.tsx:13190",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 329,
+      "line": 332,
       "kind": "span",
       "displayed_kpi_definition": "Локація:",
       "props": {},
@@ -15576,15 +16096,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:329"
+      "evidence": "web/app/page.tsx:332"
     },
     {
-      "id": "web/app/page.tsx:13160",
+      "id": "web/app/page.tsx:13286",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 330,
+      "line": 333,
       "kind": "span",
       "displayed_kpi_definition": "Бренд:",
       "props": {},
@@ -15593,15 +16113,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:330"
+      "evidence": "web/app/page.tsx:333"
     },
     {
-      "id": "web/app/page.tsx:13255",
+      "id": "web/app/page.tsx:13381",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 331,
+      "line": 334,
       "kind": "span",
       "displayed_kpi_definition": "Власність:",
       "props": {},
@@ -15610,30 +16130,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:331"
+      "evidence": "web/app/page.tsx:334"
     },
     {
-      "id": "web/app/page.tsx:13344",
+      "id": "web/app/page.tsx:13470",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 332,
+      "line": 335,
       "kind": "span",
       "displayed_kpi_definition": "LFL: без закритих точок",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:332"
+      "evidence": "web/app/page.tsx:335"
     },
     {
-      "id": "web/app/page.tsx:13427",
+      "id": "web/app/page.tsx:13553",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 333,
+      "line": 336,
       "kind": "Link",
       "displayed_kpi_definition": "Скинути зріз",
       "props": {
@@ -15645,15 +16165,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:333"
+      "evidence": "web/app/page.tsx:336"
     },
     {
-      "id": "web/app/page.tsx:13741",
+      "id": "web/app/page.tsx:13867",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 343,
+      "line": 346,
       "kind": "X",
       "displayed_kpi_definition": "X",
       "props": {},
@@ -15663,15 +16183,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:343"
+      "evidence": "web/app/page.tsx:346"
     },
     {
-      "id": "web/app/page.tsx:14309",
+      "id": "web/app/page.tsx:14435",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 355,
+      "line": 358,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
@@ -15680,15 +16200,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:355"
+      "evidence": "web/app/page.tsx:358"
     },
     {
-      "id": "web/app/page.tsx:14385",
+      "id": "web/app/page.tsx:14511",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 356,
+      "line": 359,
       "kind": "KpiCard",
       "displayed_kpi_definition": "KpiCard",
       "props": {},
@@ -15700,15 +16220,15 @@
       ],
       "repeat_template": "ready.snapshot.kpis",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:356"
+      "evidence": "web/app/page.tsx:359"
     },
     {
-      "id": "web/app/page.tsx:14678",
+      "id": "web/app/page.tsx:14804",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 363,
+      "line": 366,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -15724,75 +16244,100 @@
       ],
       "repeat_template": "[\"Заклад\", \"Агрегатор\", \"Доставка\"]",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:363"
+      "evidence": "web/app/page.tsx:366"
     },
     {
-      "id": "web/app/page.tsx:15301",
+      "id": "web/app/page.tsx:15427",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 380,
+      "line": 383,
       "kind": "article",
       "displayed_kpi_definition": "MULTI-YEAR DYNAMICS · · 2024–2026 Тижні (тимчасово недоступні) Періоди на графіку й у KPI різняться: графік показує 1– числа кожного року, а KPI вибраного місяця охоплює дати до . ",
       "props": {},
       "bindings": [
         "grain === \"week\" && !selectedMonth ? \"ТИЖНІ\" : selectedMonth ? \"ДНІ\" : \"МІСЯЦІ\"",
         "metricLabels[metric]",
-        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className=\"metric-pill active\" href={queryHref(filters, { grain: \"month\" })}> Місяці </Link> <span classN",
+        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className={grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"} href={queryHref(filters, { grain: \"m",
+        "isoWeeksEnabled() ? <Link className={grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"} href={queryHref(filters, { grain: \"week\" })}>ISO-тижні</Link> : (<span className=\"metr",
         "([ [\"revenue\", \"Оборот\"], [\"checks\", \"Чеки\"], [\"averageCheck\", \"Ср. чек\"], [\"markupRate\", \"Націнка %\"] ] as const).map(([value, label]) => ( <Link key={value} className={metric ===",
-        "chartHasShorterHorizon && ( <p className=\"table-note\" role=\"note\" data-testid=\"multi-year-horizon-note\"> Періоди на графіку й у KPI різняться: графік показує 1–{lastPlottedDay} чис",
-        "lastPlottedDay"
+        "ready.weekly && <WeeklyReportStatus report={ready.weekly} />"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:380"
+      "evidence": "web/app/page.tsx:383"
     },
     {
-      "id": "web/app/page.tsx:15670",
-      "paths": [
-        "/"
-      ],
-      "component": "web/app/page.tsx",
-      "line": 386,
-      "kind": "div",
-      "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
-      "props": {},
-      "bindings": [
-        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className=\"metric-pill active\" href={queryHref(filters, { grain: \"month\" })}> Місяці </Link> <span classN",
-        "([ [\"revenue\", \"Оборот\"], [\"checks\", \"Чеки\"], [\"averageCheck\", \"Ср. чек\"], [\"markupRate\", \"Націнка %\"] ] as const).map(([value, label]) => ( <Link key={value} className={metric ==="
-      ],
-      "repeat_template": null,
-      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:386"
-    },
-    {
-      "id": "web/app/page.tsx:15827",
+      "id": "web/app/page.tsx:15796",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
       "line": 389,
-      "kind": "Link",
-      "displayed_kpi_definition": "Місяці",
-      "props": {
-        "href": "{queryHref(filters, { grain: \"month\" })}"
-      },
+      "kind": "div",
+      "displayed_kpi_definition": "Тижні (тимчасово недоступні)",
+      "props": {},
       "bindings": [
-        "queryHref(filters, { grain: \"month\" })",
-        "{queryHref(filters, { grain: \"month\" })}"
+        "!selectedMonth && ( <div className=\"metric-switcher grain-switcher\"> <Link className={grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"} href={queryHref(filters, { grain: \"m",
+        "isoWeeksEnabled() ? <Link className={grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"} href={queryHref(filters, { grain: \"week\" })}>ISO-тижні</Link> : (<span className=\"metr",
+        "([ [\"revenue\", \"Оборот\"], [\"checks\", \"Чеки\"], [\"averageCheck\", \"Ср. чек\"], [\"markupRate\", \"Націнка %\"] ] as const).map(([value, label]) => ( <Link key={value} className={metric ==="
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
       "evidence": "web/app/page.tsx:389"
     },
     {
-      "id": "web/app/page.tsx:16673",
+      "id": "web/app/page.tsx:15953",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 408,
+      "line": 392,
+      "kind": "Link",
+      "displayed_kpi_definition": "Місяці",
+      "props": {
+        "href": "{queryHref(filters, { grain: \"month\" })}"
+      },
+      "bindings": [
+        "grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"",
+        "queryHref(filters, { grain: \"month\" })",
+        "{grain === \"month\" ? \"metric-pill active\" : \"metric-pill\"}",
+        "{queryHref(filters, { grain: \"month\" })}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:392"
+    },
+    {
+      "id": "web/app/page.tsx:16173",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 395,
+      "kind": "Link",
+      "displayed_kpi_definition": "ISO-тижні",
+      "props": {
+        "href": "{queryHref(filters, { grain: \"week\" })}"
+      },
+      "bindings": [
+        "grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"",
+        "queryHref(filters, { grain: \"week\" })",
+        "{grain === \"week\" ? \"metric-pill active\" : \"metric-pill\"}",
+        "{queryHref(filters, { grain: \"week\" })}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:395"
+    },
+    {
+      "id": "web/app/page.tsx:16999",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 411,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -15808,15 +16353,33 @@
       ],
       "repeat_template": "([ [\"revenue\", \"Оборот\"], [\"checks\", \"Чеки\"], [\"averageCheck\", \"Ср. чек\"], [\"markupRate\", \"Націнка %\"] ] as const)",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:408"
+      "evidence": "web/app/page.tsx:411"
     },
     {
-      "id": "web/app/page.tsx:17047",
+      "id": "web/app/page.tsx:17390",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 419,
+      "line": 422,
+      "kind": "WeeklyReportStatus",
+      "displayed_kpi_definition": "WeeklyReportStatus",
+      "props": {},
+      "bindings": [
+        "ready.weekly",
+        "{ready.weekly}"
+      ],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/page.tsx:422"
+    },
+    {
+      "id": "web/app/page.tsx:17448",
+      "paths": [
+        "/"
+      ],
+      "component": "web/app/page.tsx",
+      "line": 423,
       "kind": "MultiYearMetricChart",
       "displayed_kpi_definition": "MultiYearMetricChart",
       "props": {
@@ -15824,23 +16387,23 @@
       },
       "bindings": [
         "ready.multiYearData",
-        "years",
+        "ready.weekly?.years ?? years",
         "metric",
         "{ready.multiYearData}",
-        "{years}",
+        "{ready.weekly?.years ?? years}",
         "{metric}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:419"
+      "evidence": "web/app/page.tsx:423"
     },
     {
-      "id": "web/app/page.tsx:17238",
+      "id": "web/app/page.tsx:17662",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 425,
+      "line": 429,
       "kind": "p",
       "displayed_kpi_definition": "Періоди на графіку й у KPI різняться: графік показує 1– числа кожного року, а KPI вибраного місяця охоплює дати до . Дні – на графіку відсутні, хоча місячний KPI охоплює також ці д",
       "props": {},
@@ -15853,15 +16416,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:425"
+      "evidence": "web/app/page.tsx:429"
     },
     {
-      "id": "web/app/page.tsx:17842",
+      "id": "web/app/page.tsx:18266",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 435,
+      "line": 439,
       "kind": "article",
       "displayed_kpi_definition": "STRUCTURE Канали продажів",
       "props": {},
@@ -15870,15 +16433,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:435"
+      "evidence": "web/app/page.tsx:439"
     },
     {
-      "id": "web/app/page.tsx:18083",
+      "id": "web/app/page.tsx:18507",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 442,
+      "line": 446,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -15887,15 +16450,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:442"
+      "evidence": "web/app/page.tsx:446"
     },
     {
-      "id": "web/app/page.tsx:18188",
+      "id": "web/app/page.tsx:18612",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 444,
+      "line": 448,
       "kind": "Link",
       "displayed_kpi_definition": "· чеків · ср. чек %",
       "props": {
@@ -15911,15 +16474,15 @@
       ],
       "repeat_template": "ready.snapshot.channels",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:444"
+      "evidence": "web/app/page.tsx:448"
     },
     {
-      "id": "web/app/page.tsx:19409",
+      "id": "web/app/page.tsx:19833",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 472,
+      "line": 476,
       "kind": "ChannelMixChart",
       "displayed_kpi_definition": "ChannelMixChart",
       "props": {},
@@ -15929,15 +16492,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:472"
+      "evidence": "web/app/page.tsx:476"
     },
     {
-      "id": "web/app/page.tsx:19542",
+      "id": "web/app/page.tsx:19966",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 476,
+      "line": 480,
       "kind": "article",
       "displayed_kpi_definition": "GROWTH DECOMPOSITION Що зробило зміну обороту Δ Ефект чеків зміна кількості чеків × базовий ср. чек Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -15951,15 +16514,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:476"
+      "evidence": "web/app/page.tsx:480"
     },
     {
-      "id": "web/app/page.tsx:19981",
+      "id": "web/app/page.tsx:20405",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 487,
+      "line": 491,
       "kind": "div",
       "displayed_kpi_definition": "Ефект чеків зміна кількості чеків × базовий ср. чек Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -15973,15 +16536,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:487"
+      "evidence": "web/app/page.tsx:491"
     },
     {
-      "id": "web/app/page.tsx:20033",
+      "id": "web/app/page.tsx:20457",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 488,
+      "line": 492,
       "kind": "div",
       "displayed_kpi_definition": "Ефект чеків зміна кількості чеків × базовий ср. чек",
       "props": {},
@@ -15992,15 +16555,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:488"
+      "evidence": "web/app/page.tsx:492"
     },
     {
-      "id": "web/app/page.tsx:20458",
+      "id": "web/app/page.tsx:20882",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 495,
+      "line": 499,
       "kind": "div",
       "displayed_kpi_definition": "Ефект середнього чека поточні чеки × зміна ср. чека",
       "props": {},
@@ -16011,15 +16574,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:495"
+      "evidence": "web/app/page.tsx:499"
     },
     {
-      "id": "web/app/page.tsx:20938",
+      "id": "web/app/page.tsx:21362",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 505,
+      "line": 509,
       "kind": "article",
       "displayed_kpi_definition": "CONTRIBUTION TO GROWTH Хто дав зміну",
       "props": {},
@@ -16033,15 +16596,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:505"
+      "evidence": "web/app/page.tsx:509"
     },
     {
-      "id": "web/app/page.tsx:21191",
+      "id": "web/app/page.tsx:21615",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 513,
+      "line": 517,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -16055,15 +16618,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:513"
+      "evidence": "web/app/page.tsx:517"
     },
     {
-      "id": "web/app/page.tsx:22275",
+      "id": "web/app/page.tsx:22699",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 537,
+      "line": 541,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -16077,15 +16640,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:537"
+      "evidence": "web/app/page.tsx:541"
     },
     {
-      "id": "web/app/page.tsx:23366",
+      "id": "web/app/page.tsx:23790",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 562,
+      "line": 566,
       "kind": "div",
       "displayed_kpi_definition": "Місяць Оборот YoY Чеки YoY Ср. чек Націнка % Заклад % Агр. % Доставка %",
       "props": {},
@@ -16094,15 +16657,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:562"
+      "evidence": "web/app/page.tsx:566"
     },
     {
-      "id": "web/app/page.tsx:23420",
+      "id": "web/app/page.tsx:23844",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 563,
+      "line": 567,
       "kind": "div",
       "displayed_kpi_definition": "Місяць Оборот YoY Чеки YoY Ср. чек Націнка % Заклад % Агр. % Доставка %",
       "props": {},
@@ -16111,15 +16674,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:563"
+      "evidence": "web/app/page.tsx:567"
     },
     {
-      "id": "web/app/page.tsx:24004",
+      "id": "web/app/page.tsx:24428",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 578,
+      "line": 582,
       "kind": "Link",
       "displayed_kpi_definition": "Link",
       "props": {
@@ -16135,30 +16698,30 @@
       ],
       "repeat_template": "ready.snapshot.monthlyTable",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:578"
+      "evidence": "web/app/page.tsx:582"
     },
     {
-      "id": "web/app/page.tsx:25242",
+      "id": "web/app/page.tsx:25666",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 601,
+      "line": 605,
       "kind": "small",
       "displayed_kpi_definition": "* неповний місяць — порівняння вирівняне по тому самому cutoff.",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:601"
+      "evidence": "web/app/page.tsx:605"
     },
     {
-      "id": "web/app/page.tsx:25436",
+      "id": "web/app/page.tsx:25860",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 606,
+      "line": 610,
       "kind": "article",
       "displayed_kpi_definition": "LOCATIONS · Внесок точок TOP Локація Оборот Δ Частка",
       "props": {},
@@ -16170,15 +16733,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:606"
+      "evidence": "web/app/page.tsx:610"
     },
     {
-      "id": "web/app/page.tsx:25740",
+      "id": "web/app/page.tsx:26164",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 613,
+      "line": 617,
       "kind": "Link",
       "displayed_kpi_definition": "Всі локації →",
       "props": {
@@ -16190,15 +16753,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:613"
+      "evidence": "web/app/page.tsx:617"
     },
     {
-      "id": "web/app/page.tsx:26002",
+      "id": "web/app/page.tsx:26426",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 619,
+      "line": 623,
       "kind": "div",
       "displayed_kpi_definition": "Локація Оборот Δ Частка",
       "props": {},
@@ -16207,30 +16770,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:619"
+      "evidence": "web/app/page.tsx:623"
     },
     {
-      "id": "web/app/page.tsx:26049",
+      "id": "web/app/page.tsx:26473",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 620,
+      "line": 624,
       "kind": "div",
       "displayed_kpi_definition": "Локація Оборот Δ Частка",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:620"
+      "evidence": "web/app/page.tsx:624"
     },
     {
-      "id": "web/app/page.tsx:26274",
+      "id": "web/app/page.tsx:26698",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 624,
+      "line": 628,
       "kind": "Link",
       "displayed_kpi_definition": "%",
       "props": {
@@ -16246,15 +16809,15 @@
       ],
       "repeat_template": "ready.snapshot.locations",
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:624"
+      "evidence": "web/app/page.tsx:628"
     },
     {
-      "id": "web/app/page.tsx:26982",
+      "id": "web/app/page.tsx:27406",
       "paths": [
         "/"
       ],
       "component": "web/app/page.tsx",
-      "line": 642,
+      "line": 646,
       "kind": "article",
       "displayed_kpi_definition": "Що потребує уваги 1",
       "props": {},
@@ -16265,7 +16828,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/page.tsx:642"
+      "evidence": "web/app/page.tsx:646"
     },
     {
       "id": "web/components/ChannelMixChart.tsx:294",
@@ -16485,12 +17048,12 @@
       "evidence": "web/components/OverviewFreshness.tsx:46"
     },
     {
-      "id": "web/app/pnl/page.tsx:2073",
+      "id": "web/app/pnl/page.tsx:2160",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 81,
+      "line": 83,
       "kind": "article",
       "displayed_kpi_definition": "до плану YoY",
       "props": {},
@@ -16504,15 +17067,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:81"
+      "evidence": "web/app/pnl/page.tsx:83"
     },
     {
-      "id": "web/app/pnl/page.tsx:2223",
+      "id": "web/app/pnl/page.tsx:2310",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 85,
+      "line": 87,
       "kind": "div",
       "displayed_kpi_definition": "до плану YoY",
       "props": {},
@@ -16524,15 +17087,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:85"
+      "evidence": "web/app/pnl/page.tsx:87"
     },
     {
-      "id": "web/app/pnl/page.tsx:2761",
+      "id": "web/app/pnl/page.tsx:2848",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 105,
+      "line": 107,
       "kind": "div",
       "displayed_kpi_definition": "div",
       "props": {},
@@ -16544,15 +17107,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:105"
+      "evidence": "web/app/pnl/page.tsx:107"
     },
     {
-      "id": "web/app/pnl/page.tsx:3181",
+      "id": "web/app/pnl/page.tsx:3273",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 131,
+      "line": 133,
       "kind": "article",
       "displayed_kpi_definition": "від виручки План · YoY",
       "props": {},
@@ -16566,15 +17129,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:131"
+      "evidence": "web/app/pnl/page.tsx:133"
     },
     {
-      "id": "web/app/pnl/page.tsx:4208",
+      "id": "web/app/pnl/page.tsx:4312",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 169,
+      "line": 171,
       "kind": "article",
       "displayed_kpi_definition": "Операційний результат до плану · до 2025 Виручка Валова маржа Операційні витрати Рентабельність (EBITDA %) Комісія Просування Комісія + просування ФОТ каналу ФОТ каналу Маркетинг I",
       "props": {},
@@ -16588,15 +17151,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:169"
+      "evidence": "web/app/pnl/page.tsx:171"
     },
     {
-      "id": "web/app/pnl/page.tsx:6597",
+      "id": "web/app/pnl/page.tsx:6708",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 229,
+      "line": 231,
       "kind": "DashboardSidebar",
       "displayed_kpi_definition": "DashboardSidebar",
       "props": {},
@@ -16606,17 +17169,17 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:229"
+      "evidence": "web/app/pnl/page.tsx:231"
     },
     {
-      "id": "web/app/pnl/page.tsx:7428",
+      "id": "web/app/pnl/page.tsx:7539",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 253,
+      "line": 255,
       "kind": "form",
-      "displayed_kpi_definition": "Період Від До Застосувати Весь період Знімок даних · по серпень 2026",
+      "displayed_kpi_definition": "Період Від До Застосувати Весь період Знімок даних · по вересень 2026",
       "props": {
         "action": "\"/pnl\"",
         "method": "\"get\""
@@ -16630,30 +17193,30 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:253"
+      "evidence": "web/app/pnl/page.tsx:255"
     },
     {
-      "id": "web/app/pnl/page.tsx:7499",
+      "id": "web/app/pnl/page.tsx:7610",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 254,
+      "line": 256,
       "kind": "div",
       "displayed_kpi_definition": "Період",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:254"
+      "evidence": "web/app/pnl/page.tsx:256"
     },
     {
-      "id": "web/app/pnl/page.tsx:7546",
+      "id": "web/app/pnl/page.tsx:7657",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 255,
+      "line": 257,
       "kind": "Filter",
       "displayed_kpi_definition": "Filter",
       "props": {},
@@ -16663,15 +17226,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:255"
+      "evidence": "web/app/pnl/page.tsx:257"
     },
     {
-      "id": "web/app/pnl/page.tsx:7674",
+      "id": "web/app/pnl/page.tsx:7785",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 260,
+      "line": 262,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -16686,15 +17249,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:260"
+      "evidence": "web/app/pnl/page.tsx:262"
     },
     {
-      "id": "web/app/pnl/page.tsx:7961",
+      "id": "web/app/pnl/page.tsx:8072",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 268,
+      "line": 270,
       "kind": "select",
       "displayed_kpi_definition": "select",
       "props": {
@@ -16709,15 +17272,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:268"
+      "evidence": "web/app/pnl/page.tsx:270"
     },
     {
-      "id": "web/app/pnl/page.tsx:8196",
+      "id": "web/app/pnl/page.tsx:8307",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 274,
+      "line": 276,
       "kind": "button",
       "displayed_kpi_definition": "Застосувати",
       "props": {
@@ -16726,15 +17289,15 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:274"
+      "evidence": "web/app/pnl/page.tsx:276"
     },
     {
-      "id": "web/app/pnl/page.tsx:8274",
+      "id": "web/app/pnl/page.tsx:8385",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 275,
+      "line": 277,
       "kind": "a",
       "displayed_kpi_definition": "Весь період",
       "props": {
@@ -16743,45 +17306,75 @@
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:275"
+      "evidence": "web/app/pnl/page.tsx:277"
     },
     {
-      "id": "web/app/pnl/page.tsx:8340",
+      "id": "web/app/pnl/page.tsx:8451",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 276,
+      "line": 278,
       "kind": "div",
-      "displayed_kpi_definition": "Знімок даних · по серпень 2026",
+      "displayed_kpi_definition": "Знімок даних · по вересень 2026",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:276"
+      "evidence": "web/app/pnl/page.tsx:278"
     },
     {
-      "id": "web/app/pnl/page.tsx:8435",
+      "id": "web/app/pnl/page.tsx:8580",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 279,
+      "line": 281,
+      "kind": "p",
+      "displayed_kpi_definition": "Порівняння з 2025 недоступне: у джерелі немає вересня 2025. Для YoY оберіть період до серпня.",
+      "props": {},
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/pnl/page.tsx:281"
+    },
+    {
+      "id": "web/app/pnl/page.tsx:8750",
+      "paths": [
+        "/pnl"
+      ],
+      "component": "web/app/pnl/page.tsx",
+      "line": 284,
+      "kind": "p",
+      "displayed_kpi_definition": "Січень–серпень збережено зі знімка 14.10; вересень додано 17.11. Історичні перерахунки джерела ще не застосовані. Комісія агрегаторів у цьому звіті врахована один раз в OPEX; у дже",
+      "props": {},
+      "bindings": [],
+      "repeat_template": null,
+      "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
+      "evidence": "web/app/pnl/page.tsx:284"
+    },
+    {
+      "id": "web/app/pnl/page.tsx:9039",
+      "paths": [
+        "/pnl"
+      ],
+      "component": "web/app/pnl/page.tsx",
+      "line": 289,
       "kind": "section",
       "displayed_kpi_definition": "section",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:279"
+      "evidence": "web/app/pnl/page.tsx:289"
     },
     {
-      "id": "web/app/pnl/page.tsx:8480",
+      "id": "web/app/pnl/page.tsx:9084",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 280,
+      "line": 290,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"Виручка\"",
       "props": {
@@ -16790,22 +17383,22 @@
       "bindings": [
         "fact.revenue",
         "plan.revenue",
-        "ly.revenue",
+        "ly?.revenue??null",
         "{fact.revenue}",
         "{plan.revenue}",
-        "{ly.revenue}"
+        "{ly?.revenue??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:280"
+      "evidence": "web/app/pnl/page.tsx:290"
     },
     {
-      "id": "web/app/pnl/page.tsx:8610",
+      "id": "web/app/pnl/page.tsx:9221",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 281,
+      "line": 291,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"Валовий прибуток\"",
       "props": {
@@ -16814,22 +17407,22 @@
       "bindings": [
         "fact.markup",
         "plan.markup",
-        "ly.markup",
+        "ly?.markup??null",
         "{fact.markup}",
         "{plan.markup}",
-        "{ly.markup}"
+        "{ly?.markup??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:281"
+      "evidence": "web/app/pnl/page.tsx:291"
     },
     {
-      "id": "web/app/pnl/page.tsx:8746",
+      "id": "web/app/pnl/page.tsx:9364",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 282,
+      "line": 292,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"Валова маржа\"",
       "props": {
@@ -16838,22 +17431,22 @@
       "bindings": [
         "fact.markupRate",
         "plan.markupRate",
-        "ly.markupRate",
+        "ly?.markupRate??null",
         "{fact.markupRate}",
         "{plan.markupRate}",
-        "{ly.markupRate}"
+        "{ly?.markupRate??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:282"
+      "evidence": "web/app/pnl/page.tsx:292"
     },
     {
-      "id": "web/app/pnl/page.tsx:8888",
+      "id": "web/app/pnl/page.tsx:9513",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 283,
+      "line": 293,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"Операційні витрати (OPEX)\"",
       "props": {
@@ -16862,22 +17455,22 @@
       "bindings": [
         "fact.operatingExpenses",
         "plan.operatingExpenses",
-        "ly.operatingExpenses",
+        "ly?.operatingExpenses??null",
         "false",
         "{fact.operatingExpenses}",
         "{plan.operatingExpenses}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:283"
+      "evidence": "web/app/pnl/page.tsx:293"
     },
     {
-      "id": "web/app/pnl/page.tsx:9082",
+      "id": "web/app/pnl/page.tsx:9714",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 284,
+      "line": 294,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"Операційний результат (EBITDA)\"",
       "props": {
@@ -16886,22 +17479,22 @@
       "bindings": [
         "fact.profit",
         "plan.profit",
-        "ly.profit",
+        "ly?.profit??null",
         "{fact.profit}",
         "{plan.profit}",
-        "{ly.profit}"
+        "{ly?.profit??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:284"
+      "evidence": "web/app/pnl/page.tsx:294"
     },
     {
-      "id": "web/app/pnl/page.tsx:9221",
+      "id": "web/app/pnl/page.tsx:9860",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 285,
+      "line": 295,
       "kind": "Kpi",
       "displayed_kpi_definition": "\"EBITDA % від виручки\"",
       "props": {
@@ -16910,22 +17503,22 @@
       "bindings": [
         "fact.profitRate",
         "plan.profitRate",
-        "ly.profitRate",
+        "ly?.profitRate??null",
         "{fact.profitRate}",
         "{plan.profitRate}",
-        "{ly.profitRate}"
+        "{ly?.profitRate??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:285"
+      "evidence": "web/app/pnl/page.tsx:295"
     },
     {
-      "id": "web/app/pnl/page.tsx:9440",
+      "id": "web/app/pnl/page.tsx:10086",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 289,
+      "line": 299,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"Операційні витрати / виручка\"",
       "props": {
@@ -16938,15 +17531,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:289"
+      "evidence": "web/app/pnl/page.tsx:299"
     },
     {
-      "id": "web/app/pnl/page.tsx:9554",
+      "id": "web/app/pnl/page.tsx:10200",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 290,
+      "line": 300,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"ФОТ / виручка\"",
       "props": {
@@ -16959,15 +17552,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:290"
+      "evidence": "web/app/pnl/page.tsx:300"
     },
     {
-      "id": "web/app/pnl/page.tsx:9688",
+      "id": "web/app/pnl/page.tsx:10334",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 291,
+      "line": 301,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"Маркетинг / виручка\"",
       "props": {
@@ -16980,15 +17573,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:291"
+      "evidence": "web/app/pnl/page.tsx:301"
     },
     {
-      "id": "web/app/pnl/page.tsx:9836",
+      "id": "web/app/pnl/page.tsx:10482",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 292,
+      "line": 302,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"Частка доставки\"",
       "props": {
@@ -17001,15 +17594,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:292"
+      "evidence": "web/app/pnl/page.tsx:302"
     },
     {
-      "id": "web/app/pnl/page.tsx:9966",
+      "id": "web/app/pnl/page.tsx:10612",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 293,
+      "line": 303,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"Частка агрегаторів\"",
       "props": {
@@ -17022,15 +17615,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:293"
+      "evidence": "web/app/pnl/page.tsx:303"
     },
     {
-      "id": "web/app/pnl/page.tsx:10102",
+      "id": "web/app/pnl/page.tsx:10748",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 294,
+      "line": 304,
       "kind": "ReferenceMetric",
       "displayed_kpi_definition": "\"Комісія + просування\"",
       "props": {
@@ -17043,15 +17636,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:294"
+      "evidence": "web/app/pnl/page.tsx:304"
     },
     {
-      "id": "web/app/pnl/page.tsx:10310",
+      "id": "web/app/pnl/page.tsx:10956",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 298,
+      "line": 308,
       "kind": "ChannelCard",
       "displayed_kpi_definition": "\"Доставка\"",
       "props": {
@@ -17060,22 +17653,22 @@
       "bindings": [
         "fact.delivery",
         "plan.delivery",
-        "ly.delivery",
+        "ly?.delivery??null",
         "{fact.delivery}",
         "{plan.delivery}",
-        "{ly.delivery}"
+        "{ly?.delivery??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:298"
+      "evidence": "web/app/pnl/page.tsx:308"
     },
     {
-      "id": "web/app/pnl/page.tsx:10512",
+      "id": "web/app/pnl/page.tsx:11165",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 305,
+      "line": 315,
       "kind": "ChannelCard",
       "displayed_kpi_definition": "\"Агрегатори\"",
       "props": {
@@ -17084,22 +17677,22 @@
       "bindings": [
         "fact.aggregators",
         "plan.aggregators",
-        "ly.aggregators",
+        "ly?.aggregators??null",
         "{fact.aggregators}",
         "{plan.aggregators}",
-        "{ly.aggregators}"
+        "{ly?.aggregators??null}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:305"
+      "evidence": "web/app/pnl/page.tsx:315"
     },
     {
-      "id": "web/app/pnl/page.tsx:11021",
+      "id": "web/app/pnl/page.tsx:11681",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 321,
+      "line": 331,
       "kind": "span",
       "displayed_kpi_definition": "span",
       "props": {},
@@ -17108,15 +17701,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:321"
+      "evidence": "web/app/pnl/page.tsx:331"
     },
     {
-      "id": "web/app/pnl/page.tsx:11113",
+      "id": "web/app/pnl/page.tsx:11773",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 323,
+      "line": 333,
       "kind": "PnlTrendChart",
       "displayed_kpi_definition": "PnlTrendChart",
       "props": {},
@@ -17126,15 +17719,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:323"
+      "evidence": "web/app/pnl/page.tsx:333"
     },
     {
-      "id": "web/app/pnl/page.tsx:11508",
+      "id": "web/app/pnl/page.tsx:12168",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 335,
+      "line": 345,
       "kind": "CostCard",
       "displayed_kpi_definition": "\"ФОТ\"",
       "props": {
@@ -17143,22 +17736,22 @@
       "bindings": [
         "fact.expenseGroups.fot",
         "plan.expenseGroups.fot",
-        "ly.expenseGroups.fot",
+        "ly?.expenseGroups.fot??null",
         "fact.revenue",
         "{fact.expenseGroups.fot}",
         "{plan.expenseGroups.fot}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:335"
+      "evidence": "web/app/pnl/page.tsx:345"
     },
     {
-      "id": "web/app/pnl/page.tsx:11651",
+      "id": "web/app/pnl/page.tsx:12318",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 336,
+      "line": 346,
       "kind": "CostCard",
       "displayed_kpi_definition": "\"Маркетинг\"",
       "props": {
@@ -17167,22 +17760,22 @@
       "bindings": [
         "fact.expenseGroups.marketing",
         "plan.expenseGroups.marketing",
-        "ly.expenseGroups.marketing",
+        "ly?.expenseGroups.marketing??null",
         "fact.revenue",
         "{fact.expenseGroups.marketing}",
         "{plan.expenseGroups.marketing}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:336"
+      "evidence": "web/app/pnl/page.tsx:346"
     },
     {
-      "id": "web/app/pnl/page.tsx:11818",
+      "id": "web/app/pnl/page.tsx:12492",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 337,
+      "line": 347,
       "kind": "CostCard",
       "displayed_kpi_definition": "\"IT та сервіси\"",
       "props": {
@@ -17191,22 +17784,22 @@
       "bindings": [
         "fact.expenseGroups.digitalServices",
         "plan.expenseGroups.digitalServices",
-        "ly.expenseGroups.digitalServices",
+        "ly?.expenseGroups.digitalServices??null",
         "fact.revenue",
         "{fact.expenseGroups.digitalServices}",
         "{plan.expenseGroups.digitalServices}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:337"
+      "evidence": "web/app/pnl/page.tsx:347"
     },
     {
-      "id": "web/app/pnl/page.tsx:12007",
+      "id": "web/app/pnl/page.tsx:12688",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 338,
+      "line": 348,
       "kind": "CostCard",
       "displayed_kpi_definition": "\"Витрати доставки\"",
       "props": {
@@ -17215,22 +17808,22 @@
       "bindings": [
         "fact.expenseGroups.deliveryOperations",
         "plan.expenseGroups.deliveryOperations",
-        "ly.expenseGroups.deliveryOperations",
+        "ly?.expenseGroups.deliveryOperations??null",
         "fact.revenue",
         "{fact.expenseGroups.deliveryOperations}",
         "{plan.expenseGroups.deliveryOperations}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:338"
+      "evidence": "web/app/pnl/page.tsx:348"
     },
     {
-      "id": "web/app/pnl/page.tsx:12208",
+      "id": "web/app/pnl/page.tsx:12896",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 339,
+      "line": 349,
       "kind": "CostCard",
       "displayed_kpi_definition": "\"Витрати агрегаторів\"",
       "props": {
@@ -17239,37 +17832,37 @@
       "bindings": [
         "fact.expenseGroups.aggregatorCosts",
         "plan.expenseGroups.aggregatorCosts",
-        "ly.expenseGroups.aggregatorCosts",
+        "ly?.expenseGroups.aggregatorCosts??null",
         "fact.revenue",
         "{fact.expenseGroups.aggregatorCosts}",
         "{plan.expenseGroups.aggregatorCosts}"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:339"
+      "evidence": "web/app/pnl/page.tsx:349"
     },
     {
-      "id": "web/app/pnl/page.tsx:12682",
+      "id": "web/app/pnl/page.tsx:13377",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 348,
+      "line": 358,
       "kind": "span",
       "displayed_kpi_definition": "Знімок даних · План / Факт / 2025",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:348"
+      "evidence": "web/app/pnl/page.tsx:358"
     },
     {
-      "id": "web/app/pnl/page.tsx:12831",
+      "id": "web/app/pnl/page.tsx:13526",
       "paths": [
         "/pnl"
       ],
       "component": "web/app/pnl/page.tsx",
-      "line": 352,
+      "line": 362,
       "kind": "div",
       "displayed_kpi_definition": "Стаття Факт 2026 План 2026 Δ грн Δ % Факт 2025 до 2025",
       "props": {},
@@ -17283,10 +17876,10 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/app/pnl/page.tsx:352"
+      "evidence": "web/app/pnl/page.tsx:362"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2086",
+      "id": "web/components/PnlTrendChart.tsx:2111",
       "paths": [
         "/pnl"
       ],
@@ -17310,7 +17903,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:70"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2365",
+      "id": "web/components/PnlTrendChart.tsx:2390",
       "paths": [
         "/pnl"
       ],
@@ -17328,7 +17921,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:80"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2674",
+      "id": "web/components/PnlTrendChart.tsx:2699",
       "paths": [
         "/pnl"
       ],
@@ -17343,7 +17936,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:87"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2726",
+      "id": "web/components/PnlTrendChart.tsx:2751",
       "paths": [
         "/pnl"
       ],
@@ -17361,7 +17954,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:88"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2784",
+      "id": "web/components/PnlTrendChart.tsx:2809",
       "paths": [
         "/pnl"
       ],
@@ -17379,7 +17972,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:89"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2820",
+      "id": "web/components/PnlTrendChart.tsx:2845",
       "paths": [
         "/pnl"
       ],
@@ -17397,7 +17990,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:90"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2884",
+      "id": "web/components/PnlTrendChart.tsx:2909",
       "paths": [
         "/pnl"
       ],
@@ -17415,7 +18008,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:91"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:2973",
+      "id": "web/components/PnlTrendChart.tsx:2998",
       "paths": [
         "/pnl"
       ],
@@ -17437,7 +18030,7 @@
       "evidence": "web/components/PnlTrendChart.tsx:92"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:3434",
+      "id": "web/components/PnlTrendChart.tsx:3459",
       "paths": [
         "/pnl"
       ],
@@ -17447,9 +18040,9 @@
       "displayed_kpi_definition": "Tooltip",
       "props": {},
       "bindings": [
-        "(raw,name)=>{ const value=Number(raw); return [ config.rate ? `${(value*100).toFixed(1)}%` : `₴ ${Math.round(value).toLocaleString(\"uk-UA\")}`, String(name) ]; }",
+        "(raw,name)=>{ if(raw===null||raw===undefined) return [\"—\",String(name)]; const value=Number(raw); return [ config.rate ? `${(value*100).toFixed(1)}%` : `₴ ${Math.round(value).toLoc",
         "{ background:\"#111720\", border:\"1px solid #29313d\", borderRadius:12 }",
-        "{(raw,name)=>{ const value=Number(raw); return [ config.rate ? `${(value*100).toFixed(1)}%` : `₴ ${Math.round(value).toLocaleString(\"uk-UA\")}`, String(name) ]; }}",
+        "{(raw,name)=>{ if(raw===null||raw===undefined) return [\"—\",String(name)]; const value=Number(raw); return [ config.rate ? `${(value*100).toFixed(1)}%` : `₴ ${Math.round(value).toLo",
         "{{ background:\"#111720\", border:\"1px solid #29313d\", borderRadius:12 }}"
       ],
       "repeat_template": null,
@@ -17457,27 +18050,27 @@
       "evidence": "web/components/PnlTrendChart.tsx:104"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:3916",
+      "id": "web/components/PnlTrendChart.tsx:4016",
       "paths": [
         "/pnl"
       ],
       "component": "web/components/PnlTrendChart.tsx",
-      "line": 118,
+      "line": 119,
       "kind": "Legend",
       "displayed_kpi_definition": "Legend",
       "props": {},
       "bindings": [],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/PnlTrendChart.tsx:118"
+      "evidence": "web/components/PnlTrendChart.tsx:119"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:3939",
+      "id": "web/components/PnlTrendChart.tsx:4039",
       "paths": [
         "/pnl"
       ],
       "component": "web/components/PnlTrendChart.tsx",
-      "line": 119,
+      "line": 120,
       "kind": "Line",
       "displayed_kpi_definition": "Line",
       "props": {
@@ -17494,15 +18087,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/PnlTrendChart.tsx:119"
+      "evidence": "web/components/PnlTrendChart.tsx:120"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:4159",
+      "id": "web/components/PnlTrendChart.tsx:4259",
       "paths": [
         "/pnl"
       ],
       "component": "web/components/PnlTrendChart.tsx",
-      "line": 127,
+      "line": 128,
       "kind": "Line",
       "displayed_kpi_definition": "Line",
       "props": {
@@ -17519,15 +18112,15 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/PnlTrendChart.tsx:127"
+      "evidence": "web/components/PnlTrendChart.tsx:128"
     },
     {
-      "id": "web/components/PnlTrendChart.tsx:4422",
+      "id": "web/components/PnlTrendChart.tsx:4522",
       "paths": [
         "/pnl"
       ],
       "component": "web/components/PnlTrendChart.tsx",
-      "line": 136,
+      "line": 137,
       "kind": "Line",
       "displayed_kpi_definition": "Line",
       "props": {
@@ -17544,7 +18137,7 @@
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
-      "evidence": "web/components/PnlTrendChart.tsx:136"
+      "evidence": "web/components/PnlTrendChart.tsx:137"
     }
   ]
 }
