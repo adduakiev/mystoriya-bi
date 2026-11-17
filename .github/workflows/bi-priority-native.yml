@@ -14,6 +14,7 @@ permissions:
 env:
   BI_ISO_WEEKS_V1: '1'
   BI_AGGREGATORS_FILTERS_V3: '1'
+  BI_DYNAMICS_PERIOD_COMPARISON_V1: '1'
 
 concurrency:
   group: bi-priority-native-${{ github.ref }}
