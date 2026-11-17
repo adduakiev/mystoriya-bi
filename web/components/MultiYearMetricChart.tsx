@@ -10,17 +10,20 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { isoWeekDateRange } from "@/lib/iso-week-dates";
 
 const PALETTE = ["#f5a623", "#61a9ff", "#c7ced8", "#57d38c", "#d78cff"];
 
 export function MultiYearMetricChart({
   data,
   years,
-  metric
+  metric,
+  weekDateYear
 }: {
   data: Array<Record<string, string | number | null>>;
   years: number[];
   metric: "revenue" | "checks" | "averageCheck" | "markupRate";
+  weekDateYear?: number;
 }) {
   const formatValue = (value: number) => {
     if (metric === "markupRate") return `${value.toFixed(1)}%`;
@@ -52,6 +55,11 @@ export function MultiYearMetricChart({
             tickFormatter={tick}
           />
           <Tooltip
+            labelFormatter={weekDateYear === undefined ? undefined : (label) => {
+              const dates = isoWeekDateRange(weekDateYear, String(label));
+              return dates ? `${dates.fullLabel} · ISO-рік ${weekDateYear}`
+                : `${String(label)} · ISO-рік ${weekDateYear} · дати недоступні`;
+            }}
             formatter={(value, name) => {
               const numeric = typeof value === "number" ? value
                 : typeof value === "string" && value.trim() ? Number(value) : NaN;

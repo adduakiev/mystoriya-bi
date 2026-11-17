@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - codex/bi-priorities-20261117
+      - codex/dynamics-periods-20261117
 
 permissions:
   contents: read
@@ -85,6 +86,7 @@ jobs:
         run: |
           npm run check
           node scripts/bi-priority-sql-fixtures.mjs
+          node scripts/dynamics-period-sql-fixture.mjs
           git diff --check
 
   # Exact-SHA PostgreSQL 17 major-version parity: deliberately sequenced
@@ -152,4 +154,5 @@ jobs:
           test "$(/usr/lib/postgresql/17/bin/pg_config --version | cut -d' ' -f2 | cut -d. -f1)" = 17
           npm run check
           node scripts/bi-priority-sql-fixtures.mjs
+          node scripts/dynamics-period-sql-fixture.mjs
           git diff --check

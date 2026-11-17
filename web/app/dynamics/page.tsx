@@ -1,3 +1,7 @@
+import { isoWeekDateRange } from "@/lib/iso-week-dates";
+import { dynamicsComparisonEnabled } from "@/lib/dynamics-comparison";
+import { loadDynamicsComparison } from "@/lib/data/dynamics-comparison";
+import { DynamicsComparisonCell } from "@/components/DynamicsComparisonCell";
 import { isoWeeksEnabled } from "@/lib/iso-week-contract";
 import { WeeklyReportStatus, WeeklyReportUnavailable } from "@/components/WeeklyReportStatus";
 import Link from "next/link";
@@ -73,9 +77,9 @@ function pct(current: number | null, previous: number | null): number | null {
   return ((current / previous) - 1) * 100;
 }
 
-function formatDelta(value: number | null): string {
+function formatDelta(value: number | null, metric: MetricMode): string {
   if (value === null) return "—";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
+  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}${metric === "markupRate" ? " п.п." : "%"}`;
 }
 
 function formatMetric(value: number | null, metric: MetricMode): string {
@@ -160,6 +164,11 @@ export default async function DynamicsPage({
     totalGrowth
   } = result;
 
+  const showPeriodComparison = dynamicsComparisonEnabled() && latestYear >= 2026;
+  const comparison = showPeriodComparison && result.source === "supabase-sql"
+    ? await loadDynamicsComparison({...state,lfl}, {latestYear,cutoff:result.latestSourceDate}) : null;
+  const comparisonLabel = grain === "week" ? "WoW" : "MoM";
+  const tableColumns = `140px repeat(${years.length}, 130px 80px)${showPeriodComparison ? " 100px" : ""}`;
   const metricLabel = METRICS.find(([value]) => value === metric)?.[1] ?? "Оборот";
   return (
     <main className="shell">
@@ -279,7 +288,7 @@ export default async function DynamicsPage({
           <div className="trend-summary-card">
             <span>YoY {previousYear ? `${latestYear} vs ${previousYear}` : ""}</span>
             <strong className={totalGrowth === null ? "" : totalGrowth >= 0 ? "positive" : "negative"}>
-              {formatDelta(totalGrowth)}
+              {formatDelta(totalGrowth, metric)}
             </strong>
             <small>по однаковій кількості періодів</small>
           </div>
@@ -319,7 +328,7 @@ export default async function DynamicsPage({
 
           {lfl && <div className="lfl-banner">LFL · закриті точки виключено з усієї динаміки</div>}
           {result.weekly && <WeeklyReportStatus report={result.weekly} />}
-          <MultiYearMetricChart data={data} years={years} metric={metric} />
+          <MultiYearMetricChart data={data} years={years} metric={metric} weekDateYear={grain === "week" ? latestYear : undefined} />
         </section>
 
         <section className="panel dynamics-table-panel">
@@ -329,18 +338,21 @@ export default async function DynamicsPage({
               <h2>Таблиця динаміки</h2>
             </div>
             <span className="text-button">
-              {grain === "week" ? "тиждень" : "місяць"} × роки × YoY
+              {grain === "week" ? "тиждень" : "місяць"} × роки × YoY{showPeriodComparison ? ` · ${comparisonLabel} ${latestYear}` : ""}
             </span>
           </div>
 
+          {grain === "week" && <p className="dynamics-comparison-note">Дати тижнів — ISO-рік {latestYear}; до значень інших років цей діапазон не застосовується.</p>}
+          {showPeriodComparison && <p className="dynamics-comparison-note">{comparisonLabel} {latestYear}: до безпосередньо попереднього періоду. Натисніть зміну, щоб побачити дати й базу. Для неповного періоду зіставляються однакові дні; якщо попередній місяць коротший, база порівняння відрізняється від повного показника.{lfl ? " LFL: спільні точки з повними спостереженнями в обох періодах; суми порівняння можуть відрізнятися від загального зрізу та YoY." : " Пропуски спостережень не вважаються нульовими продажами."}</p>}
+          {showPeriodComparison && !comparison && <p className="dynamics-comparison-note" role="status">MoM/WoW недоступне: джерело не підтвердило порівнювані періоди для цього зрізу. Значення та YoY показано окремо.</p>}
           <div className="dynamics-table-wrap">
             <div
               className="dynamics-table"
-              style={{ minWidth: `${Math.max(760, 160 + years.length * 220)}px` }}
+              style={{ minWidth: `${Math.max(760, 160 + years.length * 220 + (showPeriodComparison ? 100 : 0))}px` }}
             >
               <div
                 className="dynamics-table-row dynamics-table-head"
-                style={{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }}
+                style={{ gridTemplateColumns: tableColumns }}
               >
                 <span>{grain === "week" ? "Тиждень" : "Місяць"}</span>
                 {years.map((year, index) => (
@@ -349,12 +361,13 @@ export default async function DynamicsPage({
                     <span>{index === 0 ? "—" : "YoY"}</span>
                   </div>
                 ))}
+                {showPeriodComparison && <span>{comparisonLabel} {latestYear}</span>}
               </div>
 
               {data.map((point, rowIndex) => (
                 <div
                   className="dynamics-table-row"
-                  style={{ gridTemplateColumns: `140px repeat(${years.length}, 130px 80px)` }}
+                  style={{ gridTemplateColumns: tableColumns }}
                   key={String(point.label)}
                 >
                   <b>
@@ -365,24 +378,27 @@ export default async function DynamicsPage({
                         {String(point.label)}
                       </Link>
                     ) : (
-                      String(point.label)
+                      <span title={isoWeekDateRange(latestYear,String(point.label))?.fullLabel}>
+                        {String(point.label)}<small className="dynamics-week-dates">{isoWeekDateRange(latestYear,String(point.label))?.shortLabel.replace(`${String(point.label)} `, "") ?? "Дати недоступні"}</small>
+                      </span>
                     )}
                   </b>
 
                   {years.map((year, index) => {
                     const value = pointNumber(point[String(year)]);
-                    const previous = index > 0 ? pointNumber(point[String(years[index - 1])]) : null;
-                    const growth = index > 0 ? pct(value, previous) : null;
+                    const previous = index > 0 ? pointNumber(point[String(year - 1)]) : null;
+                    const growth = index > 0 ? metric === "markupRate" && value !== null && previous !== null ? value - previous : pct(value, previous) : null;
 
                     return (
                       <div className="dynamics-value-pair" key={year}>
                         <span>{formatMetric(value, metric)}</span>
                         <span className={growth === null ? "" : growth >= 0 ? "positive" : "negative"}>
-                          {index === 0 ? "—" : formatDelta(growth)}
+                          {index === 0 ? "—" : formatDelta(growth, metric)}
                         </span>
                       </div>
                     );
                   })}
+                  {showPeriodComparison && <DynamicsComparisonCell period={comparison?.periods[rowIndex]} metric={metric} label={`${comparisonLabel} ${latestYear} ${String(point.label)}`} />}
                 </div>
               ))}
             </div>

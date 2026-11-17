@@ -634,3 +634,11 @@ html.is-navigating, html.is-navigating body, html.is-navigating a, html.is-navig
 .gbp-location-identity { min-width: 0; overflow-wrap: anywhere; }
 .gbp-intent-list > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .gbp-intent-list span { min-width: 0; overflow-wrap: anywhere; }
+
+/* Dynamics: one compact latest-year comparison column; existing scroll is preserved. */
+.dynamics-comparison-note { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 6px 0; }
+.dynamics-week-dates { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 400; white-space: nowrap; }
+.dynamics-period-detail { min-width: 0; font-size: 10px; }
+.dynamics-period-detail summary { cursor: pointer; width: fit-content; }
+.dynamics-period-detail summary:focus-visible { outline: 2px solid #f5a623; outline-offset: 3px; }
+.dynamics-period-explanation { display: grid; gap: 6px; min-width: 90px; padding: 8px 4px; color: var(--muted); overflow-wrap: anywhere; font-size: 10px; line-height: 1.4; }
