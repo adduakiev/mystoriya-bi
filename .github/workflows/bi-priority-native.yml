@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   exact-sha-native:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Check out the exact pushed commit
@@ -58,8 +58,12 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      - name: Require local PostgreSQL 16 for native tests
+      - name: Install and require PostgreSQL 16 on the disposable runner
         run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends postgresql-16
+          fi
           test -x /usr/lib/postgresql/16/bin/initdb || {
             echo 'BLOCKED: native PostgreSQL 16 initdb missing; no reduced-test fallback.'
             exit 1
