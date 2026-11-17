@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# Verify under the same feature modes used by the approved deployment.
+env:
+  BI_ISO_WEEKS_V1: '1'
+  BI_AGGREGATORS_FILTERS_V3: '1'
+
 concurrency:
   group: bi-priority-native-${{ github.ref }}
   cancel-in-progress: false
