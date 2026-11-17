@@ -1,106 +1,48 @@
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
-import { GLOVO_SORTS, selectGlovoReport, type GlovoFilters } from "@/lib/data/glovo-contract";
 import { loadGlovoSource } from "@/lib/data/glovo-source";
-import { GlovoReportPresenter } from "./GlovoReportPresenter";
+import { GlovoMonthlyDashboard } from "./GlovoMonthlyDashboard";
 import styles from "./report.module.css";
 
 export const dynamic = "force-dynamic";
-
 export default async function GlovoBrandsPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const {searchParams} = props ?? {};
   const source = await loadGlovoSource();
-  const params = await searchParams ?? {};
+  const params = await props?.searchParams ?? {};
   const input = (key: string) => typeof params[key] === "string" ? params[key] as string : "";
-  const filters: GlovoFilters = {month: input("month"), brand: input("brand"), group: input("group"),
-    location: input("location"), mapping: input("mapping"), sort: input("sort")};
-  if (!GLOVO_SORTS.includes(filters.sort as typeof GLOVO_SORTS[number])) filters.sort = "source";
-  const report = source.report ? selectGlovoReport(source.report, filters) : null;
-  return (
-    <main className="shell">
-      <DashboardSidebar activeHref="/aggregators/glovo" lfl={false}
-        statusTitle={source.status} statusDetail={`Glovo · приватне читання · останній місяць ${source.latestEventMonth ?? "UNKNOWN"}`} />
-      <section className={`workspace ${styles.report}`}>
-        <nav aria-label="Звіти агрегаторів" className={styles.navigation}>
-          <Link href="/aggregators" prefetch={false}>← Агрегатори</Link>
-          <Link href="/aggregators/glovo" aria-current="page" prefetch={false}>Glovo · Аналітика брендів</Link>
-        </nav>
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">GLOVO · READ-ONLY PREVIEW</span>
-            <h1>Glovo · Аналітика брендів</h1>
-          </div>
-        </header>
-        <section className="panel" aria-labelledby="glovo-source-heading">
-          <h2 id="glovo-source-heading">{source.status}</h2>
+  const rows = "monthlyRows" in source ? source.monthlyRows : undefined;
+  return <main className="shell">
+    <DashboardSidebar activeHref="/aggregators/glovo" lfl={false}
+      statusTitle={source.status} statusDetail={"Glovo · останній місяць " + (source.latestEventMonth ?? "невідомо")} />
+    <section className={"workspace " + styles.report}>
+      <nav aria-label="Звіти агрегаторів" className={styles.navigation}>
+        <Link href="/aggregators" prefetch={false}>← Агрегатори</Link>
+        <Link href="/aggregators/glovo" aria-current="page" prefetch={false}>Glovo · Аналітика брендів</Link>
+      </nav>
+      <h1>Glovo · Аналітика брендів</h1>
+      {rows ? <GlovoMonthlyDashboard rows={rows} incompleteMonths={("incompleteMonths" in source ? source.incompleteMonths : []) ?? []}
+        initialFilters={{brand: input("brand"), ownership: input("ownership"), location: input("location"),
+          identity: input("identity"), selectedBrand: input("selectedBrand"),
+          ...(/^[1-9]\d{3}$/.test(input("year")) ? {year: Number(input("year"))} : {}),
+          ...(input("month") ? {focusMonth: input("month")} : {}),
+          metric: input("metric") === "orders" ? "deliveredOrders" : input("metric") === "averageTicket" ? "averageTicket" : "purchaseSum",
+          secondary: input("secondary") === "share" ? "share" : input("secondary") === "none" ? "none" : "mom"}} />
+      : <section className="panel" aria-labelledby="glovo-source-error">
+          <h2 id="glovo-source-error">Дані Glovo недоступні</h2>
           <p role="status">{source.reason}</p>
-          <p>Останній місяць подій: {source.latestEventMonth ?? "UNKNOWN"} · Останнє читання: {source.lastReadAt ?? "UNKNOWN"} · Автооновлення не активне.</p>
-          {source.report && <p><a href="/aggregators/glovo">Оновити з приватного джерела</a> · Повторне читання при відкритті сторінки.
-            Час читання не підтверджує свіжість оригінального експорту.</p>}
-          {!source.report && <p>Запланований період: січень–жовтень 2026. Листопад поза типовим періодом;
-            його часткові дані потребують окремої перевірки. Покриття в BI не підтверджене.</p>}
-        </section>
-
-        {source.report && report ? <GlovoReportPresenter report={report} sourceReport={source.report} filters={filters} /> : <>
-        <section className={styles.kpis} aria-label="KPI · дані недоступні">
-          {[
-            ["Доставлені замовлення", "Місячний агрегат джерела"],
-            ["Сума покупок, лок. вал.", "Ідентичність валюти не підтверджена"],
-            ["Середній чек, лок. вал.", "Сума покупок / доставлені замовлення"],
-            ["Зміна до попереднього періоду", "Лише за повного покриття обох періодів"]
-          ].map(([label, detail]) => (
-            <article className="panel" key={label}>
-              <h2>{label}</h2><strong className={styles.value}>—</strong>
-              <p>{detail}. SOURCE UNAVAILABLE.</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="panel" aria-labelledby="glovo-trend-heading">
-          <h2 id="glovo-trend-heading">Динаміка за місяцями</h2>
-          <p>Order Created Local Month · локальний місяць створення замовлення з джерела.
-            Графік з’явиться після перевірки даних; пропуски не означають нуль.</p>
-          <div className={styles.scroll} role="region" aria-label="Таблиця місячної динаміки" tabIndex={0}>
-            <table>
-              <caption>Структура звіту · без даних джерела</caption>
-              <thead><tr><th scope="col">Місяць</th><th scope="col">Доставлені замовлення</th>
-                <th scope="col">Сума покупок, лок. вал.</th><th scope="col">Покриття</th></tr></thead>
-              <tbody><tr><td colSpan={4}>SOURCE UNAVAILABLE · місячні значення відсутні</td></tr></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="panel" aria-labelledby="glovo-drilldown-heading">
-          <h2 id="glovo-drilldown-heading">Бренд × заклад · деталізація</h2>
-          <p>Після підключення джерела тут можна буде перевірити кожен сирий бренд,
-            погоджену групу та фізичну локацію окремо.</p>
-          <div className={styles.scroll} role="region" aria-label="Деталізація брендів та закладів" tabIndex={0}>
-            <table>
-              <caption>Структура деталізації · без даних джерела</caption>
-              <thead><tr>{["Місяць", "Бренд у джерелі", "Погоджена група", "Заклад у таблиці",
-                "Назва у джерелі", "Адреса у джерелі", "Фізична локація", "Власність / тип",
-                "Доставлені замовлення", "Сума покупок, лок. вал."].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead>
-              <tbody><tr><td colSpan={10}>SOURCE UNAVAILABLE · мапінг UNKNOWN / needs mapping</td></tr></tbody>
-            </table>
-          </div>
-        </section>
-
-        </>}
-        <section className="panel" aria-labelledby="glovo-definition-heading">
-          <h2 id="glovo-definition-heading">Визначення та обмеження</h2>
-          <p>Джерело містить агрегати бренд × заклад × місяць. Сума покупок у локальній валюті
-            не визначає чистий прибуток або суму після комісій. Середній чек доступний лише
-            за відомих суми та додатної кількості доставлених замовлень.</p>
-          <p>Сирі назви зберігаються. Погоджені варіанти Мʼясторія Meat Bar, Meatbar Івано-Франківська,
-            Meatbar М&apos;ясторія та Мітбар М&apos;ясторія належать до групи «МітБар».
-            Решта груп, фізичні локації, власність і реальний/віртуальний тип: UNKNOWN / needs mapping.</p>
-          <p>Немає ID замовлень, статусів, комісій чи підтвердження валюти.
-            Рядок Excel — походження запису, а не ID замовлення. Звірка всередині таблиці
-            не доводить відповідність оригінальному експорту.</p>
-        </section>
-      </section>
-    </main>
-  );
+          <p>Значення не підставляються з інших джерел. Пропуски не означають нуль продажів.</p>
+          <Link href="/aggregators/glovo" prefetch={false}>Повторити читання</Link>
+        </section>}
+      <details className="panel"><summary>Джерело, свіжість і визначення</summary>
+        <p>Приватне читання Google Sheets. Останній місяць: {source.latestEventMonth ?? "невідомо"}.
+          Час читання: {source.lastReadAt ?? "невідомо"}. Час читання не підтверджує дату останнього продажу чи повноту експорту.</p>
+        <p>Мапінг береться лише з погоджених рядків таблиці. Перший продаж не визначає дату відкриття.
+          Підсумки та порівняння — за завантаженими даними; повнота оригінального експорту незалежно не підтверджена.</p>
+        <p>Місячні агрегати бренд × заклад. Сума покупок не дорівнює прибутку чи виплаті після комісій.
+          Автоматичного запису та фонового оновлення немає.</p>
+        {rows && <Link href="/aggregators/glovo" prefetch={false}>Перечитати джерело</Link>}
+      </details>
+    </section>
+  </main>;
 }

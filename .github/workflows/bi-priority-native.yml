@@ -7,6 +7,7 @@ on:
       - codex/bi-priorities-20261117
       - codex/dynamics-periods-20261117
       - codex/lavina-confirmed-zero-20261117
+      - codex/glovo-monthly-20261117
 
 permissions:
   contents: read

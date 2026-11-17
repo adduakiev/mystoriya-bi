@@ -119,3 +119,38 @@ test('private HTTP deadline bounds hung fetch and hung body even when dependenci
   await Promise.resolve(); await Promise.resolve();
   await bodyRejected;
 });
+
+test('monthly runtime reads both approved mapping tabs without exposing credentials or claiming source closure', async () => {
+  const {GLOVO_LOCATION_HEADERS:L,GLOVO_BRAND_HEADERS:B}=modules('lib/data/glovo-monthly-mapping.ts');
+  const metadata={...meta(1000),sheets:[...meta(1000).sheets,
+    {properties:{sheetId:20111302,title:'Мапінг закладів',gridProperties:{rowCount:50,columnCount:5}}},
+    {properties:{sheetId:20111303,title:'Мапінг брендів',gridProperties:{rowCount:50,columnCount:7}}}]};
+  const calls=[];
+  const fetchImpl=async(url,init)=>{
+    calls.push({url,init});
+    const decoded=decodeURIComponent(url);
+    let body=decoded.includes('oauth2')?{access_token:'synthetic-private-token',token_type:'Bearer',expires_in:3600}
+      :decoded.includes("'Мапінг закладів'!")?{range:"'Мапінг закладів'!A1:E50",majorDimension:'ROWS',
+        values:[L,['SYNTHETIC group','SYNTHETIC address','Approved site','Погоджено']]}
+      :decoded.includes("'Мапінг брендів'!")?{range:"'Мапінг брендів'!A1:G50",majorDimension:'ROWS',
+        values:[B,[42,'SYNTHETIC brand','SYNTHETIC group','Віртуальний','Власні','Погоджено']]}
+      :decoded.includes('/values/')?matrix():metadata;
+    return response(url,body);
+  };
+  const actual=await read(credential,fetchImpl,true);
+  assert.equal(calls.length,6);
+  assert.equal(actual.monthlyRows[0].physicalLocation,'Approved site');
+  assert.equal(actual.monthlyRows[0].identity,'Віртуальний');
+  assert.equal(actual.monthlyRows[0].ownership,'Власні');
+  assert.equal(actual.monthlyRows[0].openingMonth,null);
+  assert.equal(actual.monthlyRows[1].identity,'UNKNOWN');
+  assert.ok(actual.incompleteMonths.includes('2026-11'));
+  assert.ok(actual.report.trend.every(p=>p.coverage==='PARTIAL'));
+  assert.doesNotMatch(JSON.stringify(actual),/private-token|private_key|access_token/);
+  const bad=async(url,init)=>{
+    if(decodeURIComponent(url).includes("'Мапінг брендів'!"))
+      return response(url,{range:"'Мапінг брендів'!A1:G50",majorDimension:'ROWS',values:[['billing error']]});
+    return fetchImpl(url,init);
+  };
+  await assert.rejects(read(credential,bad,true),{message:'GLOVO_SOURCE_UNAVAILABLE'});
+});

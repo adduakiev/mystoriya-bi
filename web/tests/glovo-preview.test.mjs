@@ -109,50 +109,32 @@ test('coverage controls remain visible: unchecked, missing months and empty data
   assert.match(empty, /немає рядків у вибраному періоді/);
 });
 
-test('actual page conditionally presents only a non-null builder report supplied at its test-only adapter boundary', async t => {
-  t.mock.method(globalThis, 'fetch', () => assert.fail('offline SSR must make zero transport calls'));
-  const report = reportFrom([syntheticRow()], ['2026-01'], ['2026-01']);
-  const page = load({'@/lib/data/glovo-source': {loadGlovoSource: async () => ({
-    status:'OFFLINE SYNTHETIC PREVIEW', reason:'TEST ONLY · no source connection', report
-  })}})('app/aggregators/glovo/page.tsx').default;
-  const html = renderToStaticMarkup(await page());
-  assert.deepEqual(kpiValues(html), ['2', '10', '5', '— · недоступно']);
-  assert.match(html, /SYNTHETIC new brand/);
-  assert.doesNotMatch(html, /Структура звіту · без даних джерела/);
-  for (const contract of [normalizeGlovoSheet([['bad header']]), normalizeGlovoSheet([GLOVO_HEADERS, syntheticRow(), syntheticRow()])]) {
-    assert.equal(buildGlovoReport(contract), null);
-  }
+test('actual page shows the mapped monthly report and keeps source secrets server-side', async t => {
+  t.mock.method(globalThis,'fetch',()=>assert.fail('offline SSR must make zero transport calls'));
+  const report=reportFrom([syntheticRow({0:'2026-09'}),syntheticRow({0:'2026-10'})],[],['2026-09','2026-10']);
+  const monthlyRows=report.rows.map(r=>({...r,physicalLocation:'Approved synthetic site',physicalId:null,openingMonth:null,ownership:'Власні',identity:'Віртуальний'}));
+  const page=load({'@/lib/data/glovo-source':{loadGlovoSource:async()=>({status:'CONNECTED',reason:'TEST ONLY',report,monthlyRows,incompleteMonths:['2026-10']})}})('app/aggregators/glovo/page.tsx').default;
+  const html=renderToStaticMarkup(await page());
+  assert.match(html,/Бренди × місяці/);assert.match(html,/Approved synthetic site/);
+  assert.match(html,/Деталі обраного бренду/);assert.match(html,/aria-pressed="true"/);
+  assert.doesNotMatch(html,/Структура звіту · без даних джерела|private_key|access_token/);
 });
 
-test('actual Glovo server boundary and SSR fail closed without credentials, network, fixtures or zero KPIs', async t => {
-  const previous = process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
-  t.after(() => previous === undefined ? delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON : process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON = previous);
+test('actual Glovo server boundary and SSR fail closed without credentials, fixtures or zero KPIs', async t => {
+  const previous=process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
+  t.after(()=>previous===undefined?delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON:process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON=previous);
   delete process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON;
-  t.mock.method(globalThis, 'fetch', () => assert.fail('Glovo unavailable must make no remote call'));
-  const modules = load();
-  const state = await modules('lib/data/glovo-source.ts').loadGlovoSource();
-  assert.deepEqual(state, {status:'SOURCE UNAVAILABLE', reason:state.reason, latestEventMonth:null, lastReadAt:null, report:null});
-  const page = modules('app/aggregators/glovo/page.tsx').default;
-  const html = renderToStaticMarkup(await page());
-  assert.match(html, /<h1>Glovo · Аналітика брендів<\/h1>/);
-  assert.match(html, /role="status"/);
-  assert.match(html, /SOURCE UNAVAILABLE/);
-  assert.match(html, /січень–жовтень 2026/);
-  assert.match(html, /Листопад поза типовим періодом/);
-  assert.match(html, /UNKNOWN \/ needs mapping/);
-  assert.match(html, /Order Created Local Month/);
-  assert.equal((html.match(/<strong class="value">—<\/strong>/g) ?? []).length, 4);
-  assert.equal((html.match(/role="region"[^>]*tabindex="0"/g) ?? []).length, 2);
-  assert.equal((html.match(/<caption>/g) ?? []).length, 2);
-  assert.match(html, /href="\/aggregators"/);
-  assert.match(html, /href="\/aggregators\/glovo"[^>]*aria-current="page"/);
-  assert.doesNotMatch(html, /NaN|Infinity|undefined|₴|<strong[^>]*>0|<form|<button|<iframe|gviz|LIVE/);
-  assert.doesNotMatch(html, /SYNTHETIC|Покриття:|KPI · COMPLETE|KPI · PARTIAL|<td>\d/);
-  const boundary = fs.readFileSync(new URL('../lib/data/glovo-source.ts', import.meta.url), 'utf8');
-  assert.match(boundary, /^import "server-only";/);
-  assert.match(boundary, /process\.env\.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON/);
-  assert.match(boundary, /glovo-private-runtime/);
-  assert.doesNotMatch(boundary, /callBiRpc\(|loadSalesData\(|https:\/\//);
+  t.mock.method(globalThis,'fetch',()=>assert.fail('No remote call without credentials'));
+  const modules=load(),state=await modules('lib/data/glovo-source.ts').loadGlovoSource();
+  assert.deepEqual(state,{status:'SOURCE UNAVAILABLE',reason:state.reason,latestEventMonth:null,lastReadAt:null,report:null});
+  const html=renderToStaticMarkup(await modules('app/aggregators/glovo/page.tsx').default());
+  assert.match(html,/Дані Glovo недоступні/);assert.match(html,/role="status"/);
+  assert.match(html,/Пропуски не означають нуль/);assert.match(html,/Повторити читання/);
+  assert.doesNotMatch(html,/NaN|Infinity|undefined|<strong[^>]*>0|<form|<iframe|gviz|SYNTHETIC/);
+  assert.doesNotMatch(html,/Бренди × місяці|data-month=/);
+  const boundary=fs.readFileSync(new URL('../lib/data/glovo-source.ts',import.meta.url),'utf8');
+  assert.match(boundary,/^import "server-only";/);assert.match(boundary,/process\.env\.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON/);
+  assert.match(boundary,/glovo-private-runtime/);assert.doesNotMatch(boundary,/callBiRpc\(|loadSalesData\(|https:\/\//);
 });
 
 test('child navigation is discoverable, accessible when collapsed and does not propagate unsupported LFL', async t => {
@@ -204,51 +186,25 @@ test('report tables retain local horizontal scrolling, keyboard focus and mobile
 });
 
 
-test('actual GET filters update KPI/trend/detail together and expose exact drilldown lineage', async () => {
-  const report = reportFrom([
-    syntheticRow({1:'Meatbar Івано-Франківська', 5:3, 6:30}),
-    syntheticRow({1:'SYNTHETIC other', 5:8, 6:80}),
-    syntheticRow({0:'2026-02', 1:'Meatbar Івано-Франківська', 5:9, 6:90})
-  ]);
-  const page = load({'@/lib/data/glovo-source': {loadGlovoSource: async () => ({
-    status:'OFFLINE SYNTHETIC PREVIEW', reason:'TEST ONLY', report
-  })}})('app/aggregators/glovo/page.tsx').default;
-  const html = renderToStaticMarkup(await page({searchParams:Promise.resolve({
-    month:'2026-01', group:'МітБар', location:'SYNTHETIC location', sort:'amount-desc'
-  })}));
-  assert.deepEqual(kpiValues(html), ['3','30','10','— · недоступно']);
-  assert.match(html, /<form[^>]*action="\/aggregators\/glovo"[^>]*method="get"/);
-  for (const name of ['month','brand','group','location','mapping','sort']) assert.ok(html.includes(`name="${name}"`));
-  const [trend, detail] = bodies(html);
-  assert.equal((trend.match(/<tr>/g) ?? []).length, 1);
-  assert.equal((detail.match(/<tr>/g) ?? []).length, 1);
-  assert.match(detail, /brand=Meatbar/);
-  assert.match(detail, /<details><summary>Походження та мапінг<\/summary>/);
-  assert.match(detail, /Ключ агрегату/);
-  assert.match(detail, /UNKNOWN/);
-  assert.match(html, /KPI · PARTIAL/);
-  const noMatch = renderToStaticMarkup(await page({searchParams:Promise.resolve({brand:'not-present'})}));
-  assert.deepEqual(kpiValues(noMatch), Array(4).fill('— · недоступно'));
-  assert.match(noMatch, /немає рядків у вибраному періоді/);
+test('page forwards exact URL filters to monthly totals and site drilldown', async () => {
+  const report=reportFrom([syntheticRow({0:'2026-09',1:'Chosen',5:3,6:30}),syntheticRow({0:'2026-10',1:'Chosen',5:9,6:90}),
+    syntheticRow({0:'2026-10',1:'Other',5:8,6:80})],[],['2026-09','2026-10']);
+  const monthlyRows=report.rows.map(r=>({...r,physicalLocation:'Approved site',physicalId:null,openingMonth:null,ownership:'Власні',identity:'Віртуальний'}));
+  const page=load({'@/lib/data/glovo-source':{loadGlovoSource:async()=>({status:'CONNECTED',reason:'TEST ONLY',report,monthlyRows,incompleteMonths:[]})}})('app/aggregators/glovo/page.tsx').default;
+  const html=renderToStaticMarkup(await page({searchParams:Promise.resolve({month:'2026-10',brand:'Chosen',ownership:'Власні',location:'SYNTHETIC location',metric:'orders'})}));
+  assert.match(html,/Chosen → заклади/);assert.match(html,/data-month="2026-10" data-value="9"/);
+  assert.doesNotMatch(html,/data-month="2026-10" data-value="17"/);
+  const empty=renderToStaticMarkup(await page({searchParams:Promise.resolve({brand:'No match'})}));
+  assert.match(empty,/Немає даних за вибраними фільтрами/);
 });
 
-
-test('page defaults to Jan–Oct while November and all months require explicit selection', async () => {
-  const report = reportFrom([syntheticRow({6:10}), syntheticRow({0:'2026-11', 5:4, 6:40})], [], [...GLOVO_DEFAULT_MONTHS, '2026-11']);
-  const page = load({'@/lib/data/glovo-source': {loadGlovoSource: async () => ({
-    status:'CONNECTED', reason:'TEST ONLY', latestEventMonth:'2026-11', lastReadAt:'2026-11-12T00:00:00Z', report
-  })}})('app/aggregators/glovo/page.tsx').default;
-  const render = async params => renderToStaticMarkup(await page({searchParams:Promise.resolve(params)}));
-  const historical = await render({});
-  assert.deepEqual(kpiValues(historical), ['2','10','5','— · недоступно']);
-  assert.equal((bodies(historical)[0].match(/<tr>/g) ?? []).length, 10);
-  assert.doesNotMatch(bodies(historical)[1], /2026-11/);
-  assert.match(historical, /Січень–жовтень 2026/);
-  const november = await render({month:'2026-11'});
-  assert.deepEqual(kpiValues(november), ['4','40','10','— · недоступно']);
-  assert.equal((bodies(november)[0].match(/<tr>/g) ?? []).length, 1);
-  const all = await render({month:'all'});
-  assert.deepEqual(kpiValues(all), ['6','50','8,33','— · недоступно']);
-  assert.equal((bodies(all)[0].match(/<tr>/g) ?? []).length, 11);
-  assert.match(all, /KPI · PARTIAL/);
+test('page includes January through latest data and blocks MoM of incomplete latest source month', async () => {
+  const report=reportFrom([syntheticRow({0:'2026-10',5:2,6:10}),syntheticRow({0:'2026-11',5:4,6:40})],[],['2026-10','2026-11']);
+  const monthlyRows=report.rows.map(r=>({...r,physicalLocation:'Site',physicalId:null,openingMonth:null,ownership:'Власні',identity:'Реальний'}));
+  const page=load({'@/lib/data/glovo-source':{loadGlovoSource:async()=>({status:'CONNECTED',reason:'TEST ONLY',report,monthlyRows,incompleteMonths:['2026-11']})}})('app/aggregators/glovo/page.tsx').default;
+  const html=renderToStaticMarkup(await page({searchParams:Promise.resolve({month:'2026-11'})}));
+  assert.match(html,/data-month="2026-01" data-value="unknown"/);
+  assert.match(html,/data-month="2026-11" data-value="40"/);
+  assert.match(html,/неповний період або його завершеність не підтверджена/);
+  assert.match(html,/MoM недоступний/);
 });

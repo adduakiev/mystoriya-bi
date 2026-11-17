@@ -6,7 +6,7 @@ import { readGlovoPrivateSheet } from "./glovo-private-runtime";
  * errors expose neither credential details nor upstream bodies. */
 export async function loadGlovoSource() {
   try {
-    const data = await readGlovoPrivateSheet(process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON, fetch);
+    const data = await readGlovoPrivateSheet(process.env.GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON, fetch, true);
     return { status: "CONNECTED" as const,
       reason: "Приватне джерело прочитане. Повнота місяців незалежно не підтверджена.", ...data };
   } catch {
