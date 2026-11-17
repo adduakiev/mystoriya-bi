@@ -33,8 +33,14 @@ BEGIN
  -- Observation means an actual warehouse row for this scope, never an inferred
  -- zero for an absent date. Coverage cannot certify the completeness of upstream
  -- ingestion or an absent order-type slice within an otherwise observed day.
- WITH scoped AS MATERIALIZED (
-   SELECT date,location,lfl_exclude,revenue,checks,markup
+ -- Owner-confirmed full-location closures, confirmed 2026-11-17.
+ -- These two calendar facts certify zero sales only; warehouse rows are untouched.
+ -- A real row on the date takes precedence (including NULL/invalid metrics).
+ WITH confirmed_zero_days(date,location,brand,ownership) AS (
+   VALUES (date '2026-09-04','Лавина'::text,'МитБАР'::text,'Власні'::text),
+          (date '2026-09-30','Лавина'::text,'МитБАР'::text,'Власні'::text)
+ ), scoped AS MATERIALIZED (
+   SELECT date,location,brand,ownership,lfl_exclude,revenue,checks,markup
    FROM public.bi_sales_flat_mv
    WHERE (p_channel IS NULL OR channel=p_channel)
      AND (p_order_type IS NULL OR order_type=p_order_type)
@@ -71,7 +77,7 @@ BEGIN
      CASE WHEN partial THEN previous_start+least(available_current_end-current_start+1,natural_previous_end-previous_start+1)-1
           ELSE natural_previous_end END previous_end
    FROM available
- ), daily AS MATERIALIZED (
+ ), observed_daily AS MATERIALIZED (
    SELECT location,date,bool_or(lfl_exclude IS DISTINCT FROM false) registry_excluded,
      bool_and(CASE p_metric
        WHEN 'revenue' THEN revenue IS NOT NULL AND revenue::text NOT IN ('NaN','Infinity','-Infinity')
@@ -81,11 +87,33 @@ BEGIN
        WHEN 'markupRate' THEN revenue IS NOT NULL AND markup IS NOT NULL
          AND revenue::text NOT IN ('NaN','Infinity','-Infinity') AND markup::text NOT IN ('NaN','Infinity','-Infinity')
        ELSE false END) valid,
-     sum(revenue) revenue,sum(checks) checks,sum(markup) markup
+     sum(revenue) revenue,sum(checks) checks,sum(markup) markup,false confirmed_zero
    FROM scoped GROUP BY location,date
+ ), daily AS MATERIALIZED (
+   SELECT * FROM observed_daily
+   UNION ALL
+   SELECT z.location,z.date,
+     EXISTS(SELECT 1 FROM public.location_lifecycle_registry lr
+            WHERE lr.canonical_name=z.location AND lr.lfl_exclude IS DISTINCT FROM false),
+     true,0::numeric,0::numeric,0::numeric,true
+   FROM confirmed_zero_days z
+   WHERE (p_location IS NULL OR p_location=z.location)
+     AND (p_brand IS NULL OR p_brand=z.brand)
+     AND (p_ownership IS NULL OR p_ownership=z.ownership)
+     AND z.date<=(SELECT cutoff FROM source)
+     -- Require this actual filtered slice on both sides of the closure:
+     -- never create an invented channel/brand/location or extend its lifecycle.
+     AND EXISTS(SELECT 1 FROM scoped s WHERE s.location=z.location
+         AND s.brand=z.brand AND s.ownership=z.ownership AND s.date BETWEEN z.date-7 AND z.date-1)
+     AND EXISTS(SELECT 1 FROM scoped s WHERE s.location=z.location
+         AND s.brand=z.brand AND s.ownership=z.ownership AND s.date BETWEEN z.date+1 AND z.date+7)
+     AND NOT EXISTS(SELECT 1 FROM public.bi_sales_flat_mv actual
+         WHERE actual.location=z.location AND actual.date=z.date)
  ), candidate_days AS (
    SELECT w.n,d.location,
      bool_or(d.registry_excluded) AND p_lfl registry_excluded,
+     count(*) FILTER(WHERE d.date BETWEEN w.current_start AND w.current_end AND d.confirmed_zero)::int current_confirmed_zero_days,
+     count(*) FILTER(WHERE d.date BETWEEN w.previous_start AND w.previous_end AND d.confirmed_zero)::int previous_confirmed_zero_days,
      count(*) FILTER(WHERE d.date BETWEEN w.current_start AND w.current_end AND d.valid)::int current_days,
      count(*) FILTER(WHERE d.date BETWEEN w.previous_start AND w.previous_end AND d.valid)::int previous_days,
      count(*) FILTER(WHERE d.date BETWEEN w.current_start AND w.current_end AND NOT d.valid)::int current_invalid,
@@ -108,6 +136,8 @@ BEGIN
      count(c.location) FILTER(WHERE included)::int included_count,
      count(c.location) FILTER(WHERE registry_excluded)::int registry_excluded_count,
      count(c.location) FILTER(WHERE NOT included AND NOT registry_excluded)::int incomplete_count,
+     coalesce(sum(c.current_confirmed_zero_days) FILTER(WHERE included),0)::int current_confirmed_zero_days,
+     coalesce(sum(c.previous_confirmed_zero_days) FILTER(WHERE included),0)::int previous_confirmed_zero_days,
      coalesce(sum(c.current_days) FILTER(WHERE included),0)::int current_observed_days,
      coalesce(sum(c.previous_days) FILTER(WHERE included),0)::int previous_observed_days,
      sum(current_revenue) FILTER(WHERE included) current_revenue,
@@ -166,6 +196,7 @@ BEGIN
        'candidateCount',candidate_count,'includedCount',included_count,'excludedCount',candidate_count-included_count,
        'registryExcludedCount',registry_excluded_count,'incompleteCount',incomplete_count,
        'currentObservedDays',current_observed_days,'previousObservedDays',previous_observed_days,
+       'currentConfirmedZeroDays',current_confirmed_zero_days,'previousConfirmedZeroDays',previous_confirmed_zero_days,
        'currentExpectedDays',included_count*(current_end-current_start+1),
        'previousExpectedDays',included_count*(previous_end-previous_start+1),
        'currentCoverage',current_observed_days::numeric/nullif(included_count*(current_end-current_start+1),0),

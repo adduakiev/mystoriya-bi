@@ -8,7 +8,7 @@ export type ComparisonFilters = {channel: string | null; orderType: string | nul
 export type PeriodWindow = {key:string; label:string; currentStart:string; currentEnd:string; previousStart:string; previousEnd:string; naturalCurrentEnd:string; naturalPreviousEnd:string; currentDays:number; previousDays:number; partial:boolean; clampedDays:number};
 export type ComparisonPeriod = PeriodWindow & {
   status:"ready"|"unavailable"; reason:string|null; current:number|null; previous:number|null; delta:number|null; unit:"percent"|"pp";
-  cohort:{candidateCount:number; includedCount:number; excludedCount:number; registryExcludedCount:number; incompleteCount:number; mode:"pairwise-complete"|"all-locations"; currentObservedDays:number; previousObservedDays:number; currentExpectedDays:number; previousExpectedDays:number; currentCoverage:number|null; previousCoverage:number|null};
+  cohort:{currentConfirmedZeroDays?:number; previousConfirmedZeroDays?:number; candidateCount:number; includedCount:number; excludedCount:number; registryExcludedCount:number; incompleteCount:number; mode:"pairwise-complete"|"all-locations"; currentObservedDays:number; previousObservedDays:number; currentExpectedDays:number; previousExpectedDays:number; currentCoverage:number|null; previousCoverage:number|null};
   observedCurrent:number|null; observedPrevious:number|null;
 };
 export type PeriodComparison = {contractVersion:typeof COMPARISON_CONTRACT; latestYear:number; cutoff:string; grain:GrainMode; metric:MetricMode; filters:ComparisonFilters; periods:ComparisonPeriod[]};
@@ -76,6 +76,8 @@ export function validatePeriodComparison(input:unknown,expected:{latestYear:numb
         const expectedDays=Number(c.includedCount)*w[`${side}Days`];
         const observedDays=Number(c[`${side}ObservedDays`]);
         const coverage=c[`${side}Coverage`];
+        const confirmed=c[`${side}ConfirmedZeroDays`];
+        if(confirmed!==undefined&&(!integer(confirmed)||confirmed>observedDays))return null;
         if(c[`${side}ExpectedDays`]!==expectedDays||observedDays>expectedDays)return null;
         if(expectedDays===0?coverage!==null:!finite(coverage)||Math.abs(coverage-observedDays/expectedDays)>1e-9)return null;
       }

@@ -12,7 +12,8 @@ export function DynamicsComparisonCell({period,metric,label}:{period?:Comparison
       {period && <><span>Поточний: {dates(period.currentStart,period.currentEnd)} · {display(period.current,metric)}</span><span>Попередній: {dates(period.previousStart,period.previousEnd)} · {display(period.previous,metric)}</span>
       <span>{period.partial?"Неповний період · зіставні дні":"Повні календарні періоди"}: {period.currentDays} / {period.previousDays} днів.</span>
       {period.clampedDays>0&&<span>{period.clampedDays} дн. поточного періоду не включено: попередній місяць коротший.</span>}
-      <span>Точки з повними спостереженнями: {period.cohort.includedCount} / {period.cohort.candidateCount}. Виключено з пари: {period.cohort.excludedCount}.</span>
+      <span>Точки з повними даними: {period.cohort.includedCount} / {period.cohort.candidateCount}. Виключено з пари: {period.cohort.excludedCount}.</span>
+      {((period.cohort.currentConfirmedZeroDays??0)+(period.cohort.previousConfirmedZeroDays??0))>0&&<span>Підтверджений простій із нульовими продажами: {period.cohort.currentConfirmedZeroDays??0} / {period.cohort.previousConfirmedZeroDays??0} точко-днів (поточний / попередній період). Враховано у повноті даних; суми продажів не змінено.</span>}
       {period.cohort.mode==="pairwise-complete"&&<span>LFL: однакові точки в обох періодах; набір визначено окремо для цієї пари. Реєстр виключив {period.cohort.registryExcludedCount} точок.</span>}</>}
       {reason&&<span>{reason}.</span>}
     </div>

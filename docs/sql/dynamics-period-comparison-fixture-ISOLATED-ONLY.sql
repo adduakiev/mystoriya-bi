@@ -13,6 +13,7 @@ CREATE ROLE authenticated;
 CREATE ROLE service_role;
 CREATE TABLE public.bi_runtime_config(config_key text,value_hash text);
 INSERT INTO public.bi_runtime_config VALUES('access_password',encode(extensions.digest('fixture-only','sha256'),'hex'));
+CREATE TABLE public.location_lifecycle_registry(canonical_name text,lfl_exclude boolean);
 CREATE TABLE public.bi_sales_flat_mv(date date,location text,brand text,ownership text,channel text,order_type text,lfl_exclude boolean,revenue numeric,checks numeric,markup numeric);
 CREATE FUNCTION public.bi_dynamics_payload() RETURNS text LANGUAGE sql AS $$ SELECT 'unchanged-old-rpc'::text $$;
 
@@ -64,6 +65,11 @@ INSERT INTO public.bi_sales_flat_mv
  WHERE NOT(b='MissingDay' AND d::date=date '2026-02-02');
 -- Stray channel must not leak through a chosen dimension scope.
 INSERT INTO public.bi_sales_flat_mv VALUES('2026-03-31','Other','CompleteMonths','Franchise','Агрегатор','Glovo',false,99999,1,1);
+-- Real identifiers only for owner-confirmed calendar facts; all amounts synthetic.
+INSERT INTO public.bi_sales_flat_mv
+ SELECT d::date,'Лавина','МитБАР','Власні','Доставка','Courier',false,10,2,3
+ FROM generate_series(date '2026-08-01',date '2026-11-15',interval '1 day') d
+ WHERE d::date NOT IN (date '2026-09-04',date '2026-09-30');
 \ir dynamics-period-comparison-NOT-APPLIED.sql
 
 DO $test$
@@ -157,6 +163,68 @@ BEGIN
  EXCEPTION WHEN OTHERS THEN blocked:=SQLERRM='invalid_parameters'; END;
  ASSERT blocked,'unsupported metrics must fail';
 END $test$;
+DO $closures$
+DECLARE r jsonb;p jsonb;m text;w int;
+BEGIN
+ FOREACH m IN ARRAY ARRAY['revenue','checks','averageCheck','markupRate'] LOOP
+  r:=public.bi_dynamics_period_comparison('fixture-only',m,'month',NULL,NULL,'Лавина','МитБАР','Власні',false);
+  p:=r->'periods'->9;
+  ASSERT p->>'status'='ready' AND p#>>'{cohort,includedCount}'='1';
+  ASSERT p#>>'{cohort,previousConfirmedZeroDays}'='2' AND p#>>'{cohort,currentConfirmedZeroDays}'='0';
+  ASSERT p#>>'{cohort,previousObservedDays}'='30' AND p->>'currentDays'='31';
+  IF m='revenue' THEN ASSERT (p->>'previous')::numeric=280 AND (p->>'current')::numeric=310;
+  ELSIF m='checks' THEN ASSERT (p->>'previous')::numeric=56 AND (p->>'current')::numeric=62;
+  ELSIF m='averageCheck' THEN ASSERT (p->>'previous')::numeric=5 AND (p->>'current')::numeric=5;
+  ELSE ASSERT (p->>'previous')::numeric=30 AND (p->>'current')::numeric=30; END IF;
+ END LOOP;
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','week','Доставка','Courier','Лавина','МитБАР','Власні',true);
+ FOREACH w IN ARRAY ARRAY[35,36,39,40] LOOP ASSERT r->'periods'->w->>'status'='ready'; END LOOP;
+ ASSERT r#>>'{periods,35,cohort,currentConfirmedZeroDays}'='1';
+ ASSERT r#>>'{periods,36,cohort,previousConfirmedZeroDays}'='1';
+ ASSERT r#>>'{periods,39,cohort,currentConfirmedZeroDays}'='1';
+ ASSERT r#>>'{periods,40,cohort,previousConfirmedZeroDays}'='1';
+ ASSERT (r#>>'{periods,35,current}')::numeric=60 AND (r#>>'{periods,35,previous}')::numeric=70;
+ ASSERT (r#>>'{periods,36,current}')::numeric=70 AND (r#>>'{periods,36,previous}')::numeric=60;
+ -- No later cutoff or false-zero ratio is introduced.
+ ASSERT r->>'cutoff'='2026-11-15';
+ ASSERT r#>>'{periods,45,cohort,currentConfirmedZeroDays}'='0';
+ -- Other location's same date is still unknown, not a global missing-day default.
+ INSERT INTO public.bi_sales_flat_mv
+ SELECT d::date,'UnknownOther','МитБАР','Власні','Доставка','Courier',false,10,2,3
+ FROM generate_series(date '2026-09-01',date '2026-10-31',interval '1 day') d
+ WHERE d::date<>date '2026-09-04';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,NULL,'МитБАР','Власні',false);
+ ASSERT r#>>'{periods,9,reason}'='INCOMPLETE_COVERAGE' AND r#>>'{periods,9,cohort,includedCount}'='1';
+ DELETE FROM public.bi_sales_flat_mv WHERE location='UnknownOther';
+ -- Any real row wins, even from a different channel; no fabricated rows, double count or masking NULLs.
+ INSERT INTO public.bi_sales_flat_mv VALUES('2026-09-04','Лавина','МитБАР','Власні','Агрегатор','Glovo',false,50,5,10);
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,'Лавина','МитБАР','Власні',false);
+ ASSERT (r#>>'{periods,9,previous}')::numeric=330 AND r#>>'{periods,9,cohort,previousConfirmedZeroDays}'='1';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month','Доставка',NULL,'Лавина','МитБАР','Власні',false);
+ ASSERT r#>>'{periods,9,status}'='unavailable';
+ UPDATE public.bi_sales_flat_mv SET revenue=NULL WHERE location='Лавина' AND date='2026-09-04';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,'Лавина','МитБАР','Власні',false);
+ ASSERT r#>>'{periods,9,status}'='unavailable';
+ DELETE FROM public.bi_sales_flat_mv WHERE location='Лавина' AND date='2026-09-04';
+ -- The explicit date cannot repair a third missing day or an arbitrary year.
+ DELETE FROM public.bi_sales_flat_mv WHERE location='Лавина' AND date='2026-09-10';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,'Лавина','МитБАР','Власні',false);
+ ASSERT r#>>'{periods,9,status}'='unavailable';
+ INSERT INTO public.bi_sales_flat_mv VALUES('2026-09-10','Лавина','МитБАР','Власні','Доставка','Courier',false,10,2,3);
+ -- LFL exclusion is never overridden by closure confirmation.
+ INSERT INTO public.location_lifecycle_registry VALUES('Лавина',true);
+ UPDATE public.bi_sales_flat_mv SET lfl_exclude=true WHERE location='Лавина';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,NULL,'МитБАР','Власні',true);
+ ASSERT r->>'status'='unavailable';
+ UPDATE public.bi_sales_flat_mv SET lfl_exclude=false WHERE location='Лавина';
+ DELETE FROM public.location_lifecycle_registry WHERE canonical_name='Лавина';
+ -- No nonexistent channel or ownership can be invented.
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month','Absent',NULL,'Лавина','МитБАР','Власні',false);
+ ASSERT r->>'status'='unavailable';
+ r:=public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,'Лавина','МитБАР','Franchise',false);
+ ASSERT r->>'status'='unavailable';
+END $closures$;
+
 SET LOCAL ROLE anon;
 SELECT public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,NULL,'Partial15')->>'contractVersion' AS password_gated_anon_contract;
 RESET ROLE;
@@ -169,6 +237,8 @@ SELECT jsonb_build_object('fixtureSamples',jsonb_build_array(
  public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,NULL,'OpenClose',NULL,false),
  public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,NULL,'Zero'),
  public.bi_dynamics_period_comparison('fixture-only','revenue','week',NULL,NULL,NULL,'W01after53'),
- public.bi_dynamics_period_comparison('fixture-only','revenue','week',NULL,NULL,NULL,'W53partial')
+ public.bi_dynamics_period_comparison('fixture-only','revenue','week',NULL,NULL,NULL,'W53partial'),
+ public.bi_dynamics_period_comparison('fixture-only','revenue','month',NULL,NULL,'Лавина','МитБАР','Власні',false),
+ public.bi_dynamics_period_comparison('fixture-only','revenue','week',NULL,NULL,'Лавина','МитБАР','Власні',true)
 ));
 ROLLBACK;
