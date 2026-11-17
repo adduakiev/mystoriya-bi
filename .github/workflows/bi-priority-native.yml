@@ -117,8 +117,8 @@ jobs:
           set -euo pipefail
           # Official PGDG signed apt repository for Ubuntu 24.04 (noble).
           sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-          sudo curl --fail --silent --show-error --location \
-            https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+          sudo curl --fail --silent --show-error --location --connect-timeout 10 --max-time 60 --retry 2 --retry-delay 2 \
+            https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc \
             -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
           gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
             | grep -q '^fpr:::::::::B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8:'

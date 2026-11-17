@@ -11974,19 +11974,19 @@
         "action": "\"/dynamics\""
       },
       "bindings": [
+        "buildHref(state, {})",
         "lfl && <input type=\"hidden\" name=\"lfl\" value=\"1\" />",
         "grain",
         "!isoWeeksEnabled()",
         "isoWeeksEnabled() ? \"ISO-тижні\" : \"Тижні (тимчасово недоступні)\"",
-        "metric",
-        "METRICS.map(([value, label]) => ( <option key={value} value={value}>{label}</option> ))"
+        "metric"
       ],
       "repeat_template": null,
       "lineage_scope": "INHERIT_ROUTE_CANDIDATES_NOT_PROVEN_PER_METRIC",
       "evidence": "web/app/dynamics/page.tsx:211"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7695",
+      "id": "web/app/dynamics/page.tsx:7722",
       "paths": [
         "/dynamics"
       ],
@@ -12005,7 +12005,7 @@
       "evidence": "web/app/dynamics/page.tsx:212"
     },
     {
-      "id": "web/app/dynamics/page.tsx:7816",
+      "id": "web/app/dynamics/page.tsx:7843",
       "paths": [
         "/dynamics"
       ],
@@ -12027,7 +12027,7 @@
       "evidence": "web/app/dynamics/page.tsx:215"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8172",
+      "id": "web/app/dynamics/page.tsx:8199",
       "paths": [
         "/dynamics"
       ],
@@ -12050,7 +12050,7 @@
       "evidence": "web/app/dynamics/page.tsx:223"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8470",
+      "id": "web/app/dynamics/page.tsx:8497",
       "paths": [
         "/dynamics"
       ],
@@ -12072,7 +12072,7 @@
       "evidence": "web/app/dynamics/page.tsx:232"
     },
     {
-      "id": "web/app/dynamics/page.tsx:8792",
+      "id": "web/app/dynamics/page.tsx:8819",
       "paths": [
         "/dynamics"
       ],
@@ -12094,7 +12094,7 @@
       "evidence": "web/app/dynamics/page.tsx:240"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9112",
+      "id": "web/app/dynamics/page.tsx:9139",
       "paths": [
         "/dynamics"
       ],
@@ -12116,7 +12116,7 @@
       "evidence": "web/app/dynamics/page.tsx:248"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9419",
+      "id": "web/app/dynamics/page.tsx:9446",
       "paths": [
         "/dynamics"
       ],
@@ -12138,7 +12138,7 @@
       "evidence": "web/app/dynamics/page.tsx:256"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9682",
+      "id": "web/app/dynamics/page.tsx:9709",
       "paths": [
         "/dynamics"
       ],
@@ -12157,7 +12157,7 @@
       "evidence": "web/app/dynamics/page.tsx:262"
     },
     {
-      "id": "web/app/dynamics/page.tsx:9762",
+      "id": "web/app/dynamics/page.tsx:9789",
       "paths": [
         "/dynamics"
       ],
@@ -12179,7 +12179,7 @@
       "evidence": "web/app/dynamics/page.tsx:264"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10020",
+      "id": "web/app/dynamics/page.tsx:10047",
       "paths": [
         "/dynamics"
       ],
@@ -12194,7 +12194,7 @@
       "evidence": "web/app/dynamics/page.tsx:270"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10067",
+      "id": "web/app/dynamics/page.tsx:10094",
       "paths": [
         "/dynamics"
       ],
@@ -12211,7 +12211,7 @@
       "evidence": "web/app/dynamics/page.tsx:271"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10149",
+      "id": "web/app/dynamics/page.tsx:10176",
       "paths": [
         "/dynamics"
       ],
@@ -12228,7 +12228,7 @@
       "evidence": "web/app/dynamics/page.tsx:272"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10329",
+      "id": "web/app/dynamics/page.tsx:10356",
       "paths": [
         "/dynamics"
       ],
@@ -12246,7 +12246,7 @@
       "evidence": "web/app/dynamics/page.tsx:278"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10550",
+      "id": "web/app/dynamics/page.tsx:10577",
       "paths": [
         "/dynamics"
       ],
@@ -12264,7 +12264,7 @@
       "evidence": "web/app/dynamics/page.tsx:283"
     },
     {
-      "id": "web/app/dynamics/page.tsx:10780",
+      "id": "web/app/dynamics/page.tsx:10807",
       "paths": [
         "/dynamics"
       ],
@@ -12283,7 +12283,7 @@
       "evidence": "web/app/dynamics/page.tsx:288"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11496",
+      "id": "web/app/dynamics/page.tsx:11523",
       "paths": [
         "/dynamics"
       ],
@@ -12301,7 +12301,7 @@
       "evidence": "web/app/dynamics/page.tsx:304"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11608",
+      "id": "web/app/dynamics/page.tsx:11635",
       "paths": [
         "/dynamics"
       ],
@@ -12323,7 +12323,7 @@
       "evidence": "web/app/dynamics/page.tsx:306"
     },
     {
-      "id": "web/app/dynamics/page.tsx:11778",
+      "id": "web/app/dynamics/page.tsx:11805",
       "paths": [
         "/dynamics"
       ],
@@ -12345,7 +12345,7 @@
       "evidence": "web/app/dynamics/page.tsx:307"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12344",
+      "id": "web/app/dynamics/page.tsx:12371",
       "paths": [
         "/dynamics"
       ],
@@ -12369,7 +12369,7 @@
       "evidence": "web/app/dynamics/page.tsx:317"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12703",
+      "id": "web/app/dynamics/page.tsx:12730",
       "paths": [
         "/dynamics"
       ],
@@ -12384,7 +12384,7 @@
       "evidence": "web/app/dynamics/page.tsx:329"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12813",
+      "id": "web/app/dynamics/page.tsx:12840",
       "paths": [
         "/dynamics"
       ],
@@ -12402,7 +12402,7 @@
       "evidence": "web/app/dynamics/page.tsx:330"
     },
     {
-      "id": "web/app/dynamics/page.tsx:12870",
+      "id": "web/app/dynamics/page.tsx:12897",
       "paths": [
         "/dynamics"
       ],
@@ -12426,7 +12426,7 @@
       "evidence": "web/app/dynamics/page.tsx:331"
     },
     {
-      "id": "web/app/dynamics/page.tsx:13022",
+      "id": "web/app/dynamics/page.tsx:13049",
       "paths": [
         "/dynamics"
       ],
@@ -12448,7 +12448,7 @@
       "evidence": "web/app/dynamics/page.tsx:334"
     },
     {
-      "id": "web/app/dynamics/page.tsx:14395",
+      "id": "web/app/dynamics/page.tsx:14422",
       "paths": [
         "/dynamics"
       ],
@@ -12470,7 +12470,7 @@
       "evidence": "web/app/dynamics/page.tsx:348"
     },
     {
-      "id": "web/app/dynamics/page.tsx:14445",
+      "id": "web/app/dynamics/page.tsx:14472",
       "paths": [
         "/dynamics"
       ],
@@ -12492,7 +12492,7 @@
       "evidence": "web/app/dynamics/page.tsx:349"
     },
     {
-      "id": "web/app/dynamics/page.tsx:14637",
+      "id": "web/app/dynamics/page.tsx:14664",
       "paths": [
         "/dynamics"
       ],
@@ -12514,7 +12514,7 @@
       "evidence": "web/app/dynamics/page.tsx:353"
     },
     {
-      "id": "web/app/dynamics/page.tsx:15287",
+      "id": "web/app/dynamics/page.tsx:15314",
       "paths": [
         "/dynamics"
       ],
@@ -12536,7 +12536,7 @@
       "evidence": "web/app/dynamics/page.tsx:368"
     },
     {
-      "id": "web/app/dynamics/page.tsx:15554",
+      "id": "web/app/dynamics/page.tsx:15581",
       "paths": [
         "/dynamics"
       ],
@@ -12557,7 +12557,7 @@
       "evidence": "web/app/dynamics/page.tsx:375"
     },
     {
-      "id": "web/app/dynamics/page.tsx:17139",
+      "id": "web/app/dynamics/page.tsx:17166",
       "paths": [
         "/dynamics"
       ],
@@ -12582,7 +12582,7 @@
       "evidence": "web/app/dynamics/page.tsx:401"
     },
     {
-      "id": "web/app/dynamics/page.tsx:17509",
+      "id": "web/app/dynamics/page.tsx:17536",
       "paths": [
         "/dynamics"
       ],

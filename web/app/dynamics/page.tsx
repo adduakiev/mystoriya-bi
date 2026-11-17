@@ -208,7 +208,7 @@ export default async function DynamicsPage({
             </span>
           </summary>
 
-          <form className="filter-form" method="get" action="/dynamics">
+          <form key={buildHref(state, {})} className="filter-form" method="get" action="/dynamics">
             {lfl && <input type="hidden" name="lfl" value="1" />}
             <label>
               <span>Гранулярність</span>
