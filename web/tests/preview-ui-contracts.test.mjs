@@ -6,6 +6,19 @@ import {executionMatrix} from '../../scripts/bi-audit-browser-qa.mjs';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
+// This suite verifies the default-disabled contracts. Deployment flags must not
+// change its fixture mode; enabled behavior has dedicated weekly/filter suites.
+test.beforeEach(t => {
+  for (const key of ['BI_ISO_WEEKS_V1', 'BI_AGGREGATORS_FILTERS_V3']) {
+    const previous = process.env[key];
+    process.env[key] = '0';
+    t.after(() => {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    });
+  }
+});
+
 for (const [route, [heading, rpc]] of Object.entries(routeAssertions)) {
   test(`mock SSR ${route}: actual page and adapter render fixture states`, async t => {
     t.mock.method(globalThis, 'fetch', () => assert.fail('Synthetic UI suite cannot reach a network'));

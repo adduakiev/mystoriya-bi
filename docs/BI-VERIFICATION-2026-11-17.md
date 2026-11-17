@@ -1,3 +1,17 @@
+# Release continuation — 2026-11-17
+
+This document retains the original local verification below as historical evidence. The following status supersedes its former no-PR/no-migration statements:
+
+- PR52 created on branch codex/bi-priorities-20261117. Commit97f341ae passed trusted CI with799 tests, TypeScript, build and3 SQL fixtures on each of PostgreSQL16 and17.
+- Authenticated preview confirmed September P&L and GBP fail-closed rendering. September revenue7,673,452.32 UAH and operating result2,313,019.12 UAH.
+- Owner explicitly approved applying five SQL function replacements plus filters RPC, then enabled-preview acceptance, then merge/production if successful.
+- Migration bi_priorities_20261117_pr52 applied. Original function hashes/ACLs matched the backup. Five invalid-password checks reject access. Backup and rollback definitions are outside Git; synthetic restore-hash checks passed for all five originals.
+- Source sheets, provider plans, credentials, cron schedules and source rows were not modified. Main/production frontend has not yet been promoted.
+- Enabled preview exposed test environment leakage: default-disabled SSR scenarios inherited deployment flags. This follow-up makes that suite explicitly choose disabled mode and restores previous values. Dedicated enabled-mode suites remain intact. Targeted run with both deployment flags=1:56/56 PASS. Full exact-SHA CI and enabled preview must be accepted again before merge.
+- New RPC uses the existing password-gated SECURITY DEFINER model. Supabase advisor callable-function counts increased by one for anon and authenticated as expected; no other security-advisor category changed.
+
+## Historical local verification
+
 # BI candidate verification — 2026-11-17
 
 Local candidate based on main `946a6c2b14344390784404ec433505636b151143` in `adduakiev/mystoriya-bi`. No commit, push, PR creation, production deployment, database migration, paid action or schedule modification was performed in this task.
