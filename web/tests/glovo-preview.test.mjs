@@ -155,7 +155,11 @@ test('actual Glovo server boundary and SSR fail closed without credentials, netw
   assert.doesNotMatch(boundary, /callBiRpc\(|loadSalesData\(|https:\/\//);
 });
 
-test('child navigation is discoverable, accessible when collapsed and does not propagate unsupported LFL', async () => {
+test('child navigation is discoverable, accessible when collapsed and does not propagate unsupported LFL', async t => {
+  // Explicit legacy mode; deployment environment must not choose fixture behavior.
+  const previousFlag = process.env.BI_AGGREGATORS_FILTERS_V3;
+  process.env.BI_AGGREGATORS_FILTERS_V3 = '0';
+  t.after(() => { if (previousFlag === undefined) delete process.env.BI_AGGREGATORS_FILTERS_V3; else process.env.BI_AGGREGATORS_FILTERS_V3 = previousFlag; });
   const Sidebar = load()('components/DashboardSidebar.tsx').DashboardSidebar;
   for (const activeHref of ['/aggregators', '/aggregators/glovo', '/']) {
     const html = renderToStaticMarkup(Sidebar({activeHref, lfl:true, statusTitle:'TEST', statusDetail:'TEST'}));

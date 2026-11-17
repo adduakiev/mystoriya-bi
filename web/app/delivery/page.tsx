@@ -1,3 +1,5 @@
+import { isoWeeksEnabled } from "@/lib/iso-week-contract";
+import { WeeklyReportStatus, WeeklyReportUnavailable } from "@/components/WeeklyReportStatus";
 import Link from "next/link";
 import { Filter } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
@@ -28,10 +30,8 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
-function parseGrain(_value: string | undefined): GrainMode {
-  // P1 safety: installed bi_delivery_payload groups calendar YEAR with ISO WEEK.
-  // Fail closed until the weekly SQL is corrected under a separate owner-approved gate.
-  return "month";
+function parseGrain(value: string | undefined): GrainMode {
+  return value === "week" && isoWeeksEnabled() ? "week" : "month";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -127,7 +127,11 @@ export default async function DeliveryPage({
     metric,
     grain,
     lfl
+  }).catch((error: unknown) => {
+    if (grain === "week") return null;
+    throw error;
   });
+  if (!data) return <WeeklyReportUnavailable href="/delivery" lfl={lfl} />;
 
   // The deployed Delivery RPC falls back to the latest date across all years
   // when a requested year/month has no rows. Never render that other period
@@ -267,7 +271,7 @@ export default async function DeliveryPage({
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
                 <option value="month">Місяці</option>
-                <option value="week" disabled>Тижні (тимчасово недоступні)</option>
+                <option value="week" disabled={!isoWeeksEnabled()}>{isoWeeksEnabled() ? "ISO-тижні" : "Тижні (тимчасово недоступні)"}</option>
               </select>
             </label>
 
@@ -358,14 +362,14 @@ export default async function DeliveryPage({
               <div className="chart-controls">
                 {!selectedMonth && (
                   <div className="metric-switcher grain-switcher">
-                    <Link className="metric-pill active" href={buildHref(state, { grain: "month" })}>Місяці</Link>
-                    <span
+                    <Link className={grain === "month" ? "metric-pill active" : "metric-pill"} href={buildHref(state, { grain: "month" })}>Місяці</Link>
+                    {isoWeeksEnabled() ? <Link className={grain === "week" ? "metric-pill active" : "metric-pill"} href={buildHref(state, { grain: "week" })}>ISO-тижні</Link> : (<span
                       className="metric-pill"
                       aria-disabled="true"
                       title="Тижневу доставку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
                     >
                       Тижні (тимчасово недоступні)
-                    </span>
+                    </span>)}
                   </div>
                 )}
                 <div className="metric-switcher">
@@ -381,7 +385,8 @@ export default async function DeliveryPage({
                 </div>
               </div>
             </div>
-            <MultiYearMetricChart data={multiYearData} years={years} metric={metric} />
+            {data.weekly && <WeeklyReportStatus report={data.weekly} />}
+            <MultiYearMetricChart data={multiYearData} years={data.weekly?.years ?? years} metric={metric} />
           </article>
 
           <article className="panel">

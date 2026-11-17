@@ -1,3 +1,5 @@
+import { isoWeeksEnabled } from "@/lib/iso-week-contract";
+import { WeeklyReportStatus, WeeklyReportUnavailable } from "@/components/WeeklyReportStatus";
 import Link from "next/link";
 import { Filter, X } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
@@ -42,11 +44,8 @@ function parseMetric(value: string | undefined): MetricMode {
   return value === "checks" || value === "averageCheck" || value === "markupRate" ? value : "revenue";
 }
 
-function parseGrain(_value: string | undefined): GrainMode {
-  // P1 safety gate: installed bi_overview_payload mixes calendar YEAR with ISO WEEK.
-  // Until the SQL contract is corrected at an approved migration gate, never request
-  // or render a weekly multi-year series as verified live data.
-  return "month";
+function parseGrain(value: string | undefined): GrainMode {
+  return value === "week" && isoWeeksEnabled() ? "week" : "month";
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -101,7 +100,11 @@ export default async function Home({
     grain,
     lfl
   };
-  const overview = await loadOverviewData(overviewQuery, warehouse.version);
+  const overview = await loadOverviewData(overviewQuery, warehouse.version).catch((error: unknown) => {
+    if (grain === "week") return null;
+    throw error;
+  });
+  if (!overview) return <WeeklyReportUnavailable href="/" lfl={lfl} />;
 
   const {
     sourceRowCount,
@@ -386,16 +389,16 @@ export default async function Home({
               <div className="chart-controls">
                 {!selectedMonth && (
                   <div className="metric-switcher grain-switcher">
-                    <Link className="metric-pill active" href={queryHref(filters, { grain: "month" })}>
+                    <Link className={grain === "month" ? "metric-pill active" : "metric-pill"} href={queryHref(filters, { grain: "month" })}>
                       Місяці
                     </Link>
-                    <span
+                    {isoWeeksEnabled() ? <Link className={grain === "week" ? "metric-pill active" : "metric-pill"} href={queryHref(filters, { grain: "week" })}>ISO-тижні</Link> : (<span
                       className="metric-pill"
                       aria-disabled="true"
                       title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
                     >
                       Тижні (тимчасово недоступні)
-                    </span>
+                    </span>)}
                   </div>
                 )}
                 <div className="metric-switcher">
@@ -416,9 +419,10 @@ export default async function Home({
                 </div>
               </div>
             </div>
+            {ready.weekly && <WeeklyReportStatus report={ready.weekly} />}
             <MultiYearMetricChart
               data={ready.multiYearData}
-              years={years}
+              years={ready.weekly?.years ?? years}
               metric={metric}
             />
             {chartHasShorterHorizon && (

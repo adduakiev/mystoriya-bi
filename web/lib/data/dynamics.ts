@@ -1,3 +1,4 @@
+import { readIsoWeeklyReport, type IsoWeekMeta, type IsoWeeklyReport } from "@/lib/iso-week-contract";
 import { optionalSalesDimension } from "./rpc-parameters";
 import { unstable_cache } from "next/cache";
 import {
@@ -20,6 +21,7 @@ export type DynamicsQuery = {
 };
 
 export type DynamicsData = {
+  weekly?: IsoWeeklyReport;
   source: "supabase-sql" | "legacy" | "unavailable";
   rowCount: number;
   years: number[];
@@ -32,8 +34,8 @@ export type DynamicsData = {
   latestYear: number;
   previousYear?: number;
   latestSourceDate: string;
-  latestYearTotal: number;
-  previousYearTotal: number;
+  latestYearTotal: number | null;
+  previousYearTotal: number | null;
   totalGrowth: number | null;
 };
 
@@ -43,7 +45,7 @@ type RpcObservationPoint = {
 };
 
 type RpcPayload = {
-  meta?: {
+  meta?: IsoWeekMeta & {
     rowCount?: number | string;
     latestSourceDate?: string;
     years?: Array<number | string>;
@@ -268,7 +270,7 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
       !payload || typeof payload !== "object" || Array.isArray(payload) ||
       !payload.meta || !Array.isArray(payload.meta.years) ||
       !Array.isArray(payload.series) || !payload.summary ||
-      (payload.seriesObservationCounts !== undefined &&
+      (query.grain === "month" && payload.seriesObservationCounts !== undefined &&
         !validObservationCounts(payload.seriesObservationCounts, payload.meta.years, payload.series, query.grain))
     ) {
       return {
@@ -290,13 +292,15 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
     }
 
     const meta = payload.meta ?? {};
+    const weekly=query.grain === "week" ? readIsoWeeklyReport(meta,payload.series) : undefined;
     const previousYearRaw = meta.previousYear;
 
     return {
       source: "supabase-sql",
       rowCount: num(meta.rowCount),
-      years: (meta.years ?? []).map(num),
-      series: normalizeSeries(payload.series, {
+      weekly,
+      years: weekly?.years ?? (meta.years ?? []).map(num),
+      series: weekly?.series ?? normalizeSeries(payload.series, {
         grain: query.grain,
         latestYear: num(meta.latestYear),
         latestSourceDate: meta.latestSourceDate ?? "",
@@ -313,11 +317,12 @@ export async function loadDynamicsData(query: DynamicsQuery): Promise<DynamicsDa
           ? undefined
           : num(previousYearRaw),
       latestSourceDate: meta.latestSourceDate ?? "",
-      latestYearTotal: num(payload.summary?.latestYearTotal),
-      previousYearTotal: num(payload.summary?.previousYearTotal),
+      latestYearTotal: query.grain === "week" ? nullableNum(payload.summary?.latestYearTotal) : num(payload.summary?.latestYearTotal),
+      previousYearTotal: query.grain === "week" ? nullableNum(payload.summary?.previousYearTotal) : num(payload.summary?.previousYearTotal),
       totalGrowth: nullableNum(payload.summary?.growth)
     };
   } catch (error) {
+    if(query.grain === "week") throw error;
     console.error("SQL-first Dynamics failed; using legacy fallback.", error);
     return legacy(query);
   }

@@ -154,6 +154,10 @@ test('legacy Overview fallback uses the same signal; measured zero rows keep val
 });
 
 test('Overview weekly ISO-year P1 fails closed at SSR/RPC boundary', async t => {
+  // Explicit legacy mode; deployment environment must not choose fixture behavior.
+  const previousFlag = process.env.BI_ISO_WEEKS_V1;
+  process.env.BI_ISO_WEEKS_V1 = '0';
+  t.after(() => { if (previousFlag === undefined) delete process.env.BI_ISO_WEEKS_V1; else process.env.BI_ISO_WEEKS_V1 = previousFlag; });
   t.mock.method(globalThis, 'fetch', () => assert.fail('Synthetic weekly guard cannot reach network'));
   const h = harness(metrics, zero);
   const html = await h.render({year:'2025', location:'Черкаси', grain:'week'});

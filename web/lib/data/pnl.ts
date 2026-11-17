@@ -4,9 +4,9 @@ import {
   type PnlSeriesKey
 } from "@/lib/data/pnl-source";
 
-export const PNL_MONTHS = ["Січ","Лют","Бер","Кві","Тра","Чер","Лип","Сер"] as const;
+export const PNL_MONTHS = ["Січ","Лют","Бер","Кві","Тра","Чер","Лип","Сер","Вер"] as const;
 export const PNL_MONTHS_LONG = [
-  "Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень"
+  "Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень"
 ] as const;
 
 type Getter = (code: string) => number;
@@ -48,7 +48,7 @@ export type PnlDetailRow = {
   kind:"income"|"expense"|"total";
   fact:number;
   plan:number;
-  ly:number;
+  ly:number|null;
 };
 
 function safe(value:number|null|undefined){
@@ -65,11 +65,12 @@ function sourceRange(code:string,key:PnlSeriesKey,startMonth:number,endMonth:num
 }
 
 function calculate(get:Getter):PnlCalculated{
-  const revenue=get("revenue_total");
   const deliveryRevenue=get("revenue_delivery");
   const deliveryCogs=get("cogs_delivery");
   const aggregatorRevenue=get("revenue_aggregators");
   const aggregatorCogs=get("cogs_aggregators");
+  // Compute report totals from channel lines; source subtotal rows are controls only.
+  const revenue=deliveryRevenue+aggregatorRevenue;
 
   // Merchandise COGS is channel COGS only. Aggregator commission is an operating cost.
   const cogs=deliveryCogs+aggregatorCogs;
@@ -212,29 +213,31 @@ export function loadPnlData({
   const fact=period("fact2026",start,end);
   const plan=period("plan2026",start,end);
   const ly=period("fact2025",start,end);
+  // A partial prior-year period is not a comparable YTD baseline.
+  const comparisonAvailable=end<PNL_SOURCE_META.latestComparisonMonth;
 
   const trend=PNL_MONTHS.slice(start,end+1).map((label,offset)=>{
     const index=start+offset;
     const current=month("fact2026",index);
     const planned=month("plan2026",index);
-    const previous=month("fact2025",index);
+    const previous=index<PNL_SOURCE_META.latestComparisonMonth ? month("fact2025",index) : null;
     return {
       label,
       revenueFact:current.revenue,
       revenuePlan:planned.revenue,
-      revenueLy:previous.revenue,
+      revenueLy:previous?.revenue??null,
       profitFact:current.profit,
       profitPlan:planned.profit,
-      profitLy:previous.profit,
+      profitLy:previous?.profit??null,
       markupFact:current.markup,
       markupPlan:planned.markup,
-      markupLy:previous.markup,
+      markupLy:previous?.markup??null,
       markupRateFact:current.markupRate,
       markupRatePlan:planned.markupRate,
-      markupRateLy:previous.markupRate,
+      markupRateLy:previous?.markupRate??null,
       profitRateFact:current.profitRate,
       profitRatePlan:planned.profitRate,
-      profitRateLy:previous.profitRate
+      profitRateLy:previous?.profitRate??null
     };
   });
 
@@ -275,15 +278,16 @@ export function loadPnlData({
       ...PNL_SOURCE_META,
       startMonth:start,
       endMonth:end,
+      comparisonAvailable,
       periodLabel:start===end
         ? `${PNL_MONTHS_LONG[start]} 2026`
         : `${PNL_MONTHS_LONG[start]}–${PNL_MONTHS_LONG[end]} 2026`
     },
     fact,
     plan,
-    ly,
+    ly:comparisonAvailable?ly:null,
     trend,
-    details
+    details:comparisonAvailable?details:details.map(row=>({...row,ly:null}))
   };
 }
 

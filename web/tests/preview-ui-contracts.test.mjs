@@ -6,6 +6,19 @@ import {executionMatrix} from '../../scripts/bi-audit-browser-qa.mjs';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
+// This suite verifies the default-disabled contracts. Deployment flags must not
+// change its fixture mode; enabled behavior has dedicated weekly/filter suites.
+test.beforeEach(t => {
+  for (const key of ['BI_ISO_WEEKS_V1', 'BI_AGGREGATORS_FILTERS_V3']) {
+    const previous = process.env[key];
+    process.env[key] = '0';
+    t.after(() => {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    });
+  }
+});
+
 for (const [route, [heading, rpc]] of Object.entries(routeAssertions)) {
   test(`mock SSR ${route}: actual page and adapter render fixture states`, async t => {
     t.mock.method(globalThis, 'fetch', () => assert.fail('Synthetic UI suite cannot reach a network'));
@@ -38,13 +51,15 @@ for (const route of ['/', '/delivery', '/locations', '/dynamics', '/explorer', '
   test(`mock selectors ${route}: query → actual loader RPC args; month, LFL and segments stay explicit`, async () => {
     const h = previewHarness();
     const html = await h.render(route, selected);
-    const {args} = h.calls[0];
-    assert.equal(args.p_lfl, true);
     if (route === '/aggregators') {
-      assert.deepEqual(args, {p_period: 'week', p_comparison: 'previous', p_lfl: true});
-      assert.match(html, /period=month&amp;compare=previous&amp;lfl=1/);
+      // v2 cannot honor dimensions: until v3 is enabled, never silently show an unfiltered report.
+      assert.deepEqual(h.calls, []);
+      assert.match(html, /Обраний зріз поки недоступний/);
+      assert.doesNotMatch(html, /kpi-grid|data-mock-chart/);
       return;
     }
+    const {args} = h.calls[0];
+    assert.equal(args.p_lfl, true);
     assert.equal(args.p_brand, selected.brand);
     assert.equal(args.p_ownership, selected.ownership);
     if (route !== '/dynamics') {

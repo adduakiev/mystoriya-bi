@@ -3,6 +3,7 @@ import { buildDashboardSnapshot } from "@/lib/analytics";
 import { filterSalesRows } from "@/lib/filters";
 import type { ComparisonMode, DashboardSnapshot, Kpi, MetricSet, PeriodMode, SalesRow } from "@/lib/data/types";
 import { callBiRpc, loadSalesData } from "@/lib/data/source";
+import { aggregatorContractMatches, type AggregatorFilters, type AggregatorFilterOptions } from "@/lib/aggregator-filters";
 
 export type AggregatorCard = {
   name: string;
@@ -15,10 +16,11 @@ export type AggregatorCard = {
 };
 
 export type AggregatorsData = {
-  source: "supabase-sql" | "legacy";
+  source: "supabase-sql" | "legacy" | "unavailable";
   rowCount: number;
-  snapshot: DashboardSnapshot;
+  snapshot: DashboardSnapshot | null;
   aggregators: AggregatorCard[];
+  filterOptions?: AggregatorFilterOptions;
 };
 
 type RpcMetricSet = {
@@ -31,6 +33,9 @@ type RpcMetricSet = {
 
 type RpcPayload = {
   meta?: {
+    contractVersion?: string;
+    requestedFilters?: Record<string, unknown>;
+    filterOptions?: AggregatorFilterOptions;
     rowCount?: number | string;
     cutoffDate?: string;
     period?: PeriodMode;
@@ -185,8 +190,52 @@ function groupLegacy(rows: SalesRow[], period: PeriodMode, comparison: Compariso
 export async function loadAggregatorsData(
   period: PeriodMode,
   comparison: ComparisonMode,
-  lfl: boolean
+  lfl: boolean,
+  filters: AggregatorFilters = {}
 ): Promise<AggregatorsData> {
+  const unavailable = (): AggregatorsData => ({source:"unavailable",rowCount:0,snapshot:null,aggregators:[]});
+  const hasFilters = Object.values(filters).some((value) => value !== undefined && value !== "");
+  // Enable only after the NOT-APPLIED v3 SQL has passed native PostgreSQL and
+  // deployed-function parity checks. A filtered URL must never use v2/CSV.
+  if (process.env.BI_AGGREGATORS_FILTERS_V3 === "1") {
+    if ((filters.month !== undefined && (!Number.isInteger(filters.month) || filters.month < 1 || filters.month > 12))
+      || (filters.year !== undefined && (!Number.isInteger(filters.year) || filters.year < 1900 || filters.year > 9999))) return unavailable();
+    try {
+      const payload = await unstable_cache(
+        () => callBiRpc<RpcPayload>("bi_aggregators_payload_v3", {
+          p_period:period,p_comparison:comparison,p_lfl:lfl,
+          p_year:filters.year ?? null,p_month:filters.month ?? null,
+          p_brand:filters.brand ?? null,p_ownership:filters.ownership ?? null,
+          p_location:filters.location ?? null,p_order_type:filters.orderType ?? null
+        }),
+        ["bi-aggregators-sql-v3",JSON.stringify([period,comparison,lfl,filters])],
+        {revalidate:180,tags:["sales-data","aggregators-data"]}
+      )();
+      if (!aggregatorContractMatches(payload.meta,filters,period,comparison,lfl)) return unavailable();
+      const finiteValue = (value: unknown) => (typeof value === "number" || typeof value === "string")
+        && String(value).trim() !== "" && Number.isFinite(Number(value));
+      const options = payload.meta?.filterOptions;
+      if (!finiteValue(payload.meta?.rowCount) || Number(payload.meta?.rowCount) <= 0
+        || !options || !Array.isArray(options.years) || !options.years.length
+        || options.years.some(year => !Number.isInteger(year))
+        || [options.brands,options.ownerships,options.locations,options.orderTypes].some(items => !Array.isArray(items) || items.some(item => typeof item !== "string"))
+        || [payload.current,payload.previous].some(metrics => !metrics || [metrics.revenue,metrics.checks,metrics.markup,metrics.averageCheck,metrics.markupRate].some(value => !finiteValue(value)))
+        || !Array.isArray(payload.trend) || !Array.isArray(payload.locations) || !Array.isArray(payload.aggregators)) return unavailable();
+      return {
+        source:"supabase-sql",rowCount:num(payload.meta?.rowCount),snapshot:snapshotFromRpc(payload),
+        filterOptions:payload.meta?.filterOptions,
+        aggregators:(payload.aggregators ?? []).map((item)=>({
+          name:item.name ?? "",revenue:num(item.revenue),checks:num(item.checks),
+          averageCheck:num(item.averageCheck),markupRate:num(item.markupRate),
+          growth:nullableNum(item.growth),share:num(item.share)
+        }))
+      };
+    } catch {
+      // Deliberately no fallback: do not silently lose filters or LFL semantics.
+      return unavailable();
+    }
+  }
+  if (hasFilters) return unavailable();
   const key = JSON.stringify([period,comparison,lfl?1:0]);
 
   try {

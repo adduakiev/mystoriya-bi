@@ -11,7 +11,15 @@ function titleOf(row: LocationIdentity): string {
   return ["—", "-"].includes(title) ? "" : title;
 }
 
-/** Labels describe profiles, never an unverified street/store crosswalk.
+// Exact GBP resource IDs confirmed by Kostiantyn on 2026-11-17.
+// Address confirmation does not establish ownership/franchise status.
+const confirmedAddresses:Readonly<Record<string,string>>={
+  "locations/14041797018953207147":"вулиця Академіка Вільямса, 3/7, Київ, 02000",
+  "locations/11452898684627681419":"вулиця Анни Ахматової, 22, Київ, 02000",
+  "locations/14390582861278894493":"Голосіївський проспект, 58А, 1 поверх, ЖК Парк Авеню, Київ, 03039",
+  "locations/15689179339837801980":"проспект Героїв Сталінграду, 8К5, Київ, 04210",
+};
+/** Labels include only owner-confirmed addresses matched by exact resource ID.
  * Always retain the full source ID, even with a unique title: filtering the
  * input must not rename a profile or shorten its identity to a colliding suffix.
  * No ordinal/ranking fallback: missing or repeated IDs remain ambiguous.
@@ -26,12 +34,13 @@ export function labelGbpLocations<T extends LocationIdentity>(rows: readonly T[]
     const title = titleOf(row);
     const id = row.locationId ?? "";
     const hasId = Boolean(id.trim());
+    const address=confirmedAddresses[id];
     return {
       ...row,
-      locationLabel: `${title || "Профіль GBP"} · ID ${hasId ? id : "відсутній"}`,
+      locationLabel: `${title || "Профіль GBP"}${address?` · ${address}`:""} · ID ${hasId ? id : "відсутній"}`,
       locationIdentityNote: `${hasId
         ? `GBP ID: ${id}${(idCounts.get(id) ?? 0) > 1 ? " · ID повторюється; ідентичність неоднозначна" : ""}`
-        : "GBP ID відсутній; ідентичність не підтверджена"} · Адреса не підтверджена`,
+        : "GBP ID відсутній; ідентичність не підтверджена"} · ${address?"Адресу підтверджено власником · Належність закладу не підтверджена":"Адреса не підтверджена"}`,
     };
   });
   const counts = new Map<string, number>();

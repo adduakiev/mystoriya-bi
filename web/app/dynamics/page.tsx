@@ -1,3 +1,5 @@
+import { isoWeeksEnabled } from "@/lib/iso-week-contract";
+import { WeeklyReportStatus, WeeklyReportUnavailable } from "@/components/WeeklyReportStatus";
 import Link from "next/link";
 import { Filter } from "lucide-react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
@@ -22,10 +24,8 @@ function parseMetric(value: string | undefined): MetricMode {
     : "revenue";
 }
 
-function parseGrain(_value: string | undefined): GrainMode {
-  // P1 safety gate: installed bi_dynamics_payload mixes calendar YEAR with ISO WEEK.
-  // Disable weekly SQL data until an independently verified, owner-approved migration.
-  return "month";
+function parseGrain(value: string | undefined): GrainMode {
+  return value === "week" && isoWeeksEnabled() ? "week" : "month";
 }
 
 function buildHref(
@@ -112,7 +112,11 @@ export default async function DynamicsPage({
     brand,
     ownership,
     lfl
+  }).catch((error: unknown) => {
+    if (grain === "week") return null;
+    throw error;
   });
+  if (!result) return <WeeklyReportUnavailable href="/dynamics" lfl={lfl} />;
 
   if (result.source === "unavailable") {
     return (
@@ -201,7 +205,7 @@ export default async function DynamicsPage({
               <span>Гранулярність</span>
               <select name="grain" defaultValue={grain}>
                 <option value="month">Місяці</option>
-                <option value="week" disabled>Тижні (тимчасово недоступні)</option>
+                <option value="week" disabled={!isoWeeksEnabled()}>{isoWeeksEnabled() ? "ISO-тижні" : "Тижні (тимчасово недоступні)"}</option>
               </select>
             </label>
 
@@ -290,14 +294,14 @@ export default async function DynamicsPage({
 
             <div className="chart-controls">
               <div className="metric-switcher grain-switcher">
-                <Link className="metric-pill active" href={buildHref(state, { grain: "month" })}>Місяці</Link>
-                <span
+                <Link className={grain === "month" ? "metric-pill active" : "metric-pill"} href={buildHref(state, { grain: "month" })}>Місяці</Link>
+                {isoWeeksEnabled() ? <Link className={grain === "week" ? "metric-pill active" : "metric-pill"} href={buildHref(state, { grain: "week" })}>ISO-тижні</Link> : (<span
                   className="metric-pill"
                   aria-disabled="true"
                   title="Тижневу динаміку тимчасово вимкнено: SQL-функція змішує календарний рік і ISO-тиждень."
                 >
                   Тижні (тимчасово недоступні)
-                </span>
+                </span>)}
               </div>
               <div className="metric-switcher">
                 {METRICS.map(([value, label]) => (
@@ -314,6 +318,7 @@ export default async function DynamicsPage({
           </div>
 
           {lfl && <div className="lfl-banner">LFL · закриті точки виключено з усієї динаміки</div>}
+          {result.weekly && <WeeklyReportStatus report={result.weekly} />}
           <MultiYearMetricChart data={data} years={years} metric={metric} />
         </section>
 
