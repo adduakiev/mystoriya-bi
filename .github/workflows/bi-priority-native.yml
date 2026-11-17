@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - codex/bi-priorities-20261117
+      - codex/dynamics-periods-20261117
 
 permissions:
   contents: read
@@ -13,6 +14,7 @@ permissions:
 env:
   BI_ISO_WEEKS_V1: '1'
   BI_AGGREGATORS_FILTERS_V3: '1'
+  BI_DYNAMICS_PERIOD_COMPARISON_V1: '1'
 
 concurrency:
   group: bi-priority-native-${{ github.ref }}
@@ -85,6 +87,7 @@ jobs:
         run: |
           npm run check
           node scripts/bi-priority-sql-fixtures.mjs
+          node scripts/dynamics-period-sql-fixture.mjs
           git diff --check
 
   # Exact-SHA PostgreSQL 17 major-version parity: deliberately sequenced
@@ -114,8 +117,8 @@ jobs:
           set -euo pipefail
           # Official PGDG signed apt repository for Ubuntu 24.04 (noble).
           sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-          sudo curl --fail --silent --show-error --location \
-            https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+          sudo curl --fail --silent --show-error --location --connect-timeout 10 --max-time 60 --retry 2 --retry-delay 2 \
+            https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc \
             -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
           gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
             | grep -q '^fpr:::::::::B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8:'
@@ -152,4 +155,5 @@ jobs:
           test "$(/usr/lib/postgresql/17/bin/pg_config --version | cut -d' ' -f2 | cut -d. -f1)" = 17
           npm run check
           node scripts/bi-priority-sql-fixtures.mjs
+          node scripts/dynamics-period-sql-fixture.mjs
           git diff --check

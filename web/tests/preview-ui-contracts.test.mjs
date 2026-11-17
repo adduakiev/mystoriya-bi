@@ -7,9 +7,9 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 // This suite verifies the default-disabled contracts. Deployment flags must not
-// change its fixture mode; enabled behavior has dedicated weekly/filter suites.
+// change its fixture mode; enabled behavior has dedicated weekly/filter/comparison suites.
 test.beforeEach(t => {
-  for (const key of ['BI_ISO_WEEKS_V1', 'BI_AGGREGATORS_FILTERS_V3']) {
+  for (const key of ['BI_ISO_WEEKS_V1', 'BI_AGGREGATORS_FILTERS_V3', 'BI_DYNAMICS_PERIOD_COMPARISON_V1']) {
     const previous = process.env[key];
     process.env[key] = '0';
     t.after(() => {
