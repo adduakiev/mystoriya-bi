@@ -14,7 +14,7 @@ jobs:
       github.event.issue.pull_request == null &&
       github.actor == 'adduakiev' &&
       startsWith(github.event.comment.body, '/astra run')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: write
@@ -40,7 +40,24 @@ jobs:
           node-version: '22.13.0'
           cache: npm
           cache-dependency-path: web/package-lock.json
-
+      - name: Check native PostgreSQL for disposable sales tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_bin=/usr/lib/postgresql/16/bin
+          for executable in initdb pg_ctl postgres psql; do
+            if [[ ! -x "$pg_bin/$executable" ]]; then
+              echo "::error::Required PostgreSQL 16 executable missing: $pg_bin/$executable"
+              exit 1
+            fi
+          done
+          version="$("$pg_bin/postgres" --version)"
+          if [[ "$version" != "postgres (PostgreSQL) 16."* ]]; then
+            echo "::error::Expected PostgreSQL 16, got $version"
+            exit 1
+          fi
+          echo "SALES_TEST_PG_BIN=$pg_bin" >> "$GITHUB_ENV"
+          echo "Using $version; native tests create their own temporary clusters."
       - name: Require Codex API secret
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
