@@ -40,7 +40,7 @@ jobs:
           node-version: '22.13.0'
           cache: npm
           cache-dependency-path: web/package-lock.json
-                  - name: Check native PostgreSQL for disposable sales tests
+      - name: Check native PostgreSQL for disposable sales tests
         shell: bash
         run: |
           set -euo pipefail
@@ -58,7 +58,6 @@ jobs:
           fi
           echo "SALES_TEST_PG_BIN=$pg_bin" >> "$GITHUB_ENV"
           echo "Using $version; native tests create their own temporary clusters."
-          
       - name: Require Codex API secret
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
